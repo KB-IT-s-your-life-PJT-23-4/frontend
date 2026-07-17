@@ -57,7 +57,7 @@ jobs:
               \"project\": {
                 \"key\": \"${PROJECT_KEY}\"
               },
-              \"summary\": \"[BE] ${{ github.event.issue.title }}\",
+              \"summary\": \"[FE] ${{ github.event.issue.title }}\",
               \"description\": {
                 \"version\": 1,
                 \"type\": \"doc\",
