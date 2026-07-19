@@ -1,0 +1,23 @@
+@import './base.css';
+@import './layout.css';
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app-shell {
+  position: relative;
+  width: min(100%, var(--app-max-width));
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding-bottom: var(--app-bottom-space);
+  overflow-x: clip;
+  background: var(--surface-page);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}

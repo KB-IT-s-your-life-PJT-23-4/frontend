@@ -1,0 +1,58 @@
+:root {
+  --app-max-width: 390px;
+  --app-header-height: 72px;
+  --app-bottom-nav-height: 69px;
+  --app-bottom-space: 128px;
+  --app-gutter: 20px;
+  --app-gutter-compact: 16px;
+  --brand-primary: #0064ff;
+  --brand-deep: #004ecb;
+  --surface-page: #f8f9ff;
+  --surface-card: #eff4ff;
+  --surface-white: #ffffff;
+  --text-primary: #161c25;
+  --text-on-brand: #f5f5ff;
+  --danger: #ba1a1a;
+  --focus-ring: rgb(0 100 255 / 35%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #d9d9d9;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--text-primary);
+  background: #d9d9d9;
+  font-family: 'Gmarket Sans', 'GmarketSansMedium', 'Noto Sans KR', sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+svg {
+  display: block;
+}
