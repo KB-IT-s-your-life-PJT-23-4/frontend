@@ -1,6 +1,14 @@
 @import './base.css';
 @import './layout.css';
 
+:root {
+  --brand-primary: #517594;
+  --brand-deep: #517594;
+  --action-primary: #ffcc00;
+  --text-on-action: #000000;
+  --focus-ring: rgb(81 117 148 / 35%);
+}
+
 #app {
   width: 100%;
   min-height: 100vh;
@@ -20,4 +28,13 @@ button:focus-visible,
 a:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+.notification-button img {
+  filter: brightness(0) saturate(100%) invert(43%) sepia(22%) saturate(958%) hue-rotate(165deg)
+    brightness(94%) contrast(86%);
+}
+
+.notification-button__badge {
+  display: none;
 }
