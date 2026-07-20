@@ -104,9 +104,16 @@
 }
 
 .simulation-card__icon img {
+  display: none;
+}
+
+.simulation-card__icon::before {
   width: 21px;
   height: 21px;
-  object-fit: contain;
+  background: #ffcc00;
+  content: '';
+  mask: url('../../assets/home/calculator.png') center / contain no-repeat;
+  -webkit-mask: url('../../assets/home/calculator.png') center / contain no-repeat;
 }
 
 .simulation-card h2 {
@@ -128,9 +135,9 @@
   justify-content: center;
   padding: 16px;
   border-radius: 12px;
-  color: var(--text-on-brand);
+  color: var(--text-on-action);
   cursor: pointer;
-  background: var(--brand-primary);
+  background: var(--action-primary);
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
