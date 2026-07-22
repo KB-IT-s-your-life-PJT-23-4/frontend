@@ -40,6 +40,19 @@ defineProps({
       <p>{{ plan.note }}</p>
     </div>
 
+    <a
+      v-if="plan.siteUrl"
+      class="product-site-link"
+      :href="plan.siteUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <span>해당 사이트로 바로가기</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5h11v11M19 5 10 14M16 19H5V8" />
+      </svg>
+    </a>
+
     <div v-if="plan.risk" class="risk-warning">
       <div>
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -167,6 +180,49 @@ defineProps({
   margin: 0;
   font-size: 11px;
   line-height: 18px;
+}
+
+.product-site-link {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 12px 18px;
+  border: 1px solid #d9e2ec;
+  border-radius: 18px;
+  color: #517594;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  text-decoration: none;
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.product-site-link svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.product-site-link:hover {
+  border-color: #b9cbdc;
+  background: #f8fbff;
+}
+
+.product-site-link:active {
+  transform: scale(0.99);
+}
+
+.product-site-link:focus-visible {
+  outline: 2px solid #517594;
+  outline-offset: 2px;
 }
 
 .risk-warning {

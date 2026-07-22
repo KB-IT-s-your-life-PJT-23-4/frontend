@@ -1,5 +1,28 @@
 @import './base.css';
 @import './layout.css';
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('/fonts/GmarketSansLight.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('/fonts/GmarketSansMedium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gmarket Sans';
+  src: url('/fonts/GmarketSansBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --brand-primary: #517594;

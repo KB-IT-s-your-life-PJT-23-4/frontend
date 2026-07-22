@@ -54,7 +54,7 @@ const riskLevel = computed(() => {
         <path d="M12 10v5M12 7.5v.5" />
       </svg>
       <p>
-        <strong>{{ growthRatio }}:{{ 100 - growthRatio }} 혼합형</strong>은 시장 수익률을
+        <strong>{{ 100 - growthRatio }} : {{ growthRatio }} 혼합형</strong>은 시장 수익률을
         추구하면서도 안정성을 확보하는 <strong>추천 비율</strong>입니다.
       </p>
     </div>
