@@ -20,6 +20,7 @@ const planCatalog = {
     rate: '최대 2.95%',
     periodLabel: '운용 기간',
     period: '10년 (비과세 한도 5,000만원 활용)',
+    siteUrl: 'https://ombr.kbstar.com/quics?TmpltID=TP02001&page=C106592',
   },
   적금: {
     future: 5700,
@@ -30,6 +31,7 @@ const planCatalog = {
     periodLabel: '운용기간 (10년)',
     period: '36개월+36개월+36개월+12개월 (자동 재예치)',
     note: '복리 효과는 만기 시 자동 재예치 가정을 포함합니다.',
+    siteUrl: 'https://obank.kbstar.com/quics?page=C016614',
   },
   보험: {
     future: 6720,
@@ -40,6 +42,7 @@ const planCatalog = {
     periodLabel: '운용기간 (10년)',
     period: '36개월+36개월+36개월+12개월 (자동 재예치)',
     note: '증여세 공제 한도를 넘는 금액도 수익자 지정을 통해 장기적인 자산 증식 효과를 얻을 수 있습니다.',
+    siteUrl: 'https://www.kblife.co.kr/',
   },
   ETF: {
     future: 8000,
@@ -50,6 +53,7 @@ const planCatalog = {
     periodLabel: '운용기간',
     period: '10년',
     risk: true,
+    siteUrl: 'https://www.kbsec.com/',
   },
 }
 
