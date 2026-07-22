@@ -1,11 +1,23 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+
 const navItems = [
-  { key: 'calculator', label: '계산기' },
+  { key: 'calculator', label: 'Simulation', routeName: 'simulation', to: '/simulation' },
   { key: 'chart', label: '통계' },
-  { key: 'home', label: 'Home', active: true },
-  { key: 'message', label: '메시지' },
+  { key: 'home', label: 'Home', routeName: 'home', to: '/' },
+  { key: 'message', label: '상담' },
   { key: 'user', label: 'My' },
 ]
+
+const activeRouteName = computed(() => route.name)
+
+function navigate(item) {
+  if (item.to) router.push(item.to)
+}
 </script>
 
 <template>
@@ -15,10 +27,11 @@ const navItems = [
         v-for="item in navItems"
         :key="item.key"
         class="bottom-nav__item"
-        :class="{ 'bottom-nav__item--active': item.active }"
+        :class="{ 'bottom-nav__item--active': item.routeName === activeRouteName }"
         type="button"
         :aria-label="item.label"
-        :aria-current="item.active ? 'page' : undefined"
+        :aria-current="item.routeName === activeRouteName ? 'page' : undefined"
+        @click="navigate(item)"
       >
         <svg v-if="item.key === 'calculator'" viewBox="0 0 24 24" aria-hidden="true">
           <rect x="4" y="3" width="16" height="18" rx="2" />
@@ -39,7 +52,9 @@ const navItems = [
           <circle cx="12" cy="8" r="3" />
           <path d="M5 20c.7-4 3.1-6 7-6s6.3 2 7 6Z" />
         </svg>
-        <span v-if="item.active" class="bottom-nav__label">{{ item.label }}</span>
+        <span v-if="item.routeName === activeRouteName" class="bottom-nav__label">
+          {{ item.label }}
+        </span>
       </button>
     </nav>
   </footer>
