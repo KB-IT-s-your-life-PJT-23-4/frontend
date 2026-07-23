@@ -18,7 +18,7 @@ const store = useAppStore()
         </div>
       </div>
       <div class="desktop-message">
-        <span class="eyebrow">MIRIJEUM</span>
+        <span class="eyebrow">MIRIZOOM</span>
         <h2>복잡한 증여를<br />가족의 계획으로.</h2>
         <p>세금부터 장기 운용까지, 한 번에 비교하고 미리 준비하세요.</p>
       </div>

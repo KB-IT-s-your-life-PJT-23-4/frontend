@@ -1,7 +1,7 @@
 import { computed, reactive, readonly, watch } from 'vue'
 import { initialState } from '../data/mockData'
 
-const STORAGE_KEY = 'mirijeum-demo-state-v1'
+const STORAGE_KEY = 'mirizoom-demo-state-v1'
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value))
@@ -169,4 +169,3 @@ export function useAppStore() {
     resetDemo,
   }
 }
-
