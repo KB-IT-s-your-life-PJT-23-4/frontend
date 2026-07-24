@@ -1555,11 +1555,33 @@ textarea:focus-visible {
   width: 72px;
   border-radius: 15px 15px 5px 5px;
   background: #dfe5eb;
-  transition: height 0.4s ease;
+  transform-origin: bottom center;
+  transition:
+    height 0.4s ease,
+    background-color 0.24s ease,
+    box-shadow 0.24s ease;
 }
 
 .chart-bar.selected {
   background: #78ade0;
+  box-shadow:
+    0 0 0 4px rgba(120, 173, 224, 0.18),
+    0 10px 18px rgba(74, 128, 180, 0.2);
+  animation: chart-bar-selected 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes chart-bar-selected {
+  0% {
+    transform: translateY(5px) scaleX(0.9) scaleY(0.96);
+  }
+
+  58% {
+    transform: translateY(-3px) scaleX(1.06) scaleY(1.03);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
 
 .chart-column > strong {
