@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import RecommendedProductCard from '../components/simulation/RecommendedProductCard.vue'
-import ResultSummaryCard from '../components/simulation/ResultSummaryCard.vue'
 import RiskCard from '../components/simulation/RiskCard.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
 import SimulationInputContent from '../components/simulation/SimulationInputContent.vue'
@@ -35,8 +34,10 @@ const amount = computed(() => normalizeAmount(amountText.value))
 const remaining = computed(() =>
   Math.max(0, family.value.deductionLimit - family.value.giftedAmount),
 )
-const selectedScenario = computed(() =>
-  result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value),
+const selectedScenario = computed(
+  () =>
+    result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value) ??
+    result.value?.results[0],
 )
 const activeProduct = computed(() =>
   selectedScenario.value?.products.find((product) => product.type === activeProductType.value),
@@ -152,13 +153,11 @@ async function savePlan() {
       </div>
 
       <SimulationScenarioSection
-        v-model:selectedScenarioType="selectedScenarioType"
+        v-model:selected-scenario-type="selectedScenarioType"
         :result="result"
         :active-product-type="activeProductType"
         :remaining="remaining"
       />
-
-      <ResultSummaryCard :selected-scenario="selectedScenario" :active-product="activeProduct" />
 
       <RecommendedProductCard :active-product="activeProduct" />
 
