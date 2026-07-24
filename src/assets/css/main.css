@@ -1081,6 +1081,20 @@ textarea:focus-visible {
   background: #f8faff;
 }
 
+.family-context-card--empty {
+  border: 1px solid #dcebe7;
+  background: #f7fbfa;
+}
+
+.family-context-card--empty .context-avatar {
+  color: #327565;
+  background: #dff1ec;
+}
+
+.family-context-card--empty .context-remaining strong {
+  color: #327565;
+}
+
 .context-avatar,
 .family-avatar {
   display: grid;

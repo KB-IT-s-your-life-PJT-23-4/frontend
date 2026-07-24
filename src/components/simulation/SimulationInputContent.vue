@@ -61,14 +61,20 @@ defineEmits(['update:selectedFamilyId', 'amount-input', 'add-amount', 'submit'])
         </div>
       </div>
 
-      <article class="family-context-card">
+      <article
+        class="family-context-card"
+        :class="{ 'family-context-card--empty': family.giftedAmount === 0 }"
+      >
         <span class="context-avatar">{{ family.name.slice(-2) }}</span>
         <div>
           <strong>{{ family.name }}</strong>
-          <span>최근 10년 증여 {{ formatCompactWon(family.giftedAmount) }}</span>
+          <span v-if="family.giftedAmount > 0">
+            최근 10년 증여 {{ formatCompactWon(family.giftedAmount) }}
+          </span>
+          <span v-else>최근 10년간 증여 이력이 없어요</span>
         </div>
         <div class="context-remaining">
-          <span>남은 공제</span>
+          <span>{{ family.giftedAmount > 0 ? '남은 공제' : '사용 가능 공제' }}</span>
           <strong>{{ formatCompactWon(remaining) }}</strong>
         </div>
       </article>
@@ -95,9 +101,14 @@ defineEmits(['update:selectedFamilyId', 'amount-input', 'add-amount', 'submit'])
 
       <aside class="info-callout">
         <AppIcon name="info" :size="20" />
-        <p>
+        <p v-if="family.giftedAmount > 0">
           {{ family.name }} 님은 현재 <strong>{{ formatCompactWon(remaining) }}</strong
           >까지 비과세 한도를 활용할 수 있어요. 한도 갱신 예정일은 {{ family.resetDate }}입니다.
+        </p>
+        <p v-else>
+          최근 10년간 증여 이력이 없어
+          <strong>{{ formatCompactWon(remaining) }}</strong
+          >의 공제 한도를 모두 활용할 수 있어요.
         </p>
       </aside>
 
