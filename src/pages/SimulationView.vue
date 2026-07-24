@@ -131,8 +131,9 @@ async function savePlan() {
         <button class="back-text-button" type="button" @click="resetSimulation">
           <AppIcon name="back" :size="17" /> 조건 다시 입력
         </button>
-        <span class="section-kicker">10년 뒤 예상 결과</span>
-        <h2>{{ family.name }} 님께 {{ formatCompactWon(result.requestedAmount) }}을 증여한다면</h2>
+        <h2>
+          {{ family.name }} 님께<br />{{ formatCompactWon(result.requestedAmount) }}을 증여한다면
+        </h2>
         <p>세금과 운용 시점을 함께 고려한 결과예요.</p>
       </section>
 
