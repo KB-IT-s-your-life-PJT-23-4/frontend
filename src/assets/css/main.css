@@ -1130,7 +1130,9 @@ textarea:focus-visible {
   border-radius: 20px;
   background: #f4f7fa;
   cursor: pointer;
-  transition: background 160ms ease, transform 160ms ease;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
 }
 
 .recipient-picker:active {
@@ -1556,7 +1558,7 @@ textarea:focus-visible {
   transition: height 0.4s ease;
 }
 
-.chart-bar.recommended {
+.chart-bar.selected {
   background: #78ade0;
 }
 
@@ -1653,12 +1655,6 @@ textarea:focus-visible {
 
 .result-summary-card:disabled {
   opacity: 1;
-}
-
-.result-summary-card.recommended {
-  border-color: #9dbddd;
-  background: #f7fbff;
-  box-shadow: 0 8px 20px rgba(57, 105, 150, 0.1);
 }
 
 .result-summary-card.selected {
@@ -1883,7 +1879,10 @@ textarea:focus-visible {
   color: var(--ink);
   background: #f9fbfd;
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
 }
 
 .mixed-product-option.selected {
