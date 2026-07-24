@@ -22,6 +22,7 @@ const result = ref(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const activeProductType = ref('DEPOSIT')
+const selectedScenarioType = ref('TAX_OPTIMIZED')
 const showSaveModal = ref(false)
 const saving = ref(false)
 
@@ -34,10 +35,11 @@ const amount = computed(() => normalizeAmount(amountText.value))
 const remaining = computed(() =>
   Math.max(0, family.value.deductionLimit - family.value.giftedAmount),
 )
-const selectedScenario = computed(() => {
-  const preferredScenarioType = result.value?.exceedsDeduction ? 'TAX_OPTIMIZED' : 'IMMEDIATE'
-  return result.value?.results.find((item) => item.scenarioType === preferredScenarioType)
-})
+const selectedScenario = computed(
+  () =>
+    result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value) ??
+    result.value?.results[0],
+)
 const activeProduct = computed(() =>
   selectedScenario.value?.products.find((product) => product.type === activeProductType.value),
 )
@@ -64,6 +66,7 @@ async function runSimulation() {
       amount: amount.value,
       years: 10,
     })
+    selectedScenarioType.value = result.value.exceedsDeduction ? 'TAX_OPTIMIZED' : 'IMMEDIATE'
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } catch (error) {
     errorMessage.value = error.message
@@ -155,7 +158,11 @@ async function savePlan() {
         :remaining="remaining"
       />
 
-      <ResultSummaryCard :scenarios="result.results" :active-product-type="activeProductType" />
+      <ResultSummaryCard
+        v-model:selected-scenario-type="selectedScenarioType"
+        :scenarios="result.results"
+        :active-product-type="activeProductType"
+      />
 
       <RecommendedProductCard :active-product="activeProduct" />
 

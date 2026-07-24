@@ -1378,15 +1378,66 @@ textarea:focus-visible {
 }
 
 .result-summary-grid .result-summary-card {
+  width: 100%;
   min-width: 0;
   margin-bottom: 0;
   padding: 16px;
+  appearance: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .result-summary-card.recommended {
   border-color: #9dbddd;
   background: #f7fbff;
   box-shadow: 0 8px 20px rgba(57, 105, 150, 0.1);
+}
+
+.result-summary-card.selected {
+  border-color: var(--blue-strong);
+  background: #eef6ff;
+  box-shadow:
+    inset 0 0 0 1px var(--blue-strong),
+    0 10px 24px rgba(44, 96, 139, 0.16);
+}
+
+.result-summary-card:active {
+  transform: scale(0.985);
+}
+
+.scenario-selection-state {
+  display: inline-flex;
+  margin-bottom: 8px;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.scenario-selection-state i {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 2px solid #bdc9d5;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.result-summary-card.selected .scenario-selection-state {
+  color: var(--blue-strong);
+}
+
+.result-summary-card.selected .scenario-selection-state i {
+  border-color: var(--blue-strong);
+  background: var(--blue-strong);
+  box-shadow: inset 0 0 0 3px #fff;
 }
 
 .result-summary-card .summary-card-heading {

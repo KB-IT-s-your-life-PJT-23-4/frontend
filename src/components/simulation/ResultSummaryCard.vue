@@ -11,7 +11,13 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  selectedScenarioType: {
+    type: String,
+    required: true,
+  },
 })
+
+const emit = defineEmits(['update:selectedScenarioType'])
 
 const scenarioSummaries = computed(() =>
   props.scenarios.map((scenario) => ({
@@ -29,13 +35,25 @@ const scenarioSummaries = computed(() =>
       </div>
     </div>
 
-    <div class="result-summary-grid">
-      <article
+    <div class="result-summary-grid" role="radiogroup" aria-label="증여 전략 선택">
+      <button
         v-for="summary in scenarioSummaries"
         :key="summary.scenario.scenarioType"
+        type="button"
+        role="radio"
         class="result-summary-card"
-        :class="{ recommended: summary.scenario.scenarioType === 'TAX_OPTIMIZED' }"
+        :class="{
+          recommended: summary.scenario.scenarioType === 'TAX_OPTIMIZED',
+          selected: selectedScenarioType === summary.scenario.scenarioType,
+        }"
+        :aria-checked="selectedScenarioType === summary.scenario.scenarioType"
+        @click="emit('update:selectedScenarioType', summary.scenario.scenarioType)"
       >
+        <span class="scenario-selection-state">
+          <i aria-hidden="true" />
+          {{ selectedScenarioType === summary.scenario.scenarioType ? '선택된 전략' : '전략 선택' }}
+        </span>
+
         <div class="summary-card-heading">
           <div>
             <h2>{{ summary.scenario.scenarioName }}</h2>
@@ -66,7 +84,7 @@ const scenarioSummaries = computed(() =>
             </strong>
           </div>
         </div>
-      </article>
+      </button>
     </div>
   </section>
 </template>
