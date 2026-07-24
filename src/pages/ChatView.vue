@@ -6,12 +6,26 @@ import ModalSheet from '../components/layout/ModalSheet.vue'
 import { faqItems } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 
+function getTodayDateFormat() {
+  const now = new Date()
+  return `오늘, ${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`
+}
+
+function getCurrentTimeFormat() {
+  return new Date().toLocaleTimeString('ko-KR', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
 const input = ref('')
 const messages = ref([
   {
     id: 1,
     role: 'assistant',
     text: '반갑습니다! 증여세와 절세 혜택에 대해 무엇이든 물어보세요. \n아래의 자주 묻는 질문들을 통해 상담을 시작하실 수도 있습니다.',
+    createdAt: getCurrentTimeFormat(),
   },
 ])
 const loading = ref(false)
@@ -29,10 +43,18 @@ async function scrollToBottom() {
 async function sendMessage(question = input.value) {
   const trimmed = question.trim()
   if (!trimmed || loading.value) return
-  messages.value.push({ id: Date.now(), role: 'user', text: trimmed })
+
+  messages.value.push({
+    id: Date.now(),
+    role: 'user',
+    text: trimmed,
+    createdAt: getCurrentTimeFormat(),
+  })
+
   input.value = ''
   loading.value = true
   await scrollToBottom()
+
   try {
     const response = await api.askConsultation(trimmed)
     messages.value.push({
@@ -41,6 +63,7 @@ async function sendMessage(question = input.value) {
       text: response.answer,
       references: response.references,
       actions: true,
+      createdAt: getCurrentTimeFormat(),
     })
   } catch (error) {
     messages.value.push({
@@ -48,6 +71,7 @@ async function sendMessage(question = input.value) {
       role: 'assistant',
       text: error.message,
       error: true,
+      createdAt: getCurrentTimeFormat(),
     })
   } finally {
     loading.value = false
@@ -61,6 +85,7 @@ function clearConversation() {
       id: Date.now(),
       role: 'assistant',
       text: '새 상담을 시작할게요. 어떤 점이 궁금하신가요?',
+      createdAt: getCurrentTimeFormat(),
     },
   ]
   showEndModal.value = false
@@ -71,7 +96,7 @@ function clearConversation() {
   <div class="page chat-page">
     <AppHeader />
     <div ref="conversation" class="chat-conversation">
-      <div class="chat-date">오늘</div>
+      <div class="chat-date">{{ getTodayDateFormat() }}</div>
       <div class="chat-agent-label">미리줌 AI</div>
 
       <template v-for="message in messages" :key="message.id">
@@ -105,7 +130,7 @@ function clearConversation() {
               </a>
             </div>
           </article>
-          <time>{{ message.role === 'user' ? '지금' : '' }}</time>
+          <time>{{ message.createdAt }}</time>
         </div>
       </template>
 
