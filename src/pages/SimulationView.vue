@@ -161,7 +161,7 @@ async function savePlan() {
 
       <RecommendedProductCard :active-product="activeProduct" />
 
-      <RiskCard :active-product="activeProduct" />
+      <RiskCard v-if="activeProduct?.type === 'ETF'" :active-product="activeProduct" />
 
       <button
         class="primary-button full tall sticky-result-button"
