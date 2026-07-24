@@ -1327,7 +1327,7 @@ textarea:focus-visible {
 }
 
 .chart-column > strong {
-  color: #627181;
+  color: var(--muted);
   font-size: 11px;
 }
 
@@ -1371,10 +1371,26 @@ textarea:focus-visible {
   margin-bottom: 14px;
 }
 
+.simulation-scenario-section > .result-summary-section {
+  margin-bottom: 0;
+}
+
+.scenario-comparison-section > .result-summary-section {
+  margin-top: 20px;
+}
+
+.simulation-scenario-section:not(.scenario-comparison-section) > .result-summary-section {
+  margin-bottom: 14px;
+}
+
 .result-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.result-summary-grid.single {
+  grid-template-columns: 1fr;
 }
 
 .result-summary-grid .result-summary-card {
@@ -1391,6 +1407,18 @@ textarea:focus-visible {
     background 0.2s ease,
     box-shadow 0.2s ease,
     transform 0.2s ease;
+}
+
+.result-summary-grid.single .result-summary-card {
+  cursor: default;
+}
+
+.result-summary-grid.single .result-summary-card:active {
+  transform: none;
+}
+
+.result-summary-card:disabled {
+  opacity: 1;
 }
 
 .result-summary-card.recommended {
@@ -1438,6 +1466,17 @@ textarea:focus-visible {
   border-color: var(--blue-strong);
   background: var(--blue-strong);
   box-shadow: inset 0 0 0 3px #fff;
+}
+
+.scenario-result-state {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: #e7f6f0;
+  color: var(--success);
+  font-size: 9px;
+  font-weight: 700;
 }
 
 .result-summary-card .summary-card-heading {
@@ -1508,6 +1547,50 @@ textarea:focus-visible {
 .result-summary-card .metric-grid strong {
   overflow-wrap: anywhere;
   font-size: 14px;
+}
+
+.within-result-chart {
+  display: flex;
+  min-height: 190px;
+  margin-top: 14px;
+  padding: 18px 16px 12px;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(26px, 12vw, 70px);
+  border-radius: 14px;
+  background: #f5f7fb;
+}
+
+.within-result-chart-column {
+  display: grid;
+  width: min(120px, 40%);
+  justify-items: center;
+  gap: 7px;
+}
+
+.within-result-chart-value {
+  padding: 4px 8px;
+  border-radius: 9px;
+  background: #283849;
+  color: #fff;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.within-result-chart-bar {
+  width: 68px;
+  border-radius: 14px 14px 5px 5px;
+  background: #d5dde6;
+  transition: height 0.4s ease;
+}
+
+.within-result-chart-bar.future {
+  background: #78ade0;
+}
+
+.within-result-chart-column > strong {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .product-brand-row {
