@@ -231,12 +231,9 @@ textarea:focus-visible {
 
 .brand-avatar {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   place-items: center;
-  border-radius: 50%;
-  background: var(--blue-strong);
-  color: #fff;
 }
 
 .header-title {
