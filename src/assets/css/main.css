@@ -1434,7 +1434,6 @@ textarea:focus-visible {
   align-content: space-between;
   gap: 9px;
   border-radius: 14px;
-  /* background: #f5f7fb; */
 }
 
 .metric-grid strong {
