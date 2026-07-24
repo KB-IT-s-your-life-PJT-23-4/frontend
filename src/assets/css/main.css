@@ -1484,22 +1484,22 @@ textarea:focus-visible {
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 14px;
-  color: #fff;
+  border-radius: 50%;
+  color: #517594;
+  background: #e8f1ff;
 }
 
 .product-brand-row > div {
   min-width: 0;
 }
 
-.product-brand-row span,
-.recommended-product-card > p {
+.product-brand-row span {
   color: var(--muted);
   font-size: 10px;
 }
 
 .product-brand-row h2 {
-  margin: 3px 0 0;
+  margin: 0 0 3px;
   overflow: hidden;
   font-size: 17px;
   letter-spacing: -0.035em;
@@ -1511,36 +1511,61 @@ textarea:focus-visible {
   color: #506c84 !important;
 }
 
-.recommended-product-card > p {
-  margin: 16px 0;
-  font-size: 12px;
-  line-height: 1.6;
-}
-
 .product-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-bottom: 15px;
-  border: 1px solid #e8edf3;
-  border-radius: 15px;
-  background: #f7f9fc;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0;
 }
 
 .product-metrics > div {
-  display: grid;
-  min-height: 70px;
-  padding: 12px 9px;
-  align-content: center;
-  gap: 7px;
-  text-align: center;
+  display: flex;
+  min-height: 76px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 15px;
+  border-radius: 18px;
+  background: #f7f9fc;
+  text-align: left;
 }
 
 .product-metrics > div + div {
-  border-left: 1px solid #e2e8ef;
+  border-left: 0;
 }
 
 .product-metrics strong {
-  font-size: 12px;
+  color: #191f28;
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.product-metrics > div:first-child strong {
+  color: #517594;
+  font-size: 15px;
+}
+
+.product-description-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  color: #517594;
+  background: #eef5ff;
+}
+
+.product-description-note > svg {
+  flex: none;
+}
+
+.product-description-note p {
+  margin: 0;
+  color: #517594;
+  font-size: 11px;
+  line-height: 1.6;
 }
 
 .isa-note {
@@ -2710,19 +2735,7 @@ textarea:focus-visible {
   }
 
   .product-metrics {
-    grid-template-columns: 1fr;
-  }
-
-  .product-metrics > div {
-    grid-template-columns: 1fr auto;
-    min-height: 48px;
-    align-items: center;
-    text-align: left;
-  }
-
-  .product-metrics > div + div {
-    border-top: 1px solid #e2e8ef;
-    border-left: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .profile-summary-card {

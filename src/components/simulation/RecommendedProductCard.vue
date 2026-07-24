@@ -1,6 +1,5 @@
 <script setup>
 import AppIcon from '../layout/AppIcon.vue'
-import { formatCompactWon } from '../../utils/finance'
 
 defineProps({
   activeProduct: {
@@ -13,30 +12,32 @@ defineProps({
 <template>
   <section class="recommended-product-card">
     <div class="product-brand-row">
-      <span class="product-symbol" :style="{ background: activeProduct.color }">
+      <span class="product-symbol">
         <AppIcon :name="activeProduct.type === 'ETF' ? 'chart' : 'wallet'" :size="21" />
       </span>
       <div>
-        <span>{{ activeProduct.provider }}</span>
         <h2>{{ activeProduct.name }}</h2>
+        <span>{{ activeProduct.provider }}</span>
       </div>
       <span class="risk-pill">{{ activeProduct.risk }}</span>
     </div>
-    <p>{{ activeProduct.description }}</p>
+
     <div class="product-metrics">
       <div>
-        <span>가정 수익률</span>
+        <span>금리 (연, 세전)</span>
         <strong>연 {{ activeProduct.rate }}%</strong>
       </div>
       <div>
-        <span>예상 수익</span>
-        <strong>+{{ formatCompactWon(activeProduct.expectedProfit) }}</strong>
-      </div>
-      <div>
-        <span>10년 예상 자산</span>
-        <strong>{{ formatCompactWon(activeProduct.expectedFutureValue) }}</strong>
+        <span>운용기간</span>
+        <strong>{{ activeProduct.period }}</strong>
       </div>
     </div>
+
+    <div class="product-description-note">
+      <AppIcon name="info" :size="18" />
+      <p>{{ activeProduct.description }}</p>
+    </div>
+
     <div v-if="activeProduct.type === 'ETF'" class="isa-note">
       <AppIcon name="info" :size="17" /> ISA 계좌를 함께 활용하면 추가 절세 가능성을 살펴볼 수
       있어요.
