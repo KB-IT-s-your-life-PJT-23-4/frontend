@@ -158,6 +158,39 @@ export const products = [
     description: '자녀의 장기 자금 목적에 맞춰 안정적으로 적립할 수 있어요.',
     feature: '장기 유지 시 비과세 요건 확인',
   },
+  {
+    id: 4,
+    type: 'MIXED',
+    label: '혼합형',
+    name: '예적금·ETF 혼합 포트폴리오',
+    provider: '',
+    rate: 6.23,
+    period: '10년',
+    stableRatio: 40,
+    growthRatio: 60,
+    risk: '보통',
+    color: '#517594',
+    description: '예적금 40%와 ETF 60%를 함께 운용해 안정성과 성장 가능성을 균형 있게 추구해요.',
+    feature: '예적금 40% · ETF 60% 기준',
+    recommendedProducts: [
+      {
+        type: 'DEPOSIT',
+        label: '예적금',
+        name: 'KB Star 정기예금',
+        provider: 'KB국민은행',
+        rate: 3.2,
+        siteUrl: 'https://obank.kbstar.com/quics?page=C016613',
+      },
+      {
+        type: 'ETF',
+        label: 'ETF',
+        name: 'KBSTAR 미국S&P500',
+        provider: 'KB자산운용',
+        rate: 8.25,
+        siteUrl: 'https://www.kbam.co.kr/',
+      },
+    ],
+  },
 ]
 
 export const faqItems = [
