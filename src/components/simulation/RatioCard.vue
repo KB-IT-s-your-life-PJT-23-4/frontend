@@ -126,9 +126,9 @@ const riskLevel = computed(() => {
 }
 
 .ratio-values strong {
-  font-family: Arial, sans-serif;
+  font-family: 'Gmarket Sans', sans-serif;
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .ratio-values span {
