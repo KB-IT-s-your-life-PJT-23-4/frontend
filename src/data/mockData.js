@@ -33,6 +33,17 @@ export const initialState = {
       resetLabel: '8년 10개월',
       tone: 'mint',
     },
+    {
+      id: 3,
+      name: '김하윤',
+      relation: '자녀',
+      birthDate: '2008.09.18',
+      deductionLimit: 50000000,
+      giftedAmount: 0,
+      resetDate: '미정',
+      resetLabel: '증여 이력 없음',
+      tone: 'blue',
+    },
   ],
   giftHistory: [
     { id: 101, familyId: 1, date: '2024.01.15', type: '현금', amount: 10000000, status: 'COMPLETED' },
@@ -169,4 +180,3 @@ export const faqItems = [
       '증여계약서, 가족관계증명서, 주민등록등본, 송금증이나 이체확인증, 증여재산 평가자료를 준비하면 좋아요. 재산 유형과 거래 방식에 따라 추가 서류가 필요할 수 있습니다.',
   },
 ]
-
