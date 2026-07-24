@@ -19,7 +19,6 @@ defineProps({
         <h2>{{ activeProduct.name }}</h2>
         <span>{{ activeProduct.provider }}</span>
       </div>
-      <span class="risk-pill">{{ activeProduct.risk }}</span>
     </div>
 
     <div class="product-metrics">
