@@ -1933,7 +1933,7 @@ textarea:focus-visible {
 
 .mixed-product-detail {
   margin-top: 10px;
-  padding: 16px;
+  padding: 10px 0 0 0;
   border: 0;
   border-radius: 20px;
   background: #fff;
