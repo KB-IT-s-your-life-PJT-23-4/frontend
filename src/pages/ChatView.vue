@@ -178,14 +178,14 @@ function clearConversation() {
           <AppIcon name="send" :size="19" />
         </button>
       </form>
-      <button
+      <!-- <button
         v-if="messages.length > 2"
         class="end-chat-button"
         type="button"
         @click="showEndModal = true"
       >
         상담 종료
-      </button>
+      </button> -->
     </div>
 
     <ModalSheet
