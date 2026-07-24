@@ -11,7 +11,7 @@ const messages = ref([
   {
     id: 1,
     role: 'assistant',
-    text: '반갑습니다! 증여세와 절세 계획에 대해 무엇이든 물어보세요. 아래 자주 묻는 질문을 눌러 바로 시작할 수도 있어요.',
+    text: '반갑습니다! 증여세와 절세 혜택에 대해 무엇이든 물어보세요. \n아래의 자주 묻는 질문들을 통해 상담을 시작하실 수도 있습니다.',
   },
 ])
 const loading = ref(false)
@@ -129,8 +129,8 @@ function clearConversation() {
       <aside class="chat-disclaimer">
         <AppIcon name="info" :size="18" />
         <p>
-          AI 답변은 일반적인 세무 정보이며 법적 효력이 없습니다. 실제 신고 전 전문가 확인을
-          권장해요.
+          AI 상담 답변은 일반적인 세무 정보를 바탕으로 제공되는 참고용 정보이며, 법적 효력이나 세무
+          신고의 근거로 사용할 수 없습니다. 정확한 판단이 필요한 경우 세무 전문가와 상담해 주세요.
         </p>
       </aside>
     </div>
