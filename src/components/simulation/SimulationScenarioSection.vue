@@ -12,17 +12,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  selectedScenarioType: {
-    type: String,
-    required: true,
-  },
   remaining: {
     type: Number,
     required: true,
   },
 })
-
-const emit = defineEmits(['update:selectedScenarioType'])
 
 const immediateScenario = computed(() =>
   props.result.results.find((item) => item.scenarioType === 'IMMEDIATE'),
@@ -74,25 +68,6 @@ function getFutureValue(scenario) {
         />
         <strong>{{ scenario.scenarioType === 'IMMEDIATE' ? '지금 전액' : '공제 우선' }}</strong>
       </div>
-    </div>
-
-    <div class="scenario-selector">
-      <button
-        v-for="scenario in result.results"
-        :key="scenario.scenarioType"
-        type="button"
-        :class="{
-          selected: selectedScenarioType === scenario.scenarioType,
-        }"
-        @click="emit('update:selectedScenarioType', scenario.scenarioType)"
-      >
-        <span class="scenario-radio"><i /></span>
-        <span>
-          <strong>{{ scenario.scenarioName }}</strong>
-          <small>{{ scenario.description }}</small>
-        </span>
-        <em v-if="scenario.scenarioType === 'TAX_OPTIMIZED'">추천</em>
-      </button>
     </div>
 
     <aside class="saving-callout">
