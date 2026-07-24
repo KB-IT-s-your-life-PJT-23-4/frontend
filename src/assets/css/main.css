@@ -1,5 +1,32 @@
 /* @import './base.css'; */
 /* @import './layout.css'; */
+/* ctrl+F 눌러서 검색
+ 
+ * 폰트 정의
+ * 전역
+ * 전역 리셋 & 기본 스타일
+ * 접근성 유틸리티
+ * 앱 프레임 & 전체 레이아웃
+ * 헤더
+ * 하단 네비게이션
+ * 공통 타이포그래피 & 버튼
+ * 토스트 알림
+ * 홈
+ * 알림
+ * 증여 시뮬레이션
+ * 공통 안내 박스(콜아웃)
+ * 상품 탭 & 시나리오 비교
+ * 증여 현황
+ * AI 상담
+ * 마이페이지
+ * 모달 (바텀시트)
+ * 반응형: 작은 모바일 화면(~390px)
+ * 반응형: 태블릿(760px~)
+ * 반응형: 데스크탑(1024px~)
+ * 접근성: 모션 감소 설정 대응
+ */
+
+/* --------------폰트 정의------------- */
 @font-face {
   font-family: 'Gmarket Sans';
   src: url('../fonts/GmarketSansTTFLight.ttf') format('truetype');
@@ -24,6 +51,7 @@
   font-display: swap;
 }
 
+/* --------------전역------------- */
 :root {
   font-family:
     'Gmarket Sans', Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', Inter, system-ui, sans-serif;
@@ -70,6 +98,17 @@ body {
   color: var(--ink);
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b {
+  font-weight: 500;
+}
+
 button,
 input,
 select,
@@ -100,6 +139,7 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* --------------접근성 유틸리티------------- */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -128,6 +168,7 @@ textarea:focus-visible {
   transform: translateY(0);
 }
 
+/* --------------앱 프레임 & 전체 레이아웃------------- */
 .desktop-shell {
   min-height: 100vh;
 }
@@ -162,6 +203,7 @@ textarea:focus-visible {
   padding-top: 24px;
 }
 
+/* --------------헤더------------- */
 .app-header {
   position: sticky;
   top: 0;
@@ -183,7 +225,7 @@ textarea:focus-visible {
   width: max-content;
   color: var(--blue-strong);
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: -0.04em;
 }
 
@@ -243,9 +285,10 @@ textarea:focus-visible {
   background: var(--danger);
   color: #fff;
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
+/* --------------하단 네비게이션------------- */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -273,7 +316,7 @@ textarea:focus-visible {
   border-radius: 15px;
   color: #84909c;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   transition:
     color 0.2s ease,
     background 0.2s ease;
@@ -294,12 +337,13 @@ textarea:focus-visible {
   display: none;
 }
 
+/* --------------공통 타이포그래피 & 버튼------------- */
 .eyebrow,
 .section-kicker,
 .hero-kicker {
   color: var(--blue-strong);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -329,7 +373,7 @@ textarea:focus-visible {
   background: transparent;
   color: var(--blue-strong);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -346,7 +390,7 @@ textarea:focus-visible {
   border: 0;
   border-radius: 14px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 500;
   line-height: 1;
   cursor: pointer;
   transition:
@@ -429,6 +473,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------토스트 알림------------- */
 .toast {
   position: fixed;
   bottom: calc(var(--nav-height) + 16px + env(safe-area-inset-bottom));
@@ -445,7 +490,7 @@ textarea:focus-visible {
   color: #fff;
   box-shadow: var(--shadow-md);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   transform: translateX(-50%);
 }
 
@@ -466,7 +511,7 @@ textarea:focus-visible {
   transform: translate(-50%, 12px);
 }
 
-/* Home */
+/* --------------홈------------- */
 .home-content {
   display: grid;
   gap: 18px;
@@ -544,7 +589,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: var(--kb-yellow);
   color: #614b00;
-  font-weight: 900;
+  font-weight: 500;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
@@ -707,7 +752,7 @@ textarea:focus-visible {
   background: transparent;
   color: #748192;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -769,7 +814,7 @@ textarea:focus-visible {
   background: #edf4ff;
   color: var(--blue-strong);
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 500;
 }
 
 .progress-track {
@@ -898,7 +943,7 @@ textarea:focus-visible {
   grid-column: 1 / -1;
 }
 
-/* Notifications */
+/* --------------알림------------- */
 .notification-group + .notification-group {
   margin-top: 28px;
 }
@@ -955,7 +1000,7 @@ textarea:focus-visible {
   background: #edf3fb;
   color: #5e7891;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .pill.warning {
@@ -990,7 +1035,7 @@ textarea:focus-visible {
   text-align: center;
 }
 
-/* Forms and simulation */
+/* --------------증여 시뮬레이션------------- */
 .simulation-input-content,
 .simulation-result-content {
   padding-top: 24px;
@@ -1197,7 +1242,7 @@ textarea:focus-visible {
 .modal-form label > span {
   color: #465467;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .select-wrap,
@@ -1270,7 +1315,7 @@ textarea:focus-visible {
   background: #dceafb;
   color: #3c678d;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 500;
 }
 
 .family-context-card > div:not(.context-remaining) {
@@ -1332,16 +1377,14 @@ textarea:focus-visible {
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: clamp(30px, 9vw, 40px);
+  font-size: 24px;
   font-weight: 500;
-  letter-spacing: -0.04em;
-  text-align: left;
+  text-align: right;
 }
 
 .amount-input-wrap > span {
   margin-left: 8px;
   color: #536174;
-  font-size: 18px;
   font-weight: 500;
 }
 
@@ -1382,6 +1425,7 @@ textarea:focus-visible {
   width: calc(100% - 44px);
 }
 
+/* --------------공통 안내 박스(콜아웃)------------- */
 .info-callout,
 .saving-callout,
 .isa-note,
@@ -1425,10 +1469,11 @@ textarea:focus-visible {
   background: transparent;
   color: var(--blue-strong);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
 }
 
+/* --------------상품 탭 & 시나리오 비교------------- */
 .product-tabs {
   position: sticky;
   top: 63px;
@@ -1451,7 +1496,7 @@ textarea:focus-visible {
   background: transparent;
   color: #7b8795;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -1466,7 +1511,7 @@ textarea:focus-visible {
 .result-summary-card,
 .recommended-product-card,
 .risk-card {
-  margin-bottom: 14px;
+  margin-bottom: 24px;
   padding: 20px;
   border-radius: var(--radius-md);
 }
@@ -1478,7 +1523,7 @@ textarea:focus-visible {
 
 .scenario-chart {
   display: flex;
-  min-height: 205px;
+  min-height: 225px;
   margin-top: 8px;
   padding: 18px 20px 10px;
   align-items: flex-end;
@@ -1501,12 +1546,11 @@ textarea:focus-visible {
   background: #283849;
   color: #fff;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .chart-bar {
   width: 72px;
-  min-height: 42px;
   border-radius: 15px 15px 5px 5px;
   background: #dfe5eb;
   transition: height 0.4s ease;
@@ -1517,74 +1561,8 @@ textarea:focus-visible {
 }
 
 .chart-column > strong {
-  color: #627181;
-  font-size: 11px;
-}
-
-.scenario-selector {
-  display: grid;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.scenario-selector button {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  padding: 14px;
-  align-items: center;
-  gap: 11px;
-  border: 1px solid #e1e7ef;
-  border-radius: 15px;
-  background: #fff;
-  text-align: left;
-  cursor: pointer;
-}
-
-.scenario-selector button.selected {
-  border-color: #7ca5ca;
-  background: #f2f7ff;
-  box-shadow: inset 0 0 0 1px #7ca5ca;
-}
-
-.scenario-radio {
-  display: grid;
-  width: 20px;
-  height: 20px;
-  place-items: center;
-  border: 2px solid #cbd4df;
-  border-radius: 50%;
-}
-
-.scenario-selector button.selected .scenario-radio {
-  border-color: var(--blue-strong);
-}
-
-.scenario-selector button.selected .scenario-radio i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--blue-strong);
-}
-
-.scenario-selector button > span:nth-child(2) {
-  display: grid;
-  gap: 4px;
-}
-
-.scenario-selector small {
   color: var(--muted);
-  font-size: 10px;
-  line-height: 1.45;
-}
-
-.scenario-selector em {
-  padding: 4px 7px;
-  border-radius: 8px;
-  background: var(--kb-yellow);
-  color: #654e00;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 900;
+  font-size: 11px;
 }
 
 .saving-callout {
@@ -1623,14 +1601,146 @@ textarea:focus-visible {
   font-size: 11px;
 }
 
+.result-summary-section {
+  margin-bottom: 14px;
+}
+
+.simulation-scenario-section > .result-summary-section {
+  margin-bottom: 0;
+}
+
+.scenario-comparison-section > .result-summary-section {
+  margin-top: 20px;
+}
+
+.simulation-scenario-section:not(.scenario-comparison-section) > .result-summary-section {
+  margin-bottom: 14px;
+}
+
+.result-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.result-summary-grid.single {
+  grid-template-columns: 1fr;
+}
+
+.result-summary-grid .result-summary-card {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0;
+  padding: 16px;
+  appearance: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.result-summary-grid.single .result-summary-card {
+  cursor: default;
+}
+
+.result-summary-grid.single .result-summary-card:active {
+  transform: none;
+}
+
+.result-summary-card:disabled {
+  opacity: 1;
+}
+
+.result-summary-card.recommended {
+  border-color: #9dbddd;
+  background: #f7fbff;
+  box-shadow: 0 8px 20px rgba(57, 105, 150, 0.1);
+}
+
+.result-summary-card.selected {
+  border-color: var(--blue-strong);
+  background: #eef6ff;
+  box-shadow:
+    inset 0 0 0 1px var(--blue-strong),
+    0 10px 24px rgba(44, 96, 139, 0.16);
+}
+
+.result-summary-card:active {
+  transform: scale(0.985);
+}
+
+.scenario-selection-state {
+  display: inline-flex;
+  margin-bottom: 8px;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.scenario-selection-state i {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 2px solid #bdc9d5;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.result-summary-card.selected .scenario-selection-state {
+  color: var(--blue-strong);
+}
+
+.result-summary-card.selected .scenario-selection-state i {
+  border-color: var(--blue-strong);
+  background: var(--blue-strong);
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.scenario-result-state {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: #e7f6f0;
+  color: var(--success);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.result-summary-card .summary-card-heading {
+  display: grid;
+  gap: 10px;
+}
+
 .summary-card-heading h2 {
   margin: 4px 0 0;
-  font-size: 20px;
+  font-size: 17px;
+  line-height: 1.35;
   letter-spacing: -0.04em;
 }
 
+.scenario-description {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
 .tax-chip {
+  width: max-content;
+  max-width: 100%;
   background: #eef3f9;
+  font-size: 9px;
+  white-space: normal;
 }
 
 .metric-grid {
@@ -1647,7 +1757,6 @@ textarea:focus-visible {
   align-content: space-between;
   gap: 9px;
   border-radius: 14px;
-  background: #f5f7fb;
 }
 
 .metric-grid strong {
@@ -1656,6 +1765,66 @@ textarea:focus-visible {
 
 .metric-grid strong.blue {
   color: var(--blue-strong);
+}
+
+.result-summary-card .metric-grid {
+  grid-template-columns: 1fr;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.result-summary-card .metric-grid > div {
+  min-height: 58px;
+  padding: 11px;
+}
+
+.result-summary-card .metric-grid strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.within-result-chart {
+  display: flex;
+  min-height: 190px;
+  margin-top: 14px;
+  padding: 18px 16px 12px;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(26px, 12vw, 70px);
+  border-radius: 14px;
+  background: #f5f7fb;
+}
+
+.within-result-chart-column {
+  display: grid;
+  width: min(120px, 40%);
+  justify-items: center;
+  gap: 7px;
+}
+
+.within-result-chart-value {
+  padding: 4px 8px;
+  border-radius: 9px;
+  background: #283849;
+  color: #fff;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.within-result-chart-bar {
+  width: 68px;
+  border-radius: 14px 14px 5px 5px;
+  background: #d5dde6;
+  transition: height 0.4s ease;
+}
+
+.within-result-chart-bar.future {
+  background: #78ade0;
+}
+
+.within-result-chart-column > strong {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .product-brand-row {
@@ -1918,7 +2087,7 @@ textarea:focus-visible {
   gap: 7px;
   color: #b74a52;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .risk-card.deposit .risk-card-top > span,
@@ -1967,7 +2136,7 @@ textarea:focus-visible {
   margin-top: 5px;
 }
 
-/* Status */
+/* --------------증여 현황------------- */
 .status-content {
   display: grid;
   gap: 14px;
@@ -2018,7 +2187,7 @@ textarea:focus-visible {
   background: var(--kb-yellow);
   color: #6b5200;
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 500;
   box-shadow: 0 10px 18px rgba(190, 144, 0, 0.2);
 }
 
@@ -2290,7 +2459,7 @@ textarea:focus-visible {
 
 .yellow-text {
   color: #b08300 !important;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .document-list {
@@ -2388,7 +2557,7 @@ textarea:focus-visible {
   grid-column: 1 / -1;
 }
 
-/* Chat */
+/* --------------AI 상담------------- */
 .chat-page {
   display: flex;
   height: 100dvh;
@@ -2423,7 +2592,7 @@ textarea:focus-visible {
   margin-bottom: 7px;
   color: var(--blue-strong);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 500;
 }
 
 .chat-row {
@@ -2547,17 +2716,20 @@ textarea:focus-visible {
   padding: 0 12px;
   border: 1px solid #dce4ed;
   border-radius: 17px;
-  background: #fff;
-  color: #4c6f8c;
+  background: #517594;
+  color: #fff;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .chat-disclaimer {
   margin-top: 18px;
+  width: 300px;
 }
-
+.chat-disclaimer p {
+  color: #1d4ed8;
+}
 .chat-composer-wrap {
   flex: none;
   padding: 9px 14px 12px;
@@ -2625,7 +2797,7 @@ textarea:focus-visible {
   color: #8a95a2;
 }
 
-/* My page */
+/* --------------마이페이지------------- */
 .my-content {
   display: grid;
   gap: 18px;
@@ -2651,7 +2823,7 @@ textarea:focus-visible {
   background: #d6e5f3;
   color: #355e80;
   font-size: 21px;
-  font-weight: 900;
+  font-weight: 500;
 }
 
 .profile-summary-card > div:nth-child(2) {
@@ -2789,7 +2961,7 @@ textarea:focus-visible {
   justify-content: space-between;
   color: var(--blue-strong);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .history-topline button {
@@ -2831,7 +3003,7 @@ textarea:focus-visible {
   cursor: pointer;
 }
 
-/* Modals */
+/* --------------모달 (바텀시트)------------- */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -3047,6 +3219,7 @@ textarea:focus-visible {
   transform: translateY(30px);
 }
 
+/* --------------반응형: 작은 모바일 화면(~390px)------------- */
 @media (max-width: 390px) {
   .page-content {
     padding-right: 14px;
@@ -3122,6 +3295,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------반응형: 태블릿(760px~)------------- */
 @media (min-width: 760px) {
   .page-content {
     padding-right: 26px;
@@ -3142,6 +3316,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------반응형: 데스크탑(1024px~)------------- */
 @media (min-width: 1024px) {
   body {
     padding: 28px;
@@ -3262,7 +3437,7 @@ textarea:focus-visible {
     border-radius: 14px;
     color: rgba(255, 255, 255, 0.67);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
   }
 
   .desktop-nav a.router-link-exact-active {
@@ -3355,6 +3530,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------접근성: 모션 감소 설정 대응------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

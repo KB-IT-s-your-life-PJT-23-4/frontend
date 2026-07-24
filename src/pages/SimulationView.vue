@@ -5,7 +5,7 @@ import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import RatioCard from '../components/simulation/RatioCard.vue'
 import RecommendedProductCard from '../components/simulation/RecommendedProductCard.vue'
-import ResultSummaryCard from '../components/simulation/ResultSummaryCard.vue'
+import RiskCard from '../components/simulation/RiskCard.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
 import SimulationInputContent from '../components/simulation/SimulationInputContent.vue'
 import SimulationScenarioSection from '../components/simulation/SimulationScenarioSection.vue'
@@ -36,8 +36,10 @@ const amount = computed(() => normalizeAmount(amountText.value))
 const remaining = computed(() =>
   Math.max(0, family.value.deductionLimit - family.value.giftedAmount),
 )
-const selectedScenario = computed(() =>
-  result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value),
+const selectedScenario = computed(
+  () =>
+    result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value) ??
+    result.value?.results[0],
 )
 const activeProduct = computed(() => {
   const scenario = selectedScenario.value
@@ -156,8 +158,9 @@ async function savePlan() {
         <button class="back-text-button" type="button" @click="resetSimulation">
           <AppIcon name="back" :size="17" /> 조건 다시 입력
         </button>
-        <span class="section-kicker">10년 뒤 예상 결과</span>
-        <h2>{{ family.name }} 님께 {{ formatCompactWon(result.requestedAmount) }}을 증여한다면</h2>
+        <h2>
+          {{ family.name }} 님께<br />{{ formatCompactWon(result.requestedAmount) }}을 증여한다면
+        </h2>
         <p>세금과 운용 시점을 함께 고려한 결과예요.</p>
       </section>
 
@@ -178,14 +181,12 @@ async function savePlan() {
       <RatioCard v-if="activeProductType === 'MIXED'" v-model="growthRatio" />
 
       <SimulationScenarioSection
-        v-model:selectedScenarioType="selectedScenarioType"
+        v-model:selected-scenario-type="selectedScenarioType"
         :result="result"
         :active-product-type="activeProductType"
         :active-product-rate="activeProduct.rate"
         :remaining="remaining"
       />
-
-      <ResultSummaryCard :selected-scenario="selectedScenario" :active-product="activeProduct" />
 
       <RecommendedProductCard :active-product="activeProduct" />
 

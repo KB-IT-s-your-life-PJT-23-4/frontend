@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "format": "prettier --write --experimental-cli src/",
     "prepare": "husky",
-    "test" : "echo \"Error: no test specified\""
+    "test": "echo \"Error: no test specified\""
   },
   "dependencies": {
     "pinia": "^3.0.4",
