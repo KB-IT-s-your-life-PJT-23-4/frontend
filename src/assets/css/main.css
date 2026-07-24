@@ -1112,7 +1112,7 @@ textarea:focus-visible {
 .family-context-card > div:not(.context-remaining) {
   display: grid;
   min-width: 0;
-  gap: 3px;
+  gap: 7px;
 }
 
 .family-context-card span {
