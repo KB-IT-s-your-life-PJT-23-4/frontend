@@ -25,7 +25,6 @@ const scenarioSummaries = computed(() =>
   <section class="result-summary-section">
     <div class="section-heading-row">
       <div>
-        <span class="section-kicker">RESULT</span>
         <h2>전략별 결과를 비교해 보세요</h2>
       </div>
     </div>

@@ -3,6 +3,10 @@ import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { formatCompactWon } from '../../utils/finance'
 
+const MIN_BAR_HEIGHT = 42
+const MAX_BAR_HEIGHT = 145
+const COMPARISON_EMPHASIS = 0.3
+
 const props = defineProps({
   result: {
     type: Object,
@@ -30,8 +34,15 @@ const comparedScenarios = computed(() =>
 const taxSaving = computed(() =>
   Math.max(0, (immediateScenario.value?.giftTax ?? 0) - (optimizedScenario.value?.giftTax ?? 0)),
 )
-const maxFutureValue = computed(() =>
-  Math.max(...comparedScenarios.value.map((scenario) => getFutureValue(scenario)), 1),
+const overallValueRange = computed(() =>
+  getValueRange(
+    props.result.results.flatMap((scenario) =>
+      scenario.products.map((product) => product.expectedFutureValue),
+    ),
+  ),
+)
+const activeValueRange = computed(() =>
+  getValueRange(comparedScenarios.value.map((scenario) => getFutureValue(scenario))),
 )
 
 function getFutureValue(scenario) {
@@ -40,13 +51,43 @@ function getFutureValue(scenario) {
       ?.expectedFutureValue ?? 0
   )
 }
+
+function getValueRange(values) {
+  const validValues = values.filter((value) => Number.isFinite(value) && value > 0)
+
+  if (!validValues.length) return { min: 0, max: 0 }
+
+  return {
+    min: Math.min(...validValues),
+    max: Math.max(...validValues),
+  }
+}
+
+function getNormalizedValue(value, range) {
+  if (value <= 0) return 0
+  if (range.max === range.min) return 0.5
+
+  return (value - range.min) / (range.max - range.min)
+}
+
+function getBarHeight(scenario) {
+  const value = getFutureValue(scenario)
+  if (value <= 0) return '0px'
+
+  const overallRatio = getNormalizedValue(value, overallValueRange.value)
+  const comparisonRatio = getNormalizedValue(value, activeValueRange.value)
+  const emphasizedRatio =
+    overallRatio * (1 - COMPARISON_EMPHASIS) + comparisonRatio * COMPARISON_EMPHASIS
+  const height = MIN_BAR_HEIGHT + emphasizedRatio * (MAX_BAR_HEIGHT - MIN_BAR_HEIGHT)
+
+  return `${height}px`
+}
 </script>
 
 <template>
   <section v-if="result.exceedsDeduction" class="scenario-comparison-section">
     <div class="section-heading-row">
       <div>
-        <span class="section-kicker">SCENARIO</span>
         <h2>두 전략을 비교했어요</h2>
       </div>
       <span class="recommend-badge">절세 추천</span>
@@ -63,7 +104,7 @@ function getFutureValue(scenario) {
             recommended: scenario.scenarioType === 'TAX_OPTIMIZED',
           }"
           :style="{
-            height: `${Math.max(42, (getFutureValue(scenario) / maxFutureValue) * 130)}px`,
+            height: getBarHeight(scenario),
           }"
         />
         <strong>{{ scenario.scenarioType === 'IMMEDIATE' ? '지금 전액' : '공제 우선' }}</strong>

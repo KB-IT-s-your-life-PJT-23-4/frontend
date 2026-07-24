@@ -1277,7 +1277,7 @@ textarea:focus-visible {
 .result-summary-card,
 .recommended-product-card,
 .risk-card {
-  margin-bottom: 14px;
+  margin-bottom: 24px;
   padding: 20px;
   border-radius: var(--radius-md);
 }
@@ -1289,7 +1289,7 @@ textarea:focus-visible {
 
 .scenario-chart {
   display: flex;
-  min-height: 205px;
+  min-height: 225px;
   margin-top: 8px;
   padding: 18px 20px 10px;
   align-items: flex-end;
@@ -1317,7 +1317,6 @@ textarea:focus-visible {
 
 .chart-bar {
   width: 72px;
-  min-height: 42px;
   border-radius: 15px 15px 5px 5px;
   background: #dfe5eb;
   transition: height 0.4s ease;
