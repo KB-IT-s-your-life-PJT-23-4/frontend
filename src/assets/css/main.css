@@ -1407,7 +1407,6 @@ textarea:focus-visible {
   margin-top: 6px;
   color: var(--muted);
   font-size: 10px;
-  font-weight: 300;
   line-height: 1.55;
   letter-spacing: -0.02em;
   word-break: keep-all;
