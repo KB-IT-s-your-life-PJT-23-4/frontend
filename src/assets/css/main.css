@@ -1019,9 +1019,173 @@ textarea:focus-visible {
 
 .simulation-form {
   display: grid;
-  gap: 20px;
-  padding: 22px;
-  border-radius: var(--radius-lg);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(35, 55, 75, 0.07);
+}
+
+.simulation-input-step {
+  width: 100%;
+  min-width: 0;
+  padding: 24px 22px 26px;
+}
+
+.simulation-input-step + .simulation-input-step {
+  border-top: 1px solid #eef1f4;
+}
+
+.input-step-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.input-step-heading > div {
+  min-width: 0;
+}
+
+.input-step-heading > span {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  color: #3e617f;
+  background: #e8f1ff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.input-step-heading h3 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.recipient-picker {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 74px;
+  margin-top: 22px;
+  padding: 12px 14px;
+  align-items: center;
+  gap: 12px;
+  border-radius: 20px;
+  background: #f4f7fa;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.recipient-picker:active {
+  background: #edf2f7;
+  transform: scale(0.99);
+}
+
+.recipient-picker:focus-within {
+  outline: 3px solid rgba(79, 125, 165, 0.14);
+}
+
+.recipient-avatar {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  color: #3c678d;
+  background: #dceafb;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.recipient-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.recipient-copy strong {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.recipient-copy small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recipient-change {
+  display: flex;
+  flex: none;
+  margin-left: auto;
+  align-items: center;
+  gap: 4px;
+  color: #517594;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.recipient-change svg {
+  transform: rotate(90deg);
+}
+
+.recipient-picker select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.recipient-deduction-summary {
+  min-width: 0;
+  margin-top: 22px;
+  padding-inline: 2px;
+}
+
+.recipient-deduction-summary > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recipient-deduction-summary > strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.recipient-deduction-summary p {
+  display: flex;
+  min-width: 0;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  justify-content: space-between;
+  border-radius: 14px;
+  color: #607082;
+  background: #eef5ff;
+  font-size: 11px;
+}
+
+.recipient-deduction-summary b {
+  min-width: 0;
+  color: #3c678d;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 
 .field-group {
@@ -1136,14 +1300,20 @@ textarea:focus-visible {
 }
 
 .amount-input-wrap {
-  height: 64px;
-  padding: 0 16px;
-  border: 1px solid #dfe6ef;
-  border-radius: 16px;
-  background: #f4f7fb;
+  height: 76px;
+  margin-top: 18px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid #dfe5eb;
+  border-radius: 0;
+  background: transparent;
 }
 
-.amount-input-wrap:focus-within,
+.amount-input-wrap:focus-within {
+  border-color: #517594;
+  outline: 0;
+}
+
 .select-wrap select:focus,
 .modal-form input:focus,
 .modal-form textarea:focus,
@@ -1153,7 +1323,7 @@ textarea:focus-visible {
 }
 
 .amount-input-wrap.invalid {
-  border-color: #f08184;
+  border-bottom-color: #f08184;
 }
 
 .amount-input-wrap input {
@@ -1162,15 +1332,17 @@ textarea:focus-visible {
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: 24px;
-  font-weight: 900;
-  text-align: right;
+  font-size: clamp(30px, 9vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  text-align: left;
 }
 
 .amount-input-wrap > span {
   margin-left: 8px;
   color: #536174;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .field-error {
@@ -1181,19 +1353,33 @@ textarea:focus-visible {
 
 .amount-quick-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .amount-quick-buttons button {
-  min-height: 35px;
-  border: 1px solid #dfe6ef;
-  border-radius: 11px;
-  background: #fff;
-  color: #627a91;
+  min-width: 0;
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: #f2f4f6;
+  color: #536b80;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.simulation-form > .info-callout {
+  margin: 0 22px 20px;
+}
+
+.simulation-form > .primary-button {
+  margin: 0 22px 22px;
+  width: calc(100% - 44px);
 }
 
 .info-callout,
@@ -1248,7 +1434,7 @@ textarea:focus-visible {
   top: 63px;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   margin: 0 -2px 18px;
   padding: 5px;
   gap: 4px;
@@ -1579,7 +1765,7 @@ textarea:focus-visible {
 .mixed-product-detail {
   margin-top: 10px;
   padding: 16px;
-  border: 1px solid #e4eaf1;
+  border: 0;
   border-radius: 20px;
   background: #fff;
 }
@@ -2865,6 +3051,44 @@ textarea:focus-visible {
   .page-content {
     padding-right: 14px;
     padding-left: 14px;
+  }
+
+  .simulation-input-step {
+    padding: 22px 18px 24px;
+  }
+
+  .input-step-heading h3 {
+    font-size: 17px;
+  }
+
+  .recipient-picker {
+    margin-top: 18px;
+    padding-inline: 12px;
+  }
+
+  .recipient-deduction-summary p {
+    display: grid;
+    gap: 6px;
+  }
+
+  .recipient-deduction-summary b {
+    text-align: left;
+  }
+
+  .amount-quick-buttons button {
+    padding-inline: 4px;
+    font-size: 10px;
+  }
+
+  .simulation-form > .info-callout {
+    margin-right: 18px;
+    margin-left: 18px;
+  }
+
+  .simulation-form > .primary-button {
+    width: calc(100% - 36px);
+    margin-right: 18px;
+    margin-left: 18px;
   }
 
   .hero-card {

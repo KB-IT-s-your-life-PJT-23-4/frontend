@@ -30,6 +30,10 @@ const productInfoUrl = computed(
   () => selectedMixedProduct.value?.siteUrl ?? props.activeProduct.siteUrl ?? 'https://www.kbstar.com',
 )
 
+const visibleRiskProduct = computed(() =>
+  props.activeProduct.type === 'MIXED' ? selectedMixedProduct.value : props.activeProduct,
+)
+
 function getMixedRatio(type) {
   return type === 'ETF' ? props.activeProduct.growthRatio : props.activeProduct.stableRatio
 }
@@ -104,17 +108,16 @@ function getMixedRatio(type) {
       </div>
     </div>
 
-    <RiskCard v-if="activeProduct.type === 'ETF'" :active-product="activeProduct" />
+    <RiskCard
+      v-if="visibleRiskProduct?.type === 'ETF'"
+      :active-product="visibleRiskProduct"
+    />
 
-    <div class="product-description-note">
+    <div v-if="activeProduct.description" class="product-description-note">
       <AppIcon name="info" :size="18" />
       <p>{{ activeProduct.description }}</p>
     </div>
 
-    <div v-if="activeProduct.type === 'ETF'" class="isa-note">
-      <AppIcon name="info" :size="17" /> ISA 계좌를 함께 활용하면 추가 절세 가능성을 살펴볼 수
-      있어요.
-    </div>
     <a class="secondary-button full" :href="productInfoUrl" target="_blank" rel="noreferrer">
       상품 정보 확인하기 <AppIcon name="arrow" :size="17" />
     </a>

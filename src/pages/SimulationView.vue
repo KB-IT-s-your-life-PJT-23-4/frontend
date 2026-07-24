@@ -64,7 +64,6 @@ const activeProduct = computed(() => {
     growthRatio: growthRatio.value,
     expectedFutureValue,
     expectedProfit: expectedFutureValue - scenario.postTaxAmount,
-    description: `예적금 ${100 - growthRatio.value}%와 ETF ${growthRatio.value}%를 함께 운용해 안정성과 성장 가능성을 균형 있게 추구해요.`,
   }
 })
 

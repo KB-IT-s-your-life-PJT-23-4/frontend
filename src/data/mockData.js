@@ -127,8 +127,21 @@ export const products = [
     minRate: 2.8,
     risk: '매우 낮음',
     color: '#3f78a8',
-    description: '목돈을 안정적으로 운용하며 예측 가능한 이자를 받을 수 있어요.',
     feature: '10년 유지 시 연 3.2% 가정',
+  },
+  {
+    id: 5,
+    type: 'SAVINGS',
+    label: '적금',
+    name: 'KB국민행복적금',
+    provider: 'KB국민은행',
+    rate: 3.05,
+    period: '10년',
+    minRate: 2.75,
+    risk: '매우 낮음',
+    color: '#4f86b5',
+    feature: '만기 후 재예치 기준 연 3.05% 가정',
+    siteUrl: 'https://obank.kbstar.com/quics?page=C016614',
   },
   {
     id: 2,
@@ -141,7 +154,6 @@ export const products = [
     volatility: 14.32,
     risk: '보통',
     color: '#7f73d8',
-    description: '미국 대표 기업에 분산 투자해 장기 성장 가능성을 높여요.',
     feature: '과거 10년 연평균 수익률 기준',
   },
   {
@@ -155,7 +167,6 @@ export const products = [
     guaranteedRate: 2.95,
     risk: '낮음',
     color: '#3b9e87',
-    description: '자녀의 장기 자금 목적에 맞춰 안정적으로 적립할 수 있어요.',
     feature: '장기 유지 시 비과세 요건 확인',
   },
   {
@@ -170,7 +181,6 @@ export const products = [
     growthRatio: 60,
     risk: '보통',
     color: '#517594',
-    description: '예적금 40%와 ETF 60%를 함께 운용해 안정성과 성장 가능성을 균형 있게 추구해요.',
     feature: '예적금 40% · ETF 60% 기준',
     recommendedProducts: [
       {
@@ -187,6 +197,7 @@ export const products = [
         name: 'KBSTAR 미국S&P500',
         provider: 'KB자산운용',
         rate: 8.25,
+        risk: '보통',
         siteUrl: 'https://www.kbam.co.kr/',
       },
     ],
