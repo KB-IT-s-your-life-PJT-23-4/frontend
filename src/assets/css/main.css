@@ -2226,7 +2226,9 @@ textarea:focus-visible {
   margin-top: 18px;
   width: 300px;
 }
-
+.chat-disclaimer p {
+  color: #1d4ed8;
+}
 .chat-composer-wrap {
   flex: none;
   padding: 9px 14px 12px;

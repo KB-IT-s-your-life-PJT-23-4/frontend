@@ -89,19 +89,20 @@ function clearConversation() {
             <div v-if="message.actions" class="chat-actions">
               <a
                 class="primary-button compact"
-                href="https://obank.kbstar.com"
+                href="https://map.naver.com/p/search/근처 국민은행"
                 target="_blank"
                 rel="noreferrer"
               >
                 가까운 영업점 알아보기
               </a>
-              <button
+              <a
                 class="secondary-button compact"
-                type="button"
-                @click="input = '세무 전문가 상담이 필요해요'"
+                href="https://www.nts.go.kr/nts/taxSrch/taxSrchPage.do?mi=6761"
+                target="_blank"
+                rel="noreferrer"
               >
-                전문가 상담 준비하기
-              </button>
+                근처 세무서 알아보기
+              </a>
             </div>
           </article>
           <time>{{ message.role === 'user' ? '지금' : '' }}</time>
@@ -112,7 +113,7 @@ function clearConversation() {
         <div class="chat-bubble typing" aria-label="답변 작성 중"><span /><span /><span /></div>
       </div>
 
-      <section v-if="messages.length === 1" class="faq-suggestions">
+      <section class="faq-suggestions">
         <span>궁금해하실 내용을 준비했어요</span>
         <div class="faq-chip-list">
           <button
