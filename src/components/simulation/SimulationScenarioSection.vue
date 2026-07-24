@@ -164,7 +164,7 @@ function getWithinLimitBarHeight(value) {
           <div
             class="chart-bar"
             :class="{
-              selected: scenario.scenarioType === 'TAX_OPTIMIZED',
+              selected: selectedScenarioType === scenario.scenarioType,
             }"
             :style="{
               height: getBarHeight(scenario),
