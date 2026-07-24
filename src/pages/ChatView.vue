@@ -6,12 +6,26 @@ import ModalSheet from '../components/layout/ModalSheet.vue'
 import { faqItems } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 
+function getTodayDateFormat() {
+  const now = new Date()
+  return `오늘, ${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`
+}
+
+function getCurrentTimeFormat() {
+  return new Date().toLocaleTimeString('ko-KR', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
 const input = ref('')
 const messages = ref([
   {
     id: 1,
     role: 'assistant',
-    text: '반갑습니다! 증여세와 절세 계획에 대해 무엇이든 물어보세요. 아래 자주 묻는 질문을 눌러 바로 시작할 수도 있어요.',
+    text: '반갑습니다! 증여세와 절세 혜택에 대해 무엇이든 물어보세요. \n아래의 자주 묻는 질문들을 통해 상담을 시작하실 수도 있습니다.',
+    createdAt: getCurrentTimeFormat(),
   },
 ])
 const loading = ref(false)
@@ -29,10 +43,18 @@ async function scrollToBottom() {
 async function sendMessage(question = input.value) {
   const trimmed = question.trim()
   if (!trimmed || loading.value) return
-  messages.value.push({ id: Date.now(), role: 'user', text: trimmed })
+
+  messages.value.push({
+    id: Date.now(),
+    role: 'user',
+    text: trimmed,
+    createdAt: getCurrentTimeFormat(),
+  })
+
   input.value = ''
   loading.value = true
   await scrollToBottom()
+
   try {
     const response = await api.askConsultation(trimmed)
     messages.value.push({
@@ -41,6 +63,7 @@ async function sendMessage(question = input.value) {
       text: response.answer,
       references: response.references,
       actions: true,
+      createdAt: getCurrentTimeFormat(),
     })
   } catch (error) {
     messages.value.push({
@@ -48,6 +71,7 @@ async function sendMessage(question = input.value) {
       role: 'assistant',
       text: error.message,
       error: true,
+      createdAt: getCurrentTimeFormat(),
     })
   } finally {
     loading.value = false
@@ -61,6 +85,7 @@ function clearConversation() {
       id: Date.now(),
       role: 'assistant',
       text: '새 상담을 시작할게요. 어떤 점이 궁금하신가요?',
+      createdAt: getCurrentTimeFormat(),
     },
   ]
   showEndModal.value = false
@@ -71,7 +96,7 @@ function clearConversation() {
   <div class="page chat-page">
     <AppHeader />
     <div ref="conversation" class="chat-conversation">
-      <div class="chat-date">오늘</div>
+      <div class="chat-date">{{ getTodayDateFormat() }}</div>
       <div class="chat-agent-label">미리줌 AI</div>
 
       <template v-for="message in messages" :key="message.id">
@@ -89,22 +114,23 @@ function clearConversation() {
             <div v-if="message.actions" class="chat-actions">
               <a
                 class="primary-button compact"
-                href="https://obank.kbstar.com"
+                href="https://map.naver.com/p/search/근처 국민은행"
                 target="_blank"
                 rel="noreferrer"
               >
                 가까운 영업점 알아보기
               </a>
-              <button
+              <a
                 class="secondary-button compact"
-                type="button"
-                @click="input = '세무 전문가 상담이 필요해요'"
+                href="https://www.nts.go.kr/nts/taxSrch/taxSrchPage.do?mi=6761"
+                target="_blank"
+                rel="noreferrer"
               >
-                전문가 상담 준비하기
-              </button>
+                근처 세무서 알아보기
+              </a>
             </div>
           </article>
-          <time>{{ message.role === 'user' ? '지금' : '' }}</time>
+          <time>{{ message.createdAt }}</time>
         </div>
       </template>
 
@@ -112,7 +138,7 @@ function clearConversation() {
         <div class="chat-bubble typing" aria-label="답변 작성 중"><span /><span /><span /></div>
       </div>
 
-      <section v-if="messages.length === 1" class="faq-suggestions">
+      <section class="faq-suggestions">
         <span>궁금해하실 내용을 준비했어요</span>
         <div class="faq-chip-list">
           <button
@@ -129,8 +155,8 @@ function clearConversation() {
       <aside class="chat-disclaimer">
         <AppIcon name="info" :size="18" />
         <p>
-          AI 답변은 일반적인 세무 정보이며 법적 효력이 없습니다. 실제 신고 전 전문가 확인을
-          권장해요.
+          AI 상담 답변은 일반적인 세무 정보를 바탕으로 제공되는 참고용 정보이며, 법적 효력이나 세무
+          신고의 근거로 사용할 수 없습니다. 정확한 판단이 필요한 경우 세무 전문가와 상담해 주세요.
         </p>
       </aside>
     </div>
@@ -152,14 +178,14 @@ function clearConversation() {
           <AppIcon name="send" :size="19" />
         </button>
       </form>
-      <button
+      <!-- <button
         v-if="messages.length > 2"
         class="end-chat-button"
         type="button"
         @click="showEndModal = true"
       >
         상담 종료
-      </button>
+      </button> -->
     </div>
 
     <ModalSheet

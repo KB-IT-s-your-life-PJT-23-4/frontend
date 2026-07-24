@@ -1,5 +1,32 @@
 /* @import './base.css'; */
 /* @import './layout.css'; */
+/* ctrl+F 눌러서 검색
+ 
+ * 폰트 정의
+ * 전역
+ * 전역 리셋 & 기본 스타일
+ * 접근성 유틸리티
+ * 앱 프레임 & 전체 레이아웃
+ * 헤더
+ * 하단 네비게이션
+ * 공통 타이포그래피 & 버튼
+ * 토스트 알림
+ * 홈
+ * 알림
+ * 증여 시뮬레이션
+ * 공통 안내 박스(콜아웃)
+ * 상품 탭 & 시나리오 비교
+ * 증여 현황
+ * AI 상담
+ * 마이페이지
+ * 모달 (바텀시트)
+ * 반응형: 작은 모바일 화면(~390px)
+ * 반응형: 태블릿(760px~)
+ * 반응형: 데스크탑(1024px~)
+ * 접근성: 모션 감소 설정 대응
+ */
+
+/* --------------폰트 정의------------- */
 @font-face {
   font-family: 'Gmarket Sans';
   src: url('../fonts/GmarketSansTTFLight.ttf') format('truetype');
@@ -24,6 +51,7 @@
   font-display: swap;
 }
 
+/* --------------전역------------- */
 :root {
   font-family:
     'Gmarket Sans', Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', Inter, system-ui, sans-serif;
@@ -100,6 +128,7 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
+/* --------------접근성 유틸리티------------- */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -128,6 +157,7 @@ textarea:focus-visible {
   transform: translateY(0);
 }
 
+/* --------------앱 프레임 & 전체 레이아웃------------- */
 .desktop-shell {
   min-height: 100vh;
 }
@@ -162,6 +192,7 @@ textarea:focus-visible {
   padding-top: 24px;
 }
 
+/* --------------헤더------------- */
 .app-header {
   position: sticky;
   top: 0;
@@ -246,6 +277,7 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+/* --------------하단 네비게이션------------- */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -294,6 +326,7 @@ textarea:focus-visible {
   display: none;
 }
 
+/* --------------공통 타이포그래피 & 버튼------------- */
 .eyebrow,
 .section-kicker,
 .hero-kicker {
@@ -429,6 +462,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------토스트 알림------------- */
 .toast {
   position: fixed;
   bottom: calc(var(--nav-height) + 16px + env(safe-area-inset-bottom));
@@ -466,7 +500,7 @@ textarea:focus-visible {
   transform: translate(-50%, 12px);
 }
 
-/* Home */
+/* --------------홈------------- */
 .home-content {
   display: grid;
   gap: 18px;
@@ -898,7 +932,7 @@ textarea:focus-visible {
   grid-column: 1 / -1;
 }
 
-/* Notifications */
+/* --------------알림------------- */
 .notification-group + .notification-group {
   margin-top: 28px;
 }
@@ -990,7 +1024,7 @@ textarea:focus-visible {
   text-align: center;
 }
 
-/* Forms and simulation */
+/* --------------증여 시뮬레이션------------- */
 .simulation-input-content,
 .simulation-result-content {
   padding-top: 24px;
@@ -1182,6 +1216,7 @@ textarea:focus-visible {
   cursor: pointer;
 }
 
+/* --------------공통 안내 박스(콜아웃)------------- */
 .info-callout,
 .saving-callout,
 .isa-note,
@@ -1229,6 +1264,7 @@ textarea:focus-visible {
   cursor: pointer;
 }
 
+/* --------------상품 탭 & 시나리오 비교------------- */
 .product-tabs {
   position: sticky;
   top: 63px;
@@ -1599,7 +1635,7 @@ textarea:focus-visible {
   margin-top: 5px;
 }
 
-/* Status */
+/* --------------증여 현황------------- */
 .status-content {
   display: grid;
   gap: 14px;
@@ -2020,7 +2056,7 @@ textarea:focus-visible {
   grid-column: 1 / -1;
 }
 
-/* Chat */
+/* --------------AI 상담------------- */
 .chat-page {
   display: flex;
   height: 100dvh;
@@ -2179,8 +2215,8 @@ textarea:focus-visible {
   padding: 0 12px;
   border: 1px solid #dce4ed;
   border-radius: 17px;
-  background: #fff;
-  color: #4c6f8c;
+  background: #517594;
+  color: #fff;
   font-size: 10px;
   font-weight: 800;
   cursor: pointer;
@@ -2188,8 +2224,11 @@ textarea:focus-visible {
 
 .chat-disclaimer {
   margin-top: 18px;
+  width: 300px;
 }
-
+.chat-disclaimer p {
+  color: #1d4ed8;
+}
 .chat-composer-wrap {
   flex: none;
   padding: 9px 14px 12px;
@@ -2257,7 +2296,7 @@ textarea:focus-visible {
   color: #8a95a2;
 }
 
-/* My page */
+/* --------------마이페이지------------- */
 .my-content {
   display: grid;
   gap: 18px;
@@ -2463,7 +2502,7 @@ textarea:focus-visible {
   cursor: pointer;
 }
 
-/* Modals */
+/* --------------모달 (바텀시트)------------- */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -2679,6 +2718,7 @@ textarea:focus-visible {
   transform: translateY(30px);
 }
 
+/* --------------반응형: 작은 모바일 화면(~390px)------------- */
 @media (max-width: 390px) {
   .page-content {
     padding-right: 14px;
@@ -2728,6 +2768,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------반응형: 태블릿(760px~)------------- */
 @media (min-width: 760px) {
   .page-content {
     padding-right: 26px;
@@ -2748,6 +2789,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------반응형: 데스크탑(1024px~)------------- */
 @media (min-width: 1024px) {
   body {
     padding: 28px;
@@ -2961,6 +3003,7 @@ textarea:focus-visible {
   }
 }
 
+/* --------------접근성: 모션 감소 설정 대응------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
