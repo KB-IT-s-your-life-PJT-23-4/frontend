@@ -1574,6 +1574,14 @@ textarea:focus-visible {
   background: #fff9fa;
 }
 
+.recommended-product-card > .risk-card {
+  margin: 0 0 14px;
+  padding: 16px;
+  border: 0;
+  border-radius: 18px;
+  box-shadow: none;
+}
+
 .risk-card.deposit,
 .risk-card.insurance {
   background: #f4f9ff;

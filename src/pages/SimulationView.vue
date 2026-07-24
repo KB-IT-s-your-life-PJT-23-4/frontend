@@ -5,7 +5,6 @@ import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import RecommendedProductCard from '../components/simulation/RecommendedProductCard.vue'
 import ResultSummaryCard from '../components/simulation/ResultSummaryCard.vue'
-import RiskCard from '../components/simulation/RiskCard.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
 import SimulationInputContent from '../components/simulation/SimulationInputContent.vue'
 import SimulationScenarioSection from '../components/simulation/SimulationScenarioSection.vue'
@@ -160,8 +159,6 @@ async function savePlan() {
       <ResultSummaryCard :selected-scenario="selectedScenario" :active-product="activeProduct" />
 
       <RecommendedProductCard :active-product="activeProduct" />
-
-      <RiskCard v-if="activeProduct?.type === 'ETF'" :active-product="activeProduct" />
 
       <button
         class="primary-button full tall sticky-result-button"

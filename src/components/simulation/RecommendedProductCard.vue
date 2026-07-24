@@ -1,5 +1,6 @@
 <script setup>
 import AppIcon from '../layout/AppIcon.vue'
+import RiskCard from './RiskCard.vue'
 
 defineProps({
   activeProduct: {
@@ -31,6 +32,8 @@ defineProps({
         <strong>{{ activeProduct.period }}</strong>
       </div>
     </div>
+
+    <RiskCard v-if="activeProduct.type === 'ETF'" :active-product="activeProduct" />
 
     <div class="product-description-note">
       <AppIcon name="info" :size="18" />
