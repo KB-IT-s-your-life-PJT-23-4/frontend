@@ -17,6 +17,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  activeProductRate: {
+    type: Number,
+    required: true,
+  },
   selectedScenarioType: {
     type: String,
     required: true,
@@ -85,6 +89,12 @@ const withinLimitMaxValue = computed(() =>
 )
 
 function getFutureValue(scenario) {
+  if (props.activeProductType === 'MIXED') {
+    return Math.round(
+      scenario.postTaxAmount * (1 + props.activeProductRate / 100) ** (props.result.years ?? 10),
+    )
+  }
+
   return (
     scenario.products.find((product) => product.type === props.activeProductType)
       ?.expectedFutureValue ?? 0

@@ -39,47 +39,67 @@ defineEmits(['update:selectedFamilyId', 'amount-input', 'add-amount', 'submit'])
 <template>
   <div class="page-content simulation-input-content">
     <section class="simulation-intro">
-      <span class="section-kicker">GIFT SIMULATION</span>
       <h2>누구에게, 얼마를<br />증여할 예정인가요?</h2>
-      <p>최근 10년 이력과 공제 한도를 반영해 두 가지 전략을 비교해 드려요.</p>
     </section>
 
     <form class="simulation-form" @submit.prevent="$emit('submit')">
-      <div class="field-group">
-        <label for="family-select">수증자</label>
-        <div class="select-wrap">
+      <section class="simulation-input-step">
+        <div class="input-step-heading">
+          <span>1</span>
+          <div>
+            <h3>누구에게 증여할까요?</h3>
+          </div>
+        </div>
+
+        <label class="recipient-picker" for="family-select">
+          <span class="recipient-avatar">{{ family.name.slice(-2) }}</span>
+          <span class="recipient-copy">
+            <strong>{{ family.name }}</strong>
+            <small>{{ family.relation }}</small>
+          </span>
+          <span class="recipient-change">
+            변경
+            <AppIcon name="chevron" :size="15" />
+          </span>
           <select
             id="family-select"
             :value="selectedFamilyId"
+            aria-label="수증자 변경"
             @change="$emit('update:selectedFamilyId', Number($event.target.value))"
           >
             <option v-for="item in families" :key="item.id" :value="item.id">
               {{ item.name }} ({{ item.relation }})
             </option>
           </select>
-          <AppIcon name="chevron" :size="17" />
-        </div>
-      </div>
+        </label>
 
-      <article class="family-context-card">
-        <span class="context-avatar">{{ family.name.slice(-2) }}</span>
-        <div>
-          <strong>{{ family.name }}</strong>
-          <span>최근 10년 증여 {{ formatCompactWon(family.giftedAmount) }}</span>
+        <div class="recipient-deduction-summary">
+          <span>최근 10년 증여 이력</span>
+          <strong v-if="family.giftedAmount > 0">
+            {{ formatCompactWon(family.giftedAmount) }}을 증여했어요
+          </strong>
+          <strong v-else>아직 증여한 이력이 없어요</strong>
+          <p>
+            {{ family.giftedAmount > 0 ? '남은 공제 한도' : '사용 가능한 공제 한도' }}
+            <b>{{ formatCompactWon(remaining) }}</b>
+          </p>
         </div>
-        <div class="context-remaining">
-          <span>남은 공제</span>
-          <strong>{{ formatCompactWon(remaining) }}</strong>
-        </div>
-      </article>
+      </section>
 
-      <div class="field-group amount-field-group">
-        <label for="gift-amount">이번 증여 예정 금액</label>
+      <section class="simulation-input-step amount-step">
+        <div class="input-step-heading">
+          <span>2</span>
+          <div>
+            <h3>얼마를 증여할까요?</h3>
+          </div>
+        </div>
+
         <div class="amount-input-wrap" :class="{ invalid: errorMessage }">
           <input
             id="gift-amount"
             :value="amountText"
             inputmode="numeric"
+            aria-label="이번 증여 예정 금액"
             placeholder="0"
             @input="$emit('amount-input', $event.target.value)"
           />
@@ -91,13 +111,18 @@ defineEmits(['update:selectedFamilyId', 'amount-input', 'add-amount', 'submit'])
           <button type="button" @click="$emit('add-amount', 30000000)">+3천만원</button>
           <button type="button" @click="$emit('add-amount', 50000000)">+5천만원</button>
         </div>
-      </div>
+      </section>
 
       <aside class="info-callout">
         <AppIcon name="info" :size="20" />
-        <p>
+        <p v-if="family.giftedAmount > 0">
           {{ family.name }} 님은 현재 <strong>{{ formatCompactWon(remaining) }}</strong
           >까지 비과세 한도를 활용할 수 있어요. 한도 갱신 예정일은 {{ family.resetDate }}입니다.
+        </p>
+        <p v-else>
+          최근 10년간 증여 이력이 없어
+          <strong>{{ formatCompactWon(remaining) }}</strong
+          >의 공제 한도를 모두 활용할 수 있어요.
         </p>
       </aside>
 

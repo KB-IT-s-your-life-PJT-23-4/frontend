@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
+import RatioCard from '../components/simulation/RatioCard.vue'
 import RecommendedProductCard from '../components/simulation/RecommendedProductCard.vue'
 import RiskCard from '../components/simulation/RiskCard.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
@@ -11,7 +12,7 @@ import SimulationScenarioSection from '../components/simulation/SimulationScenar
 import { products } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 import { useAppStore } from '../stores/appStore'
-import { formatCompactWon, normalizeAmount } from '../utils/finance'
+import { formatCompactWon, futureValue, normalizeAmount } from '../utils/finance'
 
 const store = useAppStore()
 const router = useRouter()
@@ -21,6 +22,7 @@ const result = ref(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const activeProductType = ref('DEPOSIT')
+const growthRatio = ref(60)
 const selectedScenarioType = ref('TAX_OPTIMIZED')
 const showSaveModal = ref(false)
 const saving = ref(false)
@@ -39,9 +41,33 @@ const selectedScenario = computed(
     result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value) ??
     result.value?.results[0],
 )
-const activeProduct = computed(() =>
-  selectedScenario.value?.products.find((product) => product.type === activeProductType.value),
-)
+const activeProduct = computed(() => {
+  const scenario = selectedScenario.value
+  const product = scenario?.products.find((item) => item.type === activeProductType.value)
+  if (!product || product.type !== 'MIXED') return product
+
+  const depositRate = scenario.products.find((item) => item.type === 'DEPOSIT')?.rate ?? 0
+  const etfRate = scenario.products.find((item) => item.type === 'ETF')?.rate ?? 0
+  const mixedRate = Number(
+    (depositRate * ((100 - growthRatio.value) / 100) + etfRate * (growthRatio.value / 100)).toFixed(
+      2,
+    ),
+  )
+  const expectedFutureValue = futureValue(
+    scenario.postTaxAmount,
+    mixedRate,
+    result.value?.years ?? 10,
+  )
+
+  return {
+    ...product,
+    rate: mixedRate,
+    stableRatio: 100 - growthRatio.value,
+    growthRatio: growthRatio.value,
+    expectedFutureValue,
+    expectedProfit: expectedFutureValue - scenario.postTaxAmount,
+  }
+})
 
 function setAmount(value) {
   amountText.value = Number(normalizeAmount(value)).toLocaleString('ko-KR')
@@ -152,16 +178,17 @@ async function savePlan() {
         </button>
       </div>
 
+      <RatioCard v-if="activeProductType === 'MIXED'" v-model="growthRatio" />
+
       <SimulationScenarioSection
         v-model:selected-scenario-type="selectedScenarioType"
         :result="result"
         :active-product-type="activeProductType"
+        :active-product-rate="activeProduct.rate"
         :remaining="remaining"
       />
 
       <RecommendedProductCard :active-product="activeProduct" />
-
-      <RiskCard :active-product="activeProduct" />
 
       <button
         class="primary-button full tall sticky-result-button"
