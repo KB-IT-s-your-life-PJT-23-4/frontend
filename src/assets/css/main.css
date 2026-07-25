@@ -231,12 +231,9 @@ textarea:focus-visible {
 
 .brand-avatar {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   place-items: center;
-  border-radius: 50%;
-  background: var(--blue-strong);
-  color: #fff;
 }
 
 .header-title {
@@ -1130,7 +1127,9 @@ textarea:focus-visible {
   border-radius: 20px;
   background: #f4f7fa;
   cursor: pointer;
-  transition: background 160ms ease, transform 160ms ease;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
 }
 
 .recipient-picker:active {
@@ -1553,11 +1552,33 @@ textarea:focus-visible {
   width: 72px;
   border-radius: 15px 15px 5px 5px;
   background: #dfe5eb;
-  transition: height 0.4s ease;
+  transform-origin: bottom center;
+  transition:
+    height 0.4s ease,
+    background-color 0.24s ease,
+    box-shadow 0.24s ease;
 }
 
-.chart-bar.recommended {
+.chart-bar.selected {
   background: #78ade0;
+  box-shadow:
+    0 0 0 4px rgba(120, 173, 224, 0.18),
+    0 10px 18px rgba(74, 128, 180, 0.2);
+  animation: chart-bar-selected 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes chart-bar-selected {
+  0% {
+    transform: translateY(5px) scaleX(0.9) scaleY(0.96);
+  }
+
+  58% {
+    transform: translateY(-3px) scaleX(1.06) scaleY(1.03);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
 
 .chart-column > strong {
@@ -1653,12 +1674,6 @@ textarea:focus-visible {
 
 .result-summary-card:disabled {
   opacity: 1;
-}
-
-.result-summary-card.recommended {
-  border-color: #9dbddd;
-  background: #f7fbff;
-  box-shadow: 0 8px 20px rgba(57, 105, 150, 0.1);
 }
 
 .result-summary-card.selected {
@@ -1883,7 +1898,10 @@ textarea:focus-visible {
   color: var(--ink);
   background: #f9fbfd;
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
 }
 
 .mixed-product-option.selected {

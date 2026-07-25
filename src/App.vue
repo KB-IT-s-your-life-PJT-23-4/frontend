@@ -11,7 +11,7 @@ const store = useAppStore()
   <div class="desktop-shell">
     <aside class="desktop-brand-panel" aria-label="미리줌 소개">
       <div class="desktop-brand">
-        <img src="/src/assets/brand-symbol.svg" alt="" />
+        <img src="/src/assets/brand-symbol.png" alt="" />
         <div>
           <strong>미리줌</strong>
           <span>우리 가족 증여 플래너</span>

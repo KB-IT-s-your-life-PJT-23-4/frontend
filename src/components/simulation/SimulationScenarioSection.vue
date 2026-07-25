@@ -164,7 +164,7 @@ function getWithinLimitBarHeight(value) {
           <div
             class="chart-bar"
             :class="{
-              recommended: scenario.scenarioType === 'TAX_OPTIMIZED',
+              selected: selectedScenarioType === scenario.scenarioType,
             }"
             :style="{
               height: getBarHeight(scenario),
@@ -201,7 +201,6 @@ function getWithinLimitBarHeight(value) {
           :role="result.exceedsDeduction ? 'radio' : undefined"
           class="result-summary-card"
           :class="{
-            recommended: summary.scenario.scenarioType === 'TAX_OPTIMIZED',
             selected:
               result.exceedsDeduction && selectedScenarioType === summary.scenario.scenarioType,
           }"
@@ -215,9 +214,6 @@ function getWithinLimitBarHeight(value) {
         >
           <span v-if="result.exceedsDeduction" class="scenario-selection-state">
             <i aria-hidden="true" />
-            {{
-              selectedScenarioType === summary.scenario.scenarioType ? '선택된 전략' : '전략 선택'
-            }}
           </span>
 
           <div class="summary-card-heading">
