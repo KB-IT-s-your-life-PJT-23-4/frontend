@@ -39,13 +39,10 @@ const guides = {
     ],
   },
   'gift-reporting': {
-    title: '증여 신고 방법 A-Z',
-    intro: '증여받은 달의 말일부터 3개월 이내에 신고·납부해야 합니다.',
-    sections: [
-      ['1. 서류 준비', '증여계약서, 가족관계증명서, 재산 평가자료를 준비합니다.'],
-      ['2. 신고서 작성', '홈택스에서 증여세 신고서를 작성하고 첨부 서류를 제출합니다.'],
-      ['3. 세액 납부', '신고 기한 안에 세액을 납부하고 접수 내역을 보관합니다.'],
-    ],
+    title: '증여세 신고 방법 A-Z',
+    intro:
+      '증여세 신고 및 납부는 증여받은 날이 속하는 달의 말일부터 3개월 이내에 해야 해요.\n신고 기한부터 구비 서류, 분할납부까지 순서대로 안내해드릴게요.',
+    sections: [],
   },
   'non-cash-gifts': {
     title: '현금 외 증여에 대하여',
@@ -60,8 +57,10 @@ const guides = {
 const guide = computed(() => guides[route.params.slug] ?? guides.mirizoom)
 const isMirizoomGuide = computed(() => route.params.slug === 'mirizoom')
 const isTaxGuide = computed(() => route.params.slug === 'tax-brackets')
+const isGiftReportingGuide = computed(() => route.params.slug === 'gift-reporting')
 const isNonCashGuide = computed(() => route.params.slug === 'non-cash-gifts')
 const activeNonCashChapter = ref('real-estate')
+const activeReportingMethod = ref('online')
 </script>
 
 <template>
@@ -224,6 +223,215 @@ const activeNonCashChapter = ref('real-estate')
             ><i>=</i><strong>과세표준 1억 원</strong>
           </div>
           <p>과세표준 1억 원에는 세율 10%가 적용되어, 산출세액은 <b>1,000만 원</b>이에요.</p>
+        </article>
+      </section>
+      <section v-else-if="isGiftReportingGuide" class="tax-guide gift-reporting-guide">
+        <article class="tax-guide-hero">
+          <span>증여세 신고·납부 가이드</span>
+          <h2>증여세 신고,<br />언제 어떻게 하나요?</h2>
+          <p>
+            증여받은 날이 속하는 달의 말일부터 3개월 이내에 신고하고 납부해야 해요. 기한 안에
+            신고하면 세액의 3%를 공제받을 수 있어요.
+          </p>
+        </article>
+
+        <article class="guide-section">
+          <h2>신고 기한과 납부의무자</h2>
+          <div class="info-pair">
+            <div><strong>신고·납부 기한</strong><span>증여받은 달의 말일부터 3개월 이내</span></div>
+            <div>
+              <strong>납부의무자</strong
+              ><span>재산을 증여받은 사람(수증자)이 납세지 관할 세무서에 신고·납부해요.</span>
+            </div>
+          </div>
+          <div class="tax-summary">
+            <strong>기한 내 신고하면</strong><span>신고세액공제 3%</span>
+            <p>증여세 신고기한 내에 신고서를 제출하면 세액의 3%를 공제받을 수 있어요.</p>
+          </div>
+        </article>
+
+        <article class="guide-section">
+          <h2>신고 절차, 이렇게 진행돼요</h2>
+          <p>홈택스 온라인 신고와 세무서 방문 신고, 두 가지 방법 중 편한 방법을 선택하세요.</p>
+
+          <div class="chapter-tabs" role="tablist" aria-label="증여세 신고 방법">
+            <button
+              :class="{ active: activeReportingMethod === 'online' }"
+              type="button"
+              role="tab"
+              :aria-selected="activeReportingMethod === 'online'"
+              @click="activeReportingMethod = 'online'"
+            >
+              홈택스 온라인 신고
+            </button>
+            <button
+              :class="{ active: activeReportingMethod === 'visit' }"
+              type="button"
+              role="tab"
+              :aria-selected="activeReportingMethod === 'visit'"
+              @click="activeReportingMethod = 'visit'"
+            >
+              세무서 방문 신고
+            </button>
+          </div>
+
+          <ol v-show="activeReportingMethod === 'online'" class="process-list">
+            <li>
+              <b>01</b>
+              <div>
+                <strong>국세청 홈택스 접속</strong><span>홈택스 홈페이지에 로그인해요.</span>
+              </div>
+            </li>
+            <li>
+              <b>02</b>
+              <div>
+                <strong>증여세 신고서 작성</strong
+                ><span>증여세 신고 메뉴의 정기 신고에서 신고서를 작성해요.</span>
+              </div>
+            </li>
+            <li>
+              <b>03</b>
+              <div>
+                <strong>증빙 서류 제출</strong
+                ><span>관련 증빙 서류를 온라인으로 첨부해 제출해요.</span>
+              </div>
+            </li>
+          </ol>
+
+          <ol v-show="activeReportingMethod === 'visit'" class="process-list">
+            <li>
+              <b>01</b>
+              <div>
+                <strong>관할 세무서 방문</strong><span>납세지 관할 세무서를 방문해요.</span>
+              </div>
+            </li>
+            <li>
+              <b>02</b>
+              <div>
+                <strong>과세표준신고서 제출</strong
+                ><span>증여세 과세표준신고 및 자진납부계산서를 제출해요.</span>
+              </div>
+            </li>
+            <li>
+              <b>03</b>
+              <div>
+                <strong>평가·입증서류 첨부</strong
+                ><span>증여재산 평가명세서와 채무사실 입증서류를 함께 첨부해요.</span>
+              </div>
+            </li>
+          </ol>
+        </article>
+
+        <article class="guide-section">
+          <h2>신고 시 구비 서류</h2>
+          <ul class="check-list">
+            <li>가족관계증명서</li>
+            <li>이체확인증</li>
+            <li>증여세 신고서(세무서 방문 신고 시 필요)</li>
+            <li>증여재산 및 평가명세서</li>
+            <li>증여세 과세표준 신고 및 자진납부계산서</li>
+            <li>자진납부서</li>
+          </ul>
+        </article>
+
+        <article class="guide-section">
+          <h2>분할납부와 연부연납</h2>
+          <p>
+            증여세는 한 번에 납부하는 것이 원칙이지만, 세부담을 분산하고 납세 의무를 쉽게 이행할 수
+            있도록 일정 요건을 충족하면 나누어 낼 수 있어요. 2회로 나누어 내는 것을
+            <strong>분납</strong>, 장기간에 걸쳐 나누어 내는 것을 <strong>연부연납</strong>이라고
+            해요.
+          </p>
+
+          <div class="deduction-limit-card">
+            <span class="section-kicker">분납 요건</span>
+            <h2>납부세액이 1,000만 원을 초과할 때</h2>
+            <div class="deduction-limit-grid">
+              <div><span>세액 2,000만 원 이하</span><strong>1,000만 원 초과분</strong></div>
+              <div><span>세액 2,000만 원 초과</span><strong>세액의 50% 이하</strong></div>
+            </div>
+            <p class="guide-caption">
+              신고서의 '분납'란에 분할 납부할 세액을 적어 제출하면 별도 신청서 없이 분납이 완료돼요.
+            </p>
+          </div>
+
+          <div class="deduction-limit-card" style="margin-top: 12px">
+            <span class="section-kicker">연부연납 요건</span>
+            <h2>아래 조건을 모두 충족해야 해요</h2>
+            <ul class="check-list">
+              <li>
+                납부세액이 2,000만 원을 초과할 것(각 회분 분할납부세액이 1,000만 원을 초과하도록
+                기간을 정해요)
+              </li>
+              <li>연부연납 신청 세액에 상당하는 납세담보를 제공할 것</li>
+              <li>신청 기한 내에 연부연납허가신청서를 제출할 것</li>
+            </ul>
+            <div class="rate-grid">
+              <div class="emphasis">
+                <span>연부연납 가산금 이자율</span><strong>연 3.5%</strong
+                ><small>2024년 3월 22일 이후 적용</small>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="guide-section">
+          <h2>증여세 납부는 이렇게 해요</h2>
+          <ul class="check-list">
+            <li>자진납부서를 작성해 신고기한 이내에 은행이나 우체국에 직접 납부</li>
+            <li>신용카드로 납부</li>
+            <li>홈택스 등 전자납부 시스템으로 납부</li>
+          </ul>
+        </article>
+
+        <article class="tax-table-card">
+          <h2>신고·납부를 하지 않으면 생기는 가산세</h2>
+          <div class="tax-table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>구분</th>
+                  <th>가산세율</th>
+                  <th>비고</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>일반 무신고</td>
+                  <td>20%</td>
+                  <td>무신고납부세액 기준</td>
+                </tr>
+                <tr>
+                  <td>부정 무신고</td>
+                  <td>40%</td>
+                  <td>무신고납부세액 기준</td>
+                </tr>
+                <tr>
+                  <td>일반 과소신고</td>
+                  <td>10%</td>
+                  <td>과소신고납부세액 기준</td>
+                </tr>
+                <tr>
+                  <td>부정 과소신고</td>
+                  <td>40%</td>
+                  <td>과소신고납부세액 기준</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="guide-caption">
+            신고기한 내 신고하면 세액의 3%를 공제받지만, 신고하지 않거나 적게 신고하면 위 가산세를
+            추가로 부담해요.
+          </p>
+        </article>
+
+        <article class="guide-section">
+          <h2>납부까지 늦어지면?</h2>
+          <p>
+            세금을 납부하지 않거나 납부할 세액보다 적게 냈다면 납부지연가산세를 추가로 부담해요.
+            계산식은 <strong>미납·미달납부세액 × 미납기간 × 이자율(22/100,000)</strong>이며,
+            미납기간은 납부기한 다음 날부터 실제 납부일 또는 납세고지일까지예요.
+          </p>
         </article>
       </section>
       <section v-else-if="isNonCashGuide" class="non-cash-guide">

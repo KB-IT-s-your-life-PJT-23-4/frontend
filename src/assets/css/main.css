@@ -538,7 +538,7 @@ textarea:focus-visible {
 
 .hero-copy h2 {
   margin: 14px 0 10px;
-  font-size: clamp(28px, 8vw, 36px);
+  font-size: clamp(28px, 8vw, 30px);
   line-height: 1.2;
   letter-spacing: -0.06em;
 }
@@ -5355,7 +5355,8 @@ textarea:focus-visible {
 }
 
 .chapter-tabs button {
-  min-width: max-content;
+  flex: 1;
+  min-width: 0;
   padding: 10px 13px;
   border: 0;
   border-radius: 12px;
@@ -5363,6 +5364,7 @@ textarea:focus-visible {
   color: #728094;
   font-size: 12px;
   font-weight: 700;
+  text-align: center;
   cursor: pointer;
 }
 
@@ -5554,7 +5556,6 @@ textarea:focus-visible {
   }
 }
 
-/* 모바일에서도 표 전체가 카드 안에 들어오도록 고정 폭을 제거합니다. */
 .tax-table-scroll {
   overflow: visible;
 }
