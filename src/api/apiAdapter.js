@@ -3,9 +3,18 @@ import { calculateSimulation } from "../utils/finance";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
 
+function authHeaders() {
+  const token = localStorage.getItem("mirizoom-token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...options.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+      ...options.headers,
+    },
     ...options,
   });
 
@@ -70,6 +79,42 @@ export const api = {
     }
     await wait(350);
     return { giftPlans: [], message: "증여 계획이 저장되었습니다." };
+  },
+
+  // GET /api/gifts?familyId=&status= — 진행 중(DRAFT)/확정(CONFIRMED) 증여 조회
+  async listGifts({ familyId, status, size = 50 } = {}) {
+    if (!API_BASE) return [];
+    const params = new URLSearchParams();
+    if (familyId != null) params.set("familyId", familyId);
+    if (status) params.set("status", status);
+    params.set("size", size);
+    const data = await request(`/gifts?${params.toString()}`);
+    if (Array.isArray(data)) return data;
+    return data?.content ?? [];
+  },
+
+  // POST /api/gifts — 증여 등록(기본 DRAFT, 과거 이력은 CONFIRMED)
+  async createGift({ familyId, amount, giftDate, memo, status = "DRAFT" }) {
+    if (!API_BASE) return null;
+    return request("/gifts", {
+      method: "POST",
+      body: JSON.stringify({ familyId, amount, giftDate, status, memo }),
+    });
+  },
+
+  // DELETE /api/gifts/{giftId} — DRAFT 상태만 삭제 가능
+  async deleteGift(giftId) {
+    if (!API_BASE) return null;
+    return request(`/gifts/${giftId}`, { method: "DELETE" });
+  },
+
+  // PATCH /api/gifts/{giftId}/status — DRAFT → CONFIRMED 등 상태 전이
+  async updateGiftStatus(giftId, status) {
+    if (!API_BASE) return null;
+    return request(`/gifts/${giftId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
   },
 
   async askConsultation(question) {

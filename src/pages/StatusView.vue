@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import AppHeader from "../components/layout/AppHeader.vue";
 import AppIcon from "../components/layout/AppIcon.vue";
@@ -11,6 +11,7 @@ const store = useAppStore();
 const router = useRouter();
 const showAddGift = ref(false);
 const planToDelete = ref(null);
+const expandedPlanIds = ref([]);
 const giftForm = reactive({
   amount: "",
   date: new Date().toISOString().slice(0, 10),
@@ -33,33 +34,112 @@ const familyPlans = computed(() =>
 const history = computed(() =>
   store.state.giftHistory.filter((gift) => gift.familyId === family.value.id),
 );
-const completedDocuments = computed(
-  () => store.state.documents.filter((item) => item.done).length,
-);
+
+function completedDocuments(planId) {
+  return store.checkedDocumentCount(planId);
+}
+
+function isDocumentDone(planId, documentId) {
+  return store.isDocumentChecked(planId, documentId);
+}
+
+function isPlanReadyToConfirm(planId) {
+  return (
+    store.state.documents.length > 0 &&
+    completedDocuments(planId) === store.state.documents.length
+  );
+}
+
+function isPlanExpanded(planId) {
+  return expandedPlanIds.value.includes(planId);
+}
+
+function togglePlan(planId) {
+  expandedPlanIds.value = isPlanExpanded(planId)
+    ? expandedPlanIds.value.filter((id) => id !== planId)
+    : [...expandedPlanIds.value, planId];
+}
 
 function setGiftAmount(value) {
   giftForm.amount = normalizeAmount(value).toLocaleString("ko-KR");
 }
 
-function submitGift() {
+async function submitGift() {
   const numericAmount = normalizeAmount(giftForm.amount);
   if (!numericAmount || !giftForm.date) return;
-  store.addGift({
-    familyId: family.value.id,
-    amount: numericAmount,
-    date: giftForm.date.replaceAll("-", "."),
-    memo: giftForm.memo,
-  });
-  giftForm.amount = "";
-  giftForm.memo = "현금 증여";
-  showAddGift.value = false;
+  try {
+    await store.addGift({
+      familyId: family.value.id,
+      amount: numericAmount,
+      date: giftForm.date.replaceAll("-", "."),
+      memo: giftForm.memo,
+    });
+    giftForm.amount = "";
+    giftForm.memo = "현금 증여";
+    showAddGift.value = false;
+  } catch (error) {
+    store.showToast(error.message || "증여 이력을 등록하지 못했습니다.", "info");
+  }
 }
 
-function confirmDelete() {
-  if (!planToDelete.value) return;
-  store.deletePlan(planToDelete.value.id);
-  planToDelete.value = null;
+const planToConfirm = ref(null);
+const confirming = ref(false);
+
+async function confirmGift() {
+  if (!planToConfirm.value || confirming.value) return;
+  confirming.value = true;
+  try {
+    await store.confirmPlanGift(planToConfirm.value.id);
+    planToConfirm.value = null;
+  } catch (error) {
+    store.showToast(error.message || "증여 확정을 처리하지 못했습니다.", "info");
+  } finally {
+    confirming.value = false;
+  }
 }
+
+const hoveredTipKey = ref(null);
+const sampleDocument = ref(null);
+const sampleImageFailed = ref(false);
+
+function openSample(document) {
+  sampleImageFailed.value = false;
+  sampleDocument.value = document;
+}
+
+function closeSample() {
+  sampleDocument.value = null;
+}
+
+async function confirmDelete() {
+  if (!planToDelete.value) return;
+  try {
+    await store.deletePlan(planToDelete.value.id);
+    planToDelete.value = null;
+  } catch (error) {
+    store.showToast(error.message || "삭제하지 못했습니다.", "info");
+  }
+}
+
+// DB에 등록된 진행 중인 증여(status=DRAFT)와 확정 이력을 불러온다.
+const loadingGifts = ref(false);
+const loadError = ref("");
+
+async function loadGifts() {
+  if (store.isMock) return;
+  loadingGifts.value = true;
+  loadError.value = "";
+  try {
+    await store.syncGifts(family.value.id);
+  } catch (error) {
+    loadError.value = error.message || "증여 정보를 불러오지 못했습니다.";
+  } finally {
+    loadingGifts.value = false;
+  }
+}
+
+onMounted(loadGifts);
+watch(() => family.value.id, loadGifts);
 </script>
 
 <template>
@@ -110,7 +190,9 @@ function confirmDelete() {
           </h2>
           <strong>{{ familyPlans[0].productName }}</strong>
           <div class="plan-card-meta">
-            <span>예상 수익률 연 {{ familyPlans[0].rate }}%</span>
+            <span v-if="familyPlans[0].rate"
+              >예상 수익률 연 {{ familyPlans[0].rate }}%</span
+            >
             <span>{{ familyPlans[0].giftDate }} 예정</span>
           </div>
         </div>
@@ -205,57 +287,113 @@ function confirmDelete() {
               v-for="plan in familyPlans"
               :key="plan.id"
               class="ongoing-plan-item"
+              :class="{ open: isPlanExpanded(plan.id) }"
             >
-              <div>
-                <strong>{{
-                  formatCompactWon(plan.currentAmount || plan.amount)
-                }}</strong>
-                <span>증여 신고 전</span>
+              <button
+                class="ongoing-plan-summary"
+                type="button"
+                :aria-expanded="isPlanExpanded(plan.id)"
+                :aria-controls="`plan-documents-${plan.id}`"
+                @click="togglePlan(plan.id)"
+              >
+                <div>
+                  <strong>{{
+                    formatCompactWon(plan.currentAmount || plan.amount)
+                  }}</strong>
+                  <span>증여 신고 전</span>
+                </div>
+                <span class="ongoing-plan-aside">
+                  <span class="status-pill">진행 중</span>
+                  <span class="ongoing-plan-caret"
+                    ><AppIcon name="chevron" :size="16"
+                  /></span>
+                </span>
+                <p>
+                  <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과
+                  신고 서류를 미리 확인하세요.
+                </p>
+              </button>
+
+              <div
+                v-show="isPlanExpanded(plan.id)"
+                :id="`plan-documents-${plan.id}`"
+                class="plan-document-panel"
+              >
+                <div class="plan-document-heading">
+                  <div>
+                    <span class="section-kicker">CHECKLIST</span>
+                    <strong>필수 증빙 서류</strong>
+                  </div>
+                  <span class="yellow-text"
+                    >{{ completedDocuments(plan.id) }}/{{
+                      store.state.documents.length
+                    }}
+                    준비</span
+                  >
+                </div>
+                <div class="document-list">
+                  <div
+                    v-for="document in store.state.documents"
+                    :key="document.id"
+                    class="document-row"
+                    :class="{
+                      'tip-open': hoveredTipKey === `${plan.id}-${document.id}`,
+                    }"
+                    @mouseenter="hoveredTipKey = `${plan.id}-${document.id}`"
+                    @mouseleave="hoveredTipKey = null"
+                  >
+                    <button
+                      type="button"
+                      :class="{ done: isDocumentDone(plan.id, document.id) }"
+                      :aria-describedby="`document-tip-${plan.id}-${document.id}`"
+                      @click="store.toggleDocument(plan.id, document.id)"
+                    >
+                      <span class="document-icon"
+                        ><AppIcon name="document" :size="19"
+                      /></span>
+                      <span>
+                        <strong>{{ document.label }}</strong>
+                        <small>{{ document.description }}</small>
+                      </span>
+                      <span class="document-check"
+                        ><AppIcon name="check" :size="15"
+                      /></span>
+                    </button>
+                    <span
+                      :id="`document-tip-${plan.id}-${document.id}`"
+                      class="document-tooltip"
+                      role="tooltip"
+                    >
+                      <strong>{{ document.label }}</strong>
+                      {{ document.tooltip }}
+                      <button
+                        v-if="document.sampleImage"
+                        class="document-sample-button"
+                        type="button"
+                        @click="openSample(document)"
+                      >
+                        예시 보기
+                      </button>
+                    </span>
+                  </div>
+                </div>
+                <button
+                  v-if="isPlanReadyToConfirm(plan.id)"
+                  class="primary-button full confirm-gift-button"
+                  type="button"
+                  @click="planToConfirm = plan"
+                >
+                  <AppIcon name="check" :size="16" /> 증여 확정하기
+                </button>
               </div>
-              <span class="status-pill">진행 중</span>
-              <p>
-                <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과
-                신고 서류를 미리 확인하세요.
-              </p>
             </div>
           </div>
+          <p v-else-if="loadingGifts" class="empty-inline">
+            진행 중인 증여를 불러오는 중이에요.
+          </p>
+          <p v-else-if="loadError" class="empty-inline">{{ loadError }}</p>
           <p v-else class="empty-inline">현재 진행 중인 증여가 없습니다.</p>
         </article>
-      </section>
-
-      <section class="status-section document-section">
-        <div class="section-heading-row">
-          <div>
-            <span class="section-kicker">CHECKLIST</span>
-            <h2>필수 증빙 서류</h2>
-          </div>
-          <span class="yellow-text"
-            >{{ completedDocuments }}/{{
-              store.state.documents.length
-            }}
-            준비</span
-          >
-        </div>
-        <div class="document-list">
-          <button
-            v-for="document in store.state.documents"
-            :key="document.id"
-            type="button"
-            :class="{ done: document.done }"
-            @click="store.toggleDocument(document.id)"
-          >
-            <span class="document-icon"
-              ><AppIcon name="document" :size="19"
-            /></span>
-            <span>
-              <strong>{{ document.label }}</strong>
-              <small>{{ document.description }}</small>
-            </span>
-            <span class="document-check"
-              ><AppIcon name="check" :size="15"
-            /></span>
-          </button>
-        </div>
       </section>
 
       <section class="expert-card">
@@ -324,6 +462,66 @@ function confirmDelete() {
         </button>
         <button class="primary-button" type="submit" form="gift-history-form">
           등록
+        </button>
+      </template>
+    </ModalSheet>
+
+    <ModalSheet
+      :show="Boolean(planToConfirm)"
+      title="증여를 확정할까요?"
+      description="확정하면 증여 이력에 반영되고 10년 누적 증여액과 남은 공제 한도가 갱신돼요."
+      @close="planToConfirm = null"
+    >
+      <template #icon><AppIcon name="check" :size="25" /></template>
+      <aside v-if="planToConfirm" class="info-callout compact">
+        <AppIcon name="info" :size="18" />
+        <p>
+          {{ family.name }} 님에게
+          {{
+            formatCompactWon(
+              planToConfirm.currentAmount || planToConfirm.amount,
+            )
+          }}을 증여한 것으로 기록합니다. 확정 후에도 신고 기한(증여일이 속한 달
+          말일부터 3개월) 안에 세무서 제출을 마무리해 주세요.
+        </p>
+      </aside>
+      <template #actions>
+        <button
+          class="secondary-button"
+          type="button"
+          @click="planToConfirm = null"
+        >
+          취소
+        </button>
+        <button
+          class="primary-button"
+          type="button"
+          :disabled="confirming"
+          @click="confirmGift"
+        >
+          {{ confirming ? "처리 중..." : "확정하기" }}
+        </button>
+      </template>
+    </ModalSheet>
+
+    <ModalSheet
+      :show="Boolean(sampleDocument)"
+      :title="`${sampleDocument?.label ?? ''} 예시`"
+      :description="sampleDocument?.sampleCaption"
+      @close="closeSample"
+    >
+      <div class="document-sample-view">
+        <img
+          v-if="!sampleImageFailed"
+          :src="sampleDocument?.sampleImage"
+          :alt="`${sampleDocument?.label} 예시 이미지`"
+          @error="sampleImageFailed = true"
+        />
+        <p v-else class="empty-inline">예시 이미지를 준비 중이에요.</p>
+      </div>
+      <template #actions>
+        <button class="primary-button" type="button" @click="closeSample">
+          닫기
         </button>
       </template>
     </ModalSheet>
