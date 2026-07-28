@@ -4450,10 +4450,113 @@ textarea:focus-visible {
   line-height: 1.55;
 }
 
+.product-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 18px;
+  border-bottom: 1px solid #e7edf2;
+}
+
+.product-category-tabs button {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 4px 11px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 10px 10px 0 0;
+  color: #84909d;
+  background: transparent;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.product-category-tabs button::after {
+  position: absolute;
+  right: 18%;
+  bottom: -1px;
+  left: 18%;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: var(--product-tab-color);
+  content: '';
+  opacity: 0;
+  transform: scaleX(0.45);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.product-category-tabs button.active {
+  color: #27394b;
+  background: linear-gradient(
+    to bottom,
+    transparent 24%,
+    color-mix(in srgb, var(--product-tab-color) 7%, transparent)
+  );
+}
+
+.product-category-tabs button.active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.product-category-tabs span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.product-category-tabs span::before {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--product-tab-color);
+  content: '';
+  opacity: 0.48;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.product-category-tabs button.active span::before {
+  opacity: 1;
+  transform: scale(1.18);
+}
+
+.product-category-tabs small {
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: #8b98a5;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 8px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.product-category-tabs button.active small {
+  color: color-mix(in srgb, var(--product-tab-color) 78%, #304050);
+  background: #fff;
+}
+
 .product-category-list {
   display: grid;
   gap: 22px;
-  margin-top: 22px;
+  margin-top: 16px;
 }
 
 .product-category-heading {
@@ -4666,6 +4769,10 @@ textarea:focus-visible {
   grid-column: 1 / -1;
 }
 
+.selectable-product-details .product-tracking-index {
+  grid-column: 1 / -1;
+}
+
 .product-condition-list p {
   display: flex;
   margin: 0;
@@ -4675,15 +4782,30 @@ textarea:focus-visible {
   font-size: 9px;
 }
 
-.product-feature {
+.product-site-link {
+  display: flex;
   grid-column: 1 / -1;
-  margin: 0;
-  padding: 10px 11px;
-  border-radius: 12px;
-  color: #55758f;
-  background: #edf5fc;
-  font-size: 9px;
-  line-height: 1.55;
+  min-height: 36px;
+  padding: 0 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 11px;
+  color: #fff;
+  background: #486f91;
+  font-size: 10px;
+  font-weight: 500;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.product-site-link:hover {
+  background: #385f81;
+}
+
+.product-site-link:active {
+  transform: scale(0.99);
 }
 
 .filing-credit-callout {
