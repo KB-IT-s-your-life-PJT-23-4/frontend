@@ -1,8 +1,9 @@
 <script setup>
+import { computed } from 'vue'
 import ModalSheet from '../layout/ModalSheet.vue'
 import { formatWon } from '../../utils/finance'
 
-defineProps({
+const props = defineProps({
   show: {
     type: Boolean,
     default: false,
@@ -30,6 +31,23 @@ defineProps({
 })
 
 defineEmits(['close', 'save'])
+
+const productNames = computed(() =>
+  (props.activeProduct?.name ?? '')
+    .split(' · ')
+    .map((name) => name.trim())
+    .filter(Boolean),
+)
+
+const productRows = computed(() => {
+  if (productNames.value.length === 4) {
+    return [productNames.value.slice(0, 2), productNames.value.slice(2)]
+  }
+  if (productNames.value.length === 5) {
+    return [productNames.value.slice(0, 3), productNames.value.slice(3)]
+  }
+  return [productNames.value]
+})
 </script>
 
 <template>
@@ -50,7 +68,16 @@ defineEmits(['close', 'save'])
         <span>증여 금액</span><strong>{{ formatWon(result.requestedAmount) }}</strong>
       </div>
       <div>
-        <span>추천 상품</span><strong>{{ activeProduct.name }}</strong>
+        <span>추천 상품</span>
+        <strong class="save-plan-products">
+          <span
+            v-for="(productRow, rowIndex) in productRows"
+            :key="rowIndex"
+            class="save-plan-product-row"
+          >
+            <span v-for="productName in productRow" :key="productName">{{ productName }}</span>
+          </span>
+        </strong>
       </div>
     </div>
     <template #actions>
