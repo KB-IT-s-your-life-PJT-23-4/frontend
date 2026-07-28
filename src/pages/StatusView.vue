@@ -1,145 +1,158 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import AppHeader from "../components/layout/AppHeader.vue";
-import AppIcon from "../components/layout/AppIcon.vue";
-import ModalSheet from "../components/layout/ModalSheet.vue";
-import { useAppStore } from "../stores/appStore";
-import { formatCompactWon, formatWon, normalizeAmount } from "../utils/finance";
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import AppHeader from '../components/layout/AppHeader.vue'
+import AppIcon from '../components/layout/AppIcon.vue'
+import ModalSheet from '../components/layout/ModalSheet.vue'
+import { useAppStore } from '../stores/appStore'
+import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
 
-const store = useAppStore();
-const router = useRouter();
-const showAddGift = ref(false);
-const planToDelete = ref(null);
-const expandedPlanIds = ref([]);
+const store = useAppStore()
+const router = useRouter()
+const showAddGift = ref(false)
+const planToDelete = ref(null)
+const expandedPlanIds = ref([])
 const giftForm = reactive({
-  amount: "",
+  amount: '',
   date: new Date().toISOString().slice(0, 10),
-  memo: "현금 증여",
-});
+  memo: '현금 증여',
+})
 
-const family = store.selectedFamily;
+const family = store.selectedFamily
 const remaining = computed(() =>
   Math.max(0, family.value.deductionLimit - family.value.giftedAmount),
-);
+)
 const progress = computed(() =>
-  Math.min(
-    100,
-    Math.round((family.value.giftedAmount / family.value.deductionLimit) * 100),
-  ),
-);
+  Math.min(100, Math.round((family.value.giftedAmount / family.value.deductionLimit) * 100)),
+)
 const familyPlans = computed(() =>
   store.state.plans.filter((plan) => plan.familyId === family.value.id),
-);
+)
 const history = computed(() =>
   store.state.giftHistory.filter((gift) => gift.familyId === family.value.id),
-);
+)
 
 function completedDocuments(planId) {
-  return store.checkedDocumentCount(planId);
+  return store.checkedDocumentCount(planId)
 }
 
 function isDocumentDone(planId, documentId) {
-  return store.isDocumentChecked(planId, documentId);
+  return store.isDocumentChecked(planId, documentId)
 }
 
 function isPlanReadyToConfirm(planId) {
   return (
-    store.state.documents.length > 0 &&
-    completedDocuments(planId) === store.state.documents.length
-  );
+    store.state.documents.length > 0 && completedDocuments(planId) === store.state.documents.length
+  )
 }
 
 function isPlanExpanded(planId) {
-  return expandedPlanIds.value.includes(planId);
+  return expandedPlanIds.value.includes(planId)
 }
 
 function togglePlan(planId) {
   expandedPlanIds.value = isPlanExpanded(planId)
     ? expandedPlanIds.value.filter((id) => id !== planId)
-    : [...expandedPlanIds.value, planId];
+    : [...expandedPlanIds.value, planId]
 }
 
 function setGiftAmount(value) {
-  giftForm.amount = normalizeAmount(value).toLocaleString("ko-KR");
+  giftForm.amount = normalizeAmount(value).toLocaleString('ko-KR')
 }
 
 async function submitGift() {
-  const numericAmount = normalizeAmount(giftForm.amount);
-  if (!numericAmount || !giftForm.date) return;
+  const numericAmount = normalizeAmount(giftForm.amount)
+  if (!numericAmount || !giftForm.date) return
   try {
     await store.addGift({
       familyId: family.value.id,
       amount: numericAmount,
-      date: giftForm.date.replaceAll("-", "."),
+      date: giftForm.date.replaceAll('-', '.'),
       memo: giftForm.memo,
-    });
-    giftForm.amount = "";
-    giftForm.memo = "현금 증여";
-    showAddGift.value = false;
+    })
+    giftForm.amount = ''
+    giftForm.memo = '현금 증여'
+    showAddGift.value = false
   } catch (error) {
-    store.showToast(error.message || "증여 이력을 등록하지 못했습니다.", "info");
+    store.showToast(error.message || '증여 이력을 등록하지 못했습니다.', 'info')
   }
 }
 
-const planToConfirm = ref(null);
-const confirming = ref(false);
+const planToConfirm = ref(null)
+const confirming = ref(false)
 
 async function confirmGift() {
-  if (!planToConfirm.value || confirming.value) return;
-  confirming.value = true;
+  if (!planToConfirm.value || confirming.value) return
+  confirming.value = true
   try {
-    await store.confirmPlanGift(planToConfirm.value.id);
-    planToConfirm.value = null;
+    await store.confirmPlanGift(planToConfirm.value.id)
+    planToConfirm.value = null
   } catch (error) {
-    store.showToast(error.message || "증여 확정을 처리하지 못했습니다.", "info");
+    store.showToast(error.message || '증여 확정을 처리하지 못했습니다.', 'info')
   } finally {
-    confirming.value = false;
+    confirming.value = false
   }
 }
 
-const hoveredTipKey = ref(null);
-const sampleDocument = ref(null);
-const sampleImageFailed = ref(false);
+// 서류 설명 드롭다운 (증여 건 + 서류 조합으로 열림 상태 관리)
+const openedDocumentKeys = ref([])
+
+function documentKey(planId, documentId) {
+  return `${planId}-${documentId}`
+}
+
+function isDocumentOpen(planId, documentId) {
+  return openedDocumentKeys.value.includes(documentKey(planId, documentId))
+}
+
+function toggleDocumentDetail(planId, documentId) {
+  const key = documentKey(planId, documentId)
+  openedDocumentKeys.value = openedDocumentKeys.value.includes(key)
+    ? openedDocumentKeys.value.filter((item) => item !== key)
+    : [...openedDocumentKeys.value, key]
+}
+
+const sampleDocument = ref(null)
+const sampleImageFailed = ref(false)
 
 function openSample(document) {
-  sampleImageFailed.value = false;
-  sampleDocument.value = document;
+  sampleImageFailed.value = false
+  sampleDocument.value = document
 }
 
 function closeSample() {
-  sampleDocument.value = null;
+  sampleDocument.value = null
 }
 
 async function confirmDelete() {
-  if (!planToDelete.value) return;
+  if (!planToDelete.value) return
   try {
-    await store.deletePlan(planToDelete.value.id);
-    planToDelete.value = null;
+    await store.deletePlan(planToDelete.value.id)
+    planToDelete.value = null
   } catch (error) {
-    store.showToast(error.message || "삭제하지 못했습니다.", "info");
+    store.showToast(error.message || '삭제하지 못했습니다.', 'info')
   }
 }
 
 // DB에 등록된 진행 중인 증여(status=DRAFT)와 확정 이력을 불러온다.
-const loadingGifts = ref(false);
-const loadError = ref("");
+const loadingGifts = ref(false)
+const loadError = ref('')
 
 async function loadGifts() {
-  if (store.isMock) return;
-  loadingGifts.value = true;
-  loadError.value = "";
+  if (store.isMock) return
+  loadingGifts.value = true
+  loadError.value = ''
   try {
-    await store.syncGifts(family.value.id);
+    await store.syncGifts(family.value.id)
   } catch (error) {
-    loadError.value = error.message || "증여 정보를 불러오지 못했습니다.";
+    loadError.value = error.message || '증여 정보를 불러오지 못했습니다.'
   } finally {
-    loadingGifts.value = false;
+    loadingGifts.value = false
   }
 }
 
-onMounted(loadGifts);
-watch(() => family.value.id, loadGifts);
+onMounted(loadGifts)
+watch(() => family.value.id, loadGifts)
 </script>
 
 <template>
@@ -170,29 +183,19 @@ watch(() => family.value.id, loadGifts);
         <div class="active-plan-visual">
           <div class="plan-orbit" />
           <span class="plan-coin">₩</span>
-          <span class="plan-document"
-            ><AppIcon name="document" :size="31"
-          /></span>
+          <span class="plan-document"><AppIcon name="document" :size="31" /></span>
         </div>
         <div class="plan-card-copy">
           <div class="plan-card-eyebrow">
             <span>저축하며 불러요</span>
-            <button
-              type="button"
-              aria-label="계획 삭제"
-              @click="planToDelete = familyPlans[0]"
-            >
+            <button type="button" aria-label="계획 삭제" @click="planToDelete = familyPlans[0]">
               <AppIcon name="trash" :size="17" />
             </button>
           </div>
-          <h2>
-            {{ formatCompactWon(familyPlans[0].amount) }}을 준비하고 있어요
-          </h2>
+          <h2>{{ formatCompactWon(familyPlans[0].amount) }}을 준비하고 있어요</h2>
           <strong>{{ familyPlans[0].productName }}</strong>
           <div class="plan-card-meta">
-            <span v-if="familyPlans[0].rate"
-              >예상 수익률 연 {{ familyPlans[0].rate }}%</span
-            >
+            <span v-if="familyPlans[0].rate">예상 수익률 연 {{ familyPlans[0].rate }}%</span>
             <span>{{ familyPlans[0].giftDate }} 예정</span>
           </div>
         </div>
@@ -202,9 +205,7 @@ watch(() => family.value.id, loadGifts);
         <span><AppIcon name="calculator" :size="25" /></span>
         <h2>현재 저장한 증여 계획이 없어요</h2>
         <p>시뮬레이션을 돌려 우리 가족에게 맞는 계획을 만들어 보세요.</p>
-        <RouterLink class="primary-button" to="/simulation"
-          >시뮬레이션 시작하기</RouterLink
-        >
+        <RouterLink class="primary-button" to="/simulation">시뮬레이션 시작하기</RouterLink>
       </section>
 
       <section class="deduction-card">
@@ -223,9 +224,8 @@ watch(() => family.value.id, loadGifts);
           <span>한도 {{ formatWon(family.deductionLimit) }}</span>
         </div>
         <p>
-          <AppIcon name="info" :size="16" /> 추가
-          {{ formatCompactWon(remaining) }}까지 공제 한도 안에서 증여할 수
-          있어요.
+          <AppIcon name="info" :size="16" /> 추가 {{ formatCompactWon(remaining) }}까지 공제 한도
+          안에서 증여할 수 있어요.
         </p>
       </section>
 
@@ -247,9 +247,7 @@ watch(() => family.value.id, loadGifts);
         <article class="status-list-card">
           <div class="status-card-title">
             <div>
-              <span class="status-section-icon history"
-                ><AppIcon name="clock" :size="19"
-              /></span>
+              <span class="status-section-icon history"><AppIcon name="clock" :size="19" /></span>
               <strong>증여 이력</strong>
             </div>
             <span>{{ history.length }}건</span>
@@ -263,11 +261,7 @@ watch(() => family.value.id, loadGifts);
             </div>
           </div>
           <p v-else class="empty-inline">등록된 증여 이력이 없습니다.</p>
-          <button
-            class="soft-button full"
-            type="button"
-            @click="showAddGift = true"
-          >
+          <button class="soft-button full" type="button" @click="showAddGift = true">
             <AppIcon name="plus" :size="17" /> 증여 이력 추가
           </button>
         </article>
@@ -297,20 +291,16 @@ watch(() => family.value.id, loadGifts);
                 @click="togglePlan(plan.id)"
               >
                 <div>
-                  <strong>{{
-                    formatCompactWon(plan.currentAmount || plan.amount)
-                  }}</strong>
+                  <strong>{{ formatCompactWon(plan.currentAmount || plan.amount) }}</strong>
                   <span>증여 신고 전</span>
                 </div>
                 <span class="ongoing-plan-aside">
                   <span class="status-pill">진행 중</span>
-                  <span class="ongoing-plan-caret"
-                    ><AppIcon name="chevron" :size="16"
-                  /></span>
+                  <span class="ongoing-plan-caret"><AppIcon name="chevron" :size="16" /></span>
                 </span>
                 <p>
-                  <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과
-                  신고 서류를 미리 확인하세요.
+                  <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과 신고 서류를 미리
+                  확인하세요.
                 </p>
               </button>
 
@@ -325,10 +315,7 @@ watch(() => family.value.id, loadGifts);
                     <strong>필수 증빙 서류</strong>
                   </div>
                   <span class="yellow-text"
-                    >{{ completedDocuments(plan.id) }}/{{
-                      store.state.documents.length
-                    }}
-                    준비</span
+                    >{{ completedDocuments(plan.id) }}/{{ store.state.documents.length }} 준비</span
                   >
                 </div>
                 <div class="document-list">
@@ -336,36 +323,57 @@ watch(() => family.value.id, loadGifts);
                     v-for="document in store.state.documents"
                     :key="document.id"
                     class="document-row"
-                    :class="{
-                      'tip-open': hoveredTipKey === `${plan.id}-${document.id}`,
-                    }"
-                    @mouseenter="hoveredTipKey = `${plan.id}-${document.id}`"
-                    @mouseleave="hoveredTipKey = null"
+                    :class="{ open: isDocumentOpen(plan.id, document.id) }"
                   >
-                    <button
-                      type="button"
+                    <div
+                      class="document-row-head"
                       :class="{ done: isDocumentDone(plan.id, document.id) }"
-                      :aria-describedby="`document-tip-${plan.id}-${document.id}`"
-                      @click="store.toggleDocument(plan.id, document.id)"
                     >
-                      <span class="document-icon"
-                        ><AppIcon name="document" :size="19"
-                      /></span>
-                      <span>
-                        <strong>{{ document.label }}</strong>
+                      <span class="document-icon"><AppIcon name="document" :size="19" /></span>
+                      <div class="document-row-text">
+                        <button
+                          class="document-name"
+                          type="button"
+                          :aria-expanded="isDocumentOpen(plan.id, document.id)"
+                          :aria-controls="`document-detail-${plan.id}-${document.id}`"
+                          @click="toggleDocumentDetail(plan.id, document.id)"
+                        >
+                          <strong>{{ document.label }}</strong>
+                          <span class="document-name-caret"
+                            ><AppIcon name="chevron" :size="14"
+                          /></span>
+                        </button>
                         <small>{{ document.description }}</small>
-                      </span>
-                      <span class="document-check"
-                        ><AppIcon name="check" :size="15"
-                      /></span>
-                    </button>
-                    <span
-                      :id="`document-tip-${plan.id}-${document.id}`"
-                      class="document-tooltip"
-                      role="tooltip"
+                      </div>
+                      <button
+                        class="document-check-button"
+                        type="button"
+                        :aria-pressed="isDocumentDone(plan.id, document.id)"
+                        :aria-label="`${document.label} 준비 완료`"
+                        @click="store.toggleDocument(plan.id, document.id)"
+                      >
+                        <span class="document-check"><AppIcon name="check" :size="15" /></span>
+                      </button>
+                    </div>
+                    <div
+                      v-show="isDocumentOpen(plan.id, document.id)"
+                      :id="`document-detail-${plan.id}-${document.id}`"
+                      class="document-detail"
                     >
-                      <strong>{{ document.label }}</strong>
-                      {{ document.tooltip }}
+                      <p v-if="document.intro">{{ document.intro }}</p>
+                      <div
+                        v-if="document.guide"
+                        class="document-guide"
+                        :class="{ plain: document.guide.plain }"
+                      >
+                        <strong>
+                          <AppIcon v-if="!document.guide.plain" name="document" :size="15" />
+                          {{ document.guide.title }}
+                        </strong>
+                        <ol>
+                          <li v-for="step in document.guide.steps" :key="step">{{ step }}</li>
+                        </ol>
+                      </div>
                       <button
                         v-if="document.sampleImage"
                         class="document-sample-button"
@@ -374,7 +382,20 @@ watch(() => family.value.id, loadGifts);
                       >
                         예시 보기
                       </button>
-                    </span>
+                      <div v-if="document.links" class="document-link-row">
+                        <a
+                          v-for="link in document.links"
+                          :key="link.href"
+                          class="document-link"
+                          :class="{ primary: link.primary }"
+                          :href="link.href"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <AppIcon :name="link.icon" :size="15" /> {{ link.label }}
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <button
@@ -388,9 +409,7 @@ watch(() => family.value.id, loadGifts);
               </div>
             </div>
           </div>
-          <p v-else-if="loadingGifts" class="empty-inline">
-            진행 중인 증여를 불러오는 중이에요.
-          </p>
+          <p v-else-if="loadingGifts" class="empty-inline">진행 중인 증여를 불러오는 중이에요.</p>
           <p v-else-if="loadError" class="empty-inline">{{ loadError }}</p>
           <p v-else class="empty-inline">현재 진행 중인 증여가 없습니다.</p>
         </article>
@@ -402,9 +421,7 @@ watch(() => family.value.id, loadGifts);
           <h2>증여 신고가 어려우신가요?</h2>
           <p>AI 상담으로 상황을 정리하고 전문가 상담을 준비해 보세요.</p>
         </div>
-        <RouterLink class="primary-button" to="/chat"
-          >전문가 상담 준비</RouterLink
-        >
+        <RouterLink class="primary-button" to="/chat">전문가 상담 준비</RouterLink>
       </section>
     </div>
 
@@ -414,11 +431,7 @@ watch(() => family.value.id, loadGifts);
       description="신고된 과거 이력을 기록하면 공제 한도를 더 정확히 계산할 수 있어요."
       @close="showAddGift = false"
     >
-      <form
-        id="gift-history-form"
-        class="modal-form"
-        @submit.prevent="submitGift"
-      >
+      <form id="gift-history-form" class="modal-form" @submit.prevent="submitGift">
         <label>
           <span>증여 금액</span>
           <div class="modal-input-affix">
@@ -446,23 +459,12 @@ watch(() => family.value.id, loadGifts);
         </label>
         <aside class="info-callout compact">
           <AppIcon name="info" :size="18" />
-          <p>
-            등록한 금액은 최근 10년 누적 증여액과 남은 공제 한도에 바로
-            반영됩니다.
-          </p>
+          <p>등록한 금액은 최근 10년 누적 증여액과 남은 공제 한도에 바로 반영됩니다.</p>
         </aside>
       </form>
       <template #actions>
-        <button
-          class="secondary-button"
-          type="button"
-          @click="showAddGift = false"
-        >
-          취소
-        </button>
-        <button class="primary-button" type="submit" form="gift-history-form">
-          등록
-        </button>
+        <button class="secondary-button" type="button" @click="showAddGift = false">취소</button>
+        <button class="primary-button" type="submit" form="gift-history-form">등록</button>
       </template>
     </ModalSheet>
 
@@ -477,29 +479,15 @@ watch(() => family.value.id, loadGifts);
         <AppIcon name="info" :size="18" />
         <p>
           {{ family.name }} 님에게
-          {{
-            formatCompactWon(
-              planToConfirm.currentAmount || planToConfirm.amount,
-            )
-          }}을 증여한 것으로 기록합니다. 확정 후에도 신고 기한(증여일이 속한 달
-          말일부터 3개월) 안에 세무서 제출을 마무리해 주세요.
+          {{ formatCompactWon(planToConfirm.currentAmount || planToConfirm.amount) }}을 증여한
+          것으로 기록합니다. 확정 후에도 신고 기한(증여일이 속한 달 말일부터 3개월) 안에 세무서
+          제출을 마무리해 주세요.
         </p>
       </aside>
       <template #actions>
-        <button
-          class="secondary-button"
-          type="button"
-          @click="planToConfirm = null"
-        >
-          취소
-        </button>
-        <button
-          class="primary-button"
-          type="button"
-          :disabled="confirming"
-          @click="confirmGift"
-        >
-          {{ confirming ? "처리 중..." : "확정하기" }}
+        <button class="secondary-button" type="button" @click="planToConfirm = null">취소</button>
+        <button class="primary-button" type="button" :disabled="confirming" @click="confirmGift">
+          {{ confirming ? '처리 중...' : '확정하기' }}
         </button>
       </template>
     </ModalSheet>
@@ -520,9 +508,7 @@ watch(() => family.value.id, loadGifts);
         <p v-else class="empty-inline">예시 이미지를 준비 중이에요.</p>
       </div>
       <template #actions>
-        <button class="primary-button" type="button" @click="closeSample">
-          닫기
-        </button>
+        <button class="primary-button" type="button" @click="closeSample">닫기</button>
       </template>
     </ModalSheet>
 
@@ -535,16 +521,8 @@ watch(() => family.value.id, loadGifts);
     >
       <template #icon><AppIcon name="trash" :size="25" /></template>
       <template #actions>
-        <button
-          class="secondary-button"
-          type="button"
-          @click="planToDelete = null"
-        >
-          취소
-        </button>
-        <button class="danger-button" type="button" @click="confirmDelete">
-          삭제하기
-        </button>
+        <button class="secondary-button" type="button" @click="planToDelete = null">취소</button>
+        <button class="danger-button" type="button" @click="confirmDelete">삭제하기</button>
       </template>
     </ModalSheet>
   </div>

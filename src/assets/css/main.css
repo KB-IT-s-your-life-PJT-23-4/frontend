@@ -2527,81 +2527,188 @@ textarea:focus-visible {
   font-size: 10px;
 }
 
-.document-row {
-  position: relative;
-}
-
-.document-tooltip {
-  position: absolute;
-  z-index: 5;
-  bottom: calc(100% + 8px);
-  left: 12px;
-  right: 12px;
+.document-row-head {
   display: grid;
-  padding: 10px 12px;
+  grid-template-columns: auto 1fr auto;
+  width: 100%;
+  padding: 12px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e4e9ef;
+  border-radius: 15px;
+  background: #fff;
+  text-align: left;
+}
+
+.document-row-head.done {
+  background: #f7faff;
+}
+
+.document-row-text {
+  display: grid;
+  min-width: 0;
   gap: 3px;
-  border-radius: 12px;
-  background: #253345;
-  box-shadow: 0 10px 24px rgb(21 32 45 / 22%);
-  color: #eef3f9;
-  font-size: 10px;
-  line-height: 1.6;
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.16s ease,
-    transform 0.16s ease;
-  transform: translateY(4px);
 }
 
-.document-tooltip strong {
-  color: var(--kb-yellow);
+/* 서류명 + 화살표 = 설명 드롭다운 토글 */
+.document-list .document-name {
+  display: inline-flex;
+  width: auto;
+  padding: 0;
+  align-items: center;
+  justify-self: start;
+  gap: 4px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.document-name-caret {
+  display: grid;
+  place-items: center;
+  color: #92a2b3;
+  transition: transform 0.18s ease;
+}
+
+.document-row.open .document-name-caret {
+  color: #5d6f81;
+  transform: rotate(90deg);
+}
+
+.document-list .document-check-button {
+  display: grid;
+  width: auto;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.document-detail {
+  display: grid;
+  margin-top: 6px;
+  padding: 11px 13px;
+  justify-items: start;
+  gap: 8px;
+  border-radius: 13px;
+  background: #eef3f9;
+  color: #4a5a6b;
   font-size: 11px;
+  line-height: 1.65;
 }
 
-.document-tooltip::after {
-  position: absolute;
-  top: 100%;
-  left: 26px;
-  border: 6px solid transparent;
-  border-top-color: #253345;
-  content: "";
+.document-detail p {
+  margin: 0;
 }
 
-.document-tooltip::before {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  height: 8px;
-  content: "";
+.document-detail > p,
+.document-detail > .document-guide,
+.document-detail > .document-link-row {
+  justify-self: stretch;
 }
 
-.document-row:hover .document-tooltip,
-.document-row.tip-open .document-tooltip,
-.document-row:has(button:focus-visible) .document-tooltip {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
+.document-guide {
+  display: grid;
+  padding: 13px 14px;
+  gap: 10px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.document-guide.plain {
+  padding: 0;
+  background: none;
+}
+
+.document-guide strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.document-guide.plain strong {
+  color: #5d6f81;
+}
+
+.document-guide ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 7px;
+  list-style: none;
+  counter-reset: guide-step;
+}
+
+.document-guide li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 6px;
+  counter-increment: guide-step;
+}
+
+.document-guide li::before {
+  color: var(--blue-strong);
+  font-weight: 600;
+  content: counter(guide-step) '.';
+}
+
+.document-link-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.document-link {
+  display: inline-flex;
+  min-height: 40px;
+  padding: 0 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  background: #e3e9f1;
+  color: #3f4f61;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.document-link:hover {
+  background: #d7e0ea;
+}
+
+.document-link.primary {
+  background: var(--blue-strong);
+  color: #fff;
+}
+
+.document-link.primary:hover {
+  background: #24527a;
 }
 
 .document-list .document-sample-button {
   display: inline-flex;
-  justify-self: start;
   width: auto;
-  margin-top: 6px;
-  padding: 4px 10px;
-  border: 1px solid rgb(255 255 255 / 26%);
+  padding: 5px 12px;
+  align-items: center;
+  border: 1px solid #d5c07a;
   border-radius: 999px;
-  background: rgb(255 255 255 / 10%);
-  color: var(--kb-yellow);
+  background: #fff;
+  color: #8a6b00;
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .document-list .document-sample-button:hover {
-  background: rgb(255 255 255 / 18%);
+  border-color: var(--kb-yellow);
+  background: #fffaea;
 }
 
 .confirm-gift-button {
@@ -2641,24 +2748,6 @@ textarea:focus-visible {
   gap: 8px;
 }
 
-.document-list button {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  width: 100%;
-  padding: 12px;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #e4e9ef;
-  border-radius: 15px;
-  background: #fff;
-  text-align: left;
-  cursor: pointer;
-}
-
-.document-list button.done {
-  background: #f7faff;
-}
-
 .document-icon {
   display: grid;
   width: 36px;
@@ -2667,11 +2756,6 @@ textarea:focus-visible {
   border-radius: 11px;
   background: #eaf2ff;
   color: #6688a5;
-}
-
-.document-list button > span:nth-child(2) {
-  display: grid;
-  gap: 3px;
 }
 
 .document-list small {
@@ -2689,7 +2773,7 @@ textarea:focus-visible {
   color: transparent;
 }
 
-.document-list button.done .document-check {
+.document-row-head.done .document-check {
   border-color: var(--kb-yellow);
   background: var(--kb-yellow);
   color: #594600;

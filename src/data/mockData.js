@@ -49,9 +49,30 @@ export const initialState = {
     },
   ],
   giftHistory: [
-    { id: 101, familyId: 1, date: '2024.01.15', type: '현금', amount: 10000000, status: 'COMPLETED' },
-    { id: 102, familyId: 1, date: '2023.05.20', type: '현금', amount: 10000000, status: 'COMPLETED' },
-    { id: 103, familyId: 2, date: '2025.05.20', type: '현금', amount: 10000000, status: 'COMPLETED' },
+    {
+      id: 101,
+      familyId: 1,
+      date: '2024.01.15',
+      type: '현금',
+      amount: 10000000,
+      status: 'COMPLETED',
+    },
+    {
+      id: 102,
+      familyId: 1,
+      date: '2023.05.20',
+      type: '현금',
+      amount: 10000000,
+      status: 'COMPLETED',
+    },
+    {
+      id: 103,
+      familyId: 2,
+      date: '2025.05.20',
+      type: '현금',
+      amount: 10000000,
+      status: 'COMPLETED',
+    },
   ],
   plans: [
     {
@@ -111,17 +132,23 @@ export const initialState = {
       id: 'family',
       label: '가족관계증명서',
       description: '수증자와의 관계 증명',
-      tooltip:
+      intro:
         '증여자와 수증자가 어떤 가족 관계인지 확인하는 서류예요. 관계에 따라 공제 한도(직계존비속 5,000만원, 배우자 6억원 등)가 달라지기 때문에 꼭 필요해요. 주민센터나 정부24에서 발급할 수 있어요.',
-      sampleImage: '/samples/family-certificate.jpeg',
-      sampleCaption: '주민센터·정부24에서 발급한 가족관계증명서 예시',
     },
     {
       id: 'transfer',
       label: '이체확인증',
       description: '실제 자금 이동 기록',
-      tooltip:
-        '증여한 돈이 실제로 오갔다는 것을 증명하는 서류예요. 계좌 이체 내역이 없으면 증여 사실 자체를 인정받기 어려울 수 있어요. 거래 은행 앱이나 창구에서 발급받으세요.',
+      guide: {
+        title: 'KB스타뱅킹 발급 방법',
+        steps: [
+          'KB스타뱅킹 앱 실행 > 로그인',
+          '홈 화면 > 해당 계좌의 [더보기] 메뉴',
+          '[이체결과조회(이체확인증)] 선택',
+          '증여 대금 송금 [조회기간] 입력',
+          '[조회] 클릭 > 이체확인증 저장 및 발급',
+        ],
+      },
       sampleImage: '/samples/transfer-confirmation.png',
       sampleCaption: '은행에서 발급한 이체확인증 예시',
     },
@@ -129,10 +156,21 @@ export const initialState = {
       id: 'tax',
       label: '증여세 신고서',
       description: '세무서 제출용 서식',
-      tooltip:
-        '증여받은 재산과 계산한 세액을 신고하는 서식이에요. 증여일이 속한 달의 말일부터 3개월 안에 내야 하고, 늦으면 가산세가 붙어요. 홈택스에서 전자신고할 수 있어요.',
-      sampleImage: '/samples/gift-tax-return.jpeg',
-      sampleCaption: '증여세 과세표준 신고 및 자진납부 계산서 예시',
+      intro:
+        '홈택스(PC/모바일) 또는 세무서에서 직접 작성할 수 있습니다. 증여재산 평가 명세서와 함께 제출해야 합니다.',
+      guide: {
+        title: '신고 서류 작성 순서',
+        plain: true,
+        steps: ['증여재산 및 평가명세서', '증여세 과세표준 신고 및 자진납부계산서', '자진 납부서'],
+      },
+      links: [
+        {
+          label: '한 번에 작성하기',
+          icon: 'external',
+          primary: true,
+          href: 'https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&tmIdx=41&tm2lIdx=4107000000&tm3lIdx=4107010000',
+        },
+      ],
     },
   ],
   // 증여(gift) 건별 서류 체크 상태: { [giftId]: ['family', 'transfer'] }
