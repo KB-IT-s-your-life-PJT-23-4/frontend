@@ -17,15 +17,25 @@ const props = defineProps({
   },
 })
 
-const allocationItems = computed(() =>
-  Object.entries(props.allocation)
-    .map(([type, ratio]) => ({
-      type,
-      ratio,
-      ...PRODUCT_TYPE_META[type],
-    }))
-    .filter((item) => item.ratio > 0),
-)
+const allocationItems = computed(() => {
+  let cursor = 0
+
+  return Object.entries(props.allocation)
+    .filter(([, ratio]) => ratio > 0)
+    .map(([type, ratio]) => {
+      const midpoint = cursor + ratio / 2
+      const angle = ((midpoint * 3.6 - 90) * Math.PI) / 180
+      cursor += ratio
+
+      return {
+        type,
+        ratio,
+        labelX: 50 + Math.sin(angle) * 40,
+        labelY: 50 - Math.cos(angle) * 40,
+        ...PRODUCT_TYPE_META[type],
+      }
+    })
+})
 
 const donutStyle = computed(() => {
   let cursor = 0
@@ -50,6 +60,21 @@ const donutStyle = computed(() => {
 
     <div class="portfolio-donut-layout">
       <div
+        v-for="item in allocationItems"
+        :key="item.type"
+        class="portfolio-orbit-label"
+        :style="{
+          '--label-x': `${item.labelX}%`,
+          '--label-y': `${item.labelY}%`,
+          '--segment-color': item.color,
+        }"
+      >
+        <span class="portfolio-color" />
+        <span>{{ item.label }}</span>
+        <strong>{{ item.ratio }}%</strong>
+      </div>
+
+      <div
         class="portfolio-donut"
         :style="donutStyle"
         role="img"
@@ -58,14 +83,6 @@ const donutStyle = computed(() => {
         <div class="portfolio-donut-center">
           <span>예상 금액</span>
           <strong>{{ formatCompactWon(expectedFutureValue) }}</strong>
-        </div>
-      </div>
-
-      <div class="portfolio-legend">
-        <div v-for="item in allocationItems" :key="item.type">
-          <span class="portfolio-color" :style="{ background: item.color }" />
-          <span>{{ item.label }}</span>
-          <strong>{{ item.ratio }}%</strong>
         </div>
       </div>
     </div>
