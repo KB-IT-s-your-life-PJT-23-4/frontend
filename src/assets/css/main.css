@@ -2565,7 +2565,7 @@ textarea:focus-visible {
   left: 26px;
   border: 6px solid transparent;
   border-top-color: #253345;
-  content: "";
+  content: '';
 }
 
 .document-tooltip::before {
@@ -2574,7 +2574,7 @@ textarea:focus-visible {
   left: 0;
   right: 0;
   height: 8px;
-  content: "";
+  content: '';
 }
 
 .document-row:hover .document-tooltip,
