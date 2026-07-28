@@ -1533,6 +1533,14 @@ textarea:focus-visible {
   background: #f6f8fb;
 }
 
+.scenario-legacy-insert {
+  margin-top: 14px;
+}
+
+.scenario-legacy-insert .result-summary-section {
+  margin: 14px 0 0;
+}
+
 .chart-column {
   display: grid;
   width: 118px;
@@ -1734,8 +1742,16 @@ textarea:focus-visible {
   gap: 10px;
 }
 
+.summary-card-title-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+}
+
 .summary-card-heading h2 {
-  margin: 4px 0 0;
+  min-width: 0;
+  margin: 0;
   font-size: 17px;
   line-height: 1.35;
   letter-spacing: -0.04em;
@@ -4075,7 +4091,18 @@ textarea:focus-visible {
   border-color: #517b9f;
 }
 
+.result-summary-card.selected .strategy-radio {
+  border-color: #517b9f;
+}
+
 .strategy-choice-card.selected .strategy-radio i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #517b9f;
+}
+
+.result-summary-card.selected .strategy-radio i {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -4739,6 +4766,28 @@ textarea:focus-visible {
 }
 
 @media (max-width: 430px) {
+  .scenario-chart {
+    min-height: 190px;
+    padding: 14px 12px 8px;
+    gap: 18px;
+  }
+
+  .chart-column {
+    width: 96px;
+  }
+
+  .chart-bar {
+    width: 56px;
+  }
+
+  .scenario-legacy-insert .result-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-legacy-insert .result-summary-card .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .strategy-card-grid {
     grid-template-columns: 1fr;
   }

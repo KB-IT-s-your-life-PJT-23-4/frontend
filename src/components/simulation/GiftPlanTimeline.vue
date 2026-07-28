@@ -3,6 +3,10 @@ import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { formatCompactWon } from '../../utils/finance'
 
+const MIN_BAR_HEIGHT = 42
+const MAX_BAR_HEIGHT = 145
+const MAX_WITHIN_LIMIT_BAR_HEIGHT = 130
+
 const props = defineProps({
   result: {
     type: Object,
@@ -23,6 +27,9 @@ const emit = defineEmits(['update:selectedScenarioType'])
 const visibleScenarios = computed(() =>
   props.result.exceedsDeduction ? props.result.results : [props.result.results[0]],
 )
+const comparedScenarios = computed(() =>
+  props.result.results.filter((item) => ['IMMEDIATE', 'TAX_OPTIMIZED'].includes(item.scenarioType)),
+)
 const scenario = computed(
   () =>
     props.result.results.find((item) => item.scenarioType === props.selectedScenarioType) ??
@@ -30,6 +37,34 @@ const scenario = computed(
 )
 const expectedFutureValue = computed(
   () => props.futureValues[scenario.value.scenarioType] ?? scenario.value.estimatedFutureValue,
+)
+const comparisonValueRange = computed(() =>
+  getValueRange(comparedScenarios.value.map((item) => getFutureValue(item))),
+)
+const scenarioSummaries = computed(() =>
+  visibleScenarios.value.map((item) => ({
+    scenario: item,
+    futureValue: getFutureValue(item),
+  })),
+)
+const withinLimitChartItems = computed(() => {
+  if (props.result.exceedsDeduction || !scenarioSummaries.value[0]) return []
+
+  return [
+    {
+      key: 'principal',
+      label: '운용 원금',
+      value: scenarioSummaries.value[0].scenario.postTaxAmount,
+    },
+    {
+      key: 'future',
+      label: `${props.result.years}년 후 예상`,
+      value: scenarioSummaries.value[0].futureValue,
+    },
+  ]
+})
+const withinLimitMaxValue = computed(() =>
+  Math.max(...withinLimitChartItems.value.map((item) => item.value), 1),
 )
 
 function parseDate(value) {
@@ -48,6 +83,35 @@ const outsideSchedule = computed(() =>
 
 function getFutureValue(item) {
   return props.futureValues[item.scenarioType] ?? item.estimatedFutureValue
+}
+
+function getValueRange(values) {
+  const validValues = values.filter((value) => Number.isFinite(value) && value > 0)
+  if (!validValues.length) return { min: 0, max: 0 }
+
+  return {
+    min: Math.min(...validValues),
+    max: Math.max(...validValues),
+  }
+}
+
+function getNormalizedValue(value, range) {
+  if (value <= 0) return 0
+  if (range.max === range.min) return 0.5
+  return (value - range.min) / (range.max - range.min)
+}
+
+function getBarHeight(item) {
+  const value = getFutureValue(item)
+  if (value <= 0) return '0px'
+
+  const ratio = getNormalizedValue(value, comparisonValueRange.value)
+  return `${MIN_BAR_HEIGHT + ratio * (MAX_BAR_HEIGHT - MIN_BAR_HEIGHT)}px`
+}
+
+function getWithinLimitBarHeight(value) {
+  if (value <= 0) return '0px'
+  return `${(value / withinLimitMaxValue.value) * MAX_WITHIN_LIMIT_BAR_HEIGHT}px`
 }
 
 function getPosition(item) {
@@ -70,6 +134,107 @@ function getPosition(item) {
         }}
       </h2>
     </header>
+
+    <section class="scenario-legacy-insert" aria-label="증여 전략 결과 비교">
+      <div
+        v-if="result.exceedsDeduction"
+        class="scenario-chart"
+        :aria-label="`시나리오별 ${result.years}년 후 예상 자산 비교`"
+      >
+        <div
+          v-for="chartScenario in comparedScenarios"
+          :key="chartScenario.scenarioType"
+          class="chart-column"
+        >
+          <div class="chart-value">
+            {{ formatCompactWon(getFutureValue(chartScenario)) }}
+          </div>
+          <div
+            class="chart-bar"
+            :class="{
+              selected: selectedScenarioType === chartScenario.scenarioType,
+            }"
+            :style="{ height: getBarHeight(chartScenario) }"
+          />
+          <strong>
+            {{ chartScenario.scenarioType === 'IMMEDIATE' ? '지금 전액' : '공제 우선' }}
+          </strong>
+        </div>
+      </div>
+
+      <section class="result-summary-section">
+        <div
+          class="result-summary-grid"
+          :class="{ single: !result.exceedsDeduction }"
+          :role="result.exceedsDeduction ? 'radiogroup' : undefined"
+          :aria-label="result.exceedsDeduction ? '상세 증여 전략 선택' : undefined"
+        >
+          <button
+            v-for="summary in scenarioSummaries"
+            :key="`legacy-${summary.scenario.scenarioType}`"
+            type="button"
+            class="result-summary-card"
+            :class="{
+              selected:
+                result.exceedsDeduction && selectedScenarioType === summary.scenario.scenarioType,
+            }"
+            :role="result.exceedsDeduction ? 'radio' : undefined"
+            :aria-checked="
+              result.exceedsDeduction
+                ? selectedScenarioType === summary.scenario.scenarioType
+                : undefined
+            "
+            :disabled="!result.exceedsDeduction"
+            @click="emit('update:selectedScenarioType', summary.scenario.scenarioType)"
+          >
+            <div class="summary-card-heading">
+              <div>
+                <div class="summary-card-title-row">
+                  <span class="strategy-radio"><i /></span>
+                  <h2>
+                    {{
+                      result.exceedsDeduction ? summary.scenario.scenarioName : '한도 내 증여 결과'
+                    }}
+                  </h2>
+                </div>
+                <span class="scenario-description">
+                  {{
+                    result.exceedsDeduction
+                      ? summary.scenario.description
+                      : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
+                  }}
+                </span>
+              </div>
+              <span class="tax-chip">
+                예상 세금 {{ formatCompactWon(summary.scenario.estimatedPayableTax) }}
+              </span>
+            </div>
+
+            <div
+              v-if="!result.exceedsDeduction"
+              class="within-result-chart"
+              :aria-label="`운용 원금과 ${result.years}년 후 예상 금액 비교`"
+            >
+              <div
+                v-for="chartItem in withinLimitChartItems"
+                :key="chartItem.key"
+                class="within-result-chart-column"
+              >
+                <div class="within-result-chart-value">
+                  {{ formatCompactWon(chartItem.value) }}
+                </div>
+                <div
+                  class="within-result-chart-bar"
+                  :class="{ future: chartItem.key === 'future' }"
+                  :style="{ height: getWithinLimitBarHeight(chartItem.value) }"
+                />
+                <strong>{{ chartItem.label }}</strong>
+              </div>
+            </div>
+          </button>
+        </div>
+      </section>
+    </section>
 
     <div
       class="strategy-card-grid"
