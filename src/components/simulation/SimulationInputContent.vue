@@ -1,8 +1,9 @@
 <script setup>
+import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { formatCompactWon } from '../../utils/finance'
 
-defineProps({
+const props = defineProps({
   families: {
     type: Array,
     required: true,
@@ -31,9 +32,34 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  investmentYears: {
+    type: Number,
+    default: 10,
+  },
+  donorPaysTax: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-defineEmits(['update:selectedFamilyId', 'amount-input', 'add-amount', 'submit'])
+const peerAverageGiftAmount = computed(() => {
+  if (Number.isFinite(props.family.peerAverageGiftAmount)) {
+    return props.family.peerAverageGiftAmount
+  }
+
+  const birthYear = Number(String(props.family.birthDate ?? '').slice(0, 4))
+  const age = Number.isFinite(birthYear) ? new Date().getFullYear() - birthYear : 0
+  return age < 19 ? 18000000 : age < 30 ? 30000000 : 42000000
+})
+
+defineEmits([
+  'update:selectedFamilyId',
+  'update:investmentYears',
+  'update:donorPaysTax',
+  'amount-input',
+  'add-amount',
+  'submit',
+])
 </script>
 
 <template>
@@ -74,15 +100,27 @@ defineEmits(['update:selectedFamilyId', 'amount-input', 'add-amount', 'submit'])
         </label>
 
         <div class="recipient-deduction-summary">
-          <span>최근 10년 증여 이력</span>
-          <strong v-if="family.giftedAmount > 0">
-            {{ formatCompactWon(family.giftedAmount) }}을 증여했어요
-          </strong>
-          <strong v-else>아직 증여한 이력이 없어요</strong>
-          <p>
-            {{ family.giftedAmount > 0 ? '남은 공제 한도' : '사용 가능한 공제 한도' }}
-            <b>{{ formatCompactWon(remaining) }}</b>
-          </p>
+          <div class="recipient-history-row">
+            <div>
+              <span>최근 10년 증여 이력</span>
+              <strong v-if="family.giftedAmount > 0">
+                {{ formatCompactWon(family.giftedAmount) }}
+              </strong>
+              <strong v-else>이력 없음</strong>
+            </div>
+            <div>
+              <span>남은 공제 한도</span>
+              <strong>{{ formatCompactWon(remaining) }}</strong>
+            </div>
+          </div>
+          <div class="peer-average-card">
+            <span class="peer-average-icon"><AppIcon name="chart" :size="17" /></span>
+            <div>
+              <span>비슷한 나이대는 평균적으로</span>
+              <strong>{{ formatCompactWon(peerAverageGiftAmount) }}을 증여했어요</strong>
+              <small>서비스 시연을 위한 데모 통계예요.</small>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -110,6 +148,97 @@ defineEmits(['update:selectedFamilyId', 'amount-input', 'add-amount', 'submit'])
           <button type="button" @click="$emit('add-amount', 10000000)">+1천만원</button>
           <button type="button" @click="$emit('add-amount', 30000000)">+3천만원</button>
           <button type="button" @click="$emit('add-amount', 50000000)">+5천만원</button>
+        </div>
+      </section>
+
+      <section class="simulation-input-step period-step">
+        <div class="input-step-heading">
+          <span>3</span>
+          <div>
+            <h3>얼마 동안 운용할까요?</h3>
+            <p>기간에 맞춰 상품 비중과 예상 금액을 계산해요.</p>
+          </div>
+        </div>
+
+        <div class="period-control">
+          <div class="period-value">
+            <span>희망 운용 기간</span>
+            <label>
+              <input
+                :value="investmentYears"
+                type="number"
+                min="1"
+                max="20"
+                aria-label="희망 운용 기간"
+                @input="
+                  $emit(
+                    'update:investmentYears',
+                    Math.min(20, Math.max(1, Number($event.target.value) || 1)),
+                  )
+                "
+              />
+              <b>년</b>
+            </label>
+          </div>
+          <input
+            class="period-slider"
+            :value="investmentYears"
+            type="range"
+            min="1"
+            max="20"
+            step="1"
+            aria-label="운용 기간 조절"
+            :style="{ '--period-ratio': `${((investmentYears - 1) / 19) * 100}%` }"
+            @input="$emit('update:investmentYears', Number($event.target.value))"
+          />
+          <div class="period-scale" aria-hidden="true">
+            <span>1년</span>
+            <span>10년</span>
+            <span>20년</span>
+          </div>
+        </div>
+
+        <aside v-if="investmentYears >= 10" class="long-term-note">
+          <AppIcon name="sparkles" :size="18" />
+          <p>
+            10년 이상 장기 운용 조건으로 저축보험을 포함해 비교해 드릴게요.
+            실제 비과세 적용 여부는 상품별 요건을 확인해야 해요.
+          </p>
+        </aside>
+      </section>
+
+      <section class="simulation-input-step tax-payer-step">
+        <div class="input-step-heading">
+          <span>4</span>
+          <div>
+            <h3>증여세는 누가 준비할까요?</h3>
+            <p>세금 대납 여부까지 반영해 실제 필요한 금액을 계산해요.</p>
+          </div>
+        </div>
+
+        <div class="tax-payer-options" role="radiogroup" aria-label="증여세 납부 주체">
+          <button
+            type="button"
+            role="radio"
+            :aria-checked="!donorPaysTax"
+            :class="{ selected: !donorPaysTax }"
+            @click="$emit('update:donorPaysTax', false)"
+          >
+            <span class="tax-option-check"><i /></span>
+            <strong>받는 분이 납부</strong>
+            <small>증여 금액에서 예상 세금을 준비해요.</small>
+          </button>
+          <button
+            type="button"
+            role="radio"
+            :aria-checked="donorPaysTax"
+            :class="{ selected: donorPaysTax }"
+            @click="$emit('update:donorPaysTax', true)"
+          >
+            <span class="tax-option-check"><i /></span>
+            <strong>주는 분이 함께 준비</strong>
+            <small>대납 세금도 추가 증여로 보아 계산해요.</small>
+          </button>
         </div>
       </section>
 

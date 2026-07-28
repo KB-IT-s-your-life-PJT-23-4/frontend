@@ -1,31 +1,37 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
-import RatioCard from '../components/simulation/RatioCard.vue'
-import RecommendedProductCard from '../components/simulation/RecommendedProductCard.vue'
-import RiskCard from '../components/simulation/RiskCard.vue'
+import GiftPlanTimeline from '../components/simulation/GiftPlanTimeline.vue'
+import PortfolioDonutCard from '../components/simulation/PortfolioDonutCard.vue'
+import ProductSelectionPanel from '../components/simulation/ProductSelectionPanel.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
 import SimulationInputContent from '../components/simulation/SimulationInputContent.vue'
 import SimulationScenarioSection from '../components/simulation/SimulationScenarioSection.vue'
 import { products } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 import { useAppStore } from '../stores/appStore'
-import { formatCompactWon, futureValue, normalizeAmount } from '../utils/finance'
+import {
+  calculatePortfolioValue,
+  formatCompactWon,
+  formatWon,
+  normalizeAmount,
+} from '../utils/finance'
 
 const store = useAppStore()
 const router = useRouter()
 const selectedFamilyId = ref(store.state.selectedFamilyId)
 const amountText = ref('')
+const investmentYears = ref(10)
+const donorPaysTax = ref(false)
 const result = ref(null)
 const loading = ref(false)
 const errorMessage = ref('')
-const activeProductType = ref('DEPOSIT')
-const growthRatio = ref(60)
 const selectedScenarioType = ref('TAX_OPTIMIZED')
 const showSaveModal = ref(false)
 const saving = ref(false)
+const selectedProducts = reactive({})
 
 const family = computed(
   () =>
@@ -41,33 +47,48 @@ const selectedScenario = computed(
     result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value) ??
     result.value?.results[0],
 )
-const activeProduct = computed(() => {
-  const scenario = selectedScenario.value
-  const product = scenario?.products.find((item) => item.type === activeProductType.value)
-  if (!product || product.type !== 'MIXED') return product
-
-  const depositRate = scenario.products.find((item) => item.type === 'DEPOSIT')?.rate ?? 0
-  const etfRate = scenario.products.find((item) => item.type === 'ETF')?.rate ?? 0
-  const mixedRate = Number(
-    (depositRate * ((100 - growthRatio.value) / 100) + etfRate * (growthRatio.value / 100)).toFixed(
-      2,
-    ),
+const portfolioAllocation = computed(() => selectedScenario.value?.portfolioAllocation ?? {})
+const futureValues = computed(() => {
+  if (!result.value) return {}
+  return Object.fromEntries(
+    result.value.results.map((scenario) => [
+      scenario.scenarioType,
+      calculatePortfolioValue({
+        schedule: scenario.giftSchedule,
+        allocation: scenario.portfolioAllocation,
+        selectedProducts,
+        years: result.value.years,
+      }),
+    ]),
   )
-  const expectedFutureValue = futureValue(
-    scenario.postTaxAmount,
-    mixedRate,
-    result.value?.years ?? 10,
-  )
-
-  return {
-    ...product,
-    rate: mixedRate,
-    stableRatio: 100 - growthRatio.value,
-    growthRatio: growthRatio.value,
-    expectedFutureValue,
-    expectedProfit: expectedFutureValue - scenario.postTaxAmount,
-  }
 })
+const selectedFutureValue = computed(
+  () => futureValues.value[selectedScenario.value?.scenarioType] ?? 0,
+)
+const weightedPortfolioRate = computed(() =>
+  Object.entries(portfolioAllocation.value).reduce(
+    (total, [type, ratio]) => total + (selectedProducts[type]?.rate ?? 0) * (ratio / 100),
+    0,
+  ),
+)
+const selectedProductSummary = computed(() =>
+  Object.entries(portfolioAllocation.value)
+    .filter(([, ratio]) => ratio > 0)
+    .map(([type]) => selectedProducts[type]?.name)
+    .filter(Boolean)
+    .join(' · '),
+)
+
+function initializeSelectedProducts() {
+  const types = ['DEPOSIT', 'SAVINGS', 'ETF', 'INSURANCE']
+  types.forEach((type) => {
+    selectedProducts[type] = products
+      .filter((product) => product.type === type)
+      .sort((a, b) => b.rate - a.rate)[0]
+  })
+}
+
+initializeSelectedProducts()
 
 function setAmount(value) {
   amountText.value = Number(normalizeAmount(value)).toLocaleString('ko-KR')
@@ -89,7 +110,8 @@ async function runSimulation() {
     result.value = await api.runSimulation({
       family: family.value,
       amount: amount.value,
-      years: 10,
+      years: investmentYears.value,
+      donorPaysTax: donorPaysTax.value,
     })
     selectedScenarioType.value = result.value.exceedsDeduction ? 'TAX_OPTIMIZED' : 'IMMEDIATE'
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -105,8 +127,12 @@ function resetSimulation() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+function selectProduct(type, product) {
+  selectedProducts[type] = product
+}
+
 async function savePlan() {
-  if (!selectedScenario.value || !activeProduct.value) return
+  if (!selectedScenario.value) return
   saving.value = true
   try {
     await api.saveGiftPlan(selectedScenario.value.resultId)
@@ -121,10 +147,10 @@ async function savePlan() {
       giftDate: selectedScenario.value.deferredGiftAmount
         ? selectedScenario.value.deferredGiftDate
         : today,
-      productName: activeProduct.value.name,
-      productType: activeProduct.value.type,
-      rate: activeProduct.value.rate,
-      tax: selectedScenario.value.giftTax,
+      productName: selectedProductSummary.value,
+      productType: 'PORTFOLIO',
+      rate: Number(weightedPortfolioRate.value.toFixed(2)),
+      tax: selectedScenario.value.estimatedPayableTax,
       status: 'PLANNED',
     })
     showSaveModal.value = false
@@ -148,8 +174,12 @@ async function savePlan() {
       :remaining="remaining"
       :error-message="errorMessage"
       :loading="loading"
+      :investment-years="investmentYears"
+      :donor-pays-tax="donorPaysTax"
       @amount-input="setAmount"
       @add-amount="addAmount"
+      @update:investment-years="investmentYears = $event"
+      @update:donor-pays-tax="donorPaysTax = $event"
       @submit="runSimulation"
     />
 
@@ -161,34 +191,54 @@ async function savePlan() {
         <h2>
           {{ family.name }} 님께<br />{{ formatCompactWon(result.requestedAmount) }}을 증여한다면
         </h2>
-        <p>세금과 운용 시점을 함께 고려한 결과예요.</p>
+        <p>증여 시점과 {{ result.years }}년의 운용 흐름을 함께 계산했어요.</p>
+        <div class="result-condition-chips">
+          <span><AppIcon name="clock" :size="15" /> {{ result.years }}년 운용</span>
+          <span>
+            <AppIcon name="wallet" :size="15" />
+            {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
+          </span>
+        </div>
       </section>
-
-      <div class="product-tabs" role="tablist" aria-label="추천 상품 유형">
-        <button
-          v-for="product in products"
-          :key="product.type"
-          type="button"
-          role="tab"
-          :aria-selected="activeProductType === product.type"
-          :class="{ active: activeProductType === product.type }"
-          @click="activeProductType = product.type"
-        >
-          {{ product.label }}
-        </button>
-      </div>
-
-      <RatioCard v-if="activeProductType === 'MIXED'" v-model="growthRatio" />
 
       <SimulationScenarioSection
         v-model:selected-scenario-type="selectedScenarioType"
         :result="result"
-        :active-product-type="activeProductType"
-        :active-product-rate="activeProduct.rate"
-        :remaining="remaining"
+        :future-values="futureValues"
       />
 
-      <RecommendedProductCard :active-product="activeProduct" />
+      <GiftPlanTimeline
+        v-if="selectedScenario"
+        :scenario="selectedScenario"
+        :end-date="result.endDate"
+        :years="result.years"
+        :expected-future-value="selectedFutureValue"
+      />
+
+      <PortfolioDonutCard
+        v-if="selectedScenario"
+        :allocation="portfolioAllocation"
+        :expected-future-value="selectedFutureValue"
+        :years="result.years"
+      />
+
+      <ProductSelectionPanel
+        :products="products"
+        :allocation="portfolioAllocation"
+        :selected-products="selectedProducts"
+        @select="selectProduct"
+      />
+
+      <aside v-if="selectedScenario" class="filing-credit-callout">
+        <span class="filing-credit-icon"><AppIcon name="document" :size="21" /></span>
+        <div>
+          <span class="section-kicker">신고세액공제 3%</span>
+          <h2>기한 안에 신고하면 약 {{ formatWon(selectedScenario.filingTaxCredit) }}을 아낄 수 있어요</h2>
+          <p>
+            증여받은 날이 속하는 달의 말일부터 3개월 이내 신고할 때를 기준으로 계산했어요.
+          </p>
+        </div>
+      </aside>
 
       <button
         class="primary-button full tall sticky-result-button"
@@ -205,7 +255,11 @@ async function savePlan() {
       :selected-scenario="selectedScenario"
       :family="family"
       :result="result"
-      :active-product="activeProduct"
+      :active-product="{
+        name: selectedProductSummary,
+        type: 'PORTFOLIO',
+        rate: weightedPortfolioRate,
+      }"
       :saving="saving"
       @close="showSaveModal = false"
       @save="savePlan"
