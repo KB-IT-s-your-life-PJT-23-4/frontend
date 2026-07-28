@@ -24,6 +24,7 @@
  * 반응형: 태블릿(760px~)
  * 반응형: 데스크탑(1024px~)
  * 접근성: 모션 감소 설정 대응
+ * 홈 화면 카드뉴스
  */
 
 /* --------------폰트 정의------------- */
@@ -655,7 +656,6 @@ textarea:focus-visible {
 }
 
 .quick-card,
-.overview-card,
 .consult-card,
 .notification-preview,
 .profile-summary-card,
@@ -726,47 +726,6 @@ textarea:focus-visible {
   padding: 8px 2px 0;
 }
 
-.family-tabs,
-.family-switcher {
-  display: flex;
-  width: max-content;
-  max-width: 100%;
-  padding: 4px;
-  gap: 4px;
-  overflow-x: auto;
-  border: 1px solid #e0e7f1;
-  border-radius: 18px;
-  background: #eef3fb;
-  scrollbar-width: none;
-}
-
-.family-tab,
-.family-switcher button {
-  min-width: 82px;
-  padding: 9px 15px;
-  border: 0;
-  border-radius: 14px;
-  background: transparent;
-  color: #748192;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.family-tab.active,
-.family-switcher button.active {
-  background: var(--kb-yellow);
-  color: #3e3300;
-  box-shadow: 0 4px 10px rgba(210, 164, 0, 0.2);
-}
-
-.overview-card {
-  margin-top: 12px;
-  padding: 20px;
-  border-radius: var(--radius-md);
-}
-
-.overview-topline,
 .deduction-card-heading,
 .summary-card-heading,
 .risk-card-top {
@@ -776,15 +735,11 @@ textarea:focus-visible {
   gap: 14px;
 }
 
-.overview-topline > div:first-child,
 .deduction-card-heading > div {
   display: grid;
   gap: 5px;
 }
 
-.overview-topline span,
-.overview-labels,
-.overview-grid span,
 .deduction-card-heading span,
 .metric-grid span,
 .product-metrics span,
@@ -794,68 +749,76 @@ textarea:focus-visible {
   font-size: 11px;
 }
 
-.overview-topline strong,
 .deduction-card-heading h2 {
   margin: 0;
   font-size: 24px;
   letter-spacing: -0.05em;
 }
-
-.progress-badge {
+.guide-card-grid {
   display: grid;
-  min-width: 52px;
-  height: 32px;
-  padding: 0 10px;
-  place-items: center;
-  border-radius: 16px;
-  background: #edf4ff;
-  color: var(--blue-strong);
-  font-size: 14px;
-  font-weight: 500;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
-
-.progress-track {
-  width: 100%;
-  overflow: hidden;
-  border-radius: 10px;
-  background: #edf0f4;
-}
-
-.progress-track.large {
-  height: 9px;
-  margin-top: 17px;
-}
-
-.progress-track span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--kb-yellow);
-}
-
-.overview-labels {
+.guide-card {
   display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
+  align-items: center;
+  gap: 16px;
+  min-height: 112px;
+  padding: 22px 24px;
+  border: 1px solid #e8e9ef;
+  border-radius: 18px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
-
-.overview-grid {
+.guide-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(40, 43, 58, 0.09);
+}
+.guide-card-icon {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 18px;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
 }
-
-.overview-grid > div {
+.guide-card-icon.purple {
+  background: #f0eaff;
+  color: #7446d9;
+}
+.guide-card-icon.yellow {
+  background: #fff5d8;
+  color: #bb7b00;
+}
+.guide-card-icon.green {
+  background: #e3f7ed;
+  color: #188a52;
+}
+.guide-card-icon.blue {
+  background: #e6f1ff;
+  color: #2874c9;
+}
+.guide-card-copy {
   display: grid;
   gap: 7px;
-  padding: 14px;
-  border-radius: 14px;
-  background: #f5f8fd;
+  min-width: 0;
 }
-
-.overview-grid strong {
-  font-size: 15px;
+.guide-card-copy strong {
+  font-size: 17px;
+}
+.guide-card-copy > span {
+  color: #6b7080;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.guide-card-chevron {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: #989dac;
 }
 
 .notification-preview-list {
@@ -3551,6 +3514,85 @@ textarea:focus-visible {
   .nav-label-short {
     display: inline;
   }
+  .guide-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .guide-card {
+    display: flex;
+    min-height: 104px;
+    padding: 18px;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid rgba(225, 231, 239, 0.92);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .guide-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .guide-card-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 14px;
+  }
+
+  .guide-card-icon.purple {
+    background: #f0eaff;
+    color: #7446d9;
+  }
+
+  .guide-card-icon.yellow {
+    background: #fff5d8;
+    color: #bb7b00;
+  }
+
+  .guide-card-icon.green {
+    background: #e3f7ed;
+    color: #188a52;
+  }
+
+  .guide-card-icon.blue {
+    background: #e6f1ff;
+    color: #2874c9;
+  }
+
+  .guide-card-copy {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .guide-card-copy strong {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .guide-card-copy > span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .guide-card-chevron {
+    flex: 0 0 auto;
+    margin-left: auto;
+    color: #989dac;
+  }
 }
 
 /* --------------반응형: 태블릿(760px~)------------- */
@@ -3571,6 +3613,32 @@ textarea:focus-visible {
   .overview-grid,
   .metric-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+  .guide-card-grid {
+    gap: 14px;
+  }
+
+  .guide-card {
+    min-height: 116px;
+    padding: 22px 24px;
+    gap: 16px;
+  }
+
+  .guide-card-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .guide-card-copy {
+    gap: 7px;
+  }
+
+  .guide-card-copy strong {
+    font-size: 17px;
+  }
+
+  .guide-card-copy > span {
+    font-size: 14px;
   }
 }
 
@@ -3785,6 +3853,22 @@ textarea:focus-visible {
   .toast {
     bottom: 36px;
     left: calc(50% + 165px);
+  }
+  .guide-overview {
+    grid-column: 1 / -1;
+  }
+
+  .guide-card-grid {
+    gap: 16px;
+  }
+
+  .guide-card {
+    min-height: 124px;
+    padding: 24px 26px;
+  }
+
+  .guide-card-copy strong {
+    font-size: 18px;
   }
 }
 
@@ -4823,5 +4907,719 @@ textarea:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* --------------홈 화면 카드뉴스------------- */
+
+.guide-detail-content {
+  max-width: 760px;
+  padding-top: 40px;
+  padding-bottom: 72px;
+}
+.back-link {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.back-link :deep(svg) {
+  transform: rotate(180deg);
+}
+.guide-detail-content h1 {
+  margin: 10px 0 12px;
+  font-size: clamp(28px, 5vw, 42px);
+}
+.guide-intro {
+  margin: 0;
+  color: #626879;
+  font-size: 17px;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.guide-sections,
+.mirizoom-guide {
+  display: grid;
+  gap: 14px;
+  margin: 34px 0;
+}
+.guide-section {
+  padding: 23px;
+  border: 1px solid #e8e9ef;
+  border-radius: 16px;
+  background: #fff;
+}
+.guide-section h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.guide-section p {
+  margin: 0;
+  color: #626879;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.guide-section p + p {
+  margin-top: 18px;
+}
+.guide-highlight-card {
+  padding: 26px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #173e61, #2e638e);
+  color: #fff;
+}
+.guide-highlight-label {
+  color: #ffd93d;
+  font-size: 12px;
+  font-weight: 700;
+}
+.guide-highlight-card h2 {
+  margin: 10px 0 18px;
+  font-size: 27px;
+  line-height: 1.3;
+  letter-spacing: -0.05em;
+}
+.guide-highlight-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+  line-height: 1.75;
+}
+.guide-highlight-card p + p {
+  margin-top: 14px;
+}
+.guide-highlight-card strong {
+  color: #fff2a6;
+}
+.guide-flow-heading {
+  padding: 17px 4px 4px;
+}
+.guide-flow-heading h2 {
+  margin: 5px 0 7px;
+  font-size: 23px;
+}
+.guide-flow-heading p {
+  margin: 0;
+  color: #6b7080;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.guide-step-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+  list-style: none;
+  counter-reset: steps;
+}
+.guide-step-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  padding: 20px;
+  gap: 14px;
+  border: 1px solid #e4e9f0;
+  border-radius: 18px;
+  background: #fff;
+}
+.guide-step-number {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: #fff5cf;
+  color: #886600;
+  font-size: 12px;
+  font-weight: 700;
+}
+.guide-step-card h3 {
+  margin: 4px 0 8px;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.guide-step-card p {
+  margin: 0;
+  color: #626879;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.guide-step-card p + p {
+  margin-top: 14px;
+}
+.guide-tip {
+  display: grid;
+  margin-top: 15px;
+  padding: 13px;
+  gap: 5px;
+  border-radius: 13px;
+  background: #f1f7ff;
+  color: #55738e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.guide-tip strong {
+  color: #346388;
+}
+.tax-choice-list {
+  display: grid;
+  gap: 8px;
+}
+.tax-choice-list p {
+  display: grid;
+  padding: 12px;
+  gap: 4px;
+  border-radius: 12px;
+  background: #f7f9fc;
+}
+.tax-choice-list strong {
+  color: #344f69;
+  font-size: 13px;
+}
+.tax-choice-list span {
+  color: #626879;
+  font-size: 12px;
+  line-height: 1.55;
+}
+@media (max-width: 390px) {
+  .guide-highlight-card,
+  .guide-step-card {
+    padding: 18px;
+  }
+  .guide-highlight-card h2 {
+    font-size: 24px;
+  }
+  .guide-step-card {
+    gap: 11px;
+  }
+  .guide-step-card h3 {
+    font-size: 15px;
+  }
+}
+@media (min-width: 760px) {
+  .guide-highlight-card {
+    padding: 32px;
+  }
+  .guide-step-card {
+    padding: 24px;
+  }
+  .guide-step-list {
+    gap: 14px;
+  }
+}
+.non-cash-guide {
+  display: grid;
+  gap: 14px;
+  margin: 34px 0;
+}
+.guide-disclaimer {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff8df;
+  color: #7a6739;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.asset-hero {
+  padding: 26px;
+  border-radius: 22px;
+  color: #fff;
+}
+.asset-hero.real-estate {
+  background: linear-gradient(135deg, #495c73, #7890a7);
+}
+.asset-hero.grandparent {
+  background: linear-gradient(135deg, #755457, #aa7478);
+}
+.asset-hero.stock {
+  background: linear-gradient(135deg, #215f66, #45968c);
+}
+.asset-hero span {
+  color: #fff3a6;
+  font-size: 12px;
+  font-weight: 700;
+}
+.asset-hero h2 {
+  margin: 9px 0 15px;
+  font-size: 27px;
+  line-height: 1.28;
+  letter-spacing: -0.05em;
+}
+.asset-hero p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.tax-summary {
+  display: grid;
+  margin-top: 17px;
+  padding: 15px;
+  gap: 5px;
+  border-radius: 14px;
+  background: #f2f7fb;
+}
+.tax-summary strong {
+  color: #345a7c;
+  font-size: 13px;
+}
+.tax-summary > span {
+  color: #172231;
+  font-size: 18px;
+  font-weight: 700;
+}
+.tax-summary p {
+  font-size: 12px;
+}
+.process-list {
+  display: grid;
+  margin: 16px 0 0;
+  padding: 0;
+  gap: 13px;
+  list-style: none;
+}
+.process-list li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 11px;
+}
+.process-list b {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px;
+  color: #886600;
+  background: #fff5cf;
+  font-size: 10px;
+}
+.process-list div {
+  display: grid;
+  gap: 4px;
+}
+.process-list strong {
+  font-size: 14px;
+}
+.process-list span {
+  color: #626879;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.check-list {
+  display: grid;
+  margin: 14px 0 0;
+  padding: 0;
+  gap: 8px;
+  list-style: none;
+}
+.check-list li {
+  padding-left: 20px;
+  color: #526174;
+  font-size: 13px;
+  line-height: 1.55;
+  position: relative;
+}
+.check-list li::before {
+  position: absolute;
+  left: 0;
+  color: #25845a;
+  content: '✓';
+  font-weight: 700;
+}
+.rate-grid,
+.info-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 16px 0;
+  gap: 9px;
+}
+.rate-grid > div,
+.info-pair > div {
+  display: grid;
+  padding: 14px;
+  gap: 5px;
+  border-radius: 14px;
+  background: #f5f8fb;
+}
+.rate-grid .emphasis {
+  background: #fff5d8;
+}
+.rate-grid span,
+.info-pair span {
+  color: #647286;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.rate-grid strong {
+  font-size: 20px;
+}
+.rate-grid small {
+  color: #687687;
+  font-size: 10px;
+  line-height: 1.55;
+}
+.info-pair strong {
+  color: #345a7c;
+  font-size: 13px;
+}
+.calculation-card {
+  display: grid;
+  margin-top: 14px;
+  overflow: hidden;
+  border: 1px solid #ecdca5;
+  border-radius: 15px;
+}
+.calculation-card p {
+  display: grid;
+  margin: 0;
+  padding: 14px;
+  gap: 4px;
+  background: #fffdf5;
+}
+.calculation-card p + p {
+  border-top: 1px solid #eee5c7;
+}
+.calculation-card span {
+  color: #7b714f;
+  font-size: 11px;
+}
+.calculation-card strong {
+  color: #526174;
+  font-size: 13px;
+}
+.calculation-card b {
+  color: #725b11;
+  font-size: 15px;
+}
+.calculation-card .result {
+  background: #fff5cf;
+}
+.calculation-card .result b {
+  font-size: 19px;
+}
+.guide-caption {
+  margin-top: 11px !important;
+  color: #87909d !important;
+  font-size: 11px !important;
+  line-height: 1.55 !important;
+}
+@media (max-width: 390px) {
+  .asset-hero,
+  .guide-section {
+    padding: 18px;
+  }
+  .asset-hero h2 {
+    font-size: 24px;
+  }
+  .rate-grid,
+  .info-pair {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 760px) {
+  .asset-hero {
+    padding: 32px;
+  }
+  .non-cash-guide {
+    gap: 16px;
+  }
+}
+.stock-guide,
+.grandparent-guide {
+  display: grid;
+  gap: 14px;
+}
+
+.noncash-chapter {
+  display: grid;
+  gap: 14px;
+}
+
+.stock-guide {
+  order: 2;
+}
+
+.grandparent-guide {
+  order: 3;
+}
+
+.chapter-tabs {
+  display: flex;
+  padding: 4px;
+  gap: 4px;
+  overflow-x: auto;
+  border: 1px solid #dfe6ef;
+  border-radius: 16px;
+  background: #eef3f8;
+  scrollbar-width: none;
+}
+
+.chapter-tabs button {
+  min-width: max-content;
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #728094;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chapter-tabs button.active {
+  background: var(--surface);
+  color: var(--blue-strong);
+  box-shadow: 0 3px 9px rgba(42, 62, 86, 0.12);
+}
+
+.tax-guide {
+  display: grid;
+  gap: 14px;
+  margin: 34px 0;
+}
+
+.tax-guide-hero,
+.deduction-limit-card,
+.tax-example-card,
+.tax-table-card {
+  padding: 23px;
+  border-radius: 20px;
+}
+
+.tax-guide-hero {
+  background: linear-gradient(135deg, #173e61, #3c719b);
+  color: #fff;
+}
+
+.tax-guide-hero > span {
+  color: #ffe887;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tax-guide-hero h2 {
+  margin: 9px 0 12px;
+  font-size: 27px;
+  line-height: 1.3;
+  letter-spacing: -0.05em;
+}
+.tax-guide-hero p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.tax-table-card,
+.tax-example-card {
+  border: 1px solid #e4e9f0;
+  background: #fff;
+}
+.tax-table-card h2,
+.deduction-limit-card h2,
+.tax-example-card h2 {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.tax-table-scroll {
+  overflow-x: auto;
+}
+.tax-table-card table {
+  width: 100%;
+  min-width: 430px;
+  border-spacing: 0;
+  font-size: 12px;
+  text-align: left;
+}
+.tax-table-card th {
+  padding: 12px 13px;
+  background: #edf4fb;
+  color: #496a87;
+  font-weight: 700;
+}
+.tax-table-card th:first-child {
+  border-radius: 10px 0 0 10px;
+}
+.tax-table-card th:last-child {
+  border-radius: 0 10px 10px 0;
+}
+.tax-table-card td {
+  padding: 13px;
+  border-bottom: 1px solid #edf0f4;
+  color: #526174;
+  line-height: 1.45;
+}
+.tax-table-card td:nth-child(2) {
+  color: #2d638f;
+  font-weight: 700;
+}
+.tax-table-card td:nth-child(3) {
+  color: #7a6b45;
+}
+
+.deduction-limit-card {
+  background: #fff6d7;
+}
+.deduction-limit-card .section-kicker {
+  color: #8b6d13;
+}
+.deduction-limit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.deduction-limit-grid > div {
+  display: grid;
+  padding: 15px;
+  gap: 5px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.68);
+}
+.deduction-limit-grid span,
+.deduction-limit-grid small {
+  color: #786f5c;
+  font-size: 11px;
+}
+.deduction-limit-grid strong {
+  color: #564409;
+  font-size: 19px;
+}
+
+.tax-example-card > .section-kicker {
+  color: #3a719a;
+}
+.tax-example-card ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+  list-style: none;
+}
+.tax-example-card li {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 11px;
+}
+.tax-example-card li > b {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e9f2fc;
+  color: #386b91;
+  font-size: 11px;
+}
+.tax-example-card li div {
+  display: grid;
+  gap: 4px;
+}
+.tax-example-card li strong {
+  font-size: 14px;
+}
+.tax-example-card li span {
+  color: #6b7887;
+  font-size: 12px;
+}
+.tax-example-card li em {
+  color: #235d87;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+@media (max-width: 390px) {
+  .tax-guide-hero,
+  .deduction-limit-card,
+  .tax-example-card,
+  .tax-table-card {
+    padding: 18px;
+  }
+  .tax-guide-hero h2 {
+    font-size: 24px;
+  }
+  .deduction-limit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 760px) {
+  .tax-guide {
+    gap: 16px;
+  }
+  .tax-guide-hero,
+  .deduction-limit-card,
+  .tax-example-card,
+  .tax-table-card {
+    padding: 30px;
+  }
+}
+
+/* 모바일에서도 표 전체가 카드 안에 들어오도록 고정 폭을 제거합니다. */
+.tax-table-scroll {
+  overflow: visible;
+}
+
+.tax-table-card table {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.tax-table-card th,
+.tax-table-card td {
+  padding: 11px 7px;
+  word-break: keep-all;
+}
+
+.tax-table-card th:nth-child(1),
+.tax-table-card td:nth-child(1) {
+  width: 46%;
+}
+.tax-table-card th:nth-child(2),
+.tax-table-card td:nth-child(2) {
+  width: 20%;
+}
+.tax-table-card th:nth-child(3),
+.tax-table-card td:nth-child(3) {
+  width: 34%;
+}
+
+.tax-short-example {
+  display: flex;
+  margin: 0 0 12px;
+  padding: 15px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  border-radius: 14px;
+  background: #f2f7fc;
+  color: #526174;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.tax-short-example b,
+.tax-short-example strong {
+  color: #285f88;
+}
+
+.tax-short-example i {
+  color: #8a98a8;
+  font-style: normal;
+}
+
+.tax-example-card > p {
+  margin: 0;
+  color: #637184;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+@media (max-width: 390px) {
+  .tax-table-card th,
+  .tax-table-card td {
+    padding: 10px 5px;
+    font-size: 11px;
   }
 }
