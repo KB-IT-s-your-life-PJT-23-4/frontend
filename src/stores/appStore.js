@@ -123,11 +123,14 @@ function deleteSimulation(simulationId) {
 
 function addFamily({ name, relation, birthDate }) {
   const id = Math.max(0, ...state.families.map((item) => item.id)) + 1
+  const birthYear = Number(birthDate.slice(0, 4))
+  const age = new Date().getFullYear() - birthYear
   state.families.push({
     id,
     name,
     relation,
     birthDate: birthDate.replaceAll('-', '.'),
+    peerAverageGiftAmount: age < 19 ? 18000000 : age < 30 ? 30000000 : 42000000,
     deductionLimit: 50000000,
     giftedAmount: 0,
     resetDate: '미정',

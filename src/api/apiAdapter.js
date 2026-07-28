@@ -45,7 +45,7 @@ function consultationFallback(question) {
 export const api = {
   isMock: !API_BASE,
 
-  async runSimulation({ family, amount, years = 10 }) {
+  async runSimulation({ family, amount, years = 10, donorPaysTax = false }) {
     if (API_BASE) {
       return request("/simulations", {
         method: "POST",
@@ -53,11 +53,12 @@ export const api = {
           familyId: family.id,
           amount,
           investmentPeriodYears: years,
+          donorPaysTax,
         }),
       });
     }
     await wait(650);
-    return calculateSimulation({ amount, family, products, years });
+    return calculateSimulation({ amount, family, products, years, donorPaysTax });
   },
 
   async saveGiftPlan(resultId, memo = "미리줌에서 저장한 증여 계획") {
