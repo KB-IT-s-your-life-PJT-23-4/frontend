@@ -4649,7 +4649,8 @@ textarea:focus-visible {
 }
 
 .timeline-key-metrics {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
   margin-top: 16px;
   padding-top: 14px;
   gap: 0;
@@ -4658,12 +4659,13 @@ textarea:focus-visible {
 
 .timeline-key-metrics > div {
   display: grid;
-  min-width: 128px;
+  min-width: 0;
+  justify-items: center;
   gap: 4px;
+  text-align: center;
 }
 
 .timeline-key-metrics > div + div {
-  margin-left: 22px;
   padding-left: 22px;
   border-left: 1px solid #e2e9ef;
 }
@@ -5411,11 +5413,9 @@ textarea:focus-visible {
 
   .timeline-key-metrics > div {
     min-width: 0;
-    flex: 1;
   }
 
   .timeline-key-metrics > div + div {
-    margin-left: 14px;
     padding-left: 14px;
   }
 
