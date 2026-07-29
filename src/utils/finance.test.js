@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { calculateGiftTax, calculateSimulation, futureValue } from './finance'
+import {
+  calculateGiftTax,
+  calculateSimulation,
+  futureValue,
+  getPortfolioAllocation,
+  getPortfolioAllocations,
+} from './finance'
 
 const family = {
   deductionLimit: 50000000,
@@ -31,5 +37,14 @@ describe('증여 계산', () => {
   it('복리 예상 자산을 계산한다', () => {
     expect(futureValue(10000000, 3, 10)).toBe(13439164)
   })
-})
 
+  it('투자 성향별 포트폴리오 비중의 합은 100%이다', () => {
+    Object.values(getPortfolioAllocations(10)).forEach((allocation) => {
+      expect(Object.values(allocation).reduce((sum, ratio) => sum + ratio, 0)).toBe(100)
+    })
+  })
+
+  it('기존 대표 포트폴리오는 균형형 비중을 사용한다', () => {
+    expect(getPortfolioAllocation(10)).toEqual(getPortfolioAllocations(10).BALANCED)
+  })
+})

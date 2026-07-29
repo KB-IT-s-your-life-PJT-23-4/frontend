@@ -15,6 +15,7 @@ import {
   calculatePortfolioValue,
   formatCompactWon,
   formatWon,
+  getPortfolioAllocations,
   normalizeAmount,
 } from '../utils/finance'
 
@@ -28,6 +29,7 @@ const result = ref(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const selectedScenarioType = ref('TAX_OPTIMIZED')
+const selectedPortfolioType = ref('BALANCED')
 const showSaveModal = ref(false)
 const saving = ref(false)
 const selectedProducts = reactive({})
@@ -46,7 +48,15 @@ const selectedScenario = computed(
     result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value) ??
     result.value?.results[0],
 )
-const portfolioAllocation = computed(() => selectedScenario.value?.portfolioAllocation ?? {})
+const portfolioAllocations = computed(() =>
+  result.value ? getPortfolioAllocations(result.value.years) : {},
+)
+const portfolioAllocation = computed(
+  () =>
+    portfolioAllocations.value[selectedPortfolioType.value] ??
+    selectedScenario.value?.portfolioAllocation ??
+    {},
+)
 const futureValues = computed(() => {
   if (!result.value) return {}
   return Object.fromEntries(
@@ -54,7 +64,7 @@ const futureValues = computed(() => {
       scenario.scenarioType,
       calculatePortfolioValue({
         schedule: scenario.giftSchedule,
-        allocation: scenario.portfolioAllocation,
+        allocation: portfolioAllocation.value,
         selectedProducts,
         years: result.value.years,
       }),
@@ -105,6 +115,7 @@ async function runSimulation() {
   }
   loading.value = true
   try {
+    selectedPortfolioType.value = 'BALANCED'
     store.selectFamily(selectedFamilyId.value)
     result.value = await api.runSimulation({
       family: family.value,
@@ -208,7 +219,8 @@ async function savePlan() {
 
       <PortfolioDonutCard
         v-if="selectedScenario"
-        :allocation="portfolioAllocation"
+        v-model:active-profile="selectedPortfolioType"
+        :allocation-profiles="portfolioAllocations"
         :expected-future-value="selectedFutureValue"
         :years="result.years"
       />

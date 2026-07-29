@@ -111,17 +111,37 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
   }
 }
 
-export function getPortfolioAllocation(years) {
+export function getPortfolioAllocations(years) {
   if (years <= 3) {
-    return { DEPOSIT: 45, SAVINGS: 45, ETF: 10, INSURANCE: 0 }
+    return {
+      STABLE: { DEPOSIT: 55, SAVINGS: 40, ETF: 5, INSURANCE: 0 },
+      BALANCED: { DEPOSIT: 45, SAVINGS: 45, ETF: 10, INSURANCE: 0 },
+      GROWTH: { DEPOSIT: 20, SAVINGS: 20, ETF: 60, INSURANCE: 0 },
+    }
   }
   if (years <= 6) {
-    return { DEPOSIT: 35, SAVINGS: 30, ETF: 35, INSURANCE: 0 }
+    return {
+      STABLE: { DEPOSIT: 50, SAVINGS: 40, ETF: 10, INSURANCE: 0 },
+      BALANCED: { DEPOSIT: 35, SAVINGS: 30, ETF: 35, INSURANCE: 0 },
+      GROWTH: { DEPOSIT: 15, SAVINGS: 20, ETF: 65, INSURANCE: 0 },
+    }
   }
   if (years < 10) {
-    return { DEPOSIT: 25, SAVINGS: 25, ETF: 50, INSURANCE: 0 }
+    return {
+      STABLE: { DEPOSIT: 45, SAVINGS: 40, ETF: 15, INSURANCE: 0 },
+      BALANCED: { DEPOSIT: 25, SAVINGS: 25, ETF: 50, INSURANCE: 0 },
+      GROWTH: { DEPOSIT: 10, SAVINGS: 15, ETF: 75, INSURANCE: 0 },
+    }
   }
-  return { DEPOSIT: 20, SAVINGS: 20, ETF: 35, INSURANCE: 25 }
+  return {
+    STABLE: { DEPOSIT: 40, SAVINGS: 30, ETF: 10, INSURANCE: 20 },
+    BALANCED: { DEPOSIT: 20, SAVINGS: 20, ETF: 35, INSURANCE: 25 },
+    GROWTH: { DEPOSIT: 10, SAVINGS: 10, ETF: 65, INSURANCE: 15 },
+  }
+}
+
+export function getPortfolioAllocation(years) {
+  return getPortfolioAllocations(years).BALANCED
 }
 
 export function calculatePortfolioValue({
