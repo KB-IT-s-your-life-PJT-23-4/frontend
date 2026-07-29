@@ -16,6 +16,7 @@ import {
   calculatePortfolioValue,
   formatCompactWon,
   formatWon,
+  getPortfolioAllocations,
   normalizeAmount,
 } from '../utils/finance'
 
@@ -48,7 +49,7 @@ const futureValues = computed(() => {
       scenario.scenarioType,
       calculatePortfolioValue({
         schedule: scenario.giftSchedule,
-        allocation: scenario.portfolioAllocation,
+        allocation: portfolioAllocation.value,
         selectedProducts,
         years: result.value.years,
       }),
@@ -121,6 +122,7 @@ async function runSimulation() {
   }
   loading.value = true
   try {
+    selectedPortfolioType.value = 'BALANCED'
     store.selectFamily(selectedFamilyId.value)
     result.value = await api.runSimulation({
       family: family.value,

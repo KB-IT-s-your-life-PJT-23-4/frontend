@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { PRODUCT_TYPE_META } from '../../utils/finance'
 
@@ -24,18 +24,26 @@ const activeProductType = ref('DEPOSIT')
 const productTypeOrder = ['DEPOSIT', 'SAVINGS', 'ETF', 'INSURANCE']
 
 const productGroups = computed(() =>
-  productTypeOrder.map((type) => ({
-    type,
-    ratio: props.allocation[type] ?? 0,
-    ...PRODUCT_TYPE_META[type],
-    products: props.products
-      .filter(
-        (product) => product.type === type && (type !== 'ETF' || Boolean(product.trackingIndex)),
-      )
-      .sort((a, b) => b.rate - a.rate)
-      .slice(0, type === 'ETF' ? 5 : 3),
-  })),
+  productTypeOrder
+    .filter((type) => (props.allocation[type] ?? 0) > 0)
+    .map((type) => ({
+      type,
+      ratio: props.allocation[type],
+      ...PRODUCT_TYPE_META[type],
+      products: props.products
+        .filter(
+          (product) => product.type === type && (type !== 'ETF' || Boolean(product.trackingIndex)),
+        )
+        .sort((a, b) => b.rate - a.rate)
+        .slice(0, type === 'ETF' ? 5 : 3),
+    })),
 )
+
+watchEffect(() => {
+  if (!productGroups.value.some((group) => group.type === activeProductType.value)) {
+    activeProductType.value = productGroups.value[0]?.type ?? ''
+  }
+})
 
 const activeProductGroup = computed(() =>
   productGroups.value.find((group) => group.type === activeProductType.value),
@@ -64,7 +72,12 @@ function getRateLabel(product) {
       </div>
     </div>
 
-    <div class="product-category-tabs" role="tablist" aria-label="상품 유형">
+    <div
+      class="product-category-tabs"
+      role="tablist"
+      aria-label="상품 유형"
+      :style="{ '--product-tab-count': productGroups.length }"
+    >
       <button
         v-for="group in productGroups"
         :id="`product-tab-${group.type}`"
