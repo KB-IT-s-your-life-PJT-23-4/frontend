@@ -247,7 +247,10 @@ async function savePlan() {
         :years="result.years"
       />
 
-      <aside v-if="recommendedScenario" class="filing-credit-callout">
+      <aside
+        v-if="recommendedScenario && result.exceedsDeduction"
+        class="filing-credit-callout"
+      >
         <span class="filing-credit-icon"><AppIcon name="document" :size="21" /></span>
         <div>
           <span class="section-kicker">신고세액공제 3%</span>
