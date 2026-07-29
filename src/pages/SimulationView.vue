@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import GiftPlanTimeline from '../components/simulation/GiftPlanTimeline.vue'
+import InvestmentGrowthChart from '../components/simulation/InvestmentGrowthChart.vue'
 import PortfolioDonutCard from '../components/simulation/PortfolioDonutCard.vue'
 import ProductSelectionPanel from '../components/simulation/ProductSelectionPanel.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
@@ -27,7 +28,6 @@ const donorPaysTax = ref(false)
 const result = ref(null)
 const loading = ref(false)
 const errorMessage = ref('')
-const selectedScenarioType = ref('TAX_OPTIMIZED')
 const showSaveModal = ref(false)
 const saving = ref(false)
 const selectedProducts = reactive({})
@@ -41,12 +41,6 @@ const amount = computed(() => normalizeAmount(amountText.value))
 const remaining = computed(() =>
   Math.max(0, family.value.deductionLimit - family.value.giftedAmount),
 )
-const selectedScenario = computed(
-  () =>
-    result.value?.results.find((item) => item.scenarioType === selectedScenarioType.value) ??
-    result.value?.results[0],
-)
-const portfolioAllocation = computed(() => selectedScenario.value?.portfolioAllocation ?? {})
 const futureValues = computed(() => {
   if (!result.value) return {}
   return Object.fromEntries(
@@ -61,8 +55,30 @@ const futureValues = computed(() => {
     ]),
   )
 })
-const selectedFutureValue = computed(
-  () => futureValues.value[selectedScenario.value?.scenarioType] ?? 0,
+const recommendedScenario = computed(() => {
+  const scenarios = result.value?.results ?? []
+  if (!scenarios.length) return null
+
+  return scenarios.reduce((best, candidate) => {
+    const bestFutureValue =
+      futureValues.value[best.scenarioType] ?? best.estimatedFutureValue ?? 0
+    const candidateFutureValue =
+      futureValues.value[candidate.scenarioType] ?? candidate.estimatedFutureValue ?? 0
+
+    if (candidateFutureValue > bestFutureValue) return candidate
+    if (
+      candidateFutureValue === bestFutureValue &&
+      candidate.estimatedPayableTax < best.estimatedPayableTax
+    ) {
+      return candidate
+    }
+
+    return best
+  }, scenarios[0])
+})
+const portfolioAllocation = computed(() => recommendedScenario.value?.portfolioAllocation ?? {})
+const recommendedFutureValue = computed(
+  () => futureValues.value[recommendedScenario.value?.scenarioType] ?? 0,
 )
 const weightedPortfolioRate = computed(() =>
   Object.entries(portfolioAllocation.value).reduce(
@@ -112,7 +128,6 @@ async function runSimulation() {
       years: investmentYears.value,
       donorPaysTax: donorPaysTax.value,
     })
-    selectedScenarioType.value = result.value.exceedsDeduction ? 'TAX_OPTIMIZED' : 'IMMEDIATE'
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } catch (error) {
     errorMessage.value = error.message
@@ -131,25 +146,25 @@ function selectProduct(type, product) {
 }
 
 async function savePlan() {
-  if (!selectedScenario.value) return
+  if (!recommendedScenario.value) return
   saving.value = true
   try {
-    await api.saveGiftPlan(selectedScenario.value.resultId)
+    await api.saveGiftPlan(recommendedScenario.value.resultId)
     const today = new Date().toISOString().slice(0, 10).replaceAll('-', '.')
     store.savePlan({
       familyId: family.value.id,
-      resultId: selectedScenario.value.resultId,
-      title: selectedScenario.value.scenarioName,
+      resultId: recommendedScenario.value.resultId,
+      title: recommendedScenario.value.scenarioName,
       amount: result.value.requestedAmount,
-      currentAmount: selectedScenario.value.currentGiftAmount,
-      deferredAmount: selectedScenario.value.deferredGiftAmount,
-      giftDate: selectedScenario.value.deferredGiftAmount
-        ? selectedScenario.value.deferredGiftDate
+      currentAmount: recommendedScenario.value.currentGiftAmount,
+      deferredAmount: recommendedScenario.value.deferredGiftAmount,
+      giftDate: recommendedScenario.value.deferredGiftAmount
+        ? recommendedScenario.value.deferredGiftDate
         : today,
       productName: selectedProductSummary.value,
       productType: 'PORTFOLIO',
       rate: Number(weightedPortfolioRate.value.toFixed(2)),
-      tax: selectedScenario.value.estimatedPayableTax,
+      tax: recommendedScenario.value.estimatedPayableTax,
       status: 'PLANNED',
     })
     showSaveModal.value = false
@@ -201,15 +216,14 @@ async function savePlan() {
       </section>
 
       <GiftPlanTimeline
-        v-model:selected-scenario-type="selectedScenarioType"
         :result="result"
-        :future-values="futureValues"
+        :recommended-scenario="recommendedScenario"
       />
 
       <PortfolioDonutCard
-        v-if="selectedScenario"
+        v-if="recommendedScenario"
         :allocation="portfolioAllocation"
-        :expected-future-value="selectedFutureValue"
+        :expected-future-value="recommendedFutureValue"
         :years="result.years"
       />
 
@@ -220,11 +234,18 @@ async function savePlan() {
         @select="selectProduct"
       />
 
-      <aside v-if="selectedScenario" class="filing-credit-callout">
+      <InvestmentGrowthChart
+        v-if="recommendedScenario"
+        :principal="recommendedScenario.postTaxAmount"
+        :future-value="recommendedFutureValue"
+        :years="result.years"
+      />
+
+      <aside v-if="recommendedScenario" class="filing-credit-callout">
         <span class="filing-credit-icon"><AppIcon name="document" :size="21" /></span>
         <div>
           <span class="section-kicker">신고세액공제 3%</span>
-          <h2>기한 안에 신고하면 약 {{ formatWon(selectedScenario.filingTaxCredit) }}을 아낄 수 있어요</h2>
+          <h2>기한 안에 신고하면 약 {{ formatWon(recommendedScenario.filingTaxCredit) }}을 아낄 수 있어요</h2>
           <p>
             증여받은 날이 속하는 달의 말일부터 3개월 이내 신고할 때를 기준으로 계산했어요.
           </p>
@@ -236,14 +257,14 @@ async function savePlan() {
         type="button"
         @click="showSaveModal = true"
       >
-        이 전략으로 계획 저장하기
+        추천 전략으로 계획 저장하기
         <AppIcon name="arrow" :size="19" />
       </button>
     </div>
 
     <SavePlanModal
       :show="showSaveModal"
-      :selected-scenario="selectedScenario"
+      :selected-scenario="recommendedScenario"
       :family="family"
       :result="result"
       :active-product="{
