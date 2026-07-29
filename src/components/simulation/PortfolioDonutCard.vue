@@ -24,9 +24,9 @@ const props = defineProps({
 const emit = defineEmits(['update:activeProfile'])
 
 const portfolioProfiles = [
-  { type: 'STABLE', label: '안정형', caption: '저위험', color: '#5b8def' },
-  { type: 'BALANCED', label: '균형형', caption: '중위험', color: '#e4a800' },
-  { type: 'GROWTH', label: '성장형', caption: '고위험', color: '#ef7b77' },
+  { type: 'STABLE', label: '안정형', color: '#5b8def' },
+  { type: 'BALANCED', label: '균형형', color: '#e4a800' },
+  { type: 'GROWTH', label: '성장형', color: '#ef7b77' },
 ]
 
 const allocation = computed(
@@ -77,7 +77,6 @@ const donutStyle = computed(() => {
         @click="emit('update:activeProfile', profile.type)"
       >
         <span>{{ profile.label }}</span>
-        <small>{{ profile.caption }}</small>
       </button>
     </div>
 
