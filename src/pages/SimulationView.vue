@@ -29,6 +29,7 @@ const donorPaysTax = ref(false)
 const result = ref(null)
 const loading = ref(false)
 const errorMessage = ref('')
+const selectedPortfolioType = ref('BALANCED')
 const showSaveModal = ref(false)
 const saving = ref(false)
 const selectedProducts = reactive({})
@@ -42,6 +43,13 @@ const amount = computed(() => normalizeAmount(amountText.value))
 const remaining = computed(() =>
   Math.max(0, family.value.deductionLimit - family.value.giftedAmount),
 )
+const allocationProfiles = computed(() =>
+  getPortfolioAllocations(result.value?.years ?? investmentYears.value),
+)
+const portfolioAllocation = computed(() => {
+  const profiles = allocationProfiles.value
+  return profiles[selectedPortfolioType.value] ?? profiles.BALANCED ?? {}
+})
 const futureValues = computed(() => {
   if (!result.value) return {}
   return Object.fromEntries(
@@ -61,8 +69,7 @@ const recommendedScenario = computed(() => {
   if (!scenarios.length) return null
 
   return scenarios.reduce((best, candidate) => {
-    const bestFutureValue =
-      futureValues.value[best.scenarioType] ?? best.estimatedFutureValue ?? 0
+    const bestFutureValue = futureValues.value[best.scenarioType] ?? best.estimatedFutureValue ?? 0
     const candidateFutureValue =
       futureValues.value[candidate.scenarioType] ?? candidate.estimatedFutureValue ?? 0
 
@@ -77,7 +84,6 @@ const recommendedScenario = computed(() => {
     return best
   }, scenarios[0])
 })
-const portfolioAllocation = computed(() => recommendedScenario.value?.portfolioAllocation ?? {})
 const recommendedFutureValue = computed(
   () => futureValues.value[recommendedScenario.value?.scenarioType] ?? 0,
 )
@@ -217,14 +223,12 @@ async function savePlan() {
         </div>
       </section>
 
-      <GiftPlanTimeline
-        :result="result"
-        :recommended-scenario="recommendedScenario"
-      />
+      <GiftPlanTimeline :result="result" :recommended-scenario="recommendedScenario" />
 
       <PortfolioDonutCard
         v-if="recommendedScenario"
-        :allocation="portfolioAllocation"
+        v-model:active-profile="selectedPortfolioType"
+        :allocation-profiles="allocationProfiles"
         :expected-future-value="recommendedFutureValue"
         :years="result.years"
       />
@@ -247,10 +251,11 @@ async function savePlan() {
         <span class="filing-credit-icon"><AppIcon name="document" :size="21" /></span>
         <div>
           <span class="section-kicker">신고세액공제 3%</span>
-          <h2>기한 안에 신고하면 약 {{ formatWon(recommendedScenario.filingTaxCredit) }}을 아낄 수 있어요</h2>
-          <p>
-            증여받은 날이 속하는 달의 말일부터 3개월 이내 신고할 때를 기준으로 계산했어요.
-          </p>
+          <h2>
+            기한 안에 신고하면 약 {{ formatWon(recommendedScenario.filingTaxCredit) }}을 아낄 수
+            있어요
+          </h2>
+          <p>증여받은 날이 속하는 달의 말일부터 3개월 이내 신고할 때를 기준으로 계산했어요.</p>
         </div>
       </aside>
 

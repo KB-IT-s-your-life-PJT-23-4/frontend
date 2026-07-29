@@ -5,7 +5,7 @@ import { PRODUCT_TYPE_META, formatCompactWon } from '../../utils/finance'
 const props = defineProps({
   allocationProfiles: {
     type: Object,
-    required: true,
+    default: () => ({}),
   },
   activeProfile: {
     type: String,
@@ -29,9 +29,10 @@ const portfolioProfiles = [
   { type: 'GROWTH', label: '성장형', color: '#ef7b77' },
 ]
 
-const allocation = computed(
-  () => props.allocationProfiles[props.activeProfile] ?? props.allocationProfiles.BALANCED ?? {},
-)
+const allocation = computed(() => {
+  const profiles = props.allocationProfiles ?? {}
+  return profiles[props.activeProfile] ?? profiles.BALANCED ?? Object.values(profiles)[0] ?? {}
+})
 
 const allocationItems = computed(() => {
   return Object.entries(allocation.value)
