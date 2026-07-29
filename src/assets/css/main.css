@@ -4675,7 +4675,7 @@ textarea:focus-visible {
 
 .product-category-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--product-tab-count, 4), minmax(0, 1fr));
   gap: 0;
   margin-top: 18px;
   border-bottom: 1px solid #e7edf2;
