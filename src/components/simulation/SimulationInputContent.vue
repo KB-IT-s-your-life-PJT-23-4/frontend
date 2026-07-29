@@ -113,22 +113,24 @@ defineEmits([
               <strong>{{ formatCompactWon(remaining) }}</strong>
             </div>
           </div>
-          <div class="peer-average-card">
-            <span class="peer-average-icon"><AppIcon name="chart" :size="17" /></span>
-            <div>
-              <span>비슷한 나이대는 평균적으로</span>
-              <strong>{{ formatCompactWon(peerAverageGiftAmount) }}을 증여했어요</strong>
-              <small>서비스 시연을 위한 데모 통계예요.</small>
-            </div>
-          </div>
         </div>
       </section>
 
       <section class="simulation-input-step amount-step">
         <div class="input-step-heading">
           <span>2</span>
-          <div>
+          <div class="amount-heading-copy">
             <h3>얼마를 증여할까요?</h3>
+            <p class="peer-average-insight">
+              <span class="peer-average-icon"><AppIcon name="chart" :size="14" /></span>
+              <span class="peer-average-copy">
+                <span class="peer-average-lead">미리줌 이용자들은 같은 나이대 자녀에게</span>
+                <span class="peer-average-result"
+                  >평균 <strong>{{ formatCompactWon(peerAverageGiftAmount) }}</strong
+                  >을 증여했어요</span
+                >
+              </span>
+            </p>
           </div>
         </div>
 
@@ -201,7 +203,7 @@ defineEmits([
         <aside v-if="investmentYears >= 10" class="long-term-note">
           <AppIcon name="sparkles" :size="18" />
           <p>
-            10년 이상 장기 운용 조건으로 저축보험을 포함해 비교해 드릴게요.
+            10년 이상 장기 운용 조건으로 저축보험을 포함해 비교해 드릴게요.<br>
             실제 비과세 적용 여부는 상품별 요건을 확인해야 해요.
           </p>
         </aside>
