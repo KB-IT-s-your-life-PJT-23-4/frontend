@@ -4369,8 +4369,7 @@ textarea:focus-visible {
   line-height: 1.6;
 }
 
-.timeline-count,
-.long-term-badge {
+.timeline-count {
   flex: none;
   padding: 6px 9px;
   border-radius: 999px;

@@ -61,7 +61,6 @@ const donutStyle = computed(() => {
         <h2>{{ years }}년을 위한 운용 비중</h2>
         <p>투자 성향을 선택해 상품별 운용 비중을 비교해 보세요.</p>
       </div>
-      <span v-if="years >= 10" class="long-term-badge">장기 운용</span>
     </div>
 
     <div class="product-category-tabs portfolio-profile-tabs" role="tablist" aria-label="투자 성향">
