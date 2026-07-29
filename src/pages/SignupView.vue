@@ -9,6 +9,7 @@ import {
   formatPhone,
   validateBirthDate,
   validateEmail,
+  validateName,
   validatePassword,
   validatePhone,
 } from '../utils/authValidation'
@@ -80,6 +81,8 @@ async function checkEmail() {
       errors.email = '이미 사용 중인 이메일입니다.'
     }
   } catch (error) {
+    if (form.email !== requestedEmail) return
+
     emailStatus.value = 'idle'
     errors.email =
       error.code === 'AUTH_API_NOT_CONFIGURED'
@@ -89,7 +92,7 @@ async function checkEmail() {
 }
 
 function validateForm() {
-  errors.name = form.name.trim() ? '' : '이름을 입력해주세요.'
+  errors.name = validateName(form.name)
   errors.email = validateEmail(form.email)
   if (!errors.email && emailStatus.value !== 'available') {
     errors.email = '이메일 중복 확인이 필요합니다.'
@@ -171,7 +174,7 @@ async function submitSignup() {
               placeholder="이름을 입력해주세요"
               :aria-invalid="Boolean(errors.name)"
               @input="clearError('name')"
-              @blur="errors.name = form.name.trim() ? '' : '이름을 입력해주세요.'"
+              @blur="errors.name = validateName(form.name)"
             />
             <p v-if="errors.name" class="auth-message error">{{ errors.name }}</p>
           </div>
