@@ -145,26 +145,48 @@ function getRateLabel(product) {
               :aria-expanded="expanded.has(product.id)"
               @click="toggleDetails(product.id)"
             >
-              상세 조건 보기
+              상세 보기
               <AppIcon name="chevron" :size="15" :class="{ expanded: expanded.has(product.id) }" />
             </button>
 
             <div v-if="expanded.has(product.id)" class="selectable-product-details">
-              <div v-if="product.type === 'ETF'" class="product-tracking-index">
-                <span>추종 지수</span>
-                <strong>{{ product.trackingIndex }}</strong>
-              </div>
+              <template v-if="product.type === 'ETF'">
+                <div class="product-tracking-index">
+                  <span>추종 지수</span>
+                  <strong>{{ product.trackingIndex }}</strong>
+                </div>
+                <div class="product-etf-metric">
+                  <span>시가총액</span>
+                  <strong>{{ product.marketCap }}</strong>
+                </div>
+                <div class="product-etf-metric">
+                  <span>배당수익률</span>
+                  <strong>{{ product.dividendYield }}%</strong>
+                </div>
+                <div v-if="product.topHoldings?.length" class="product-holdings">
+                  <div class="product-holdings-heading">
+                    <span>구성 종목 비중 TOP 10</span>
+                  </div>
+                  <ol class="product-holdings-list">
+                    <li v-for="(holding, holdingIndex) in product.topHoldings" :key="holding.name">
+                      <span>{{ holdingIndex + 1 }}</span>
+                      <strong>{{ holding.name }}</strong>
+                      <b>{{ holding.ratio }}%</b>
+                    </li>
+                  </ol>
+                </div>
+              </template>
               <template v-else>
                 <div>
                   <span>가입·납입 한도</span>
                   <strong>{{ product.limit }}</strong>
                 </div>
                 <div>
-                  <span>권장 운용 기간</span>
+                  <span>운용 기간</span>
                   <strong>{{ product.period }}</strong>
                 </div>
                 <div v-if="product.conditions?.length" class="product-condition-list">
-                  <span>우대·적용 조건</span>
+                  <span>우대 조건</span>
                   <p v-for="condition in product.conditions" :key="condition">
                     <AppIcon name="check" :size="14" /> {{ condition }}
                   </p>
