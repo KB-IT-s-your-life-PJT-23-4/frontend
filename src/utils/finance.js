@@ -31,8 +31,12 @@ export function formatWon(value) {
 export function formatCompactWon(value) {
   const amount = Math.round(Number(value) || 0)
   if (amount >= 100000000) {
-    const eok = amount / 100000000
-    return `${Number.isInteger(eok) ? eok : eok.toFixed(1)}억원`
+    const amountInManWon = Math.round(amount / 10000)
+    const eok = Math.floor(amountInManWon / 10000)
+    const manWon = amountInManWon % 10000
+
+    if (manWon === 0) return `${eok.toLocaleString('ko-KR')}억원`
+    return `${eok.toLocaleString('ko-KR')}억 ${manWon.toLocaleString('ko-KR')}만원`
   }
   if (amount >= 10000) return `${Math.round(amount / 10000).toLocaleString('ko-KR')}만원`
   return `${amount.toLocaleString('ko-KR')}원`
