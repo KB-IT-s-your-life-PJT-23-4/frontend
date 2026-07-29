@@ -3,9 +3,13 @@ import { computed } from 'vue'
 import { PRODUCT_TYPE_META, formatCompactWon } from '../../utils/finance'
 
 const props = defineProps({
-  allocation: {
+  allocationProfiles: {
     type: Object,
     required: true,
+  },
+  activeProfile: {
+    type: String,
+    default: 'BALANCED',
   },
   expectedFutureValue: {
     type: Number,
@@ -17,24 +21,26 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['update:activeProfile'])
+
+const portfolioProfiles = [
+  { type: 'STABLE', label: '안정형', caption: '저위험', color: '#5b8def' },
+  { type: 'BALANCED', label: '균형형', caption: '중위험', color: '#e4a800' },
+  { type: 'GROWTH', label: '성장형', caption: '고위험', color: '#ef7b77' },
+]
+
+const allocation = computed(
+  () => props.allocationProfiles[props.activeProfile] ?? props.allocationProfiles.BALANCED ?? {},
+)
+
 const allocationItems = computed(() => {
-  let cursor = 0
-
-  return Object.entries(props.allocation)
+  return Object.entries(allocation.value)
     .filter(([, ratio]) => ratio > 0)
-    .map(([type, ratio]) => {
-      const midpoint = cursor + ratio / 2
-      const angle = ((midpoint * 3.6 - 90) * Math.PI) / 180
-      cursor += ratio
-
-      return {
-        type,
-        ratio,
-        labelX: 50 + Math.sin(angle) * 40,
-        labelY: 50 - Math.cos(angle) * 40,
-        ...PRODUCT_TYPE_META[type],
-      }
-    })
+    .map(([type, ratio]) => ({
+      type,
+      ratio,
+      ...PRODUCT_TYPE_META[type],
+    }))
 })
 
 const donutStyle = computed(() => {
@@ -53,36 +59,60 @@ const donutStyle = computed(() => {
     <div class="portfolio-card-heading">
       <div>
         <h2>{{ years }}년을 위한 운용 비중</h2>
-        <p>운용 기간을 기준으로 균형 있게 나눈 대표 포트폴리오예요.</p>
+        <p>투자 성향을 선택해 상품별 운용 비중을 비교해 보세요.</p>
       </div>
       <span v-if="years >= 10" class="long-term-badge">장기 운용</span>
     </div>
 
-    <div class="portfolio-donut-layout">
-      <div
-        v-for="item in allocationItems"
-        :key="item.type"
-        class="portfolio-orbit-label"
-        :style="{
-          '--label-x': `${item.labelX}%`,
-          '--label-y': `${item.labelY}%`,
-          '--segment-color': item.color,
-        }"
+    <div class="product-category-tabs portfolio-profile-tabs" role="tablist" aria-label="투자 성향">
+      <button
+        v-for="profile in portfolioProfiles"
+        :id="`portfolio-tab-${profile.type}`"
+        :key="profile.type"
+        type="button"
+        role="tab"
+        :aria-selected="activeProfile === profile.type"
+        :aria-controls="`portfolio-panel-${profile.type}`"
+        :class="{ active: activeProfile === profile.type }"
+        :style="{ '--product-tab-color': profile.color }"
+        @click="emit('update:activeProfile', profile.type)"
       >
-        <span class="portfolio-color" />
-        <span>{{ item.label }}</span>
-        <strong>{{ item.ratio }}%</strong>
+        <span>{{ profile.label }}</span>
+        <small>{{ profile.caption }}</small>
+      </button>
+    </div>
+
+    <div
+      :id="`portfolio-panel-${activeProfile}`"
+      class="portfolio-donut-layout"
+      role="tabpanel"
+      :aria-labelledby="`portfolio-tab-${activeProfile}`"
+    >
+      <div class="portfolio-donut-visual">
+        <div
+          class="portfolio-donut"
+          :style="donutStyle"
+          role="img"
+          :aria-label="allocationItems.map((item) => `${item.label} ${item.ratio}%`).join(', ')"
+        >
+          <div class="portfolio-donut-center">
+            <span>예상 금액</span>
+            <strong>{{ formatCompactWon(expectedFutureValue) }}</strong>
+          </div>
+        </div>
       </div>
 
-      <div
-        class="portfolio-donut"
-        :style="donutStyle"
-        role="img"
-        :aria-label="allocationItems.map((item) => `${item.label} ${item.ratio}%`).join(', ')"
-      >
-        <div class="portfolio-donut-center">
-          <span>예상 금액</span>
-          <strong>{{ formatCompactWon(expectedFutureValue) }}</strong>
+      <div class="portfolio-allocation-summary" aria-label="상품별 운용 비중">
+        <strong class="portfolio-allocation-title">상품별 비중</strong>
+        <div
+          v-for="item in allocationItems"
+          :key="item.type"
+          class="portfolio-allocation-row"
+          :style="{ '--segment-color': item.color }"
+        >
+          <span class="portfolio-color" />
+          <span>{{ item.label }}</span>
+          <strong>{{ item.ratio }}%</strong>
         </div>
       </div>
     </div>
