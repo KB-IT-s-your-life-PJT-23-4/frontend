@@ -4722,9 +4722,7 @@ textarea:focus-visible {
   padding: 14px 8px 0;
   overflow: hidden;
   border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 50%),
-    #f5f8fb;
+  background: #f5f8fb;
 }
 
 .gift-timeline-track {
