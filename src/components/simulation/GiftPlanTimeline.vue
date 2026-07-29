@@ -208,6 +208,10 @@ function getPosition(item) {
               <span class="tax-chip">
                 예상 세금 {{ formatCompactWon(summary.scenario.estimatedPayableTax) }}
               </span>
+              <p v-if="result.donorPaysTax" class="donor-tax-summary">
+                주는 분이 준비할 총 금액
+                <strong>{{ formatCompactWon(summary.scenario.totalDonorOutflow) }}</strong>
+              </p>
             </div>
 
             <div
@@ -235,51 +239,6 @@ function getPosition(item) {
         </div>
       </section>
     </section>
-
-    <div
-      class="strategy-card-grid"
-      :class="{ single: !result.exceedsDeduction }"
-      :role="result.exceedsDeduction ? 'radiogroup' : undefined"
-      aria-label="증여 전략 선택"
-    >
-      <button
-        v-for="item in visibleScenarios"
-        :key="item.scenarioType"
-        type="button"
-        class="strategy-choice-card"
-        :class="{ selected: selectedScenarioType === item.scenarioType }"
-        :role="result.exceedsDeduction ? 'radio' : undefined"
-        :aria-checked="
-          result.exceedsDeduction ? selectedScenarioType === item.scenarioType : undefined
-        "
-        :disabled="!result.exceedsDeduction"
-        @click="emit('update:selectedScenarioType', item.scenarioType)"
-      >
-        <div class="strategy-choice-heading">
-          <span class="strategy-radio"><i /></span>
-          <div>
-            <h3>{{ item.scenarioName }}</h3>
-          </div>
-          <span v-if="item.scenarioType === 'TAX_OPTIMIZED'" class="recommend-badge"> 절세 </span>
-        </div>
-
-        <div class="strategy-metrics">
-          <div>
-            <span>예상 세금</span>
-            <strong>{{ formatCompactWon(item.estimatedPayableTax) }}</strong>
-          </div>
-          <div>
-            <span>{{ result.years }}년 후</span>
-            <strong class="blue">{{ formatCompactWon(getFutureValue(item)) }}</strong>
-          </div>
-        </div>
-
-        <p v-if="result.donorPaysTax" class="donor-tax-summary">
-          주는 분이 준비할 총 금액
-          <strong>{{ formatCompactWon(item.totalDonorOutflow) }}</strong>
-        </p>
-      </button>
-    </div>
 
     <section class="selected-timeline-section" aria-labelledby="selected-timeline-title">
       <div class="timeline-roadmap-heading">
