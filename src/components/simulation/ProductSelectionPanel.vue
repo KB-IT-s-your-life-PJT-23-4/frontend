@@ -178,7 +178,7 @@ function getRateLabel(product) {
                 rel="noopener noreferrer"
               >
                 상품 사이트 바로가기
-                <AppIcon name="arrow" :size="14" />
+                <AppIcon name="external" :size="14" />
               </a>
             </div>
           </article>
