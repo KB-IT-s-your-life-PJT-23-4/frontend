@@ -42,49 +42,41 @@ function getPosition(item) {
 <template>
   <section class="gift-plan-timeline-card" aria-labelledby="gift-strategy-title">
     <header class="timeline-card-heading">
-      <h2 id="gift-strategy-title">
-        {{
-          result.exceedsDeduction
-            ? '더 유리한 증여 흐름을 추천해 드려요'
-            : '공제 한도 안에서 준비할 수 있어요'
-        }}
-      </h2>
+      <div>
+        <span class="section-kicker">추천 증여 플랜</span>
+        <h2 id="gift-strategy-title">
+          {{
+            result.exceedsDeduction
+              ? `${scenario.scenarioName}가 더 유리해요`
+              : '공제 한도 안에서 바로 증여할 수 있어요'
+          }}
+        </h2>
+        <p>
+          {{
+            result.exceedsDeduction
+              ? scenario.description
+              : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
+          }}
+          <br />
+          {{ formatCompactWon(result.requestedAmount) }}을 {{ result.years }}년 운용하는 조건으로
+          계산했어요.
+        </p>
+      </div>
+      <span class="timeline-count">기간 내 {{ visibleSchedule.length }}회 증여</span>
     </header>
 
-    <section class="selected-timeline-section" aria-labelledby="selected-timeline-title">
-      <div class="timeline-roadmap-heading">
-        <h3 id="selected-timeline-title">추천 전략의 증여 일정</h3>
-        <span class="timeline-count">기간 내 {{ visibleSchedule.length }}회 증여</span>
+    <div class="timeline-key-metrics">
+      <div>
+        <span>예상 세금</span>
+        <strong>{{ formatCompactWon(scenario.estimatedPayableTax) }}</strong>
       </div>
-
-      <div class="timeline-strategy-summary">
-        <div class="timeline-strategy-copy">
-          <span class="timeline-recommendation-label">
-            <AppIcon name="sparkles" :size="15" />
-            추천 전략
-          </span>
-          <strong class="timeline-strategy-title">
-            {{ result.exceedsDeduction ? scenario.scenarioName : '한도 내 증여 결과' }}
-          </strong>
-          <p>
-            {{
-              result.exceedsDeduction
-                ? scenario.description
-                : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
-            }}
-          </p>
-        </div>
-        <div class="timeline-strategy-meta">
-          <span class="tax-chip">
-            예상 세금 {{ formatCompactWon(scenario.estimatedPayableTax) }}
-          </span>
-          <p v-if="result.donorPaysTax" class="timeline-donor-tax">
-            주는 분이 준비할 총 금액
-            <strong>{{ formatCompactWon(scenario.totalDonorOutflow) }}</strong>
-          </p>
-        </div>
+      <div v-if="result.donorPaysTax">
+        <span>주는 분의 총 준비 금액</span>
+        <strong>{{ formatCompactWon(scenario.totalDonorOutflow) }}</strong>
       </div>
+    </div>
 
+    <section class="selected-timeline-section" aria-label="추천 전략의 증여 일정">
       <div class="gift-timeline" :aria-label="`${result.years}년 운용 기간 중 증여 일정`">
         <div class="gift-timeline-track">
           <span class="gift-timeline-fill" />
