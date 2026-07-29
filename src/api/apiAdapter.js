@@ -8,7 +8,7 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function request(path, options = {}) {
+export async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: {
       "Content-Type": "application/json",
@@ -20,7 +20,12 @@ async function request(path, options = {}) {
 
   const payload = await response.json().catch(() => null);
   if (!response.ok || payload?.success === false) {
-    throw new Error(payload?.message || "요청을 처리하지 못했습니다.");
+    const error = new Error(
+      payload?.error || payload?.message || "요청을 처리하지 못했습니다.",
+    );
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
   }
   return payload?.data ?? payload;
 }

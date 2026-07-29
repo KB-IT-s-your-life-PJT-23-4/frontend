@@ -1,9 +1,13 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppIcon from './components/layout/AppIcon.vue'
 import BottomNav from './components/layout/BottomNav.vue'
 import { useAppStore } from './stores/appStore.js'
 
 const store = useAppStore()
+const route = useRoute()
+const showBottomNav = computed(() => !route.meta.hideBottomNav)
 </script>
 
 <template>
@@ -36,7 +40,7 @@ const store = useAppStore()
 
     <main id="main-content" class="app-frame">
       <RouterView />
-      <BottomNav />
+      <BottomNav v-if="showBottomNav" />
     </main>
   </div>
 

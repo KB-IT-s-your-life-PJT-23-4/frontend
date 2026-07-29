@@ -41,7 +41,7 @@ const guideCards = [
 
 <template>
   <div class="page home-page">
-    <AppHeader />
+    <AppHeader show-login />
     <div class="page-content home-content">
       <section class="hero-card">
         <div class="hero-orbit hero-orbit-one" />

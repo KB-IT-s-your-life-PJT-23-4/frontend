@@ -6,6 +6,8 @@ import { useAppStore } from '../../stores/appStore.js'
 defineProps({
   title: { type: String, default: '' },
   back: { type: Boolean, default: false },
+  showLogin: { type: Boolean, default: false },
+  showNotifications: { type: Boolean, default: true },
 })
 
 const router = useRouter()
@@ -31,11 +33,20 @@ const store = useAppStore()
     <h1 v-if="title" class="header-title">{{ title }}</h1>
     <span v-else class="header-spacer" />
 
-    <RouterLink class="icon-button notification-button" to="/notifications" aria-label="알림 보기">
-      <AppIcon name="bell" :size="20" />
-      <span v-if="store.unreadCount.value" class="notification-dot">
-        {{ store.unreadCount.value }}
-      </span>
-    </RouterLink>
+    <div v-if="showNotifications || showLogin" class="header-actions">
+      <RouterLink
+        v-if="showNotifications"
+        class="icon-button notification-button"
+        to="/notifications"
+        aria-label="알림 보기"
+      >
+        <AppIcon name="bell" :size="20" />
+        <span v-if="store.unreadCount.value" class="notification-dot">
+          {{ store.unreadCount.value }}
+        </span>
+      </RouterLink>
+      <RouterLink v-if="showLogin" class="header-login-link" to="/login">로그인</RouterLink>
+    </div>
+    <span v-else class="header-spacer" />
   </header>
 </template>
