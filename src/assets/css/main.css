@@ -797,7 +797,14 @@ textarea:focus-visible {
   display: grid;
   gap: 5px;
 }
-
+.overview-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.overview-topline span,
+.overview-labels,
+.overview-grid span,
 .deduction-card-heading span,
 .metric-grid span,
 .product-metrics span,
@@ -806,7 +813,24 @@ textarea:focus-visible {
   color: var(--muted);
   font-size: 11px;
 }
+.progress-track {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #edf0f4;
+}
 
+.progress-track.large {
+  height: 9px;
+  margin-top: 17px;
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--kb-yellow);
+}
 .deduction-card-heading h2 {
   margin: 0;
   font-size: 24px;
