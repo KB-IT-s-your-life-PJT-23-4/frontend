@@ -3933,11 +3933,7 @@ textarea:focus-visible {
   .desktop-message {
     position: relative;
     z-index: 2;
-    margin-top: 62px;
-  }
-
-  .desktop-message .eyebrow {
-    color: #ffdb43;
+    margin-top: 48px;
   }
 
   .desktop-message h2 {
