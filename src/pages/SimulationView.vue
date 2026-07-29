@@ -8,7 +8,6 @@ import PortfolioDonutCard from '../components/simulation/PortfolioDonutCard.vue'
 import ProductSelectionPanel from '../components/simulation/ProductSelectionPanel.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
 import SimulationInputContent from '../components/simulation/SimulationInputContent.vue'
-import SimulationScenarioSection from '../components/simulation/SimulationScenarioSection.vue'
 import { products } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 import { useAppStore } from '../stores/appStore'
@@ -201,18 +200,10 @@ async function savePlan() {
         </div>
       </section>
 
-      <SimulationScenarioSection
+      <GiftPlanTimeline
         v-model:selected-scenario-type="selectedScenarioType"
         :result="result"
         :future-values="futureValues"
-      />
-
-      <GiftPlanTimeline
-        v-if="selectedScenario"
-        :scenario="selectedScenario"
-        :end-date="result.endDate"
-        :years="result.years"
-        :expected-future-value="selectedFutureValue"
       />
 
       <PortfolioDonutCard

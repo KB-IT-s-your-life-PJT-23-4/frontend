@@ -17,15 +17,25 @@ const props = defineProps({
   },
 })
 
-const allocationItems = computed(() =>
-  Object.entries(props.allocation)
-    .map(([type, ratio]) => ({
-      type,
-      ratio,
-      ...PRODUCT_TYPE_META[type],
-    }))
-    .filter((item) => item.ratio > 0),
-)
+const allocationItems = computed(() => {
+  let cursor = 0
+
+  return Object.entries(props.allocation)
+    .filter(([, ratio]) => ratio > 0)
+    .map(([type, ratio]) => {
+      const midpoint = cursor + ratio / 2
+      const angle = ((midpoint * 3.6 - 90) * Math.PI) / 180
+      cursor += ratio
+
+      return {
+        type,
+        ratio,
+        labelX: 50 + Math.sin(angle) * 40,
+        labelY: 50 - Math.cos(angle) * 40,
+        ...PRODUCT_TYPE_META[type],
+      }
+    })
+})
 
 const donutStyle = computed(() => {
   let cursor = 0
@@ -42,7 +52,6 @@ const donutStyle = computed(() => {
   <section class="portfolio-donut-card">
     <div class="portfolio-card-heading">
       <div>
-        <span class="section-kicker">PORTFOLIO</span>
         <h2>{{ years }}년을 위한 운용 비중</h2>
         <p>운용 기간을 기준으로 균형 있게 나눈 대표 포트폴리오예요.</p>
       </div>
@@ -50,6 +59,21 @@ const donutStyle = computed(() => {
     </div>
 
     <div class="portfolio-donut-layout">
+      <div
+        v-for="item in allocationItems"
+        :key="item.type"
+        class="portfolio-orbit-label"
+        :style="{
+          '--label-x': `${item.labelX}%`,
+          '--label-y': `${item.labelY}%`,
+          '--segment-color': item.color,
+        }"
+      >
+        <span class="portfolio-color" />
+        <span>{{ item.label }}</span>
+        <strong>{{ item.ratio }}%</strong>
+      </div>
+
       <div
         class="portfolio-donut"
         :style="donutStyle"
@@ -61,21 +85,15 @@ const donutStyle = computed(() => {
           <strong>{{ formatCompactWon(expectedFutureValue) }}</strong>
         </div>
       </div>
-
-      <div class="portfolio-legend">
-        <div v-for="item in allocationItems" :key="item.type">
-          <span class="portfolio-color" :style="{ background: item.color }" />
-          <span>{{ item.label }}</span>
-          <strong>{{ item.ratio }}%</strong>
-        </div>
-      </div>
     </div>
 
     <p v-if="years < 10" class="portfolio-rule-note">
+      선택 상품의 현재 수익률 가정으로 계산한 참고 금액이에요. <br />
       저축보험은 10년 이상 장기 운용 조건에서 비교 항목에 포함돼요.
     </p>
     <p v-else class="portfolio-rule-note">
-      저축보험의 보험차익 비과세 여부는 실제 납입 방식과 계약 유지 조건에 따라 달라져요.
+      선택 상품의 현재 수익률 가정으로 계산한 참고 금액이에요. <br />저축보험의 보험차익 비과세
+      여부는 실제 납입 방식과 계약 유지 조건에 따라 달라져요.
     </p>
   </section>
 </template>

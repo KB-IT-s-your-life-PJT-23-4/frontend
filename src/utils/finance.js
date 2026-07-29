@@ -143,7 +143,9 @@ export function calculatePortfolioValue({
       const installmentValue = Object.entries(allocation).reduce((total, [type, ratio]) => {
         if (!ratio) return total
         const rate = selectedProducts[type]?.rate ?? 0
-        return total + futureValue(installment.investmentAmount * (ratio / 100), rate, remainingYears)
+        return (
+          total + futureValue(installment.investmentAmount * (ratio / 100), rate, remainingYears)
+        )
       }, 0)
 
       return scenarioTotal + installmentValue
@@ -186,9 +188,9 @@ export function calculateSimulation({
   const representativeProducts = Object.fromEntries(
     Object.keys(PRODUCT_TYPE_META).map((type) => [
       type,
-      products
-        .filter((product) => product.type === type)
-        .sort((a, b) => b.rate - a.rate)[0] ?? { rate: 0 },
+      products.filter((product) => product.type === type).sort((a, b) => b.rate - a.rate)[0] ?? {
+        rate: 0,
+      },
     ]),
   )
   const decorateProducts = (principal) =>
@@ -289,10 +291,9 @@ export function calculateSimulation({
   const optimizedScenario = buildScenario({
     resultId: Date.now() + 2,
     scenarioType: 'TAX_OPTIMIZED',
-    scenarioName: '공제 한도부터 차근차근',
+    scenarioName: '공제 한도 우선 증여',
     description: '현재 공제 한도를 먼저 활용하고 갱신 후 나머지를 증여해요.',
-    deductionAmount:
-      currentGiftAmount + Math.min(deferredGiftAmount, family.deductionLimit),
+    deductionAmount: currentGiftAmount + Math.min(deferredGiftAmount, family.deductionLimit),
     tax: deferredTax,
     postTaxAmount: optimizedInvestmentAmount,
     currentAmount: currentGiftAmount,
