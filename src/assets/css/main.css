@@ -2712,6 +2712,7 @@ textarea:focus-visible {
   right: 0;
   height: 8px;
   content: '';
+}
 
 .document-link:hover {
   background: #d7e0ea;
@@ -2720,7 +2721,6 @@ textarea:focus-visible {
 .document-link.primary {
   background: var(--blue-strong);
   color: #fff;
-
 }
 
 .document-link.primary:hover {
@@ -3936,7 +3936,7 @@ textarea:focus-visible {
   place-items: center;
   border-radius: 6px;
   color: #668eaf;
-  background: rgba(255, 255, 255, 0.72);
+  background: #d9ecff;
 }
 
 .peer-average-copy {
@@ -4566,10 +4566,19 @@ textarea:focus-visible {
 }
 
 .portfolio-donut-layout {
-  position: relative;
+  display: grid;
   width: min(390px, 100%);
-  height: 260px;
+  min-height: 230px;
   margin: 14px auto 0;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  align-items: center;
+  gap: 12px;
+}
+
+.portfolio-donut-visual {
+  position: relative;
+  width: 100%;
+  height: 230px;
 }
 
 .portfolio-donut {
@@ -4609,24 +4618,28 @@ textarea:focus-visible {
   font-weight: 500;
 }
 
-.portfolio-orbit-label {
-  position: absolute;
-  top: var(--label-y);
-  left: var(--label-x);
-  z-index: 1;
-  display: inline-grid;
-  min-width: 72px;
-  padding: 7px 9px;
-  grid-template-columns: auto auto;
-  align-items: center;
-  justify-content: center;
-  gap: 3px 5px;
+.portfolio-allocation-summary {
+  display: grid;
+  padding: 12px 10px;
+  gap: 9px;
   border: 1px solid #e7edf2;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 5px 14px rgba(36, 58, 79, 0.09);
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.portfolio-allocation-title {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e7edf2;
+  color: #304e68;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.portfolio-allocation-row {
+  display: grid;
+  grid-template-columns: 7px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px;
 }
 
 .portfolio-color {
@@ -4636,17 +4649,18 @@ textarea:focus-visible {
   background: var(--segment-color);
 }
 
-.portfolio-orbit-label span:not(.portfolio-color) {
+.portfolio-allocation-row > span:not(.portfolio-color) {
+  overflow: hidden;
   color: #536174;
   font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.portfolio-orbit-label strong {
-  grid-column: 1 / -1;
+.portfolio-allocation-row strong {
   color: #304e68;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
-  text-align: center;
 }
 
 .portfolio-rule-note,
@@ -4666,6 +4680,14 @@ textarea:focus-visible {
   gap: 0;
   margin-top: 18px;
   border-bottom: 1px solid #e7edf2;
+}
+
+.portfolio-profile-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.portfolio-profile-tabs + .portfolio-donut-layout {
+  margin-top: 8px;
 }
 
 .product-category-tabs button {
