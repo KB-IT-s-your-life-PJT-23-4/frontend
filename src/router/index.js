@@ -5,6 +5,7 @@ import StatusView from '../pages/StatusView.vue'
 import ChatView from '../pages/ChatView.vue'
 import MyPageView from '../pages/MyPageView.vue'
 import NotificationsView from '../pages/NotificationsView.vue'
+import GuideDetailView from '../pages/GuideDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +25,11 @@ const router = createRouter({
       name: 'notifications',
       component: NotificationsView,
       meta: { label: '알림' },
+    },
+    {
+      path: '/guides/:slug(mirizoom|tax-brackets|gift-reporting|non-cash-gifts)',
+      name: 'guide-detail',
+      component: GuideDetailView,
     },
   ],
   scrollBehavior: () => ({ top: 0 }),
