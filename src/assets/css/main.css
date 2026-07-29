@@ -218,7 +218,39 @@ textarea:focus-visible {
   border-bottom: 1px solid rgba(225, 231, 239, 0.75);
   backdrop-filter: blur(14px);
 }
+.family-tabs,
+.family-switcher {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  padding: 4px;
+  gap: 4px;
+  overflow-x: auto;
+  border: 1px solid #e0e7f1;
+  border-radius: 18px;
+  background: #eef3fb;
+  scrollbar-width: none;
+}
 
+.family-tab,
+.family-switcher button {
+  min-width: 82px;
+  padding: 9px 15px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #748192;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.family-tab.active,
+.family-switcher button.active {
+  background: var(--kb-yellow);
+  color: #3e3300;
+  box-shadow: 0 4px 10px rgba(210, 164, 0, 0.2);
+}
 .brand-lockup {
   display: inline-flex;
   align-items: center;
