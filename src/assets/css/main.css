@@ -4258,10 +4258,29 @@ textarea:focus-visible {
 }
 
 .period-scale {
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  height: 14px;
   color: #98a3af;
   font-size: 9px;
+}
+
+.period-scale span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.period-scale span:first-child {
+  left: 0;
+}
+
+.period-scale span:nth-child(2) {
+  left: calc(47.368421% + 0.66px);
+  transform: translateX(-50%);
+}
+
+.period-scale span:last-child {
+  right: 0;
 }
 
 .long-term-note {
