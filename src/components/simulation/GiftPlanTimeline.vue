@@ -43,7 +43,10 @@ function getPosition(item) {
   <section class="gift-plan-timeline-card" aria-labelledby="gift-strategy-title">
     <header class="timeline-card-heading">
       <div>
-        <span class="section-kicker">추천 증여 플랜</span>
+        <div class="timeline-heading-meta">
+          <span class="section-kicker">추천 증여 플랜</span>
+          <span class="timeline-count">기간 내 {{ visibleSchedule.length }}회 증여</span>
+        </div>
         <h2 id="gift-strategy-title">
           {{
             result.exceedsDeduction
@@ -62,7 +65,6 @@ function getPosition(item) {
           계산했어요.
         </p>
       </div>
-      <span class="timeline-count">기간 내 {{ visibleSchedule.length }}회 증여</span>
     </header>
 
     <div class="timeline-key-metrics">

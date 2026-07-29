@@ -4374,6 +4374,10 @@ textarea:focus-visible {
   font-weight: 500;
 }
 
+.tax-option-mobile-break {
+  display: none;
+}
+
 .tax-payer-options small {
   color: var(--muted);
   font-size: 10px;
@@ -4421,6 +4425,10 @@ textarea:focus-visible {
   font-size: 19px;
   line-height: 1.35;
   letter-spacing: -0.045em;
+}
+
+.investment-mobile-break {
+  display: none;
 }
 
 .investment-growth-heading p {
@@ -4612,7 +4620,15 @@ textarea:focus-visible {
 }
 
 .timeline-card-heading > div {
+  width: 100%;
   min-width: 0;
+}
+
+.timeline-heading-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .timeline-plan-badge {
@@ -4657,7 +4673,7 @@ textarea:focus-visible {
 }
 
 .timeline-card-heading .timeline-count {
-  margin-top: 2px;
+  margin-top: 0;
   white-space: nowrap;
 }
 
@@ -5364,6 +5380,104 @@ textarea:focus-visible {
 }
 
 @media (max-width: 430px) {
+  .investment-mobile-break {
+    display: block;
+  }
+
+  .modal-sheet,
+  .modal-body,
+  .save-plan-preview {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .save-plan-preview > div {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .save-plan-preview > div > strong {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .save-plan-preview > div:last-child {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .save-plan-preview > div:last-child > strong {
+    width: 100%;
+  }
+
+  .save-plan-products {
+    width: 100%;
+    font-size: clamp(8px, 2.5vw, 11px);
+    letter-spacing: -0.035em;
+  }
+
+  .save-plan-product-row {
+    max-width: 100%;
+  }
+
+  .product-category-tabs button {
+    min-height: 54px;
+    padding: 7px 3px 10px;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .product-category-tabs span {
+    position: relative;
+    gap: 0;
+  }
+
+  .product-category-tabs span::before {
+    position: absolute;
+    top: 50%;
+    right: calc(100% + 6px);
+    transform: translateY(-50%);
+  }
+
+  .product-category-tabs button.active span::before {
+    transform: translateY(-50%) scale(1.18);
+  }
+
+  .product-category-tabs small {
+    padding: 0;
+    background: transparent;
+  }
+
+  .product-category-tabs button.active small {
+    background: transparent;
+  }
+
+  .tax-option-mobile-break {
+    display: block;
+  }
+
+  .amount-heading-copy {
+    width: 100%;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .amount-heading-copy h3 {
+    padding-top: 3px;
+  }
+
+  .input-step-heading .peer-average-insight {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: clamp(8px, 2.55vw, 10px);
+  }
+
+  .peer-average-insight strong {
+    font-size: clamp(10px, 2.8vw, 11px);
+  }
+
   .scenario-chart {
     min-height: 190px;
     padding: 14px 12px 8px;
@@ -5431,7 +5545,8 @@ textarea:focus-visible {
   }
 
   .timeline-card-heading h2 {
-    font-size: 18px;
+    font-size: clamp(14px, 4.5vw, 18px);
+    white-space: nowrap;
   }
 
   .timeline-plan-badge {
@@ -5467,7 +5582,7 @@ textarea:focus-visible {
   .gift-timeline-fill {
     top: 11px;
     right: auto;
-    bottom: 11px;
+    bottom: 33px;
     left: 10px;
     width: 3px;
     height: auto;
@@ -5520,11 +5635,15 @@ textarea:focus-visible {
     top: auto;
     right: auto;
     grid-template-columns: 23px 1fr;
-    min-height: 44px;
     padding-left: 0;
     justify-items: start;
     align-items: start;
     column-gap: 15px;
+  }
+
+  .timeline-end-dot {
+    position: relative;
+    z-index: 1;
   }
 
   .gift-timeline-end > div {

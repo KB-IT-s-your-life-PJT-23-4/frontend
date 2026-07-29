@@ -238,7 +238,7 @@ defineEmits([
             @click="$emit('update:donorPaysTax', true)"
           >
             <span class="tax-option-check"><i /></span>
-            <strong>주는 분이 함께 준비</strong>
+            <strong>주는 분이 함께<br class="tax-option-mobile-break" />준비</strong>
             <small>대납 세금도 추가 증여로 보아 계산해요.</small>
           </button>
         </div>
