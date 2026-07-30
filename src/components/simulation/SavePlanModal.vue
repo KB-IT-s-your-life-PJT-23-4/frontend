@@ -40,6 +40,9 @@ const productNames = computed(() =>
 )
 
 const productRows = computed(() => {
+  if (productNames.value.length === 3) {
+    return [productNames.value.slice(0, 2), productNames.value.slice(2)]
+  }
   if (productNames.value.length === 4) {
     return [productNames.value.slice(0, 2), productNames.value.slice(2)]
   }
