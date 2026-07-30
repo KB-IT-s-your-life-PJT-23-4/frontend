@@ -294,6 +294,7 @@ export const products = [
   {
     id: 201,
     type: 'ETF',
+    recommendationProfiles: ['GROWTH'],
     label: 'ETF',
     name: 'RISE 미국나스닥100',
     provider: 'KB자산운용',
@@ -323,6 +324,7 @@ export const products = [
   {
     id: 202,
     type: 'ETF',
+    recommendationProfiles: ['BALANCED', 'GROWTH'],
     label: 'ETF',
     name: 'RISE 미국S&P500',
     provider: 'KB자산운용',
@@ -352,6 +354,7 @@ export const products = [
   {
     id: 203,
     type: 'ETF',
+    recommendationProfiles: ['BALANCED', 'GROWTH'],
     label: 'ETF',
     name: 'RISE 200',
     provider: 'KB자산운용',
@@ -382,6 +385,7 @@ export const products = [
     id: 204,
     type: 'ETF',
     etfType: 'BOND_MIXED',
+    recommendationProfiles: ['STABLE'],
     label: 'ETF',
     name: 'RISE 삼성전자SK하이닉스채권혼합50',
     provider: 'KB자산운용',
@@ -412,6 +416,7 @@ export const products = [
     id: 205,
     type: 'ETF',
     etfType: 'BOND_MIXED',
+    recommendationProfiles: ['STABLE', 'BALANCED'],
     label: 'ETF',
     name: 'RISE 200채권혼합50',
     provider: 'KB자산운용',
@@ -442,6 +447,7 @@ export const products = [
     id: 206,
     type: 'ETF',
     etfType: 'BOND_MIXED',
+    recommendationProfiles: ['STABLE'],
     label: 'ETF',
     name: 'RISE 테슬라애플아마존채권혼합',
     provider: 'KB자산운용',

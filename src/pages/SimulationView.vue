@@ -237,6 +237,7 @@ async function savePlan() {
         :products="products"
         :allocation="portfolioAllocation"
         :selected-products="selectedProducts"
+        :portfolio-profile="selectedPortfolioType"
         @select="selectProduct"
       />
 

@@ -16,6 +16,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  portfolioProfile: {
+    type: String,
+    default: 'BALANCED',
+  },
 })
 
 const emit = defineEmits(['select'])
@@ -44,6 +48,11 @@ const holdingAssetLabels = {
   BOND: '채권',
   CASH: '예금·현금',
 }
+const portfolioProfileLabels = {
+  STABLE: '안정형',
+  BALANCED: '균형형',
+  GROWTH: '성장형',
+}
 
 const productGroups = computed(() =>
   productTypeOrder
@@ -54,16 +63,34 @@ const productGroups = computed(() =>
       ...PRODUCT_TYPE_META[type],
       products: props.products
         .filter(
-          (product) => product.type === type && (type !== 'ETF' || Boolean(product.trackingIndex)),
+          (product) =>
+            product.type === type &&
+            (type !== 'ETF' ||
+              (Boolean(product.trackingIndex) &&
+                (!product.recommendationProfiles?.length ||
+                  product.recommendationProfiles.includes(props.portfolioProfile)))),
         )
         .sort((a, b) => b.rate - a.rate)
-        .slice(0, type === 'ETF' ? 5 : 3),
+        .slice(0, 3),
     })),
+)
+const portfolioProfileLabel = computed(
+  () => portfolioProfileLabels[props.portfolioProfile] ?? '균형형',
 )
 
 watchEffect(() => {
   if (!productGroups.value.some((group) => group.type === activeProductType.value)) {
     activeProductType.value = productGroups.value[0]?.type ?? ''
+  }
+})
+
+watchEffect(() => {
+  const etfGroup = productGroups.value.find((group) => group.type === 'ETF')
+  if (!etfGroup?.products.length) return
+
+  const selectedEtfId = props.selectedProducts.ETF?.id
+  if (!etfGroup.products.some((product) => product.id === selectedEtfId)) {
+    emit('select', 'ETF', etfGroup.products[0])
   }
 })
 
@@ -168,7 +195,9 @@ function getHoldingSegments(topHoldings = []) {
             <span>{{ activeProductGroup.ratio }}% 운용</span>
           </div>
           <small>{{
-            activeProductGroup.type === 'ETF' ? '지수 추종 TOP 5' : '수익률 순 3개'
+            activeProductGroup.type === 'ETF'
+              ? `${portfolioProfileLabel} 맞춤 3개`
+              : '수익률 순 3개'
           }}</small>
         </div>
 
