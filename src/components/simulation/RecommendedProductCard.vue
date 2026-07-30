@@ -20,7 +20,7 @@ const selectedMixedProduct = computed(() =>
 
 const rateLabel = computed(() => {
   if (props.activeProduct.type === 'MIXED') return '포트폴리오 예상 수익률 (연)'
-  if (props.activeProduct.type === 'ETF' || props.activeProduct.type === 'INSURANCE') {
+  if (props.activeProduct.type === 'ETF') {
     return '예상 수익률 (연)'
   }
   return '금리 (연, 세전)'

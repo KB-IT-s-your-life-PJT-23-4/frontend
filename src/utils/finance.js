@@ -10,7 +10,6 @@ export const PRODUCT_TYPE_META = {
   DEPOSIT: { label: '예금', color: '#4f7fa8' },
   SAVINGS: { label: '적금', color: '#79a9c7' },
   ETF: { label: 'ETF', color: '#8276d8' },
-  INSURANCE: { label: '저축보험', color: '#4ca38f' },
 }
 
 export function calculateGiftTax(taxableAmount) {
@@ -118,22 +117,22 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
 export function getPortfolioAllocations(years) {
   if (years <= 3) {
     return {
-      STABLE: { DEPOSIT: 45, SAVINGS: 45, ETF: 10, INSURANCE: 0 },
-      BALANCED: { DEPOSIT: 40, SAVINGS: 40, ETF: 20, INSURANCE: 0 },
-      GROWTH: { DEPOSIT: 35, SAVINGS: 35, ETF: 30, INSURANCE: 0 },
+      STABLE: { DEPOSIT: 45, SAVINGS: 45, ETF: 10 },
+      BALANCED: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
+      GROWTH: { DEPOSIT: 35, SAVINGS: 35, ETF: 30 },
     }
   }
   if (years < 10) {
     return {
-      STABLE: { DEPOSIT: 40, SAVINGS: 40, ETF: 20, INSURANCE: 0 },
-      BALANCED: { DEPOSIT: 35, SAVINGS: 35, ETF: 30, INSURANCE: 0 },
-      GROWTH: { DEPOSIT: 25, SAVINGS: 25, ETF: 50, INSURANCE: 0 },
+      STABLE: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
+      BALANCED: { DEPOSIT: 35, SAVINGS: 35, ETF: 30 },
+      GROWTH: { DEPOSIT: 25, SAVINGS: 25, ETF: 50 },
     }
   }
   return {
-    STABLE: { DEPOSIT: 30, SAVINGS: 30, ETF: 20, INSURANCE: 20 },
-    BALANCED: { DEPOSIT: 17.5, SAVINGS: 17.5, ETF: 35, INSURANCE: 30 },
-    GROWTH: { DEPOSIT: 12.5, SAVINGS: 12.5, ETF: 25, INSURANCE: 50 },
+    STABLE: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
+    BALANCED: { DEPOSIT: 30, SAVINGS: 30, ETF: 40 },
+    GROWTH: { DEPOSIT: 20, SAVINGS: 20, ETF: 60 },
   }
 }
 

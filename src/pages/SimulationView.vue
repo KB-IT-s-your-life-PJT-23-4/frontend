@@ -102,7 +102,7 @@ const selectedProductSummary = computed(() =>
 )
 
 function initializeSelectedProducts() {
-  const types = ['DEPOSIT', 'SAVINGS', 'ETF', 'INSURANCE']
+  const types = ['DEPOSIT', 'SAVINGS', 'ETF']
   types.forEach((type) => {
     selectedProducts[type] = products
       .filter((product) => product.type === type)

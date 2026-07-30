@@ -25,7 +25,7 @@ const props = defineProps({
 const emit = defineEmits(['select'])
 const expanded = reactive(new Set())
 const activeProductType = ref('DEPOSIT')
-const productTypeOrder = ['DEPOSIT', 'SAVINGS', 'ETF', 'INSURANCE']
+const productTypeOrder = ['DEPOSIT', 'SAVINGS', 'ETF']
 const holdingSegmentColors = [
   '#675db0',
   '#8175cd',
