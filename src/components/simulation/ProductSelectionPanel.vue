@@ -22,6 +22,28 @@ const emit = defineEmits(['select'])
 const expanded = reactive(new Set())
 const activeProductType = ref('DEPOSIT')
 const productTypeOrder = ['DEPOSIT', 'SAVINGS', 'ETF', 'INSURANCE']
+const holdingSegmentColors = [
+  '#675db0',
+  '#8175cd',
+  '#978bdd',
+  '#aea4e9',
+  '#527da2',
+  '#6a97ba',
+  '#83afca',
+  '#5f9c87',
+  '#d0a24b',
+  '#c67d75',
+]
+const holdingAssetPalettes = {
+  EQUITY: ['#675db0', '#8175cd', '#9a8ddd', '#b1a6e8'],
+  BOND: ['#47779f', '#5d8aae', '#739dbc', '#89afca', '#9dc0d5', '#b2cfdf'],
+  CASH: ['#5e9183', '#79a79b', '#96bbb2', '#b4cec7'],
+}
+const holdingAssetLabels = {
+  EQUITY: '주식',
+  BOND: '채권',
+  CASH: '예금·현금',
+}
 
 const productGroups = computed(() =>
   productTypeOrder
@@ -60,6 +82,43 @@ function toggleDetails(productId) {
 function getRateLabel(product) {
   if (product.type === 'ETF') return `평균 수익률 연 ${product.rate}%`
   return `연 ${product.minRate}% ~ ${product.maxRate}%`
+}
+
+function getHoldingSegments(topHoldings = []) {
+  const assetColorIndexes = {}
+  const holdings = topHoldings.slice(0, 10).map((holding, index) => {
+    const palette = holdingAssetPalettes[holding.assetType]
+    const assetColorIndex = assetColorIndexes[holding.assetType] ?? 0
+    const color = palette?.[assetColorIndex % palette.length] ?? holdingSegmentColors[index]
+
+    if (holding.assetType) {
+      assetColorIndexes[holding.assetType] = assetColorIndex + 1
+    }
+
+    return {
+      ...holding,
+      rank: index + 1,
+      ratio: Math.max(0, Number(holding.ratio) || 0),
+      color,
+      assetLabel: holdingAssetLabels[holding.assetType] ?? '',
+      isOther: false,
+    }
+  })
+  const topTenTotal = holdings.reduce((total, holding) => total + holding.ratio, 0)
+  const otherRatio = Math.max(0, Math.round((100 - topTenTotal) * 10) / 10)
+
+  if (otherRatio === 0) return holdings
+  return [
+    ...holdings,
+    {
+      name: '기타',
+      ratio: otherRatio,
+      rank: null,
+      color: '#d8dee7',
+      assetLabel: '',
+      isOther: true,
+    },
+  ]
 }
 </script>
 
@@ -158,6 +217,40 @@ function getRateLabel(product) {
                 <div v-if="product.topHoldings?.length" class="product-holdings">
                   <div class="product-holdings-heading">
                     <span>구성 종목 비중 TOP 10</span>
+                  </div>
+                  <div
+                    class="product-holdings-chart"
+                    role="group"
+                    :aria-label="`${product.name} 구성 종목 비중`"
+                  >
+                    <button
+                      v-for="segment in getHoldingSegments(product.topHoldings)"
+                      :key="segment.isOther ? 'other' : segment.name"
+                      type="button"
+                      class="product-holding-segment"
+                      :class="{ other: segment.isOther }"
+                      :style="{
+                        width: `${segment.ratio}%`,
+                        '--holding-segment-color': segment.color,
+                      }"
+                      :aria-label="
+                        segment.isOther
+                          ? `기타 ${segment.ratio}%`
+                          : `${segment.rank}위 ${segment.name} ${segment.ratio}%`
+                      "
+                    >
+                      <span class="product-holding-tooltip" role="tooltip">
+                        <small>
+                          {{
+                            segment.isOther
+                              ? '나머지 비중'
+                              : [segment.assetLabel, `${segment.rank}위`].filter(Boolean).join(' · ')
+                          }}
+                        </small>
+                        <strong>{{ segment.name }}</strong>
+                        <b>{{ segment.ratio }}%</b>
+                      </span>
+                    </button>
                   </div>
                   <ol class="product-holdings-list">
                     <li v-for="(holding, holdingIndex) in product.topHoldings" :key="holding.name">
