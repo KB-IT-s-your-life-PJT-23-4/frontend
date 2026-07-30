@@ -1,8 +1,18 @@
 import { computed, reactive, readonly, watch } from 'vue'
-import { api } from '../api/apiAdapter'
+import { api, GIFT_STATUS } from '../api/apiAdapter'
 import { initialState } from '../data/mockData'
+import {
+  deductionLimitFor,
+  peerAverageGiftAmount,
+  relationCode,
+  relationLabel,
+  renewalDisplay,
+  toDotDate,
+  toIsoDate,
+} from '../utils/deduction'
 
-const STORAGE_KEY = 'mirizoom-demo-state-v1'
+// 데모 상태와 서버 연동 상태를 섞으면 목데이터 familyId가 DB 값과 충돌하므로 저장 키를 분리한다.
+const STORAGE_KEY = api.isMock ? 'mirizoom-demo-state-v1' : 'mirizoom-status-state-v1'
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value))
@@ -12,17 +22,48 @@ function clone(value) {
 // 저장된 옛 상태에 남은 documents가 새 항목(tooltip, sampleImage)을 지워버리는 문제 방지.
 const REFERENCE_KEYS = ['documents']
 
+// 서버 연동 모드에서 DB가 원본인 값들. 목데이터 시드 대신 빈 값으로 시작해 syncStatus()로 채운다.
+const SERVER_SOURCED_STATE = {
+  families: [],
+  plans: [],
+  giftHistory: [],
+  // 시뮬레이션 이력 API는 아직 없어 저장 시점부터 이 브라우저에 쌓인다. 목 시드는 쓰지 않는다.
+  simulations: [],
+  selectedFamilyId: null,
+}
+
+// 가족이 아직 없을 때(신규 가입/미로그인) 화면이 깨지지 않도록 쓰는 빈 수증자.
+const EMPTY_FAMILY = {
+  id: null,
+  name: '수증자',
+  relation: '',
+  birthDate: '',
+  peerAverageGiftAmount: 0,
+  deductionLimit: 0,
+  giftedAmount: 0,
+  remainingDeduction: 0,
+  resetDate: '미정',
+  resetLabel: '증여 이력 없음',
+  tone: 'blue',
+  empty: true,
+}
+
+function defaultState() {
+  const base = clone(initialState)
+  return api.isMock ? base : { ...base, ...clone(SERVER_SOURCED_STATE) }
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (!saved) return clone(initialState)
-    const merged = { ...clone(initialState), ...JSON.parse(saved) }
+    if (!saved) return defaultState()
+    const merged = { ...defaultState(), ...JSON.parse(saved) }
     REFERENCE_KEYS.forEach((key) => {
       merged[key] = clone(initialState[key])
     })
     return merged
   } catch {
-    return clone(initialState)
+    return defaultState()
   }
 }
 
@@ -39,7 +80,10 @@ watch(
 )
 
 const selectedFamily = computed(
-  () => state.families.find((family) => family.id === state.selectedFamilyId) ?? state.families[0],
+  () =>
+    state.families.find((family) => family.id === state.selectedFamilyId) ??
+    state.families[0] ??
+    EMPTY_FAMILY,
 )
 
 const unreadCount = computed(() => state.notifications.filter((item) => item.unread).length)
@@ -62,15 +106,15 @@ async function addGift({ familyId, date, amount, memo = '현금' }) {
   const numericAmount = Number(amount)
 
   if (!api.isMock) {
-    // 과거 이력은 확정된 증여로 등록한다.
+    // 과거 이력은 이미 끝난 증여이므로 COMPLETED로 등록한다.
     await api.createGift({
       familyId: Number(familyId),
       amount: numericAmount,
-      giftDate: String(date).replaceAll('.', '-'),
+      giftDate: toIsoDate(date),
       memo,
-      status: 'CONFIRMED',
+      status: GIFT_STATUS.COMPLETED,
     })
-    await syncGifts(familyId)
+    await syncStatus()
     showToast('증여 이력이 추가됐어요.')
     return
   }
@@ -88,8 +132,27 @@ async function addGift({ familyId, date, amount, memo = '현금' }) {
   showToast('증여 이력이 추가됐어요.')
 }
 
-function savePlan(plan) {
-  state.plans.unshift({ id: Date.now(), ...plan })
+async function savePlan(plan) {
+  if (!api.isMock) {
+    // 저장한 계획은 진행 중인 증여(PLANNED)로 DB에 남는다. 이후 화면은 syncStatus()가 채운다.
+    // 호출부가 결과를 기다리지 않으므로 실패는 여기서 알린다.
+    try {
+      await api.createGift({
+        familyId: Number(plan.familyId),
+        amount: Number(plan.currentAmount || plan.amount),
+        giftDate: toIsoDate(plan.giftDate),
+        memo: plan.productName || plan.title || '진행 중인 증여',
+        status: GIFT_STATUS.PLANNED,
+      })
+      await syncStatus()
+    } catch (error) {
+      showToast(error.message || '증여 계획을 저장하지 못했습니다.', 'info')
+      return
+    }
+  } else {
+    state.plans.unshift({ id: Date.now(), ...plan })
+  }
+
   state.simulations.unshift({
     id: Date.now() + 1,
     familyId: plan.familyId,
@@ -123,8 +186,9 @@ function savePlan(plan) {
 async function deletePlan(planId) {
   const plan = state.plans.find((item) => item.id === planId)
   if (!api.isMock && plan?.source === 'server') {
+    // 서버는 PLANNED 상태만 삭제를 허용한다(그 외 409 CONFLICT).
     await api.deleteGift(planId)
-    await syncGifts(plan.familyId)
+    await syncStatus()
   } else {
     state.plans = state.plans.filter((item) => item.id !== planId)
   }
@@ -132,56 +196,112 @@ async function deletePlan(planId) {
   showToast('증여 계획을 삭제했어요.', 'info')
 }
 
-function toDotDate(value) {
-  if (!value) return ''
-  return String(value).slice(0, 10).replaceAll('-', '.')
-}
-
-// 서버 gift(DRAFT) → 화면에서 쓰는 진행 중인 증여 형태로 변환
-function draftGiftToPlan(gift) {
+// 서버 gift(PLANNED) → 화면에서 쓰는 진행 중인 증여 형태로 변환
+function plannedGiftToPlan(gift) {
   return {
     id: gift.giftId,
-    familyId: gift.familyId,
+    familyId: Number(gift.familyId),
     amount: Number(gift.amount),
     currentAmount: Number(gift.amount),
     giftDate: toDotDate(gift.giftDate),
     productName: gift.memo || '진행 중인 증여',
     memo: gift.memo ?? '',
-    status: 'PLANNED',
+    status: GIFT_STATUS.PLANNED,
     source: 'server',
   }
 }
 
-function confirmedGiftToHistory(gift) {
+// 서버 gift(COMPLETED) → 증여 이력 형태로 변환
+function completedGiftToHistory(gift) {
   return {
     id: gift.giftId,
-    familyId: gift.familyId,
+    familyId: Number(gift.familyId),
     date: toDotDate(gift.giftDate),
     type: gift.memo || '현금',
     amount: Number(gift.amount),
-    status: 'COMPLETED',
+    status: GIFT_STATUS.COMPLETED,
     source: 'server',
   }
 }
 
-// DB에서 해당 가족의 진행 중인 증여(DRAFT) / 확정 이력(CONFIRMED)을 가져와 상태에 반영한다.
-// VITE_API_BASE_URL이 없으면(api.isMock) 데모 데이터를 그대로 사용한다.
-async function syncGifts(familyId = state.selectedFamilyId) {
+// 서버 family(RecipientResponse) + 그 가족의 공제 현황(DeductionResponse) → 화면 수증자 형태.
+// 공제 한도·누적 증여액·갱신일은 GET /api/gm/deduction 이 산출한 값을 그대로 쓴다.
+// 여기서 다시 계산하지 말 것. 남은 기간 문구만 renewalDisplay 로 만든다.
+function serverFamilyToState(recipient, deduction) {
+  const renewal = renewalDisplay(deduction?.nextRenewalDate ?? null)
+
+  return {
+    id: Number(recipient.familyId),
+    name: recipient.familyName,
+    relation: relationLabel(recipient.relation),
+    relationCode: relationCode(recipient.relation),
+    birthDate: toDotDate(recipient.birthDate),
+    isMinor: recipient.isMinor ?? deduction?.minor ?? false,
+    familyImg: recipient.familyImg ?? null,
+    peerAverageGiftAmount: peerAverageGiftAmount(recipient.birthDate),
+    deductionLimit: deduction?.deductionLimit ?? null,
+    giftedAmount: deduction?.usedAmount ?? 0,
+    remainingDeduction: deduction?.remainingAmount ?? null,
+    plannedAmount: deduction?.plannedAmount ?? 0,
+    remainingDeductionIfPlanned: deduction?.remainingAmountIfPlanned ?? null,
+    aggregatedCount: deduction?.aggregatedCount ?? 0,
+    resetDate: renewal.resetDate,
+    resetLabel: renewal.resetLabel,
+    nextRenewalDate: renewal.nextRenewalDate,
+    daysUntilRenewal: renewal.daysUntilRenewal,
+    tone: Number(recipient.familyId) % 2 ? 'blue' : 'mint',
+    source: 'server',
+  }
+}
+
+let statusLoaded = false
+let pendingSync = null
+
+/**
+ * DB에서 수증자 목록·증여 전체·공제 현황을 읽어 증여 현황 상태를 다시 만든다.
+ * 증여를 등록/확정/삭제한 뒤에는 이 함수만 호출하면 된다(공제도 같이 갱신된다).
+ * VITE_API_BASE_URL이 없으면(api.isMock) 데모 데이터를 그대로 사용한다.
+ */
+async function syncStatus() {
   if (api.isMock) return
-  const id = Number(familyId)
-  const [drafts, confirmed] = await Promise.all([
-    api.listGifts({ familyId: id, status: 'DRAFT' }),
-    api.listGifts({ familyId: id, status: 'CONFIRMED' }),
+
+  const [recipients, gifts, deductions] = await Promise.all([
+    api.listFamilies(),
+    api.listGifts(),
+    api.listDeductions(),
   ])
 
-  state.plans = [
-    ...state.plans.filter((plan) => Number(plan.familyId) !== id),
-    ...drafts.map(draftGiftToPlan),
-  ]
-  state.giftHistory = [
-    ...state.giftHistory.filter((gift) => Number(gift.familyId) !== id),
-    ...confirmed.map(confirmedGiftToHistory),
-  ]
+  const deductionByFamily = new Map(
+    deductions.map((deduction) => [Number(deduction.familyId), deduction]),
+  )
+
+  state.families = recipients.map((recipient) =>
+    serverFamilyToState(recipient, deductionByFamily.get(Number(recipient.familyId))),
+  )
+  state.plans = gifts.filter((gift) => gift.status === GIFT_STATUS.PLANNED).map(plannedGiftToPlan)
+  state.giftHistory = gifts
+    .filter((gift) => gift.status === GIFT_STATUS.COMPLETED)
+    .map(completedGiftToHistory)
+
+  // 선택된 수증자가 DB에서 사라졌거나 아직 없으면 첫 번째 가족으로 맞춘다.
+  const familyIds = state.families.map((family) => family.id)
+  if (!familyIds.includes(Number(state.selectedFamilyId))) {
+    state.selectedFamilyId = familyIds[0] ?? null
+  }
+
+  statusLoaded = true
+}
+
+/** 화면 진입 시 호출. 이미 불러왔으면 재요청하지 않고, 동시 호출은 한 번으로 합친다. */
+async function ensureStatusLoaded({ force = false } = {}) {
+  if (api.isMock) return
+  if (statusLoaded && !force) return
+  if (!pendingSync) {
+    pendingSync = syncStatus().finally(() => {
+      pendingSync = null
+    })
+  }
+  return pendingSync
 }
 
 async function confirmPlanGift(planId) {
@@ -191,9 +311,9 @@ async function confirmPlanGift(planId) {
   const family = state.families.find((item) => item.id === plan.familyId)
 
   if (!api.isMock) {
-    // DRAFT → CONFIRMED 전이 후 서버 데이터를 다시 읽어온다.
-    await api.updateGiftStatus(planId, 'CONFIRMED')
-    await syncGifts(plan.familyId)
+    // PLANNED → COMPLETED 전이 후 서버 데이터를 다시 읽어온다.
+    await api.updateGiftStatus(planId, GIFT_STATUS.COMPLETED)
+    await syncStatus()
   } else {
     const today = new Intl.DateTimeFormat('ko-KR', {
       year: 'numeric',
@@ -261,18 +381,32 @@ function deleteSimulation(simulationId) {
   showToast('시뮬레이션 이력을 삭제했어요.', 'info')
 }
 
-function addFamily({ name, relation, birthDate }) {
+async function addFamily({ name, relation, birthDate }) {
+  const code = relationCode(relation)
+
+  if (!api.isMock) {
+    const created = await api.createFamily({
+      familyName: name,
+      relation: code,
+      birthDate: toIsoDate(birthDate),
+    })
+    await syncStatus()
+    if (created?.familyId) state.selectedFamilyId = Number(created.familyId)
+    showToast('수증자 정보가 등록됐어요.')
+    return
+  }
+
   const id = Math.max(0, ...state.families.map((item) => item.id)) + 1
-  const birthYear = Number(birthDate.slice(0, 4))
-  const age = new Date().getFullYear() - birthYear
   state.families.push({
     id,
     name,
-    relation,
-    birthDate: birthDate.replaceAll('-', '.'),
-    peerAverageGiftAmount: age < 19 ? 18000000 : age < 30 ? 30000000 : 42000000,
-    deductionLimit: 50000000,
+    relation: relationLabel(code),
+    relationCode: code,
+    birthDate: toDotDate(birthDate),
+    peerAverageGiftAmount: peerAverageGiftAmount(birthDate),
+    deductionLimit: deductionLimitFor(code, birthDate),
     giftedAmount: 0,
+    remainingDeduction: deductionLimitFor(code, birthDate),
     resetDate: '미정',
     resetLabel: '증여 이력 없음',
     tone: id % 2 ? 'blue' : 'mint',
@@ -286,7 +420,13 @@ function updateProfile(profile) {
   showToast('회원 정보가 저장됐어요.')
 }
 
-function resetDemo() {
+async function resetDemo() {
+  // 서버 연동 모드에서는 되돌릴 데모 데이터가 없으므로 DB 상태를 다시 읽어온다.
+  if (!api.isMock) {
+    await ensureStatusLoaded({ force: true })
+    showToast('서버 데이터를 다시 불러왔어요.', 'info')
+    return
+  }
   Object.assign(state, clone(initialState))
   showToast('데모 데이터를 처음 상태로 되돌렸어요.', 'info')
 }
@@ -304,7 +444,8 @@ export function useAppStore() {
     addGift,
     savePlan,
     deletePlan,
-    syncGifts,
+    syncStatus,
+    ensureStatusLoaded,
     confirmPlanGift,
     toggleDocument,
     isDocumentChecked,
