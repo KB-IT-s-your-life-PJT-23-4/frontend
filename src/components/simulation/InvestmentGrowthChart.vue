@@ -45,7 +45,10 @@ function getBarHeight(value) {
 <template>
   <section class="investment-growth-card" aria-labelledby="investment-growth-title">
     <header class="investment-growth-heading">
-      <h2 id="investment-growth-title">운용 원금이 {{ years }}년 후 얼마나 달라질까요?</h2>
+      <h2 id="investment-growth-title">
+        운용 원금이 {{ years }}년 후<br class="investment-mobile-break" />
+        얼마나 달라질까요?
+      </h2>
       <p>지금 선택한 상품의 수익률을 반영한 예상 결과예요.</p>
     </header>
 

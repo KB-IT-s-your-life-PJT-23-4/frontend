@@ -121,16 +121,6 @@ defineEmits([
           <span>2</span>
           <div class="amount-heading-copy">
             <h3>얼마를 증여할까요?</h3>
-            <p class="peer-average-insight">
-              <span class="peer-average-icon"><AppIcon name="chart" :size="14" /></span>
-              <span class="peer-average-copy">
-                <span class="peer-average-lead">미리줌 이용자들은 같은 나이대 자녀에게</span>
-                <span class="peer-average-result"
-                  >평균 <strong>{{ formatCompactWon(peerAverageGiftAmount) }}</strong
-                  >을 증여했어요</span
-                >
-              </span>
-            </p>
           </div>
         </div>
 
@@ -151,6 +141,16 @@ defineEmits([
           <button type="button" @click="$emit('add-amount', 30000000)">+3천만원</button>
           <button type="button" @click="$emit('add-amount', 50000000)">+5천만원</button>
         </div>
+        <p class="peer-average-insight">
+          <span class="peer-average-icon"><AppIcon name="chart" :size="14" /></span>
+          <span class="peer-average-copy">
+            <span class="peer-average-lead">미리줌 이용자들은 같은 나이대 자녀에게</span>
+            <span class="peer-average-result"
+              >평균 <strong>{{ formatCompactWon(peerAverageGiftAmount) }}</strong
+              >을 증여했어요.</span
+            >
+          </span>
+        </p>
       </section>
 
       <section class="simulation-input-step period-step">
@@ -200,13 +200,7 @@ defineEmits([
           </div>
         </div>
 
-        <aside v-if="investmentYears >= 10" class="long-term-note">
-          <AppIcon name="sparkles" :size="18" />
-          <p>
-            10년 이상 장기 운용 조건으로 저축보험을 포함해 비교해 드릴게요.<br>
-            실제 비과세 적용 여부는 상품별 요건을 확인해야 해요.
-          </p>
-        </aside>
+        
       </section>
 
       <section class="simulation-input-step tax-payer-step">
@@ -238,7 +232,7 @@ defineEmits([
             @click="$emit('update:donorPaysTax', true)"
           >
             <span class="tax-option-check"><i /></span>
-            <strong>주는 분이 함께 준비</strong>
+            <strong>주는 분이 함께<br class="tax-option-mobile-break" />준비</strong>
             <small>대납 세금도 추가 증여로 보아 계산해요.</small>
           </button>
         </div>
