@@ -95,7 +95,7 @@ const weightedPortfolioRate = computed(() =>
 )
 const selectedProductSummary = computed(() =>
   Object.entries(portfolioAllocation.value)
-    .filter(([type, ratio]) => ratio > 0 && type !== 'INSURANCE')
+    .filter(([type, ratio]) => ratio > 0)
     .map(([type]) => selectedProducts[type]?.name)
     .filter(Boolean)
     .join(' · '),
