@@ -2562,6 +2562,21 @@ textarea:focus-visible {
   padding: 0;
 }
 
+/* 증여 현황 조회 실패 안내: 메시지 + 재시도/로그인 액션 */
+.status-load-error {
+  align-items: center;
+}
+
+.status-load-error p {
+  flex: 1;
+}
+
+.status-load-error .soft-button {
+  flex: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
 .active-plan-card {
   overflow: hidden;
   border-radius: var(--radius-md);
