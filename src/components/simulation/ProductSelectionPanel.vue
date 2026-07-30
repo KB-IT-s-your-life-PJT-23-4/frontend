@@ -107,7 +107,7 @@ function toggleDetails(productId) {
 }
 
 function getRateLabel(product) {
-  if (product.type === 'ETF') return `평균 수익률 연 ${product.rate}%`
+  if (product.type === 'ETF') return `연 평균 수익률 ${product.rate}%`
   return `연 ${product.minRate}% ~ ${product.maxRate}%`
 }
 
@@ -273,7 +273,9 @@ function getHoldingSegments(topHoldings = []) {
                           {{
                             segment.isOther
                               ? '나머지 비중'
-                              : [segment.assetLabel, `${segment.rank}위`].filter(Boolean).join(' · ')
+                              : [segment.assetLabel, `${segment.rank}위`]
+                                  .filter(Boolean)
+                                  .join(' · ')
                           }}
                         </small>
                         <strong>{{ segment.name }}</strong>
@@ -323,6 +325,8 @@ function getHoldingSegments(topHoldings = []) {
     </div>
 
     <p class="product-data-notice">
+      <!-- <AppIcon name="info" :size="14" /> -->
+      ETF의 연 평균 수익률은 최근 5년 수익률을 기준으로 계산했어요. <br />
       상품명과 수익률은 화면 시연을 위한 데모 정보이며, 실제 가입 전 최신 상품 설명서를 확인해야
       해요.
     </p>
