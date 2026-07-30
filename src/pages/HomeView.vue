@@ -10,28 +10,29 @@ const latestNotifications = computed(() => store.state.notifications.slice(0, 2)
 const guideCards = [
   {
     title: '미리줌 사용 가이드라인',
-    //description: '가족 정보 등록부터 증여 시뮬레이션까지, 미리줌을 시작하는 방법을 안내합니다.',
+    badge: 'HOT',
     icon: 'sparkles',
+    image: '/src/assets/brand-symbol.svg',
     color: 'purple',
     to: '/guides/mirizoom',
   },
   {
     title: '과세 구간 확인하기',
-    //description: '증여세 과세표준 구간과 세율을 한눈에 확인해 보세요.',
+    badge: 'CALCULATE',
     icon: 'calculator',
     color: 'yellow',
     to: '/guides/tax-brackets',
   },
   {
     title: '증여 신고 방법 A-Z',
-    //description: '신고 기한, 준비 서류, 홈택스 신고 절차를 순서대로 알려드립니다.',
+    badge: 'GUIDE',
     icon: 'check',
     color: 'green',
     to: '/guides/gift-reporting',
   },
   {
     title: '현금 외 증여에 대하여',
-    //description: '부동산·주식 등 현금이 아닌 자산을 증여할 때의 핵심 사항입니다.',
+    badge: 'ASSETS',
     icon: 'arrow',
     color: 'blue',
     to: '/guides/non-cash-gifts',
@@ -72,6 +73,7 @@ const guideCards = [
           증여 시뮬레이션 시작하기 <AppIcon name="arrow" :size="19" />
         </RouterLink>
       </section>
+
       <section class="section-block guide-overview">
         <div class="section-heading-row">
           <div>
@@ -79,22 +81,25 @@ const guideCards = [
             <h2>증여 가이드</h2>
           </div>
         </div>
-
-        <div class="guide-card-grid">
-          <RouterLink v-for="guide in guideCards" :key="guide.to" :to="guide.to" class="guide-card">
-            <span class="guide-card-icon" :class="guide.color">
-              <AppIcon :name="guide.icon" :size="23" />
-            </span>
-            <span class="guide-card-copy">
-              <strong>{{ guide.title }}</strong>
-              <!-- <span>{{ guide.description }}</span> -->
-            </span>
-            <AppIcon class="guide-card-chevron" name="chevron" :size="18" />
+        <div class="guide-news-scroll">
+          <RouterLink
+            v-for="guide in guideCards"
+            :key="guide.to"
+            :to="guide.to"
+            class="guide-news-card"
+            :class="guide.color"
+          >
+            <div class="guide-news-top">
+              <span class="guide-news-badge">{{ guide.badge }}</span>
+              <h3>{{ guide.title }}</h3>
+            </div>
+            <AppIcon class="guide-news-icon" :name="guide.icon" :size="112" />
+            <span class="guide-news-arrow"><AppIcon name="arrow" :size="18" /></span>
           </RouterLink>
         </div>
       </section>
 
-      <section class="section-block">
+      <!-- <section class="section-block">
         <div class="section-heading-row">
           <div>
             <span class="section-kicker">지금 확인해 보세요</span>
@@ -131,7 +136,7 @@ const guideCards = [
           <p>FAQ와 관련 법령을 바탕으로 이해하기 쉽게 안내해요.</p>
         </div>
         <RouterLink class="secondary-button" to="/chat">AI 상담 시작하기</RouterLink>
-      </section>
+      </section> -->
     </div>
   </div>
 </template>
