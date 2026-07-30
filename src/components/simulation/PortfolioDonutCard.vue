@@ -45,13 +45,13 @@ const allocationItems = computed(() => {
 })
 
 const donutStyle = computed(() => {
-  let cursor = 0
-  const segments = allocationItems.value.map((item) => {
-    const start = cursor
-    cursor += item.ratio
-    return `${item.color} ${start}% ${cursor}%`
-  })
-  return { background: `conic-gradient(${segments.join(', ')})` }
+  const depositRatio = allocation.value.DEPOSIT ?? 0
+  const savingsRatio = allocation.value.SAVINGS ?? 0
+
+  return {
+    '--deposit-stop': `${depositRatio}%`,
+    '--savings-stop': `${depositRatio + savingsRatio}%`,
+  }
 })
 </script>
 
