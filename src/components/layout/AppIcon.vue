@@ -26,8 +26,10 @@ defineProps({
         <path d="M5.7 9.4v10h12.6v-10M9.6 19.4v-5.2h4.8v5.2" />
       </template>
       <template v-else-if="name === 'calculator'">
-        <rect x="4.5" y="2.8" width="15" height="18.4" rx="2.5" />
-        <path d="M7.8 6.3h8.4v3.1H7.8zM8 13h.1M12 13h.1M16 13h.1M8 17h.1M12 17h.1M16 17h.1" />
+        <rect x="4.5" y="3.5" width="15" height="17" rx="2.5" />
+        <path
+          d="M7.5 6.8h9v3.2h-9zM7.5 13.5h1.5M11.25 13.5h1.5M15 13.5h1.5M7.5 17h1.5M11.25 17h1.5M15 17h1.5"
+        />
       </template>
       <template v-else-if="name === 'chart'">
         <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
@@ -90,7 +92,9 @@ defineProps({
         <path d="m3 4 18 8-18 8 3-8zM6 12h15" />
       </template>
       <template v-else-if="name === 'sparkles'">
-        <path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4zM18.5 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" />
+        <path
+          d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4zM18.5 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"
+        />
       </template>
       <template v-else-if="name === 'map'">
         <path d="M9 4 3 6.5v14L9 18l6 2.5 6-2.5v-14L15 6.5zM9 4v14M15 6.5v14" />
@@ -100,7 +104,10 @@ defineProps({
       </template>
       <template v-else-if="name === 'settings'">
         <circle cx="12" cy="12" r="3" />
-        <path d="M19 13.5v-3l-2-.7a7 7 0 0 0-.7-1.7l.9-1.9-2.1-2.1-1.9.9a7 7 0 0 0-1.7-.7L10.8 2h-3l-.7 2.3a7 7 0 0 0-1.7.7l-1.9-.9-2.1 2.1.9 1.9a7 7 0 0 0-.7 1.7L0 10.5v3l2 .7c.2.6.4 1.2.7 1.7l-.9 1.9 2.1 2.1 1.9-.9c.5.3 1.1.5 1.7.7l.7 2.3h3l.7-2.3c.6-.2 1.2-.4 1.7-.7l1.9.9 2.1-2.1-.9-1.9c.3-.5.5-1.1.7-1.7z" transform="translate(2) scale(.83)" />
+        <path
+          d="M19 13.5v-3l-2-.7a7 7 0 0 0-.7-1.7l.9-1.9-2.1-2.1-1.9.9a7 7 0 0 0-1.7-.7L10.8 2h-3l-.7 2.3a7 7 0 0 0-1.7.7l-1.9-.9-2.1 2.1.9 1.9a7 7 0 0 0-.7 1.7L0 10.5v3l2 .7c.2.6.4 1.2.7 1.7l-.9 1.9 2.1 2.1 1.9-.9c.5.3 1.1.5 1.7.7l.7 2.3h3l.7-2.3c.6-.2 1.2-.4 1.7-.7l1.9.9 2.1-2.1-.9-1.9c.3-.5.5-1.1.7-1.7z"
+          transform="translate(2) scale(.83)"
+        />
       </template>
       <template v-else>
         <circle cx="12" cy="12" r="8.5" />
@@ -108,4 +115,3 @@ defineProps({
     </g>
   </svg>
 </template>
-
