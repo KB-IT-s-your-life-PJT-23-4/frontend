@@ -107,7 +107,7 @@ export const api = {
     return Array.isArray(data) ? data : []
   },
 
-  // POST /api/fm/family — relation 은 ENUM(SPOUSE/LINEAL_DESCENDANT/OTHER) 코드만 허용
+  // POST /api/fm/family — relation 은 ENUM(LINEAL_DESCENDANT/OTHER) 코드만 허용
   async createFamily({ familyName, relation, birthDate, familyImg = null }) {
     if (!API_BASE) return null
     return request(FAMILY_PATH, {

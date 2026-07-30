@@ -15,7 +15,7 @@ const showProfile = ref(false)
 const showSettings = ref(false)
 const simulationToDelete = ref(null)
 const savingFamily = ref(false)
-// 백엔드 family.relation 은 ENUM(SPOUSE/LINEAL_DESCENDANT/OTHER) 이라 코드로 보낸다.
+// 백엔드 family.relation 은 ENUM(LINEAL_DESCENDANT/OTHER) 이라 코드로 보낸다.
 const familyForm = reactive({
   name: '',
   relation: RELATION_OPTIONS[0].code,
