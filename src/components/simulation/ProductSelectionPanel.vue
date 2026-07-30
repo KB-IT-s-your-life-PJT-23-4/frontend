@@ -155,14 +155,6 @@ function getRateLabel(product) {
                   <span>추종 지수</span>
                   <strong>{{ product.trackingIndex }}</strong>
                 </div>
-                <div class="product-etf-metric">
-                  <span>시가총액</span>
-                  <strong>{{ product.marketCap }}</strong>
-                </div>
-                <div class="product-etf-metric">
-                  <span>배당수익률</span>
-                  <strong>{{ product.dividendYield }}%</strong>
-                </div>
                 <div v-if="product.topHoldings?.length" class="product-holdings">
                   <div class="product-holdings-heading">
                     <span>구성 종목 비중 TOP 10</span>
