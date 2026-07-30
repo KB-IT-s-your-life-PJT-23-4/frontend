@@ -45,13 +45,13 @@ const allocationItems = computed(() => {
 })
 
 const donutStyle = computed(() => {
-  let cursor = 0
-  const segments = allocationItems.value.map((item) => {
-    const start = cursor
-    cursor += item.ratio
-    return `${item.color} ${start}% ${cursor}%`
-  })
-  return { background: `conic-gradient(${segments.join(', ')})` }
+  const depositRatio = allocation.value.DEPOSIT ?? 0
+  const savingsRatio = allocation.value.SAVINGS ?? 0
+
+  return {
+    '--deposit-stop': `${depositRatio}%`,
+    '--savings-stop': `${depositRatio + savingsRatio}%`,
+  }
 })
 </script>
 
@@ -116,13 +116,9 @@ const donutStyle = computed(() => {
       </div>
     </div>
 
-    <p v-if="years < 10" class="portfolio-rule-note">
-      선택 상품의 현재 수익률 가정으로 계산한 참고 금액이에요. <br />
-      저축보험은 10년 이상 장기 운용 조건에서 비교 항목에 포함돼요.
-    </p>
-    <p v-else class="portfolio-rule-note">
-      선택 상품의 현재 수익률 가정으로 계산한 참고 금액이에요. <br />저축보험의 보험차익 비과세
-      여부는 실제 납입 방식과 계약 유지 조건에 따라 달라져요.
+    <p class="portfolio-rule-note">
+      선택 상품의 현재 수익률을 가정해 계산한 참고 금액이에요. 실제 수익률은 시장 상황과
+      상품 조건에 따라 달라질 수 있어요.
     </p>
   </section>
 </template>

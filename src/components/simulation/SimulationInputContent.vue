@@ -199,8 +199,6 @@ defineEmits([
             <span>20년</span>
           </div>
         </div>
-
-        
       </section>
 
       <section class="simulation-input-step tax-payer-step">

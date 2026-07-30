@@ -2489,8 +2489,7 @@ textarea:focus-visible {
   box-shadow: none;
 }
 
-.risk-card.deposit,
-.risk-card.insurance {
+.risk-card.deposit {
   background: #f4f9ff;
 }
 
@@ -2503,8 +2502,7 @@ textarea:focus-visible {
   font-weight: 500;
 }
 
-.risk-card.deposit .risk-card-top > span,
-.risk-card.insurance .risk-card-top > span {
+.risk-card.deposit .risk-card-top > span {
   color: #497899;
 }
 
@@ -2513,8 +2511,7 @@ textarea:focus-visible {
   font-size: 22px;
 }
 
-.risk-card.deposit .risk-card-top strong,
-.risk-card.insurance .risk-card-top strong {
+.risk-card.deposit .risk-card-top strong {
   color: var(--blue-strong);
 }
 
@@ -2533,8 +2530,7 @@ textarea:focus-visible {
   background: #f26469;
 }
 
-.risk-card.deposit .risk-scale span,
-.risk-card.insurance .risk-scale span {
+.risk-card.deposit .risk-scale span {
   background: #79a8d1;
 }
 
@@ -4552,7 +4548,6 @@ textarea:focus-visible {
   right: 0;
 }
 
-
 .tax-payer-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5135,6 +5130,18 @@ textarea:focus-visible {
   height: 230px;
 }
 
+@property --deposit-stop {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --savings-stop {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
 .portfolio-donut {
   position: absolute;
   top: 50%;
@@ -5144,8 +5151,17 @@ textarea:focus-visible {
   height: 170px;
   place-items: center;
   border-radius: 50%;
+  background: conic-gradient(
+    #4f7fa8 0 var(--deposit-stop),
+    #79a9c7 var(--deposit-stop) var(--savings-stop),
+    #8276d8 var(--savings-stop) 100%
+  );
   transform: translate(-50%, -50%) rotate(-90deg);
   box-shadow: inset 0 0 0 1px rgba(31, 48, 65, 0.05);
+  transition:
+    --deposit-stop 620ms cubic-bezier(0.22, 1, 0.36, 1),
+    --savings-stop 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: --deposit-stop, --savings-stop;
 }
 
 .portfolio-donut-center {
@@ -5559,6 +5575,212 @@ textarea:focus-visible {
   grid-column: 1 / -1;
 }
 
+.selectable-product-details .product-holdings {
+  grid-column: 1 / -1;
+  gap: 9px;
+}
+
+.product-holdings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.product-holdings-chart {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 20px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: #edf0f4;
+  box-shadow:
+    0 0 0 1px #e1e6ed,
+    0 4px 11px rgba(45, 57, 75, 0.08);
+}
+
+.product-holding-segment {
+  position: relative;
+  display: block;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  flex: none;
+  border: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.62);
+  background: var(--holding-segment-color);
+  cursor: help;
+  transition:
+    filter 150ms ease,
+    transform 150ms ease;
+}
+
+.product-holding-segment:first-child {
+  border-radius: 999px 0 0 999px;
+}
+
+.product-holding-segment:last-child {
+  border-right: 0;
+  border-radius: 0 999px 999px 0;
+}
+
+.product-holding-segment:only-child {
+  border-radius: 999px;
+}
+
+.product-holding-segment:hover,
+.product-holding-segment:focus-visible {
+  z-index: 3;
+  filter: brightness(1.08) saturate(1.05);
+  outline: 0;
+  transform: scaleY(1.24);
+}
+
+.product-holding-segment:focus-visible {
+  box-shadow: 0 0 0 3px rgba(81, 123, 159, 0.25);
+}
+
+.product-holding-tooltip {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  z-index: 5;
+  display: grid;
+  width: max-content;
+  min-width: 108px;
+  max-width: 180px;
+  padding: 8px 10px;
+  justify-items: start;
+  gap: 2px;
+  border: 1px solid rgba(42, 58, 75, 0.08);
+  border-radius: 10px;
+  color: #fff;
+  background: #26394b;
+  box-shadow: 0 8px 20px rgba(27, 42, 58, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px) scale(0.96);
+  transform-origin: bottom center;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.product-holding-tooltip::after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #26394b;
+  content: '';
+  transform: translate(-50%, -4px) rotate(45deg);
+}
+
+.product-holding-segment:first-child .product-holding-tooltip {
+  left: -3px;
+  transform: translate(0, 4px) scale(0.96);
+  transform-origin: bottom left;
+}
+
+.product-holding-segment:first-child .product-holding-tooltip::after {
+  left: 12px;
+}
+
+.product-holding-segment:last-child .product-holding-tooltip {
+  right: -3px;
+  left: auto;
+  transform: translate(0, 4px) scale(0.96);
+  transform-origin: bottom right;
+}
+
+.product-holding-segment:last-child .product-holding-tooltip::after {
+  right: 8px;
+  left: auto;
+}
+
+.product-holding-segment:hover .product-holding-tooltip,
+.product-holding-segment:focus-visible .product-holding-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.product-holding-segment:first-child:hover .product-holding-tooltip,
+.product-holding-segment:first-child:focus-visible .product-holding-tooltip,
+.product-holding-segment:last-child:hover .product-holding-tooltip,
+.product-holding-segment:last-child:focus-visible .product-holding-tooltip {
+  transform: translate(0, 0) scale(1);
+}
+
+.product-holding-tooltip small {
+  color: #b9c8d5;
+  font-size: 7px;
+}
+
+.product-holding-tooltip strong {
+  overflow: hidden;
+  max-width: 158px;
+  color: #fff;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-holding-tooltip b {
+  color: #ffe27b;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.product-holdings-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  gap: 6px;
+  list-style: none;
+}
+
+.product-holdings-list li {
+  display: grid;
+  min-width: 0;
+  min-height: 31px;
+  padding: 6px 8px;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #e7eaf3;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.product-holdings-list li > span {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 6px;
+  color: #52718c;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.product-holdings-list li > strong {
+  overflow: hidden;
+  color: #465365;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-holdings-list li > b {
+  color: #52718c;
+  font-size: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .product-condition-list p {
   display: flex;
   margin: 0;
@@ -5610,7 +5832,6 @@ textarea:focus-visible {
   place-items: center;
   border-radius: 15px;
   color: #755d08;
-  background: #ffed9d;
 }
 
 .filing-credit-callout h2 {

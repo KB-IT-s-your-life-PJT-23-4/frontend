@@ -10,7 +10,6 @@ export const PRODUCT_TYPE_META = {
   DEPOSIT: { label: '예금', color: '#4f7fa8' },
   SAVINGS: { label: '적금', color: '#79a9c7' },
   ETF: { label: 'ETF', color: '#8276d8' },
-  INSURANCE: { label: '저축보험', color: '#4ca38f' },
 }
 
 export function calculateGiftTax(taxableAmount) {
@@ -31,8 +30,12 @@ export function formatWon(value) {
 export function formatCompactWon(value) {
   const amount = Math.round(Number(value) || 0)
   if (amount >= 100000000) {
-    const eok = amount / 100000000
-    return `${Number.isInteger(eok) ? eok : eok.toFixed(1)}억원`
+    const amountInManWon = Math.round(amount / 10000)
+    const eok = Math.floor(amountInManWon / 10000)
+    const manWon = amountInManWon % 10000
+
+    if (manWon === 0) return `${eok.toLocaleString('ko-KR')}억원`
+    return `${eok.toLocaleString('ko-KR')}억 ${manWon.toLocaleString('ko-KR')}만원`
   }
   if (amount >= 10000) return `${Math.round(amount / 10000).toLocaleString('ko-KR')}만원`
   return `${amount.toLocaleString('ko-KR')}원`
@@ -114,29 +117,22 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
 export function getPortfolioAllocations(years) {
   if (years <= 3) {
     return {
-      STABLE: { DEPOSIT: 55, SAVINGS: 40, ETF: 5, INSURANCE: 0 },
-      BALANCED: { DEPOSIT: 45, SAVINGS: 45, ETF: 10, INSURANCE: 0 },
-      GROWTH: { DEPOSIT: 20, SAVINGS: 20, ETF: 60, INSURANCE: 0 },
-    }
-  }
-  if (years <= 6) {
-    return {
-      STABLE: { DEPOSIT: 50, SAVINGS: 40, ETF: 10, INSURANCE: 0 },
-      BALANCED: { DEPOSIT: 35, SAVINGS: 30, ETF: 35, INSURANCE: 0 },
-      GROWTH: { DEPOSIT: 15, SAVINGS: 20, ETF: 65, INSURANCE: 0 },
+      STABLE: { DEPOSIT: 45, SAVINGS: 45, ETF: 10 },
+      BALANCED: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
+      GROWTH: { DEPOSIT: 35, SAVINGS: 35, ETF: 30 },
     }
   }
   if (years < 10) {
     return {
-      STABLE: { DEPOSIT: 45, SAVINGS: 40, ETF: 15, INSURANCE: 0 },
-      BALANCED: { DEPOSIT: 25, SAVINGS: 25, ETF: 50, INSURANCE: 0 },
-      GROWTH: { DEPOSIT: 10, SAVINGS: 15, ETF: 75, INSURANCE: 0 },
+      STABLE: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
+      BALANCED: { DEPOSIT: 35, SAVINGS: 35, ETF: 30 },
+      GROWTH: { DEPOSIT: 25, SAVINGS: 25, ETF: 50 },
     }
   }
   return {
-    STABLE: { DEPOSIT: 40, SAVINGS: 30, ETF: 10, INSURANCE: 20 },
-    BALANCED: { DEPOSIT: 20, SAVINGS: 20, ETF: 35, INSURANCE: 25 },
-    GROWTH: { DEPOSIT: 10, SAVINGS: 10, ETF: 65, INSURANCE: 15 },
+    STABLE: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
+    BALANCED: { DEPOSIT: 30, SAVINGS: 30, ETF: 40 },
+    GROWTH: { DEPOSIT: 20, SAVINGS: 20, ETF: 60 },
   }
 }
 
