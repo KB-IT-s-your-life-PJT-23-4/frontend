@@ -200,13 +200,7 @@ defineEmits([
           </div>
         </div>
 
-        <aside v-if="investmentYears >= 10" class="long-term-note">
-          <AppIcon name="sparkles" :size="18" />
-          <p>
-            10년 이상 장기 운용 조건으로 저축보험을 포함해 비교해 드릴게요.<br />
-            실제 비과세 적용 여부는 상품별 요건을 확인해야 해요.
-          </p>
-        </aside>
+        
       </section>
 
       <section class="simulation-input-step tax-payer-step">
