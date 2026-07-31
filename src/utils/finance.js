@@ -12,6 +12,12 @@ export const PRODUCT_TYPE_META = {
   ETF: { label: 'ETF', color: '#8276d8' },
 }
 
+export const PRODUCT_CALCULATION_METHOD = {
+  DEPOSIT: 'DEPOSIT_SIMPLE_INTEREST',
+  SAVINGS: 'SAVINGS_MONTHLY_INSTALLMENT',
+  ETF: 'ETF_COMPOUND_RETURN',
+}
+
 export function calculateGiftTax(taxableAmount) {
   if (!Number.isFinite(taxableAmount) || taxableAmount <= 0) return 0
   const bracket = TAX_BRACKETS.find((item) => taxableAmount <= item.ceiling)
@@ -21,6 +27,73 @@ export function calculateGiftTax(taxableAmount) {
 export function futureValue(principal, annualRate, years = 10) {
   if (!Number.isFinite(principal) || principal <= 0) return 0
   return Math.round(principal * (1 + annualRate / 100) ** Math.max(0, years))
+}
+
+export function calculateDepositFutureValue(principal, annualRate, months) {
+  const amount = Number(principal) || 0
+  if (amount <= 0) return 0
+
+  const rate = Number(annualRate) || 0
+  const periodMonths = Math.max(0, Number(months) || 0)
+  return Math.round(amount * (1 + (rate / 100) * (periodMonths / 12)))
+}
+
+export function calculateSavingsFutureValue(
+  totalContribution,
+  annualRate,
+  months,
+  paymentTiming = 'END_OF_MONTH',
+) {
+  const principal = Number(totalContribution) || 0
+  if (principal <= 0) return 0
+
+  const paymentCount = Math.max(0, Math.round(Number(months) || 0))
+  if (paymentCount === 0) return Math.round(principal)
+
+  const monthlyContribution = principal / paymentCount
+  const monthlyRate = (Number(annualRate) || 0) / 100 / 12
+
+  if (monthlyRate === 0) return Math.round(principal)
+
+  const ordinaryAnnuityValue =
+    monthlyContribution * (((1 + monthlyRate) ** paymentCount - 1) / monthlyRate)
+  const timingMultiplier = paymentTiming === 'BEGINNING_OF_MONTH' ? 1 + monthlyRate : 1
+
+  return Math.round(ordinaryAnnuityValue * timingMultiplier)
+}
+
+export function calculateEtfFutureValue(principal, annualReturnRate, months) {
+  const amount = Number(principal) || 0
+  if (amount <= 0) return 0
+
+  const annualGrowthFactor = Math.max(0, 1 + (Number(annualReturnRate) || 0) / 100)
+  const periodMonths = Math.max(0, Number(months) || 0)
+  return Math.round(amount * annualGrowthFactor ** (periodMonths / 12))
+}
+
+export function calculateProductFutureValue(product, principal, months) {
+  const productType = product?.type ?? product?.productType
+  const method = product?.calculationMethod ?? PRODUCT_CALCULATION_METHOD[productType]
+  const annualRate =
+    product?.rate ??
+    product?.annualReturnRatePercent ??
+    product?.appliedAnnualRatePercent ??
+    0
+
+  if (method === PRODUCT_CALCULATION_METHOD.DEPOSIT) {
+    return calculateDepositFutureValue(principal, annualRate, months)
+  }
+
+  if (method === PRODUCT_CALCULATION_METHOD.SAVINGS) {
+    return calculateSavingsFutureValue(
+      principal,
+      annualRate,
+      months,
+      product?.paymentTiming ?? 'END_OF_MONTH',
+    )
+  }
+
+  return calculateEtfFutureValue(principal, annualRate, months)
 }
 
 export function formatWon(value) {
@@ -70,8 +143,11 @@ function formatDate(date) {
     .replace(/\.$/, '')
 }
 
-function yearsBetween(start, end) {
-  return Math.max(0, (end.getTime() - start.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+function monthsBetween(start, end) {
+  const wholeMonths =
+    (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
+  const dayFraction = (end.getDate() - start.getDate()) / 30.4375
+  return Math.max(0, wholeMonths + dayFraction)
 }
 
 function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
@@ -155,12 +231,13 @@ export function calculatePortfolioValue({
       const giftDate = toDate(installment.date) ?? start
       if (giftDate > end) return scenarioTotal
 
-      const remainingYears = yearsBetween(giftDate, end)
+      const remainingMonths = monthsBetween(giftDate, end)
       const installmentValue = Object.entries(allocation).reduce((total, [type, ratio]) => {
         if (!ratio) return total
-        const rate = selectedProducts[type]?.rate ?? 0
+        const product = selectedProducts[type] ?? { type, rate: 0 }
+        const allocatedAmount = installment.investmentAmount * (ratio / 100)
         return (
-          total + futureValue(installment.investmentAmount * (ratio / 100), rate, remainingYears)
+          total + calculateProductFutureValue(product, allocatedAmount, remainingMonths)
         )
       }, 0)
 
@@ -210,12 +287,21 @@ export function calculateSimulation({
     ]),
   )
   const decorateProducts = (principal) =>
-    products.map((product) => ({
-      ...product,
-      principal,
-      expectedFutureValue: futureValue(principal, product.rate, investmentYears),
-      expectedProfit: futureValue(principal, product.rate, investmentYears) - principal,
-    }))
+    products.map((product) => {
+      const expectedFutureValue = calculateProductFutureValue(
+        product,
+        principal,
+        investmentYears * 12,
+      )
+      return {
+        ...product,
+        principal,
+        calculationMethod:
+          product.calculationMethod ?? PRODUCT_CALCULATION_METHOD[product.type],
+        expectedFutureValue,
+        expectedProfit: expectedFutureValue - principal,
+      }
+    })
 
   const immediateSchedule = [
     {

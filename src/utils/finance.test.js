@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  calculateDepositFutureValue,
+  calculateEtfFutureValue,
   calculateGiftTax,
+  calculateSavingsFutureValue,
   calculateSimulation,
   futureValue,
   getPortfolioAllocation,
@@ -36,6 +39,18 @@ describe('증여 계산', () => {
 
   it('복리 예상 자산을 계산한다', () => {
     expect(futureValue(10000000, 3, 10)).toBe(13439164)
+  })
+
+  it('예금은 운용 개월 수에 따라 단리로 계산한다', () => {
+    expect(calculateDepositFutureValue(38568000, 3.4, 36)).toBe(42501936)
+  })
+
+  it('적금은 월말 적립식으로 계산한다', () => {
+    expect(calculateSavingsFutureValue(36000000, 3.7, 36)).toBe(38012141)
+  })
+
+  it('ETF는 연 평균 수익률을 연복리로 계산한다', () => {
+    expect(calculateEtfFutureValue(18642000, 5.1, 36)).toBe(21642162)
   })
 
   it('투자 성향별 포트폴리오 비중의 합은 100%이다', () => {
