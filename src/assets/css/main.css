@@ -3947,6 +3947,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 5px;
   background: #eef4ff;
+  color: black;
 }
 
 .chat-composer {
