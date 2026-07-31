@@ -109,6 +109,9 @@ defineProps({
           transform="translate(2) scale(.83)"
         />
       </template>
+      <template v-else-if="name === 'close'">
+        <path d="M6 6l12 12M18 6 6 18" />
+      </template>
       <template v-else>
         <circle cx="12" cy="12" r="8.5" />
       </template>

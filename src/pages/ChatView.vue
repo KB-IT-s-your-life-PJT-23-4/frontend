@@ -30,7 +30,34 @@ const messages = ref([
 ])
 const loading = ref(false)
 const showEndModal = ref(false)
+const showFaqSheet = ref(false)
 const conversation = ref(null)
+
+const faqCategories = [
+  {
+    title: '증여세 계산/신고',
+    items: [
+      { question: '증여세 신고 방법', prompt: '증여세는 어떻게 신고하나요?' },
+      { question: '신고 기한 확인', prompt: '증여세 신고 기한이 언제까지인가요?' },
+      { question: '세액 계산기', prompt: '증여세를 계산해줘' },
+      { question: '납부 방법 안내', prompt: '증여세는 어떻게 납부하나요?' },
+    ],
+  },
+  {
+    title: '증여 공제/한도',
+    items: [
+      { question: '성년 자녀 공제', prompt: '성년 자녀에게 증여할 때 공제 한도가 얼마인가요?' },
+      { question: '미성년 자녀 공제', prompt: '미성년 자녀에게 증여할 때 공제 한도가 얼마인가요?' },
+      { question: '10년 합산 기준', prompt: '10년 합산 기준이 무엇인가요?' },
+      { question: '비과세 한도', prompt: '증여세 비과세 한도가 궁금해요.' },
+    ],
+  },
+]
+
+function pickFaq(prompt) {
+  showFaqSheet.value = false
+  sendMessage(prompt)
+}
 
 async function scrollToBottom() {
   await nextTick()
@@ -165,19 +192,29 @@ function clearConversation() {
       <button class="explain-button" type="button" @click="input = '증여재산공제를 쉽게 설명해줘'">
         <AppIcon name="sparkles" :size="15" /> 쉽게 설명해줘
       </button>
-      <form class="chat-composer" @submit.prevent="sendMessage()">
-        <label class="sr-only" for="chat-input">증여 상담 질문</label>
-        <input
-          id="chat-input"
-          v-model="input"
-          type="text"
-          placeholder="궁금한 내용을 입력하세요..."
-          autocomplete="off"
-        />
-        <button type="submit" :disabled="!input.trim() || loading" aria-label="질문 보내기">
-          <AppIcon name="send" :size="19" />
+      <div class="chat-composer-row">
+        <button
+          class="chat-plus-button"
+          type="button"
+          aria-label="자주 묻는 질문 보기"
+          @click="showFaqSheet = true"
+        >
+          <AppIcon name="plus" :size="20" />
         </button>
-      </form>
+        <form class="chat-composer" @submit.prevent="sendMessage()">
+          <label class="sr-only" for="chat-input">증여 상담 질문</label>
+          <input
+            id="chat-input"
+            v-model="input"
+            type="text"
+            placeholder="궁금한 내용을 입력하세요..."
+            autocomplete="off"
+          />
+          <button type="submit" :disabled="!input.trim() || loading" aria-label="질문 보내기">
+            <AppIcon name="send" :size="19" />
+          </button>
+        </form>
+      </div>
       <!-- <button
         v-if="messages.length > 2"
         class="end-chat-button"
@@ -187,6 +224,56 @@ function clearConversation() {
         상담 종료
       </button> -->
     </div>
+
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="showFaqSheet"
+          class="modal-backdrop"
+          role="presentation"
+          @click.self="showFaqSheet = false"
+        >
+          <section
+            class="modal-sheet faq-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="자주 묻는 질문"
+          >
+            <div class="faq-sheet-header">
+              <h2>자주 묻는 질문</h2>
+              <button
+                type="button"
+                class="faq-sheet-close"
+                aria-label="닫기"
+                @click="showFaqSheet = false"
+              >
+                <AppIcon name="close" :size="18" />
+              </button>
+            </div>
+            <p class="faq-sheet-greeting">
+              <span class="faq-sheet-avatar"><AppIcon name="sparkles" :size="15" /></span>
+              <span
+                >안녕하세요, 고객님!<br />아래 버튼을 누르거나 궁금하신 내용을 직접 입력해
+                주세요.</span
+              >
+            </p>
+            <div v-for="category in faqCategories" :key="category.title" class="faq-sheet-category">
+              <h3>{{ category.title }}</h3>
+              <div class="faq-sheet-grid">
+                <button
+                  v-for="item in category.items"
+                  :key="item.question"
+                  type="button"
+                  @click="pickFaq(item.prompt)"
+                >
+                  {{ item.question }}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
 
     <ModalSheet
       :show="showEndModal"
