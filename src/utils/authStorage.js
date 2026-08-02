@@ -18,6 +18,31 @@ function parseStoredUser(value) {
   }
 }
 
+function decodeJwtPayload(token) {
+  if (!token || typeof token !== 'string') return null
+
+  try {
+    const payload = token.split('.')[1]
+    if (!payload) return null
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+    return JSON.parse(atob(padded))
+  } catch {
+    return null
+  }
+}
+
+export function getTokenExpiration(token) {
+  const expiration = decodeJwtPayload(token)?.exp
+  return Number.isFinite(expiration) ? expiration * 1000 : null
+}
+
+export function isTokenExpired(token, now = Date.now()) {
+  const expiration = getTokenExpiration(token)
+  return expiration == null || expiration <= now
+}
+
 export function loadAuthSession() {
   const storage = getStorage()
   if (!storage) return { accessToken: null, refreshToken: null, user: null }

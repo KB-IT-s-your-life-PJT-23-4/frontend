@@ -1,4 +1,4 @@
-import { computed, reactive, readonly, watch } from 'vue'
+import { computed, nextTick, reactive, readonly, watch } from 'vue'
 import { api, GIFT_STATUS } from '../api/apiAdapter'
 import { initialState } from '../data/mockData'
 import {
@@ -256,6 +256,7 @@ function serverFamilyToState(recipient, deduction) {
 
 let statusLoaded = false
 let pendingSync = null
+let statusGeneration = 0
 
 /**
  * DB에서 수증자 목록·증여 전체·공제 현황을 읽어 증여 현황 상태를 다시 만든다.
@@ -265,11 +266,15 @@ let pendingSync = null
 async function syncStatus() {
   if (api.isMock) return
 
+  const generation = statusGeneration
+
   const [recipients, gifts, deductions] = await Promise.all([
     api.listFamilies(),
     api.listGifts(),
     api.listDeductions(),
   ])
+
+  if (generation !== statusGeneration) return
 
   const deductionByFamily = new Map(
     deductions.map((deduction) => [Number(deduction.familyId), deduction]),
@@ -297,11 +302,30 @@ async function ensureStatusLoaded({ force = false } = {}) {
   if (api.isMock) return
   if (statusLoaded && !force) return
   if (!pendingSync) {
-    pendingSync = syncStatus().finally(() => {
-      pendingSync = null
+    const trackedSync = syncStatus().finally(() => {
+      if (pendingSync === trackedSync) pendingSync = null
     })
+    pendingSync = trackedSync
   }
   return pendingSync
+}
+
+async function clearUserState() {
+  statusGeneration += 1
+  statusLoaded = false
+  pendingSync = null
+
+  const nextState = defaultState()
+  Object.keys(state).forEach((key) => {
+    if (!(key in nextState)) delete state[key]
+  })
+  Object.assign(state, nextState)
+
+  clearTimeout(toastTimer)
+  Object.assign(toast, { visible: false, message: '', type: 'success' })
+
+  await nextTick()
+  localStorage.removeItem(STORAGE_KEY)
 }
 
 async function confirmPlanGift(planId) {
@@ -456,5 +480,6 @@ export function useAppStore() {
     addFamily,
     updateProfile,
     resetDemo,
+    clearUserState,
   }
 }
