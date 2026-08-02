@@ -507,21 +507,24 @@ export const faqCategories = [
       {
         question: '서비스 소개',
         prompt: '미리줌은 어떤 서비스인가요?',
-        answer: 'MiriZoom(미리줌)은',
+        answer:
+          'MiriZoom(미리줌)은 자녀에게 자산을 안전하고 지혜롭게 물려줄 수 있도록 증여 현황 관리 및 맞춤형 금융상품 시뮬레이션을 제공하는 스마트 증여 케어 서비스입니다.',
         showBranchButton: false,
         showTaxOfficeButton: false,
       },
       {
         question: '시뮬레이션 사용 방법',
         prompt: '미리줌 시뮬레이션은 어떻게 사용하나요?',
-        answer: '...',
+        answer:
+          '자녀를 선택하고 증여하고자 하는 자산 금액을 입력하면, 즉시 증여 시 예상 세액과 세무 최적화 시나리오(분할 증여 등)를 비교 분석해 드립니다. 시뮬레이션 결과를 바탕으로 자녀 성향에 맞는 KB 금융상품 포트폴리오까지 한눈에 추천받으실 수 있습니다.',
         showBranchButton: false,
         showTaxOfficeButton: false,
       },
       {
         question: '현황관리',
         prompt: '미리줌에서 증여 현황 관리는 어떻게 하나요?',
-        answer: '...',
+        answer:
+          '과거에 자녀에게 증여했던 이력을 등록하면 10년 합산 공제 한도 잔여액과 다음 공제 한도 리셋 주기를 타임라인으로 쉽게 모니터링할 수 있습니다. 증여세 신고 독려 알림 및 필수 서류 체크리스트 기능도 함께 지원합니다.',
         showBranchButton: false,
         showTaxOfficeButton: false,
       },
