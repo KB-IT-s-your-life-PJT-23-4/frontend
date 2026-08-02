@@ -1,5 +1,6 @@
 import { faqItems, products } from '../data/mockData'
 import { calculateSimulation } from '../utils/finance'
+import { getAccessToken } from '../utils/authStorage'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
 
@@ -16,26 +17,35 @@ export const GIFT_STATUS = {
 }
 
 function authHeaders() {
-  const token = localStorage.getItem('mirizoom-token')
+  const token = getAccessToken()
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
 export async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-      ...options.headers,
-    },
-    ...options,
-  })
+  let response
+
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+        ...options.headers,
+      },
+      ...options,
+    })
+  } catch (cause) {
+    const error = new Error('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
+    error.code = 'NETWORK_ERROR'
+    error.cause = cause
+    throw error
+  }
 
   const payload = await response.json().catch(() => null)
 
   if (!response.ok || payload?.error) {
     const error = new Error(payload?.error || '요청을 처리하지 못했습니다.')
     error.status = response.status
-    error.code = payload?.statusCode
+    error.code = payload?.statusCode ?? response.status
     error.payload = payload
     throw error
   }

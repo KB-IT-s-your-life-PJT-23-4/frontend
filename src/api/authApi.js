@@ -1,9 +1,5 @@
 import { api, request } from './apiAdapter'
 
-const ACCESS_TOKEN_KEY = 'mirizoom-token'
-const REFRESH_TOKEN_KEY = 'mirizoom-refresh-token'
-const USER_KEY = 'mirizoom-user'
-
 function ensureAuthApiConfigured() {
   if (!api.isMock) return
 
@@ -20,13 +16,12 @@ export function login(loginData) {
   })
 }
 
-export function signup({ name, email, password }) {
+export function signup({ name, email, password, birthDate, phone, img = null }) {
   ensureAuthApiConfigured()
 
-  // TODO: 백엔드 UserSignupRequest에 birthDate와 phone 필드가 추가되면 요청 본문에 함께 전달한다.
   return request('/auth/signup', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password, birthDate, phone, img }),
   })
 }
 
@@ -36,8 +31,10 @@ export function checkEmailDuplicate(email) {
   return request(`/auth/check-email?${params.toString()}`)
 }
 
-export function saveAuthSession({ accessToken, refreshToken, user }) {
-  if (accessToken) localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
-  if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
-  if (user) localStorage.setItem(USER_KEY, JSON.stringify(user))
+export function logout(refreshToken) {
+  ensureAuthApiConfigured()
+  return request('/auth/logout', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken }),
+  })
 }
