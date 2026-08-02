@@ -3,9 +3,10 @@ import { nextTick, ref } from 'vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
-import { faqItems } from '../data/mockData'
+import { faqItems, faqCategories } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 
+// =============================== 데이터 포맷 설정
 function getTodayDateFormat() {
   const now = new Date()
   return `오늘, ${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`
@@ -19,6 +20,7 @@ function getCurrentTimeFormat() {
   })
 }
 
+// =============================== 초기 답장 포맷
 const input = ref('')
 const messages = ref([
   {
@@ -33,30 +35,10 @@ const showEndModal = ref(false)
 const showFaqSheet = ref(false)
 const conversation = ref(null)
 
-const faqCategories = [
-  {
-    title: '증여세 계산/신고',
-    items: [
-      { question: '증여세 신고 방법', prompt: '증여세는 어떻게 신고하나요?' },
-      { question: '신고 기한 확인', prompt: '증여세 신고 기한이 언제까지인가요?' },
-      { question: '세액 계산기', prompt: '증여세를 계산해줘' },
-      { question: '납부 방법 안내', prompt: '증여세는 어떻게 납부하나요?' },
-    ],
-  },
-  {
-    title: '증여 공제/한도',
-    items: [
-      { question: '성년 자녀 공제', prompt: '성년 자녀에게 증여할 때 공제 한도가 얼마인가요?' },
-      { question: '미성년 자녀 공제', prompt: '미성년 자녀에게 증여할 때 공제 한도가 얼마인가요?' },
-      { question: '10년 합산 기준', prompt: '10년 합산 기준이 무엇인가요?' },
-      { question: '비과세 한도', prompt: '증여세 비과세 한도가 궁금해요.' },
-    ],
-  },
-]
-
-function pickFaq(prompt) {
+// =============================== faq 포맷
+function pickFaq(prompt, answer, showBranch, showTaxOffice) {
   showFaqSheet.value = false
-  sendMessage(prompt)
+  sendMessage(prompt, answer, showBranch, showTaxOffice)
 }
 
 async function scrollToBottom() {
@@ -67,7 +49,13 @@ async function scrollToBottom() {
   })
 }
 
-async function sendMessage(question = input.value) {
+// =============================== 미리줌 AI 답장 포맷
+async function sendMessage(
+  question = input.value,
+  staticAnswer = null,
+  showBranch = false,
+  showTaxOffice = false,
+) {
   const trimmed = question.trim()
   if (!trimmed || loading.value) return
 
@@ -79,6 +67,29 @@ async function sendMessage(question = input.value) {
   })
 
   input.value = ''
+
+  if (staticAnswer) {
+    loading.value = true
+    await scrollToBottom()
+
+    setTimeout(async () => {
+      messages.value.push({
+        id: Date.now() + 1,
+        role: 'assistant',
+        text: staticAnswer,
+        actions: showBranch || showTaxOffice, // 둘 중 하나라도 true면 actions 블록을 활성화합니다.
+        showBranchButton: showBranch,
+        showTaxOfficeButton: showTaxOffice,
+        createdAt: getCurrentTimeFormat(), // 누락되었던 시간 값 추가
+      })
+      loading.value = false
+      await scrollToBottom()
+    }, 300)
+
+    return
+  }
+
+  // =============================== 일반 입력창에서 들어온 질문 처리
   loading.value = true
   await scrollToBottom()
 
@@ -90,6 +101,8 @@ async function sendMessage(question = input.value) {
       text: response.answer,
       references: response.references,
       actions: true,
+      showBranchButton: true,
+      showTaxOfficeButton: true,
       createdAt: getCurrentTimeFormat(),
     })
   } catch (error) {
@@ -106,6 +119,7 @@ async function sendMessage(question = input.value) {
   }
 }
 
+// =============================== 상담 초기화 포맷
 function clearConversation() {
   messages.value = [
     {
@@ -140,6 +154,7 @@ function clearConversation() {
             </div>
             <div v-if="message.actions" class="chat-actions">
               <a
+                v-if="message.showBranchButton"
                 class="primary-button compact"
                 href="https://map.naver.com/p/search/근처 국민은행"
                 target="_blank"
@@ -148,6 +163,7 @@ function clearConversation() {
                 가까운 영업점 알아보기
               </a>
               <a
+                v-if="message.showTaxOfficeButton"
                 class="secondary-button compact"
                 href="https://www.nts.go.kr/nts/taxSrch/taxSrchPage.do?mi=6761"
                 target="_blank"
@@ -172,7 +188,7 @@ function clearConversation() {
             v-for="faq in faqItems"
             :key="faq.id"
             type="button"
-            @click="sendMessage(faq.prompt)"
+            @click="sendMessage(faq.prompt, null, false, true)"
           >
             {{ faq.question }}
           </button>
@@ -189,7 +205,11 @@ function clearConversation() {
     </div>
 
     <div class="chat-composer-wrap">
-      <button class="explain-button" type="button" @click="input = '증여재산공제를 쉽게 설명해줘'">
+      <button
+        class="explain-button"
+        type="button"
+        @click="sendMessage('증여재산공제를 쉽게 설명해줘')"
+      >
         <AppIcon name="sparkles" :size="15" /> 쉽게 설명해줘
       </button>
       <div class="chat-composer-row">
@@ -215,14 +235,6 @@ function clearConversation() {
           </button>
         </form>
       </div>
-      <!-- <button
-        v-if="messages.length > 2"
-        class="end-chat-button"
-        type="button"
-        @click="showEndModal = true"
-      >
-        상담 종료
-      </button> -->
     </div>
 
     <Teleport to="body">
@@ -264,7 +276,14 @@ function clearConversation() {
                   v-for="item in category.items"
                   :key="item.question"
                   type="button"
-                  @click="pickFaq(item.prompt)"
+                  @click="
+                    pickFaq(
+                      item.prompt,
+                      item.answer,
+                      item.showBranchButton,
+                      item.showTaxOfficeButton,
+                    )
+                  "
                 >
                   {{ item.question }}
                 </button>
