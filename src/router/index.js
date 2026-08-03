@@ -62,6 +62,8 @@ router.beforeEach(async (to) => {
   const authStore = useAuthStore()
   if (authStore.isLogin) return true
 
+  const hadSession = Boolean(authStore.accessToken || authStore.refreshToken || authStore.user)
+
   if (authStore.refreshToken) {
     try {
       const session = await restoreAuthSession()
@@ -70,7 +72,7 @@ router.beforeEach(async (to) => {
     } catch {}
   }
 
-  authStore.clearAuth()
+  if (hadSession) await authStore.clearSession()
   return {
     name: 'login',
     query: { redirect: to.fullPath },
