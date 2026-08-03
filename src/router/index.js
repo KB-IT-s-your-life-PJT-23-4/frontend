@@ -8,6 +8,7 @@ import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
+import { restoreAuthSession } from '../api/apiAdapter'
 import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
@@ -55,11 +56,19 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return true
 
   const authStore = useAuthStore()
   if (authStore.isLogin) return true
+
+  if (authStore.refreshToken) {
+    try {
+      const session = await restoreAuthSession()
+      authStore.setAuthSession(session)
+      if (authStore.isLogin) return true
+    } catch {}
+  }
 
   authStore.clearAuth()
   return {
