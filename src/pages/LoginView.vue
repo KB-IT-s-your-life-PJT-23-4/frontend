@@ -1,11 +1,12 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { login, saveAuthSession } from '../api/authApi'
 import AppHeader from '../components/layout/AppHeader.vue'
+import { useAuthStore } from '../stores/authStore'
 import { validateEmail, validatePassword } from '../utils/authValidation'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '' })
 const serverError = ref('')
@@ -29,7 +30,7 @@ function loginErrorMessage(error) {
   if ([400, 401, 404].includes(error.status)) {
     return '이메일 또는 비밀번호를 확인해주세요.'
   }
-  return '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+  return error.message || '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
 }
 
 async function submitLogin() {
@@ -38,11 +39,10 @@ async function submitLogin() {
 
   isSubmitting.value = true
   try {
-    const result = await login({
+    await authStore.login({
       email: form.email.trim(),
       password: form.password,
     })
-    saveAuthSession(result)
     await router.replace('/')
   } catch (error) {
     serverError.value = loginErrorMessage(error)

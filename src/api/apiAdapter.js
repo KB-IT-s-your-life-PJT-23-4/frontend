@@ -1,5 +1,11 @@
 import { faqItems, products } from '../data/mockData'
 import { calculateSimulation } from '../utils/finance'
+import {
+  clearAuthSession,
+  getAccessToken,
+  loadAuthSession,
+  saveAuthSession,
+} from '../utils/authStorage'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
 
@@ -15,30 +21,147 @@ export const GIFT_STATUS = {
   CANCELLED: 'CANCELLED',
 }
 
-function authHeaders() {
-  const token = localStorage.getItem('mirizoom-token')
-  return token ? { Authorization: `Bearer ${token}` } : {}
+let refreshPromise = null
+let authenticationFailurePromise = null
+let onSessionRefreshed = null
+let onAuthenticationFailed = null
+
+const REFRESH_EXCLUDED_PATHS = new Set([
+  '/auth/login',
+  '/auth/logout',
+  '/auth/refresh',
+  '/auth/signup',
+  '/auth/check-email',
+])
+
+export function configureAuthLifecycleHandlers(handlers = {}) {
+  onSessionRefreshed = handlers.onSessionRefreshed ?? null
+  onAuthenticationFailed = handlers.onAuthenticationFailed ?? null
+}
+
+function normalizedPath(path) {
+  return path.split('?')[0]
+}
+
+function isFormData(body) {
+  return typeof FormData !== 'undefined' && body instanceof FormData
+}
+
+function requestHeaders(body, customHeaders, accessToken) {
+  const headers = new Headers()
+
+  if (!isFormData(body)) headers.set('Content-Type', 'application/json')
+  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
+
+  new Headers(customHeaders).forEach((value, key) => headers.set(key, value))
+  return headers
+}
+
+function responseError(response, payload) {
+  const error = new Error(payload?.error || '요청을 처리하지 못했습니다.')
+  error.status = response.status
+  error.code = payload?.statusCode ?? response.status
+  error.payload = payload
+  return error
+}
+
+async function fetchResponse(path, options, accessToken = null) {
+  const { headers: customHeaders, _retry, ...fetchOptions } = options
+
+  try {
+    return await fetch(`${API_BASE}${path}`, {
+      ...fetchOptions,
+      headers: requestHeaders(fetchOptions.body, customHeaders, accessToken),
+    })
+  } catch (cause) {
+    const error = new Error('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
+    error.code = 'NETWORK_ERROR'
+    error.cause = cause
+    throw error
+  }
+}
+
+async function handleAuthenticationFailure() {
+  if (!authenticationFailurePromise) {
+    authenticationFailurePromise = (async () => {
+      if (onAuthenticationFailed) await onAuthenticationFailed()
+      else clearAuthSession()
+    })().catch(() => {
+      clearAuthSession()
+    })
+  }
+
+  return authenticationFailurePromise
+}
+
+async function performTokenRefresh() {
+  const { refreshToken } = loadAuthSession()
+  if (!refreshToken) throw new Error('로그인 정보가 만료되었습니다.')
+
+  const response = await fetchResponse('/auth/refresh', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken }),
+  })
+  const payload = await response.json().catch(() => null)
+
+  if (!response.ok || payload?.error) throw responseError(response, payload)
+
+  const session =
+    payload && typeof payload === 'object' && 'data' in payload ? payload.data : payload
+  if (!session?.accessToken || !session?.refreshToken || !session?.user) {
+    throw new Error('인증 갱신 응답이 올바르지 않습니다.')
+  }
+
+  saveAuthSession(session)
+  if (onSessionRefreshed) await onSessionRefreshed(session)
+  authenticationFailurePromise = null
+  return session
+}
+
+function refreshAuthSession() {
+  if (!refreshPromise) {
+    refreshPromise = performTokenRefresh()
+      .catch(async (error) => {
+        await handleAuthenticationFailure()
+        throw error
+      })
+      .finally(() => {
+        refreshPromise = null
+      })
+  }
+
+  return refreshPromise
 }
 
 export async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-      ...options.headers,
-    },
-    ...options,
-  })
+  const accessToken = getAccessToken()
+  const response = await fetchResponse(path, options, accessToken)
 
   const payload = await response.json().catch(() => null)
 
   if (!response.ok || payload?.error) {
-    const error = new Error(payload?.error || '요청을 처리하지 못했습니다.')
-    error.status = response.status
-    error.code = payload?.statusCode
-    error.payload = payload
-    throw error
+    const canRefresh = response.status === 401 && !REFRESH_EXCLUDED_PATHS.has(normalizedPath(path))
+
+    if (canRefresh) {
+      if (options._retry) {
+        await handleAuthenticationFailure()
+      } else if (authenticationFailurePromise) {
+        await handleAuthenticationFailure()
+      } else {
+        const latestAccessToken = getAccessToken()
+        if (accessToken && latestAccessToken && accessToken !== latestAccessToken) {
+          return request(path, { ...options, _retry: true })
+        }
+
+        await refreshAuthSession()
+        return request(path, { ...options, _retry: true })
+      }
+    }
+
+    throw responseError(response, payload)
   }
+
+  if (normalizedPath(path) === '/auth/login') authenticationFailurePromise = null
   return payload && typeof payload === 'object' && 'data' in payload ? payload.data : payload
 }
 

@@ -5,16 +5,20 @@ import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
 import { useAppStore } from '../stores/appStore'
+import { useAuthStore } from '../stores/authStore'
 import { RELATION_OPTIONS } from '../utils/deduction'
 import { formatCompactWon } from '../utils/finance'
 
 const store = useAppStore()
+const authStore = useAuthStore()
 const router = useRouter()
 const showAddFamily = ref(false)
 const showProfile = ref(false)
 const showSettings = ref(false)
 const simulationToDelete = ref(null)
 const savingFamily = ref(false)
+const isLoggingOut = ref(false)
+const displayUser = computed(() => authStore.user ?? store.state.user)
 // 백엔드 family.relation 은 ENUM(LINEAL_DESCENDANT/OTHER) 이라 코드로 보낸다.
 const familyForm = reactive({
   name: '',
@@ -22,10 +26,10 @@ const familyForm = reactive({
   birthDate: '',
 })
 const profileForm = reactive({
-  name: store.state.user.name,
-  phone: store.state.user.phone,
-  email: store.state.user.email,
-  address: store.state.user.address,
+  name: displayUser.value.name,
+  phone: displayUser.value.phone,
+  email: displayUser.value.email,
+  address: displayUser.value.address ?? '',
 })
 
 const familySummary = computed(() =>
@@ -78,6 +82,24 @@ function confirmSimulationDelete() {
   store.deleteSimulation(simulationToDelete.value.id)
   simulationToDelete.value = null
 }
+
+async function submitLogout() {
+  if (isLoggingOut.value) return
+
+  isLoggingOut.value = true
+  try {
+    await authStore.logout()
+    store.showToast('로그아웃되었습니다.', 'info')
+  } catch (error) {
+    store.showToast(
+      error.message || '서버 로그아웃 처리에 실패했지만 로그인 정보는 삭제했습니다.',
+      'info',
+    )
+  } finally {
+    isLoggingOut.value = false
+    await router.replace('/login')
+  }
+}
 </script>
 
 <template>
@@ -86,11 +108,11 @@ function confirmSimulationDelete() {
     <div class="page-content my-content">
       <section class="profile-summary-card">
         <div class="profile-avatar">
-          {{ store.state.user.name.slice(0, 1) }}
+          {{ displayUser.name.slice(0, 1) }}
         </div>
         <div>
           <span>반가워요</span>
-          <h2>{{ store.state.user.name }}님</h2>
+          <h2>{{ displayUser.name }}님</h2>
           <p>가족의 다음 10년을 차근차근 준비하고 있어요.</p>
         </div>
         <button class="soft-button compact" type="button" @click="showProfile = true">
@@ -191,8 +213,8 @@ function confirmSimulationDelete() {
       </section>
 
       <div class="mypage-footer-actions">
-        <button type="button" @click="store.showToast('현재는 데모 로그인 상태예요.', 'info')">
-          로그아웃
+        <button type="button" :disabled="isLoggingOut" @click="submitLogout">
+          {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
         </button>
         <button type="button" @click="store.resetDemo">데모 초기화</button>
       </div>

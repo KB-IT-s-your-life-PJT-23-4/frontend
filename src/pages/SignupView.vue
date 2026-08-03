@@ -87,7 +87,7 @@ async function checkEmail() {
     errors.email =
       error.code === 'AUTH_API_NOT_CONFIGURED'
         ? '이메일 중복 확인 서버 연결이 필요합니다.'
-        : '이메일 중복 확인 중 오류가 발생했습니다. 다시 시도해주세요.'
+        : error.message || '이메일 중복 확인 중 오류가 발생했습니다. 다시 시도해주세요.'
   }
 }
 
@@ -115,10 +115,10 @@ function signupErrorMessage(error) {
     return '회원가입 서버 연결 설정이 필요합니다. 잠시 후 다시 시도해주세요.'
   }
   if ([406, 409].includes(error.payload?.statusCode) || error.status === 409) {
-    return '이미 가입된 이메일입니다.'
+    return '이미 가입된 이메일 또는 전화번호입니다.'
   }
-  if (error.status === 400) return '입력한 정보를 확인해주세요.'
-  return '회원가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+  if (error.status === 400) return error.message || '입력한 정보를 확인해주세요.'
+  return error.message || '회원가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
 }
 
 async function submitSignup() {

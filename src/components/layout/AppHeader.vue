@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import { useAppStore } from '../../stores/appStore.js'
+import { useAuthStore } from '../../stores/authStore.js'
 
 defineProps({
   title: { type: String, default: '' },
@@ -12,6 +13,7 @@ defineProps({
 
 const router = useRouter()
 const store = useAppStore()
+const authStore = useAuthStore()
 </script>
 
 <template>
@@ -45,7 +47,12 @@ const store = useAppStore()
           {{ store.unreadCount.value }}
         </span>
       </RouterLink>
-      <RouterLink v-if="showLogin" class="header-login-link" to="/login">로그인</RouterLink>
+      <RouterLink v-if="showLogin && !authStore.isLogin" class="header-login-link" to="/login">
+        로그인
+      </RouterLink>
+      <RouterLink v-else-if="showLogin" class="header-login-link" to="/my">
+        {{ authStore.user?.name ? `${authStore.user.name}님` : '마이페이지' }}
+      </RouterLink>
     </div>
     <span v-else class="header-spacer" />
   </header>
