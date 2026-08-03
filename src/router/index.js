@@ -8,6 +8,7 @@ import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
+import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,7 +22,12 @@ const router = createRouter({
     },
     { path: '/status', name: 'status', component: StatusView, meta: { label: '증여 현황' } },
     { path: '/chat', name: 'chat', component: ChatView, meta: { label: 'AI 상담' } },
-    { path: '/my', name: 'my', component: MyPageView, meta: { label: '마이' } },
+    {
+      path: '/my',
+      name: 'my',
+      component: MyPageView,
+      meta: { label: '마이', requiresAuth: true },
+    },
     {
       path: '/notifications',
       name: 'notifications',
@@ -47,6 +53,19 @@ const router = createRouter({
     },
   ],
   scrollBehavior: () => ({ top: 0 }),
+})
+
+router.beforeEach((to) => {
+  if (!to.meta.requiresAuth) return true
+
+  const authStore = useAuthStore()
+  if (authStore.isLogin) return true
+
+  authStore.clearAuth()
+  return {
+    name: 'login',
+    query: { redirect: to.fullPath },
+  }
 })
 
 export default router
