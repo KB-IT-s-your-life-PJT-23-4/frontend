@@ -3,9 +3,10 @@ import { nextTick, ref } from 'vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
-import { faqItems } from '../data/mockData'
+import { faqItems, faqCategories } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 
+// =============================== 데이터 포맷 설정
 function getTodayDateFormat() {
   const now = new Date()
   return `오늘, ${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`
@@ -19,6 +20,7 @@ function getCurrentTimeFormat() {
   })
 }
 
+// =============================== 초기 답장 포맷
 const input = ref('')
 const messages = ref([
   {
@@ -30,7 +32,14 @@ const messages = ref([
 ])
 const loading = ref(false)
 const showEndModal = ref(false)
+const showFaqSheet = ref(false)
 const conversation = ref(null)
+
+// =============================== faq 포맷
+function pickFaq(prompt, answer, showBranch, showTaxOffice) {
+  showFaqSheet.value = false
+  sendMessage(prompt, answer, showBranch, showTaxOffice)
+}
 
 async function scrollToBottom() {
   await nextTick()
@@ -40,7 +49,13 @@ async function scrollToBottom() {
   })
 }
 
-async function sendMessage(question = input.value) {
+// =============================== 미리줌 AI 답장 포맷
+async function sendMessage(
+  question = input.value,
+  staticAnswer = null,
+  showBranch = false,
+  showTaxOffice = false,
+) {
   const trimmed = question.trim()
   if (!trimmed || loading.value) return
 
@@ -52,6 +67,29 @@ async function sendMessage(question = input.value) {
   })
 
   input.value = ''
+
+  if (staticAnswer) {
+    loading.value = true
+    await scrollToBottom()
+
+    setTimeout(async () => {
+      messages.value.push({
+        id: Date.now() + 1,
+        role: 'assistant',
+        text: staticAnswer,
+        actions: showBranch || showTaxOffice, // 둘 중 하나라도 true면 actions 블록을 활성화합니다.
+        showBranchButton: showBranch,
+        showTaxOfficeButton: showTaxOffice,
+        createdAt: getCurrentTimeFormat(), // 누락되었던 시간 값 추가
+      })
+      loading.value = false
+      await scrollToBottom()
+    }, 300)
+
+    return
+  }
+
+  // =============================== 일반 입력창에서 들어온 질문 처리
   loading.value = true
   await scrollToBottom()
 
@@ -63,6 +101,8 @@ async function sendMessage(question = input.value) {
       text: response.answer,
       references: response.references,
       actions: true,
+      showBranchButton: true,
+      showTaxOfficeButton: true,
       createdAt: getCurrentTimeFormat(),
     })
   } catch (error) {
@@ -79,6 +119,7 @@ async function sendMessage(question = input.value) {
   }
 }
 
+// =============================== 상담 초기화 포맷
 function clearConversation() {
   messages.value = [
     {
@@ -113,6 +154,7 @@ function clearConversation() {
             </div>
             <div v-if="message.actions" class="chat-actions">
               <a
+                v-if="message.showBranchButton"
                 class="primary-button compact"
                 href="https://map.naver.com/p/search/근처 국민은행"
                 target="_blank"
@@ -121,6 +163,7 @@ function clearConversation() {
                 가까운 영업점 알아보기
               </a>
               <a
+                v-if="message.showTaxOfficeButton"
                 class="secondary-button compact"
                 href="https://www.nts.go.kr/nts/taxSrch/taxSrchPage.do?mi=6761"
                 target="_blank"
@@ -145,7 +188,7 @@ function clearConversation() {
             v-for="faq in faqItems"
             :key="faq.id"
             type="button"
-            @click="sendMessage(faq.prompt)"
+            @click="sendMessage(faq.prompt, null, false, true)"
           >
             {{ faq.question }}
           </button>
@@ -162,31 +205,94 @@ function clearConversation() {
     </div>
 
     <div class="chat-composer-wrap">
-      <button class="explain-button" type="button" @click="input = '증여재산공제를 쉽게 설명해줘'">
+      <button
+        class="explain-button"
+        type="button"
+        @click="sendMessage('증여재산공제를 쉽게 설명해줘')"
+      >
         <AppIcon name="sparkles" :size="15" /> 쉽게 설명해줘
       </button>
-      <form class="chat-composer" @submit.prevent="sendMessage()">
-        <label class="sr-only" for="chat-input">증여 상담 질문</label>
-        <input
-          id="chat-input"
-          v-model="input"
-          type="text"
-          placeholder="궁금한 내용을 입력하세요..."
-          autocomplete="off"
-        />
-        <button type="submit" :disabled="!input.trim() || loading" aria-label="질문 보내기">
-          <AppIcon name="send" :size="19" />
+      <div class="chat-composer-row">
+        <button
+          class="chat-plus-button"
+          type="button"
+          aria-label="자주 묻는 질문 보기"
+          @click="showFaqSheet = true"
+        >
+          <AppIcon name="plus" :size="20" />
         </button>
-      </form>
-      <!-- <button
-        v-if="messages.length > 2"
-        class="end-chat-button"
-        type="button"
-        @click="showEndModal = true"
-      >
-        상담 종료
-      </button> -->
+        <form class="chat-composer" @submit.prevent="sendMessage()">
+          <label class="sr-only" for="chat-input">증여 상담 질문</label>
+          <input
+            id="chat-input"
+            v-model="input"
+            type="text"
+            placeholder="궁금한 내용을 입력하세요..."
+            autocomplete="off"
+          />
+          <button type="submit" :disabled="!input.trim() || loading" aria-label="질문 보내기">
+            <AppIcon name="send" :size="19" />
+          </button>
+        </form>
+      </div>
     </div>
+
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="showFaqSheet"
+          class="modal-backdrop"
+          role="presentation"
+          @click.self="showFaqSheet = false"
+        >
+          <section
+            class="modal-sheet faq-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="자주 묻는 질문"
+          >
+            <div class="faq-sheet-header">
+              <h2>자주 묻는 질문</h2>
+              <button
+                type="button"
+                class="faq-sheet-close"
+                aria-label="닫기"
+                @click="showFaqSheet = false"
+              >
+                <AppIcon name="close" :size="18" />
+              </button>
+            </div>
+            <p class="faq-sheet-greeting">
+              <span class="faq-sheet-avatar"><AppIcon name="sparkles" :size="15" /></span>
+              <span
+                >안녕하세요, 고객님!<br />아래 버튼을 누르거나 궁금하신 내용을 직접 입력해
+                주세요.</span
+              >
+            </p>
+            <div v-for="category in faqCategories" :key="category.title" class="faq-sheet-category">
+              <h3>{{ category.title }}</h3>
+              <div class="faq-sheet-grid">
+                <button
+                  v-for="item in category.items"
+                  :key="item.question"
+                  type="button"
+                  @click="
+                    pickFaq(
+                      item.prompt,
+                      item.answer,
+                      item.showBranchButton,
+                      item.showTaxOfficeButton,
+                    )
+                  "
+                >
+                  {{ item.question }}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </Transition>
+    </Teleport>
 
     <ModalSheet
       :show="showEndModal"
