@@ -39,6 +39,10 @@
 - Keep component-local state inside the component and use Pinia only for shared state.
 - Extract reusable logic into utilities or composables rather than duplicating it.
 - Check existing components and styles before introducing a new pattern.
+- For dynamic form fields, derive units, placeholders, validation limits, and display formatting from the field's semantic key rather than its primitive data type; not every integer represents currency or shares the same minimum value.
+- When `0`, `false`, or an empty collection can be valid form data, check explicitly for `null`, `undefined`, or an empty string instead of using truthiness to enable submission controls.
+- When one clarification answer makes dependent questions inapplicable, normalize their dependent values immediately and skip those questions instead of requiring redundant user input.
+- Treat AI `answer` values as display-safe plain text. Do not rely on rendering raw Markdown unless an explicitly sanitized Markdown renderer and contract are introduced together.
 - Follow the formatting rules in `.prettierrc.json`.
 - Do not modify files unrelated to the requested change.
 

@@ -17,7 +17,7 @@ function ensureAiConsultApiConfigured() {
  *   status: 'COMPLETED' | 'CLARIFICATION_REQUIRED' | 'REJECTED',
  *   intent: string,
  *   requiresCalculation: boolean,
- *   answer: string,
+ *   answer: string, // Markdown 문법이 없는 표시용 일반 텍스트
  *   clarificationQuestions: Array<{
  *     key: string,
  *     data_type: string,
@@ -28,21 +28,36 @@ function ensureAiConsultApiConfigured() {
  * }>}
  */
 
-export function startAiConsult(question) {
+export async function startAiConsult(question) {
   ensureAiConsultApiConfigured()
 
-  const trimmedQeustion = question?.trim()
+  const trimmedQuestion = question?.trim()
 
-  if (!trimmedQeustion) {
+  if (!trimmedQuestion) {
     throw new Error('상담 질문을 입력해 주세요.')
   }
 
-  return request('/ai/consult', {
+  if (trimmedQuestion.replaceAll(/\s/g, '').length < 2) {
+    throw new Error('상담 질문은 공백을 제외하고 2자 이상 입력해 주세요.')
+  }
+
+  if (trimmedQuestion.length > 500) {
+    throw new Error('상담 질문은 500자 이하로 입력해 주세요.')
+  }
+
+  const payload = {
+    question: trimmedQuestion,
+  }
+
+  console.log('[AI Consult API] POST /api/ai/consult', payload)
+
+  const response = await request('/ai/consult', {
     method: 'POST',
-    body: JSON.stringify({
-      question: trimmedQeustion,
-    }),
+    body: JSON.stringify(payload),
   })
+
+  console.log('[AI Consult API] POST /api/ai/consult response', response)
+  return response
 }
 
 /**
@@ -58,7 +73,7 @@ export function startAiConsult(question) {
  * }} params
  */
 
-export function answerAiConsultClarification({
+export async function answerAiConsultClarification({
   conversationId,
   question,
   intent,
@@ -72,15 +87,26 @@ export function answerAiConsultClarification({
     throw new Error('상담 대화 ID가 없습니다.')
   }
 
-  return request('/ai/consult/clarification', {
+  if (!answers || Object.keys(answers).length === 0) {
+    throw new Error('추가 질문에 대한 답변을 입력해 주세요.')
+  }
+
+  const payload = {
+    conversationId,
+    question,
+    intent,
+    requiresCalculation,
+    facts,
+    answers,
+  }
+
+  console.log('[AI Consult API] POST /api/ai/consult/clarification', payload)
+
+  const response = await request('/ai/consult/clarification', {
     method: 'POST',
-    body: JSON.stringify({
-      conversationId,
-      question,
-      intent,
-      requiresCalculation,
-      facts,
-      answers,
-    }),
+    body: JSON.stringify(payload),
   })
+
+  console.log('[AI Consult API] POST /api/ai/consult/clarification response', response)
+  return response
 }
