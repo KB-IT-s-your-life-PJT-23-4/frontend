@@ -1,11 +1,12 @@
 <script setup>
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import { useAuthStore } from '../stores/authStore'
 import { validateEmail, validatePassword } from '../utils/authValidation'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '' })
@@ -33,6 +34,11 @@ function loginErrorMessage(error) {
   return error.message || '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
 }
 
+function getPostLoginPath() {
+  const redirect = route.query.redirect
+  return typeof redirect === 'string' && /^\/my(?:[?#]|$)/.test(redirect) ? redirect : '/'
+}
+
 async function submitLogin() {
   serverError.value = ''
   if (!validateForm()) return
@@ -43,7 +49,7 @@ async function submitLogin() {
       email: form.email.trim(),
       password: form.password,
     })
-    await router.replace('/')
+    await router.replace(getPostLoginPath())
   } catch (error) {
     serverError.value = loginErrorMessage(error)
   } finally {

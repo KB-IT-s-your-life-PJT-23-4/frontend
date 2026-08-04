@@ -118,19 +118,25 @@ async function performTokenRefresh() {
   return session
 }
 
-function refreshAuthSession() {
+function getRefreshPromise() {
   if (!refreshPromise) {
-    refreshPromise = performTokenRefresh()
-      .catch(async (error) => {
-        await handleAuthenticationFailure()
-        throw error
-      })
-      .finally(() => {
-        refreshPromise = null
-      })
+    refreshPromise = performTokenRefresh().finally(() => {
+      refreshPromise = null
+    })
   }
 
   return refreshPromise
+}
+
+export function restoreAuthSession() {
+  return getRefreshPromise()
+}
+
+function refreshAuthSession() {
+  return getRefreshPromise().catch(async (error) => {
+    await handleAuthenticationFailure()
+    throw error
+  })
 }
 
 export async function request(path, options = {}) {
