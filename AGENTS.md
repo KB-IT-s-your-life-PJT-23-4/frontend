@@ -85,6 +85,7 @@
 ## Code Review Rules
 
 - Check that route changes do not break existing URLs or navigation.
+- When adding an authenticated nested route, verify the post-login redirect allowlist accepts that nested path.
 - Check that API-backed screens handle loading and error states.
 - Check that source files do not contain environment variables, tokens, credentials, or personal data.
 - Review UI changes for mobile layout and basic accessibility.
