@@ -231,6 +231,16 @@
   line-height: 1.5;
 }
 
+.profile-edit-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 10px;
+}
+
+.profile-edit-actions > button {
+  width: 100%;
+}
+
 .profile-submit-error {
   padding: 12px 14px;
   border-radius: 12px;

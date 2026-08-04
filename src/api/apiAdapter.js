@@ -260,6 +260,19 @@ export const api = {
     })
   },
 
+  async updateFamilyProfile(familyId, profile, { image = null, removeImage = false } = {}) {
+    if (!API_BASE) return null
+    const body = new FormData()
+    body.append('profile', new Blob([JSON.stringify(profile)], { type: 'application/json' }))
+    if (image) body.append('image', image)
+    body.append('removeImage', String(removeImage))
+
+    return request(`${FAMILY_PATH}/${familyId}`, {
+      method: 'PATCH',
+      body,
+    })
+  },
+
   // DELETE /api/fm/family/{familyId} — 증여 이력이 있으면 409, force=true 로 강제 삭제
   async deleteFamily(familyId, { force = false } = {}) {
     if (!API_BASE) return null

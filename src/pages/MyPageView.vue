@@ -9,6 +9,7 @@ import { useAppStore } from '../stores/appStore'
 import { useAuthStore } from '../stores/authStore'
 import { RELATION_OPTIONS } from '../utils/deduction'
 import { formatCompactWon } from '../utils/finance'
+import { resolveProfileImageUrl } from '../utils/profileImage'
 import '../assets/css/my-page.css'
 
 const store = useAppStore()
@@ -22,6 +23,8 @@ const savingFamily = ref(false)
 const isLoggingOut = ref(false)
 const isWithdrawing = ref(false)
 const withdrawalError = ref('')
+const userImageFailed = ref(false)
+const failedFamilyImages = ref(new Set())
 const displayUser = computed(() => authStore.user ?? store.state.user)
 const displayName = computed(() => displayUser.value?.name?.trim() || '사용자')
 // 생년월일 입력 범위. min/max 를 주지 않으면 브라우저가 연도 칸을 6자리(최대 275760년)로 잡아
@@ -52,6 +55,10 @@ function openProfileDetails() {
 
 function openProfileEdit() {
   router.push({ name: 'profile-edit' })
+}
+
+function markFamilyImageFailed(familyId) {
+  failedFamilyImages.value = new Set(failedFamilyImages.value).add(Number(familyId))
 }
 
 async function submitFamily() {
@@ -170,7 +177,13 @@ async function submitWithdrawal() {
         @click="openProfileDetails"
       >
         <div class="profile-avatar">
-          {{ displayName.slice(0, 1) }}
+          <img
+            v-if="displayUser.img && !userImageFailed"
+            :src="resolveProfileImageUrl(displayUser.img)"
+            alt=""
+            @error="userImageFailed = true"
+          />
+          <template v-else>{{ displayName.slice(0, 1) }}</template>
         </div>
         <div class="profile-summary-copy">
           <h2>{{ displayName }}님</h2>
@@ -196,7 +209,15 @@ async function submitWithdrawal() {
             type="button"
             @click="openFamilyDetail(family.id)"
           >
-            <span class="family-avatar" :class="family.tone">{{ family.name.slice(-2) }}</span>
+            <span class="family-avatar" :class="family.tone">
+              <img
+                v-if="family.familyImg && !failedFamilyImages.has(Number(family.id))"
+                :src="resolveProfileImageUrl(family.familyImg)"
+                alt=""
+                @error="markFamilyImageFailed(family.id)"
+              />
+              <template v-else>{{ family.name.slice(-2) }}</template>
+            </span>
             <span class="family-profile-copy">
               <strong
                 >{{ family.name }} <small>{{ family.relation }}</small></strong

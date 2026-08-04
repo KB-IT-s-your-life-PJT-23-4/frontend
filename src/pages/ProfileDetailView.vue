@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import { useAuthStore } from '../stores/authStore'
+import { resolveProfileImageUrl } from '../utils/profileImage'
 import '../assets/css/profile-view.css'
 
 const authStore = useAuthStore()
@@ -72,7 +73,7 @@ onMounted(loadProfile)
           <span class="profile-view-avatar">
             <img
               v-if="profile.img && !imageFailed"
-              :src="profile.img"
+              :src="resolveProfileImageUrl(profile.img)"
               alt=""
               @error="imageFailed = true"
             />

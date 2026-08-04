@@ -4,9 +4,12 @@ import { useRouter } from 'vue-router'
 import DateField from '../components/common/DateField.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
+import ProfileImageField from '../components/common/ProfileImageField.vue'
+import { api } from '../api/apiAdapter'
 import { useAppStore } from '../stores/appStore'
 import { useAuthStore } from '../stores/authStore'
 import { formatPhone, validateName, validatePhone } from '../utils/authValidation'
+import { DEMO_PROFILE_IMAGE_MAX_BYTES, PROFILE_IMAGE_MAX_BYTES } from '../utils/profileImage'
 import '../assets/css/profile-view.css'
 
 const router = useRouter()
@@ -16,6 +19,11 @@ const loading = ref(true)
 const loadError = ref('')
 const submitError = ref('')
 const isSubmitting = ref(false)
+const currentImage = ref('')
+const selectedImage = ref(null)
+const removeImage = ref(false)
+const imageValid = ref(true)
+const imageMaxBytes = api.isMock ? DEMO_PROFILE_IMAGE_MAX_BYTES : PROFILE_IMAGE_MAX_BYTES
 const birthDateMax = new Date().toISOString().slice(0, 10)
 const form = reactive({ name: '', birthDate: '', phone: '' })
 const errors = reactive({ name: '', birthDate: '', phone: '' })
@@ -54,6 +62,10 @@ async function loadProfile() {
     form.name = profile.name ?? ''
     form.birthDate = normalizeIsoDate(profile.birthDate)
     form.phone = profile.phone ?? ''
+    currentImage.value = profile.img ?? ''
+    selectedImage.value = null
+    removeImage.value = false
+    imageValid.value = true
   } catch (error) {
     loadError.value = error.message || '회원 정보를 불러오지 못했습니다.'
   } finally {
@@ -67,11 +79,14 @@ async function submitProfile() {
 
   isSubmitting.value = true
   try {
-    await authStore.updateUserProfile({
-      name: form.name.trim(),
-      birthDate: form.birthDate,
-      phone: form.phone,
-    })
+    await authStore.updateUserProfile(
+      {
+        name: form.name.trim(),
+        birthDate: form.birthDate,
+        phone: form.phone,
+      },
+      { image: selectedImage.value, removeImage: removeImage.value },
+    )
     if (!appStore.isMock) appStore.showToast('회원 정보가 저장되었어요.')
     await router.replace({ name: 'profile-detail' })
   } catch (error) {
@@ -109,6 +124,16 @@ onMounted(loadProfile)
         </header>
 
         <form class="profile-edit-form" novalidate @submit.prevent="submitProfile">
+          <ProfileImageField
+            :image-url="currentImage"
+            :display-name="form.name"
+            :max-bytes="imageMaxBytes"
+            :disabled="isSubmitting"
+            @update:file="selectedImage = $event"
+            @update:remove="removeImage = $event"
+            @update:valid="imageValid = $event"
+          />
+
           <div class="profile-edit-field">
             <label for="profile-edit-name">이름</label>
             <input
@@ -166,9 +191,23 @@ onMounted(loadProfile)
             {{ submitError }}
           </p>
 
-          <button class="primary-button tall full" type="submit" :disabled="isSubmitting">
-            {{ isSubmitting ? '저장 중...' : '저장하기' }}
-          </button>
+          <div class="profile-edit-actions">
+            <button
+              class="secondary-button tall"
+              type="button"
+              :disabled="isSubmitting"
+              @click="router.back()"
+            >
+              취소
+            </button>
+            <button
+              class="primary-button tall"
+              type="submit"
+              :disabled="isSubmitting || !imageValid"
+            >
+              {{ isSubmitting ? '저장 중...' : '저장하기' }}
+            </button>
+          </div>
         </form>
       </section>
     </main>

@@ -8,6 +8,7 @@ import ModalSheet from '../components/layout/ModalSheet.vue'
 import { useAppStore } from '../stores/appStore'
 import { isMinorAt, relationLabel } from '../utils/deduction'
 import { formatWon } from '../utils/finance'
+import { resolveProfileImageUrl } from '../utils/profileImage'
 import '../assets/css/recipient-detail.css'
 
 const route = useRoute()
@@ -236,7 +237,7 @@ watch(
           <span class="recipient-detail-avatar">
             <img
               v-if="recipient.familyImg && !imageFailed"
-              :src="recipient.familyImg"
+              :src="resolveProfileImageUrl(recipient.familyImg)"
               alt=""
               @error="imageFailed = true"
             />
@@ -306,6 +307,16 @@ watch(
               </div>
             </dl>
           </section>
+
+          <button
+            class="recipient-edit-button"
+            type="button"
+            @click="
+              router.push({ name: 'recipient-edit', params: { familyId: recipient.familyId } })
+            "
+          >
+            수증자 정보 수정
+          </button>
 
           <button class="recipient-delete-button" type="button" @click="showDeleteModal = true">
             삭제하기
