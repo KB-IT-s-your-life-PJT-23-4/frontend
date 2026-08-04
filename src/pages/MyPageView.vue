@@ -58,7 +58,10 @@ async function submitFamily() {
   if (!familyForm.name || !familyForm.birthDate || savingFamily.value) return
   savingFamily.value = true
   try {
-    await store.addFamily({ ...familyForm })
+    await store.addFamily({
+      ...familyForm,
+      relation: RELATION_OPTIONS[0].code,
+    })
     familyForm.name = ''
     familyForm.relation = RELATION_OPTIONS[0].code
     familyForm.birthDate = ''
@@ -301,11 +304,7 @@ async function submitWithdrawal() {
         </label>
         <label>
           <span>관계</span>
-          <select v-model="familyForm.relation">
-            <option v-for="option in RELATION_OPTIONS" :key="option.code" :value="option.code">
-              {{ option.label }}
-            </option>
-          </select>
+          <input :value="RELATION_OPTIONS[0].label" type="text" readonly aria-readonly="true" />
         </label>
         <div class="date-field-row">
           <span>생년월일</span>

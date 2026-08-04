@@ -16,10 +16,9 @@ const RELATION_LABELS = {
   OTHER: '기타 친족',
 }
 
-// 수증자 등록/수정 폼에서 고를 수 있는 관계. 배우자 공제(6억)는 서비스 범위 밖이라 제외한다.
+// 신규 수증자는 자녀만 등록한다. 기존 저장 데이터 표기를 위해 위 라벨 사전은 유지한다.
 export const RELATION_OPTIONS = [
   { code: 'LINEAL_DESCENDANT', label: RELATION_LABELS.LINEAL_DESCENDANT },
-  { code: 'OTHER', label: RELATION_LABELS.OTHER },
 ]
 
 // 데모 데이터/이전 화면에서 쓰던 한글 관계값을 백엔드 ENUM으로 되돌린다.
