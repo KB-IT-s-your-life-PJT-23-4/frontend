@@ -1,12 +1,14 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import DateField from '../components/common/DateField.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
 import { useAppStore } from '../stores/appStore'
 import { deductionProgress } from '../utils/deduction'
 import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
+import '../assets/css/status-view.css'
 
 const store = useAppStore()
 const router = useRouter()
@@ -496,10 +498,15 @@ onMounted(() => loadStatus())
             <span>원</span>
           </div>
         </label>
-        <label>
+        <!-- 증여일은 계획(PLANNED) 등록도 있어 미래를 막지 않는다. min/max 없이 둔다. -->
+        <div class="date-field-row">
           <span>증여 날짜</span>
-          <input v-model="giftForm.date" type="date" required />
-        </label>
+          <DateField
+            v-model="giftForm.date"
+            placeholder="증여 날짜를 선택하세요"
+            aria-label="증여 날짜 선택"
+          />
+        </div>
         <label>
           <span>메모</span>
           <textarea

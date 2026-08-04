@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import DateField from '../components/common/DateField.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
@@ -19,6 +20,11 @@ const simulationToDelete = ref(null)
 const savingFamily = ref(false)
 const isLoggingOut = ref(false)
 const displayUser = computed(() => authStore.user ?? store.state.user)
+// 생년월일 입력 범위. min/max 를 주지 않으면 브라우저가 연도 칸을 6자리(최대 275760년)로 잡아
+// 4자리를 채워도 월 칸으로 넘어가지 않는다. 범위를 좁히면 연도 4자리에서 자동으로 넘어간다.
+// 미래 생년월일을 막는 역할도 겸한다.
+const BIRTH_DATE_MIN = '1900-01-01'
+const birthDateMax = new Date().toISOString().slice(0, 10)
 // 백엔드 family.relation 은 ENUM(LINEAL_DESCENDANT/OTHER) 이라 코드로 보낸다.
 const familyForm = reactive({
   name: '',
@@ -245,14 +251,26 @@ async function submitLogout() {
             </option>
           </select>
         </label>
-        <label>
+        <div class="date-field-row">
           <span>생년월일</span>
-          <input v-model="familyForm.birthDate" type="date" required />
-        </label>
+          <DateField
+            v-model="familyForm.birthDate"
+            :min="BIRTH_DATE_MIN"
+            :max="birthDateMax"
+            placeholder="생년월일을 선택하세요"
+            aria-label="생년월일 선택"
+          />
+        </div>
       </form>
       <template #actions>
         <button class="secondary-button" type="button" @click="showAddFamily = false">취소</button>
-        <button class="primary-button" type="submit" form="family-form" :disabled="savingFamily">
+        <!-- 생년월일은 DateField(button) 이라 네이티브 required 검증이 안 걸린다. 버튼으로 막는다. -->
+        <button
+          class="primary-button"
+          type="submit"
+          form="family-form"
+          :disabled="savingFamily || !familyForm.birthDate"
+        >
           {{ savingFamily ? '등록 중...' : '등록' }}
         </button>
       </template>
