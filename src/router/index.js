@@ -4,6 +4,8 @@ import SimulationView from '../pages/SimulationView.vue'
 import StatusView from '../pages/StatusView.vue'
 import ChatView from '../pages/ChatView.vue'
 import MyPageView from '../pages/MyPageView.vue'
+import ProfileDetailView from '../pages/ProfileDetailView.vue'
+import ProfileEditView from '../pages/ProfileEditView.vue'
 import RecipientDetailView from '../pages/RecipientDetailView.vue'
 import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
@@ -34,6 +36,18 @@ const router = createRouter({
       name: 'my',
       component: MyPageView,
       meta: { label: '마이', requiresAuth: true },
+    },
+    {
+      path: '/my/profile',
+      name: 'profile-detail',
+      component: ProfileDetailView,
+      meta: { label: '내 상세 정보', requiresAuth: true },
+    },
+    {
+      path: '/my/profile/edit',
+      name: 'profile-edit',
+      component: ProfileEditView,
+      meta: { label: '회원 정보 수정', requiresAuth: true },
     },
     {
       path: '/my/family/:familyId',

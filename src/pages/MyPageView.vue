@@ -9,17 +9,18 @@ import { useAppStore } from '../stores/appStore'
 import { useAuthStore } from '../stores/authStore'
 import { RELATION_OPTIONS } from '../utils/deduction'
 import { formatCompactWon } from '../utils/finance'
+import '../assets/css/my-page.css'
 
 const store = useAppStore()
 const authStore = useAuthStore()
 const router = useRouter()
 const showAddFamily = ref(false)
-const showProfile = ref(false)
 const showSettings = ref(false)
 const simulationToDelete = ref(null)
 const savingFamily = ref(false)
 const isLoggingOut = ref(false)
 const displayUser = computed(() => authStore.user ?? store.state.user)
+const displayName = computed(() => displayUser.value?.name?.trim() || '사용자')
 // 생년월일 입력 범위. min/max 를 주지 않으면 브라우저가 연도 칸을 6자리(최대 275760년)로 잡아
 // 4자리를 채워도 월 칸으로 넘어가지 않는다. 범위를 좁히면 연도 4자리에서 자동으로 넘어간다.
 // 미래 생년월일을 막는 역할도 겸한다.
@@ -31,13 +32,6 @@ const familyForm = reactive({
   relation: RELATION_OPTIONS[0].code,
   birthDate: '',
 })
-const profileForm = reactive({
-  name: displayUser.value.name,
-  phone: displayUser.value.phone,
-  email: displayUser.value.email,
-  address: displayUser.value.address ?? '',
-})
-
 const familySummary = computed(() =>
   store.state.families.map((family) => ({
     ...family,
@@ -47,6 +41,14 @@ const familySummary = computed(() =>
 
 function openFamilyDetail(familyId) {
   router.push({ name: 'recipient-detail', params: { familyId } })
+}
+
+function openProfileDetails() {
+  router.push({ name: 'profile-detail' })
+}
+
+function openProfileEdit() {
+  router.push({ name: 'profile-edit' })
 }
 
 async function submitFamily() {
@@ -77,11 +79,6 @@ onMounted(() => {
   })
 })
 
-function submitProfile() {
-  store.updateProfile({ ...profileForm })
-  showProfile.value = false
-}
-
 function confirmSimulationDelete() {
   if (!simulationToDelete.value) return
   store.deleteSimulation(simulationToDelete.value.id)
@@ -111,19 +108,20 @@ async function submitLogout() {
   <div class="page my-page">
     <AppHeader />
     <div class="page-content my-content">
-      <section class="profile-summary-card">
+      <button
+        class="profile-summary-card profile-summary-link"
+        type="button"
+        :aria-label="`${displayName}님 내 상세 정보 보기`"
+        @click="openProfileDetails"
+      >
         <div class="profile-avatar">
-          {{ displayUser.name.slice(0, 1) }}
+          {{ displayName.slice(0, 1) }}
         </div>
-        <div>
-          <span>반가워요</span>
-          <h2>{{ displayUser.name }}님</h2>
-          <p>가족의 다음 10년을 차근차근 준비하고 있어요.</p>
+        <div class="profile-summary-copy">
+          <h2>{{ displayName }}님</h2>
         </div>
-        <button class="soft-button compact" type="button" @click="showProfile = true">
-          내 정보
-        </button>
-      </section>
+        <AppIcon name="chevron" :size="19" />
+      </button>
 
       <section class="mypage-section">
         <div class="section-heading-row">
@@ -166,9 +164,11 @@ async function submitLogout() {
           >
           <AppIcon name="chevron" :size="17" />
         </button>
-        <button type="button" @click="showProfile = true">
+        <button type="button" @click="openProfileEdit">
           <span class="menu-icon"><AppIcon name="user" :size="20" /></span>
-          <span><strong>회원 정보 관리</strong><small>연락처와 주소를 확인해요</small></span>
+          <span
+            ><strong>회원 정보 수정</strong><small>이름, 생년월일과 연락처를 수정해요</small></span
+          >
           <AppIcon name="chevron" :size="17" />
         </button>
         <button
@@ -272,32 +272,6 @@ async function submitLogout() {
         >
           {{ savingFamily ? '등록 중...' : '등록' }}
         </button>
-      </template>
-    </ModalSheet>
-
-    <ModalSheet
-      :show="showProfile"
-      title="회원 정보를 수정할까요?"
-      description="변경한 정보는 이 브라우저의 데모 데이터에만 저장됩니다."
-      @close="showProfile = false"
-    >
-      <form id="profile-form" class="modal-form" @submit.prevent="submitProfile">
-        <label
-          ><span>이름</span><input v-model.trim="profileForm.name" type="text" required
-        /></label>
-        <label
-          ><span>전화번호</span><input v-model.trim="profileForm.phone" type="tel" required
-        /></label>
-        <label
-          ><span>이메일</span><input v-model.trim="profileForm.email" type="email" required
-        /></label>
-        <label
-          ><span>주소</span><input v-model.trim="profileForm.address" type="text" required
-        /></label>
-      </form>
-      <template #actions>
-        <button class="secondary-button" type="button" @click="showProfile = false">취소</button>
-        <button class="primary-button" type="submit" form="profile-form">저장</button>
       </template>
     </ModalSheet>
 

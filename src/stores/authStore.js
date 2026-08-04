@@ -1,6 +1,8 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+import { api } from '../api/apiAdapter'
 import { login as requestLogin, logout as requestLogout } from '../api/authApi'
+import { getMyProfile, updateMyProfile } from '../api/userApi'
 import { useAppStore } from './appStore'
 import {
   clearAuthSession as clearStoredAuthSession,
@@ -49,6 +51,15 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
+  function setUserProfile(profile) {
+    user.value = profile ?? null
+    saveAuthSession({
+      accessToken: accessToken.value,
+      refreshToken: refreshToken.value,
+      user: user.value,
+    })
+  }
+
   function saveToken(nextAccessToken, nextRefreshToken = refreshToken.value) {
     accessToken.value = nextAccessToken ?? null
     refreshToken.value = nextRefreshToken ?? null
@@ -86,6 +97,34 @@ export const useAuthStore = defineStore('auth', () => {
     return session
   }
 
+  async function fetchUserProfile() {
+    const profile = api.isMock ? { ...useAppStore().state.user } : await getMyProfile()
+    setUserProfile(profile)
+    return profile
+  }
+
+  async function updateUserProfile(changes) {
+    const appStore = useAppStore()
+    const currentProfile = user.value ?? appStore.state.user
+
+    if (api.isMock) {
+      appStore.updateProfile(changes)
+      const profile = { ...currentProfile, ...changes }
+      setUserProfile(profile)
+      return profile
+    }
+
+    const profile = await updateMyProfile({
+      email: currentProfile.email,
+      name: changes.name ?? currentProfile.name,
+      birthDate: changes.birthDate ?? currentProfile.birthDate ?? null,
+      phone: changes.phone ?? currentProfile.phone,
+      img: currentProfile.img ?? null,
+    })
+    setUserProfile(profile)
+    return profile
+  }
+
   async function logout() {
     const currentRefreshToken = refreshToken.value
 
@@ -103,6 +142,8 @@ export const useAuthStore = defineStore('auth', () => {
     isLogin,
     login,
     logout,
+    fetchUserProfile,
+    updateUserProfile,
     setAuthSession,
     saveToken,
     deleteToken,
