@@ -5,6 +5,7 @@ import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
 import { faqItems, faqCategories } from '../data/mockData'
 import { api } from '../api/apiAdapter'
+import { startAiConsult } from '@/api/aiConsultApi.js'
 
 // =============================== 데이터 포맷 설정
 function getTodayDateFormat() {
@@ -94,7 +95,8 @@ async function sendMessage(
   await scrollToBottom()
 
   try {
-    const response = await api.askConsultation(trimmed)
+    // const response = await api.askConsultation(trimmed)
+    const response = await startAiConsult(trimmed)
     messages.value.push({
       id: Date.now() + 1,
       role: 'assistant',
