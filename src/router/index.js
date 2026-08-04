@@ -23,7 +23,12 @@ const router = createRouter({
       meta: { label: '시뮬레이션' },
     },
     { path: '/status', name: 'status', component: StatusView, meta: { label: '증여 현황' } },
-    { path: '/chat', name: 'chat', component: ChatView, meta: { label: 'AI 상담' } },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: ChatView,
+      meta: { label: 'AI 상담', requiresAuth: true },
+    },
     {
       path: '/my',
       name: 'my',
