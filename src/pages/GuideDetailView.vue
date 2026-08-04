@@ -112,8 +112,7 @@ const activeReportingMethod = ref('online')
               <aside class="guide-tip">
                 <strong>알아두세요</strong
                 ><span
-                  >운용 기간과 투자 성향에 따라 예금·적금·ETF의 포트폴리오 비중이
-                  달라져요.</span
+                  >운용 기간과 투자 성향에 따라 예금·적금·ETF의 포트폴리오 비중이 달라져요.</span
                 >
               </aside>
             </div>

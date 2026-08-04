@@ -39,9 +39,8 @@ const familySummary = computed(() =>
   })),
 )
 
-function openFamilyStatus(familyId) {
-  store.selectFamily(familyId)
-  router.push('/status')
+function openFamilyDetail(familyId) {
+  router.push({ name: 'recipient-detail', params: { familyId } })
 }
 
 async function submitFamily() {
@@ -136,7 +135,7 @@ async function submitLogout() {
             :key="family.id"
             class="family-profile-card"
             type="button"
-            @click="openFamilyStatus(family.id)"
+            @click="openFamilyDetail(family.id)"
           >
             <span class="family-avatar" :class="family.tone">{{ family.name.slice(-2) }}</span>
             <span class="family-profile-copy">
