@@ -1,0 +1,199 @@
+/* DateField.vue 전용 스타일.
+   토큰과 치수는 main.css 의 .modal-form input / .primary-button 을 그대로 따른다.
+   달력이 폼 입력란과 다른 물건처럼 보이지 않게 하는 것이 목적이다. */
+
+/* .modal-form label 자리에 들어가는 줄. DateField 트리거가 button 이라
+   label 로 감싸면 라벨 클릭이 달력 토글로 새어 나가서 div 로 두고 배치만 맞춘다. */
+.date-field-row {
+  display: grid;
+  gap: 7px;
+}
+
+.date-field-row > span {
+  color: #465467;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.date-field {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+/* .modal-form input 과 같은 높이·반경·배경. 트리거가 입력란처럼 보여야 한다. */
+.date-field-trigger {
+  display: flex;
+  width: 100%;
+  height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border: 1px solid #e4e9f0;
+  border-radius: 14px;
+  background: #f4f7fb;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.date-field-trigger:focus-visible {
+  border-color: #7fa5c7;
+  outline: 3px solid rgba(79, 125, 165, 0.12);
+}
+
+.date-field.is-open .date-field-trigger {
+  border-color: #7fa5c7;
+  background: #fff;
+}
+
+.date-field-trigger > svg {
+  flex: none;
+  color: #8290a1;
+}
+
+.date-field-placeholder {
+  color: #97a2b1;
+}
+
+/* 바텀시트(.modal-sheet)가 overflow-y: auto 라 떠 있는 레이어는 잘린다.
+   그래서 흐름 안에서 아래로 펼치고, 시트가 자연스럽게 스크롤되게 둔다. */
+.date-field-panel {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.date-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.date-field-selects {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* 생년월일은 수십 년을 거슬러야 해서 월 이동 버튼만으로는 못 쓴다. 연·월은 셀렉트로 바로 간다. */
+.date-field-selects select {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.date-field-selects select:focus-visible {
+  border-color: #7fa5c7;
+  outline: 3px solid rgba(79, 125, 165, 0.12);
+}
+
+.date-field-nav {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #dbe3ee;
+  border-radius: 50%;
+  background: #fff;
+  color: #345a7c;
+  cursor: pointer;
+}
+
+.date-field-nav:disabled {
+  border-color: var(--line);
+  color: #c2cad6;
+  cursor: default;
+}
+
+.date-field-nav.prev > svg {
+  transform: rotate(180deg);
+}
+
+.date-field-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.date-field-weekday {
+  padding-bottom: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.date-field-weekday.sun {
+  color: #dd555b;
+}
+
+.date-field-weekday.sat {
+  color: #4f7da5;
+}
+
+.date-field-day {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.date-field-day:hover:not(:disabled):not(.is-selected) {
+  background: var(--surface-alt);
+}
+
+.date-field-day:focus-visible {
+  outline: 3px solid rgba(79, 125, 165, 0.12);
+  outline-offset: -3px;
+}
+
+.date-field-day:disabled {
+  color: #ccd3dd;
+  cursor: default;
+}
+
+/* 오늘은 테두리로만 표시한다. 선택 상태와 겹쳐 보이지 않게 배경은 쓰지 않는다. */
+.date-field-day.is-today:not(.is-selected) {
+  box-shadow: inset 0 0 0 1px #b8cadb;
+}
+
+/* 선택 강조는 .primary-button 과 같은 KB 옐로 계열로 맞춘다. */
+.date-field-day.is-selected {
+  background: var(--kb-yellow);
+  color: #151c22;
+  font-weight: 500;
+}
+
+.date-field-day.is-empty {
+  cursor: default;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .date-field-trigger,
+  .date-field-day,
+  .date-field-nav {
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+}
