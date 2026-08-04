@@ -21,6 +21,56 @@
   margin: 0;
 }
 
+.my-page .my-content {
+  padding-bottom: 48px;
+}
+
+.withdrawal-footer-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.withdrawal-text-button {
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #98a2af;
+  font-size: 10px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.withdrawal-text-button:hover {
+  background: #edf1f5;
+  color: #667384;
+}
+
+.withdrawal-text-button:active {
+  transform: translateY(1px);
+}
+
+.withdrawal-text-button:focus-visible {
+  outline: 2px solid rgba(79, 125, 165, 0.45);
+  outline-offset: 2px;
+}
+
+.withdrawal-error {
+  margin: 0;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: #fff1f1;
+  color: #b84549;
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: center;
+}
+
 @media (max-width: 359px) {
   .profile-summary-card.profile-summary-link {
     grid-template-columns: auto minmax(0, 1fr) auto;

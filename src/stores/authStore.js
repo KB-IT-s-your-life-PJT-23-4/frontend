@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '../api/apiAdapter'
 import { login as requestLogin, logout as requestLogout } from '../api/authApi'
-import { getMyProfile, updateMyProfile } from '../api/userApi'
+import { deleteMyAccount, getMyProfile, updateMyProfile } from '../api/userApi'
 import { useAppStore } from './appStore'
 import {
   clearAuthSession as clearStoredAuthSession,
@@ -135,6 +135,34 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function withdrawAccount() {
+    if (api.isMock) {
+      const error = new Error('데모 모드에서는 회원탈퇴를 사용할 수 없습니다.')
+      error.code = 'WITHDRAWAL_NOT_AVAILABLE_IN_DEMO'
+      throw error
+    }
+
+    await deleteMyAccount()
+
+    let cleanupFailed = false
+    try {
+      await clearSession()
+    } catch {
+      cleanupFailed = true
+
+      // 계정 삭제는 이미 완료됐으므로 메모리와 브라우저 상태를 각각 한 번 더 정리한다.
+      try {
+        clearAuth()
+      } catch {}
+
+      try {
+        await useAppStore().clearUserState()
+      } catch {}
+    }
+
+    return { cleanupFailed }
+  }
+
   return {
     accessToken,
     refreshToken,
@@ -142,6 +170,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLogin,
     login,
     logout,
+    withdrawAccount,
     fetchUserProfile,
     updateUserProfile,
     setAuthSession,
