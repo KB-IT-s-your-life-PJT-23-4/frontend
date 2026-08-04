@@ -1,0 +1,16 @@
+/* StatusView.vue 전용 스타일. main.css 는 건드리지 않는다. */
+
+/*
+  .status-content 는 display: grid 라 암시적 컬럼이 auto = minmax(min-content, max-content) 로
+  잡힌다. 그 안의 .family-switcher 는 width: max-content 여서 수증자가 늘어나면
+  (탭 min-width 82px × N + 추가 버튼) 컬럼이 화면 폭을 넘겨 부풀고, 같은 컬럼에 놓인
+  카드들까지 전부 밖으로 밀려 가로 스크롤이 생긴다.
+  .family-switcher 의 max-width: 100% 는 퍼센트라 이 트랙 계산에 반영되지 않는다.
+
+  컬럼 최소값을 0 으로 고정해 트랙이 컨테이너를 넘지 못하게 한다. 그러면 스위처의
+  max-width: 100% 와 overflow-x: auto 가 의도대로 살아나 탭 줄만 안에서 옆으로 스크롤된다.
+  main.css 의 .status-content 를 덮어야 해서 import 순서와 무관하도록 클래스를 겹쳐 쓴다.
+*/
+.page-content.status-content {
+  grid-template-columns: minmax(0, 1fr);
+}
