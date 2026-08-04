@@ -6,7 +6,7 @@ import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
 import { useAppStore } from '../stores/appStore'
-import { relationLabel } from '../utils/deduction'
+import { isMinorAt, relationLabel } from '../utils/deduction'
 import { formatWon } from '../utils/finance'
 import '../assets/css/recipient-detail.css'
 
@@ -42,6 +42,40 @@ function isRecipientNotFound(error) {
   return error?.status === 404 || error?.status === 411 || error?.code === 411
 }
 
+function loadDemoRecipient(familyId) {
+  const family = store.state.families.find((item) => Number(item.id) === familyId)
+  if (!family) return false
+
+  const latestGift = store.state.giftHistory.find(
+    (gift) => Number(gift.familyId) === familyId && gift.status === GIFT_STATUS.COMPLETED,
+  )
+  const deductionLimit = family.deductionLimit ?? null
+
+  recipient.value = {
+    familyId: Number(family.id),
+    familyName: family.name,
+    relation: family.relationCode ?? family.relation,
+    birthDate: family.birthDate,
+    isMinor: family.isMinor ?? isMinorAt(family.birthDate),
+    familyImg: family.familyImg ?? null,
+    createdAt: family.createdAt ?? null,
+  }
+  deduction.value = {
+    familyId: Number(family.id),
+    usedAmount: family.giftedAmount ?? 0,
+    remainingAmount:
+      family.remainingDeduction ??
+      (deductionLimit === null
+        ? null
+        : Math.max(0, deductionLimit - Number(family.giftedAmount ?? 0))),
+    deductionLimit,
+    nextRenewalDate:
+      family.nextRenewalDate ?? (family.resetDate === '미정' ? null : family.resetDate),
+  }
+  recentGiftDate.value = latestGift?.date ?? null
+  return true
+}
+
 async function loadRecipient(rawFamilyId) {
   const sequence = ++loadSequence
   const familyId = Number(rawFamilyId)
@@ -56,6 +90,12 @@ async function loadRecipient(rawFamilyId) {
 
   if (!Number.isSafeInteger(familyId) || familyId <= 0) {
     notFound.value = true
+    loading.value = false
+    return
+  }
+
+  if (api.isMock) {
+    notFound.value = !loadDemoRecipient(familyId)
     loading.value = false
     return
   }
@@ -112,16 +152,26 @@ async function confirmDeleteRecipient() {
 
   deletingRecipient.value = true
   try {
-    await api.deleteFamily(Number(recipient.value.familyId))
+    const familyId = Number(recipient.value.familyId)
+    if (api.isMock) store.deleteDemoFamily(familyId)
+    else await api.deleteFamily(familyId)
+
     showDeleteModal.value = false
 
-    try {
-      await store.ensureStatusLoaded({ force: true })
+    if (api.isMock) {
       store.showToast('수증자 정보가 삭제됐어요.')
-    } catch {
-      store.showToast('수증자는 삭제됐지만 목록을 새로 불러오지 못했습니다.', 'info')
+    } else {
+      try {
+        await store.ensureStatusLoaded({ force: true })
+        store.showToast('수증자 정보가 삭제됐어요.')
+      } catch {
+        store.showToast('수증자는 삭제됐지만 목록을 새로 불러오지 못했습니다.', 'info')
+      }
     }
 
+    recipient.value = null
+    deduction.value = null
+    recentGiftDate.value = null
     await router.replace({ name: 'my' })
   } catch (error) {
     const hasGiftHistory = error?.status === 409 || error?.code === 409

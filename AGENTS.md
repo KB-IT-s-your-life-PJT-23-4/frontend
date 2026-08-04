@@ -60,6 +60,7 @@
 - Check syntax and import paths in every changed file.
 - Apply the repository's formatting rules when needed.
 - Run `npm run build` after code changes.
+- When the API adapter supports mock mode, verify new API-backed routes and mutations reuse the existing Pinia demo state instead of relying on no-op API fallbacks.
 - For UI changes, verify loading, empty, error, and relevant responsive states.
 - If verification cannot be run, clearly state what was not run and why.
 

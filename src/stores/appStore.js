@@ -102,6 +102,30 @@ function selectFamily(familyId) {
   state.selectedFamilyId = Number(familyId)
 }
 
+function deleteDemoFamily(familyId) {
+  if (!api.isMock) return
+
+  const numericFamilyId = Number(familyId)
+  const hasGiftHistory = state.giftHistory.some((gift) => Number(gift.familyId) === numericFamilyId)
+  const hasGiftPlan = state.plans.some((plan) => Number(plan.familyId) === numericFamilyId)
+
+  if (hasGiftHistory || hasGiftPlan) {
+    const error = new Error('증여 이력이 있는 수증자는 삭제할 수 없습니다.')
+    error.status = 409
+    error.code = 409
+    throw error
+  }
+
+  state.families = state.families.filter((family) => Number(family.id) !== numericFamilyId)
+  state.simulations = state.simulations.filter(
+    (simulation) => Number(simulation.familyId) !== numericFamilyId,
+  )
+
+  if (Number(state.selectedFamilyId) === numericFamilyId) {
+    state.selectedFamilyId = state.families[0]?.id ?? null
+  }
+}
+
 async function addGift({ familyId, date, amount, memo = '현금' }) {
   const numericAmount = Number(amount)
 
@@ -465,6 +489,7 @@ export function useAppStore() {
     toast: readonly(toast),
     showToast,
     selectFamily,
+    deleteDemoFamily,
     addGift,
     savePlan,
     deletePlan,
