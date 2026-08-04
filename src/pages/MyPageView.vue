@@ -16,9 +16,12 @@ const authStore = useAuthStore()
 const router = useRouter()
 const showAddFamily = ref(false)
 const showSettings = ref(false)
+const showWithdrawal = ref(false)
 const simulationToDelete = ref(null)
 const savingFamily = ref(false)
 const isLoggingOut = ref(false)
+const isWithdrawing = ref(false)
+const withdrawalError = ref('')
 const displayUser = computed(() => authStore.user ?? store.state.user)
 const displayName = computed(() => displayUser.value?.name?.trim() || '사용자')
 // 생년월일 입력 범위. min/max 를 주지 않으면 브라우저가 연도 칸을 6자리(최대 275760년)로 잡아
@@ -101,6 +104,55 @@ async function submitLogout() {
     isLoggingOut.value = false
     await router.replace('/login')
   }
+}
+
+function openWithdrawal() {
+  if (store.isMock) {
+    store.showToast('데모 모드에서는 회원탈퇴를 사용할 수 없습니다.', 'info')
+    return
+  }
+
+  withdrawalError.value = ''
+  showWithdrawal.value = true
+}
+
+function closeWithdrawal() {
+  if (isWithdrawing.value) return
+
+  withdrawalError.value = ''
+  showWithdrawal.value = false
+}
+
+function withdrawalFailureMessage(error) {
+  if (error?.status === 401) return '로그인이 만료되었습니다. 다시 로그인해 주세요.'
+  if (error?.status === 404) return '이미 탈퇴했거나 회원 정보를 찾을 수 없습니다.'
+  return error?.message || '회원탈퇴를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'
+}
+
+async function submitWithdrawal() {
+  if (isWithdrawing.value) return
+
+  isWithdrawing.value = true
+  withdrawalError.value = ''
+
+  let result
+  try {
+    result = await authStore.withdrawAccount()
+  } catch (error) {
+    withdrawalError.value = withdrawalFailureMessage(error)
+    isWithdrawing.value = false
+    return
+  }
+
+  showWithdrawal.value = false
+  isWithdrawing.value = false
+  await router.replace({ name: 'login' })
+  store.showToast(
+    result.cleanupFailed
+      ? '회원탈퇴는 완료됐지만 브라우저 정보 일부를 정리하지 못했습니다.'
+      : '회원탈퇴가 완료되었습니다.',
+    result.cleanupFailed ? 'info' : 'success',
+  )
 }
 </script>
 
@@ -223,6 +275,11 @@ async function submitLogout() {
         </button>
         <button type="button" @click="store.resetDemo">데모 초기화</button>
       </div>
+      <div class="withdrawal-footer-action">
+        <button class="withdrawal-text-button" type="button" @click="openWithdrawal">
+          회원탈퇴
+        </button>
+      </div>
       <p class="version-label">미리줌 데모 1.0</p>
     </div>
 
@@ -316,6 +373,37 @@ async function submitLogout() {
         </button>
         <button class="danger-button" type="button" @click="confirmSimulationDelete">
           삭제하기
+        </button>
+      </template>
+    </ModalSheet>
+
+    <ModalSheet
+      :show="showWithdrawal"
+      title="회원탈퇴"
+      description="정말 회원탈퇴를 진행하시겠습니까? 탈퇴 후에는 회원 정보와 저장된 데이터 복구가 어려울 수 있습니다."
+      danger
+      @close="closeWithdrawal"
+    >
+      <p v-if="withdrawalError" class="withdrawal-error" role="alert">
+        {{ withdrawalError }}
+      </p>
+      <template #actions>
+        <button
+          class="secondary-button"
+          type="button"
+          :disabled="isWithdrawing"
+          @click="closeWithdrawal"
+        >
+          취소
+        </button>
+        <button
+          class="danger-button"
+          type="button"
+          :disabled="isWithdrawing"
+          :aria-busy="isWithdrawing"
+          @click="submitWithdrawal"
+        >
+          {{ isWithdrawing ? '탈퇴 처리 중...' : '탈퇴하기' }}
         </button>
       </template>
     </ModalSheet>

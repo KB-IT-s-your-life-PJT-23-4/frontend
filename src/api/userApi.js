@@ -10,3 +10,9 @@ export function updateMyProfile(profile) {
     body: JSON.stringify(profile),
   })
 }
+
+export function deleteMyAccount() {
+  return request('/users/me', {
+    method: 'DELETE',
+  })
+}
