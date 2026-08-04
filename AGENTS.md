@@ -60,6 +60,7 @@
 - Check syntax and import paths in every changed file.
 - Apply the repository's formatting rules when needed.
 - Run `npm run build` after code changes.
+- When the API adapter supports mock mode, verify new API-backed routes and mutations reuse the existing Pinia demo state instead of relying on no-op API fallbacks.
 - For UI changes, verify loading, empty, error, and relevant responsive states.
 - If verification cannot be run, clearly state what was not run and why.
 
@@ -85,6 +86,7 @@
 ## Code Review Rules
 
 - Check that route changes do not break existing URLs or navigation.
+- When adding an authenticated nested route, verify the post-login redirect allowlist accepts that nested path.
 - Check that API-backed screens handle loading and error states.
 - Check that source files do not contain environment variables, tokens, credentials, or personal data.
 - Review UI changes for mobile layout and basic accessibility.

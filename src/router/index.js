@@ -4,6 +4,7 @@ import SimulationView from '../pages/SimulationView.vue'
 import StatusView from '../pages/StatusView.vue'
 import ChatView from '../pages/ChatView.vue'
 import MyPageView from '../pages/MyPageView.vue'
+import RecipientDetailView from '../pages/RecipientDetailView.vue'
 import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
@@ -28,6 +29,12 @@ const router = createRouter({
       name: 'my',
       component: MyPageView,
       meta: { label: '마이', requiresAuth: true },
+    },
+    {
+      path: '/my/family/:familyId',
+      name: 'recipient-detail',
+      component: RecipientDetailView,
+      meta: { label: '수증자 상세 정보', requiresAuth: true },
     },
     {
       path: '/notifications',

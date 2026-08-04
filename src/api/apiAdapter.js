@@ -236,6 +236,12 @@ export const api = {
     return Array.isArray(data) ? data : []
   },
 
+  // GET /api/fm/family/{familyId} — 로그인 사용자 소유 수증자 단건
+  async getFamily(familyId) {
+    if (!API_BASE) return null
+    return request(`${FAMILY_PATH}/${familyId}`)
+  },
+
   // POST /api/fm/family — relation 은 ENUM(LINEAL_DESCENDANT/OTHER) 코드만 허용
   async createFamily({ familyName, relation, birthDate, familyImg = null }) {
     if (!API_BASE) return null
