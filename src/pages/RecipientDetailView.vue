@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { api } from '../api/apiAdapter'
+import { api, GIFT_STATUS } from '../api/apiAdapter'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
@@ -16,6 +16,7 @@ const store = useAppStore()
 
 const recipient = ref(null)
 const deduction = ref(null)
+const recentGiftDate = ref(null)
 const loading = ref(true)
 const loadError = ref('')
 const notFound = ref(false)
@@ -37,10 +38,6 @@ function displayMoney(value) {
   return value === null || value === undefined ? '정보 없음' : formatWon(value)
 }
 
-function displayCount(value) {
-  return value === null || value === undefined ? '정보 없음' : `${value}건`
-}
-
 function isRecipientNotFound(error) {
   return error?.status === 404 || error?.status === 411 || error?.code === 411
 }
@@ -51,6 +48,7 @@ async function loadRecipient(rawFamilyId) {
 
   recipient.value = null
   deduction.value = null
+  recentGiftDate.value = null
   loadError.value = ''
   notFound.value = false
   imageFailed.value = false
@@ -63,9 +61,10 @@ async function loadRecipient(rawFamilyId) {
   }
 
   try {
-    const [recipientData, deductions] = await Promise.all([
+    const [recipientData, deductions, completedGifts] = await Promise.all([
       api.getFamily(familyId),
       api.listDeductions({ familyId }),
+      api.listGifts({ familyId, status: GIFT_STATUS.COMPLETED }).catch(() => []),
     ])
 
     if (sequence !== loadSequence) return
@@ -76,6 +75,7 @@ async function loadRecipient(rawFamilyId) {
 
     recipient.value = recipientData
     deduction.value = deductions.find((item) => Number(item.familyId) === familyId) ?? null
+    recentGiftDate.value = completedGifts[0]?.giftDate ?? null
   } catch (error) {
     if (sequence !== loadSequence) return
     if (isRecipientNotFound(error)) notFound.value = true
@@ -216,9 +216,9 @@ watch(
                 <dt>등록일</dt>
                 <dd>{{ displayDate(recipient.createdAt) }}</dd>
               </div>
-              <div v-if="recipient.updatedAt">
-                <dt>최근 수정일</dt>
-                <dd>{{ displayDate(recipient.updatedAt) }}</dd>
+              <div>
+                <dt>최근 증여일</dt>
+                <dd>{{ displayDate(recentGiftDate) }}</dd>
               </div>
             </dl>
           </section>
@@ -229,10 +229,6 @@ watch(
           >
             <div class="recipient-section-heading">
               <h3 id="recipient-gift-heading">증여 정보</h3>
-              <small v-if="deduction?.windowStartDate && deduction?.baseDate">
-                {{ displayDate(deduction.windowStartDate) }} ~
-                {{ displayDate(deduction.baseDate) }} 기준
-              </small>
             </div>
 
             <dl class="recipient-card-list recipient-gift-list">
@@ -251,16 +247,6 @@ watch(
               <div>
                 <dt>증여재산 공제 한도</dt>
                 <dd>{{ displayMoney(deduction?.deductionLimit) }}</dd>
-              </div>
-              <div>
-                <dt>예정 증여금액</dt>
-                <dd class="recipient-emphasis-amount">
-                  {{ displayMoney(deduction?.plannedAmount) }}
-                </dd>
-              </div>
-              <div>
-                <dt>확정 증여 건수</dt>
-                <dd>{{ displayCount(deduction?.aggregatedCount) }}</dd>
               </div>
               <div>
                 <dt>다음 공제 가능일</dt>
