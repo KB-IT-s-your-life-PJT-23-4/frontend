@@ -16,6 +16,14 @@ const joinedAt = computed(() => profile.value?.createdAt ?? profile.value?.joine
 
 function displayDate(value) {
   if (!value) return '정보 없음'
+
+  if (Array.isArray(value)) {
+    const [year, month, day] = value
+    if ([year, month, day].every((part) => Number.isInteger(Number(part)))) {
+      return `${year}.${String(month).padStart(2, '0')}.${String(day).padStart(2, '0')}`
+    }
+  }
+
   return String(value).slice(0, 10).replaceAll('-', '.')
 }
 
