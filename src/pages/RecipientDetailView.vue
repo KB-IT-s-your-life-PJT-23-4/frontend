@@ -5,6 +5,7 @@ import { api, GIFT_STATUS } from '../api/apiAdapter'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
+import PageHeading from '../components/layout/PageHeading.vue'
 import { useAppStore } from '../stores/appStore'
 import { isMinorAt, relationLabel } from '../utils/deduction'
 import { formatWon } from '../utils/finance'
@@ -196,9 +197,11 @@ watch(
 
 <template>
   <div class="page recipient-detail-page">
-    <AppHeader title="수증자 상세 정보" back />
+    <AppHeader />
 
     <main class="page-content recipient-detail-content">
+      <PageHeading title="수증자 상세 정보" />
+
       <section v-if="loading" class="recipient-state-card" role="status" aria-live="polite">
         <span class="recipient-loading-spinner" aria-hidden="true" />
         <h2>수증자 정보를 불러오고 있어요</h2>

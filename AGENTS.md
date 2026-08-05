@@ -90,6 +90,7 @@
 ## Code Review Rules
 
 - Check that route changes do not break existing URLs or navigation.
+- When moving a route title from a shared header into page content, do not introduce new back-navigation controls unless the requested design explicitly includes them.
 - When adding an authenticated nested route, verify the post-login redirect allowlist accepts that nested path.
 - Check that API-backed screens handle loading and error states.
 - Check that source files do not contain environment variables, tokens, credentials, or personal data.

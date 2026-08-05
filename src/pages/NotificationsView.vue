@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import AppHeader from "../components/layout/AppHeader.vue";
 import AppIcon from "../components/layout/AppIcon.vue";
+import PageHeading from "../components/layout/PageHeading.vue";
 import { useAppStore } from "../stores/appStore";
 
 const store = useAppStore();
@@ -21,8 +22,10 @@ onMounted(() => {
 
 <template>
   <div class="page notifications-page">
-    <AppHeader title="알림" back />
+    <AppHeader />
     <div class="page-content narrow-content">
+      <PageHeading title="알림" />
+
       <section
         v-for="[group, items] in groups"
         :key="group"

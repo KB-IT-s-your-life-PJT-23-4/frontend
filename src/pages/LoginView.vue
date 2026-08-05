@@ -2,8 +2,10 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
+import PageHeading from '../components/layout/PageHeading.vue'
 import { useAuthStore } from '../stores/authStore'
 import { validateEmail, validatePassword } from '../utils/authValidation'
+import '../assets/css/auth-view.css'
 
 const router = useRouter()
 const route = useRoute()
@@ -60,15 +62,13 @@ async function submitLogin() {
 
 <template>
   <div class="page auth-page">
-    <AppHeader title="로그인" back :show-notifications="false" />
+    <AppHeader />
 
     <div class="page-content auth-content">
+      <PageHeading title="로그인" />
+
       <section class="auth-card" aria-labelledby="login-heading">
         <div class="auth-intro">
-          <div class="auth-brand">
-            <img src="/src/assets/brand-symbol.png" alt="" />
-            <span>미리줌</span>
-          </div>
           <div>
             <h2 id="login-heading">다시 만나 반가워요</h2>
             <p>미리줌으로 스마트한 증여 계획을 이어가세요.</p>

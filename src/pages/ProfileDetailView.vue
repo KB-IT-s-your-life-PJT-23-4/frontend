@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
+import PageHeading from '../components/layout/PageHeading.vue'
 import { useAuthStore } from '../stores/authStore'
 import { resolveProfileImageUrl } from '../utils/profileImage'
 import '../assets/css/profile-view.css'
@@ -52,9 +53,11 @@ onMounted(loadProfile)
 
 <template>
   <div class="page profile-view-page">
-    <AppHeader title="내 상세 정보" back />
+    <AppHeader />
 
     <main class="page-content profile-view-content">
+      <PageHeading title="내 상세 정보" />
+
       <section v-if="loading" class="profile-state-card" role="status" aria-live="polite">
         <span class="profile-loading-spinner" aria-hidden="true" />
         <h2>내 정보를 불러오고 있어요</h2>

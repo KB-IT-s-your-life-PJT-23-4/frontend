@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import DateField from '../components/common/DateField.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
+import PageHeading from '../components/layout/PageHeading.vue'
 import ProfileImageField from '../components/common/ProfileImageField.vue'
 import { api } from '../api/apiAdapter'
 import { useAppStore } from '../stores/appStore'
@@ -101,9 +102,11 @@ onMounted(loadProfile)
 
 <template>
   <div class="page profile-view-page">
-    <AppHeader title="회원 정보 수정" back />
+    <AppHeader />
 
     <main class="page-content profile-view-content profile-edit-content">
+      <PageHeading title="회원 정보 수정" />
+
       <section v-if="loading" class="profile-state-card" role="status" aria-live="polite">
         <span class="profile-loading-spinner" aria-hidden="true" />
         <h2>회원 정보를 불러오고 있어요</h2>
