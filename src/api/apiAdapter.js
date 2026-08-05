@@ -112,6 +112,14 @@ async function performTokenRefresh() {
     throw new Error('인증 갱신 응답이 올바르지 않습니다.')
   }
 
+  const currentSession = loadAuthSession()
+  if (currentSession.refreshToken !== refreshToken) {
+    if (currentSession.accessToken && currentSession.refreshToken && currentSession.user) {
+      return currentSession
+    }
+    throw new Error('인증 상태가 변경되었습니다.')
+  }
+
   saveAuthSession(session)
   if (onSessionRefreshed) await onSessionRefreshed(session)
   authenticationFailurePromise = null
@@ -129,14 +137,14 @@ function getRefreshPromise() {
 }
 
 export function restoreAuthSession() {
-  return getRefreshPromise()
-}
-
-function refreshAuthSession() {
   return getRefreshPromise().catch(async (error) => {
     await handleAuthenticationFailure()
     throw error
   })
+}
+
+function refreshAuthSession() {
+  return restoreAuthSession()
 }
 
 export async function request(path, options = {}) {

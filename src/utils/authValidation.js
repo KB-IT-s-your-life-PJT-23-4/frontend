@@ -18,7 +18,7 @@ export function validateName(value) {
 export function validateEmail(value) {
   const email = value.trim()
   if (!email) return '이메일을 입력해주세요.'
-  if (email.length > 100 || !EMAIL_PATTERN.test(email)) {
+  if (email.length > 255 || !EMAIL_PATTERN.test(email)) {
     return '올바른 이메일 형식이 아닙니다.'
   }
   return ''

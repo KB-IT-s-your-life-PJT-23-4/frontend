@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { api } from '../api/apiAdapter'
+import { api, restoreAuthSession } from '../api/apiAdapter'
 import { login as requestLogin, logout as requestLogout } from '../api/authApi'
 import { deleteMyAccount, getMyProfile, updateMyProfile } from '../api/userApi'
 import { useAppStore } from './appStore'
@@ -34,7 +34,15 @@ export const useAuthStore = defineStore('auth', () => {
     accessTokenExpired.value = remaining <= 0
 
     if (remaining > 0) {
-      expirationTimer = setTimeout(syncExpirationState, Math.min(remaining, 2_147_483_647))
+      expirationTimer = setTimeout(
+        () => {
+          syncExpirationState()
+          if (accessTokenExpired.value && refreshToken.value) {
+            restoreAuthSession().catch(() => {})
+          }
+        },
+        Math.min(remaining, 2_147_483_647),
+      )
     }
   }
 
@@ -94,6 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(credentials) {
     const session = await requestLogin(credentials)
+    await useAppStore().clearUserState()
     setAuthSession(session)
     return session
   }
@@ -149,7 +158,16 @@ export const useAuthStore = defineStore('auth', () => {
       throw error
     }
 
+    const currentRefreshToken = refreshToken.value
     await deleteMyAccount()
+
+    if (currentRefreshToken) {
+      try {
+        await requestLogout(currentRefreshToken)
+      } catch {
+        // 계정 삭제는 이미 완료됐고, 이후 Refresh 요청도 삭제된 회원이라 거부된다.
+      }
+    }
 
     let cleanupFailed = false
     try {
