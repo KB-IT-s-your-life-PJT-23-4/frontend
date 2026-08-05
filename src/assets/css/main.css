@@ -7135,12 +7135,16 @@ textarea:focus-visible {
 }
 @media (min-width: 1024px) {
   .guide-news-scroll {
-    margin: 0 -34px;
-    padding: 4px 34px 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    padding: 4px 0 12px;
     gap: 16px;
+    overflow: visible;
+    scroll-snap-type: none;
   }
   .guide-news-card {
-    width: 270px;
+    width: 100%;
     height: 330px;
   }
 }
