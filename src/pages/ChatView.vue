@@ -360,10 +360,7 @@ function appendConsultResponse(response, originalQuestion) {
     messages.value.push({
       id: Date.now() + 1,
       role: 'assistant',
-      text: normalizeAssistantAnswer(
-        response.answer,
-        '해당 질문에는 답변해 드릴 수 없습니다.',
-      ),
+      text: normalizeAssistantAnswer(response.answer, '해당 질문에는 답변해 드릴 수 없습니다.'),
       error: true,
       createdAt: getCurrentTimeFormat(),
     })
@@ -542,14 +539,6 @@ function clearConversation() {
     </div>
 
     <div class="chat-composer-wrap">
-      <button
-        class="explain-button"
-        type="button"
-        :disabled="Boolean(pendingConsult) || loading"
-        @click="sendMessage('증여재산공제를 쉽게 설명해줘')"
-      >
-        <AppIcon name="sparkles" :size="15" /> 쉽게 설명해줘
-      </button>
       <div class="chat-composer-row">
         <button
           class="chat-plus-button"
