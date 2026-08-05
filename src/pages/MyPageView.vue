@@ -35,15 +35,8 @@ const birthDateMax = new Date().toISOString().slice(0, 10)
 // 백엔드 family.relation 은 ENUM(LINEAL_DESCENDANT/OTHER) 이라 코드로 보낸다.
 const familyForm = reactive({
   name: '',
-  relation: RELATION_OPTIONS[0].code,
   birthDate: '',
 })
-const familySummary = computed(() =>
-  store.state.families.map((family) => ({
-    ...family,
-    lastGift: store.state.giftHistory.find((gift) => gift.familyId === family.id),
-  })),
-)
 
 function openFamilyDetail(familyId) {
   router.push({ name: 'recipient-detail', params: { familyId } })
@@ -70,7 +63,6 @@ async function submitFamily() {
       relation: RELATION_OPTIONS[0].code,
     })
     familyForm.name = ''
-    familyForm.relation = RELATION_OPTIONS[0].code
     familyForm.birthDate = ''
     showAddFamily.value = false
   } catch (error) {
@@ -150,12 +142,12 @@ async function submitWithdrawal() {
     result = await authStore.withdrawAccount()
   } catch (error) {
     withdrawalError.value = withdrawalFailureMessage(error)
-    isWithdrawing.value = false
     return
+  } finally {
+    isWithdrawing.value = false
   }
 
   showWithdrawal.value = false
-  isWithdrawing.value = false
   await router.replace({ name: 'login' })
   store.showToast(
     result.cleanupFailed
@@ -203,7 +195,7 @@ async function submitWithdrawal() {
         </div>
         <div class="family-card-list">
           <button
-            v-for="family in familySummary"
+            v-for="family in store.state.families"
             :key="family.id"
             class="family-profile-card"
             type="button"

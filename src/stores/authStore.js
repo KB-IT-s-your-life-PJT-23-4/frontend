@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { api } from '../api/apiAdapter'
+import { api, restoreAuthSession } from '../api/apiAdapter'
 import { login as requestLogin, logout as requestLogout } from '../api/authApi'
 import { deleteMyAccount, getMyProfile, updateMyProfile } from '../api/userApi'
 import { useAppStore } from './appStore'
@@ -25,6 +25,14 @@ export const useAuthStore = defineStore('auth', () => {
     Boolean(accessToken.value && user.value && !accessTokenExpired.value),
   )
 
+  function persistSession() {
+    saveAuthSession({
+      accessToken: accessToken.value,
+      refreshToken: refreshToken.value,
+      user: user.value,
+    })
+  }
+
   function syncExpirationState() {
     clearTimeout(expirationTimer)
     expirationTimer = null
@@ -34,7 +42,15 @@ export const useAuthStore = defineStore('auth', () => {
     accessTokenExpired.value = remaining <= 0
 
     if (remaining > 0) {
-      expirationTimer = setTimeout(syncExpirationState, Math.min(remaining, 2_147_483_647))
+      expirationTimer = setTimeout(
+        () => {
+          syncExpirationState()
+          if (accessTokenExpired.value && refreshToken.value) {
+            restoreAuthSession().catch(() => {})
+          }
+        },
+        Math.min(remaining, 2_147_483_647),
+      )
     }
   }
 
@@ -45,31 +61,12 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = session.refreshToken ?? null
     user.value = session.user ?? null
     syncExpirationState()
-    saveAuthSession({
-      accessToken: accessToken.value,
-      refreshToken: refreshToken.value,
-      user: user.value,
-    })
+    persistSession()
   }
 
   function setUserProfile(profile) {
     user.value = profile ?? null
-    saveAuthSession({
-      accessToken: accessToken.value,
-      refreshToken: refreshToken.value,
-      user: user.value,
-    })
-  }
-
-  function saveToken(nextAccessToken, nextRefreshToken = refreshToken.value) {
-    accessToken.value = nextAccessToken ?? null
-    refreshToken.value = nextRefreshToken ?? null
-    syncExpirationState()
-    saveAuthSession({
-      accessToken: accessToken.value,
-      refreshToken: refreshToken.value,
-      user: user.value,
-    })
+    persistSession()
   }
 
   function clearAuth() {
@@ -80,20 +77,21 @@ export const useAuthStore = defineStore('auth', () => {
     clearStoredAuthSession()
   }
 
-  function deleteToken() {
-    accessToken.value = null
-    refreshToken.value = null
-    syncExpirationState()
-    saveAuthSession({ accessToken: null, refreshToken: null, user: user.value })
-  }
-
   async function clearSession() {
-    clearAuth()
-    await useAppStore().clearUserState()
+    try {
+      clearAuth()
+    } finally {
+      await useAppStore().clearUserState()
+    }
   }
 
   async function login(credentials) {
     const session = await requestLogin(credentials)
+    if (!session?.accessToken || !session?.refreshToken || !session?.user) {
+      throw new Error('로그인 응답이 올바르지 않습니다.')
+    }
+
+    await useAppStore().clearUserState()
     setAuthSession(session)
     return session
   }
@@ -107,6 +105,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function updateUserProfile(changes, { image = null, removeImage = false } = {}) {
     const appStore = useAppStore()
     const currentProfile = user.value ?? appStore.state.user
+    if (!currentProfile) throw new Error('회원 정보를 찾을 수 없습니다.')
 
     if (api.isMock) {
       const nextImage = image
@@ -149,7 +148,16 @@ export const useAuthStore = defineStore('auth', () => {
       throw error
     }
 
+    const currentRefreshToken = refreshToken.value
     await deleteMyAccount()
+
+    if (currentRefreshToken) {
+      try {
+        await requestLogout(currentRefreshToken)
+      } catch {
+        // 계정 삭제는 이미 완료됐고, 이후 Refresh 요청도 삭제된 회원이라 거부된다.
+      }
+    }
 
     let cleanupFailed = false
     try {
@@ -181,9 +189,6 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUserProfile,
     updateUserProfile,
     setAuthSession,
-    saveToken,
-    deleteToken,
-    clearAuth,
     clearSession,
   }
 })
