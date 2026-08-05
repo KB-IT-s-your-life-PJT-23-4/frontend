@@ -290,8 +290,6 @@ async function submitWithdrawal() {
           {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
         </button>
         <button type="button" @click="store.resetDemo">데모 초기화</button>
-      </div>
-      <div class="withdrawal-footer-action">
         <button class="withdrawal-text-button" type="button" @click="openWithdrawal">
           회원탈퇴
         </button>

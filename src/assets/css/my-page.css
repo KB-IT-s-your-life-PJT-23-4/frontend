@@ -37,12 +37,6 @@
   padding-bottom: 48px;
 }
 
-.withdrawal-footer-action {
-  display: flex;
-  justify-content: center;
-  margin-top: 18px;
-}
-
 .withdrawal-text-button {
   padding: 6px 8px;
   border: 0;
