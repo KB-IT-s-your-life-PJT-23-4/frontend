@@ -90,7 +90,7 @@ function clarificationPlaceholder(clarification) {
 
 function clarificationMinimum(clarification) {
   if (clarification.type !== 'integer') return undefined
-  if (clarification.key === 'previous_gift_amount') return 0
+  if (clarification.key.includes('amount')) return 0
   return 1
 }
 
@@ -152,15 +152,25 @@ function hasDraftClarificationAnswer(clarification) {
 }
 
 function applyNoPreviousGiftDefaults(pending) {
-  const defaults = {
+  const answerDefaults = {
     has_previous_gifts: false,
     previous_gift_amount: 0,
-    previous_gift_date: '',
+    previous_gift_date: 'none',
     previous_gift_same_donor: false,
+  }
+  const factDefaults = {
+    ...answerDefaults,
+    previously_used_deduction: 0,
+    deduction_renewal_date: 'none',
   }
   const autoAnsweredMessages = []
 
-  Object.entries(defaults).forEach(([key, value]) => {
+  pending.facts = {
+    ...(pending.facts ?? {}),
+    ...factDefaults,
+  }
+
+  Object.entries(answerDefaults).forEach(([key, value]) => {
     pending.answers[key] = value
 
     const message = messages.value.find(
@@ -212,6 +222,7 @@ async function submitClarification(message, rawValue) {
   clarification.selectedValue = answer
   const pending = pendingConsult.value
   const previousAnswers = { ...pending.answers }
+  const previousFacts = { ...(pending.facts ?? {}) }
   pending.answers[clarification.key] = answer
   const meansNoPreviousGift =
     (clarification.key === 'has_previous_gifts' && answer === false) ||
@@ -253,6 +264,7 @@ async function submitClarification(message, rawValue) {
     clarification.answered = false
     clarification.selectedValue = null
     pending.answers = previousAnswers
+    pending.facts = previousFacts
     autoAnsweredMessages.forEach((autoAnsweredMessage) => {
       autoAnsweredMessage.clarification.answered = false
       autoAnsweredMessage.clarification.selectedValue = null
