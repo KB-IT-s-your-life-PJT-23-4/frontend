@@ -1,0 +1,31 @@
+.page-heading {
+  display: grid;
+  min-width: 0;
+  margin: 0 4px 22px;
+}
+
+.page-heading h1 {
+  margin: 0;
+  color: #172231;
+  font-size: clamp(28px, 7vw, 38px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.06em;
+}
+
+.profile-view-content > .page-heading,
+.recipient-detail-content > .page-heading {
+  margin-bottom: 0;
+}
+
+@media (max-width: 390px) {
+  .page-heading h1 {
+    font-size: 28px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-heading h1 {
+    font-size: 38px;
+  }
+}

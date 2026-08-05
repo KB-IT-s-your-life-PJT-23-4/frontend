@@ -3,6 +3,7 @@ import { reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { checkEmailDuplicate, signup } from '../api/authApi'
 import AppHeader from '../components/layout/AppHeader.vue'
+import PageHeading from '../components/layout/PageHeading.vue'
 import { useAppStore } from '../stores/appStore'
 import {
   formatBirthDate,
@@ -13,6 +14,7 @@ import {
   validatePassword,
   validatePhone,
 } from '../utils/authValidation'
+import '../assets/css/auth-view.css'
 
 const router = useRouter()
 const store = useAppStore()
@@ -146,17 +148,14 @@ async function submitSignup() {
 
 <template>
   <div class="page auth-page signup-page">
-    <AppHeader title="회원가입" back :show-notifications="false" />
+    <AppHeader />
 
     <div class="page-content auth-content">
+      <PageHeading title="회원가입" heading-id="signup-heading" />
+
       <section class="auth-card" aria-labelledby="signup-heading">
         <div class="auth-intro compact">
-          <div class="auth-brand">
-            <img src="/src/assets/brand-symbol.png" alt="" />
-            <span>미리줌</span>
-          </div>
           <div>
-            <h2 id="signup-heading">회원가입</h2>
             <p>가족의 증여 계획을 안전하게 시작해보세요.</p>
           </div>
         </div>
