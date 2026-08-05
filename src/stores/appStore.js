@@ -3,6 +3,7 @@ import { api, GIFT_STATUS } from '../api/apiAdapter'
 import { initialState } from '../data/mockData'
 import {
   deductionLimitFor,
+  isMinorAt,
   peerAverageGiftAmount,
   relationCode,
   relationLabel,
@@ -463,6 +464,61 @@ async function addFamily({ name, relation, birthDate }) {
   showToast('수증자 정보가 등록됐어요.')
 }
 
+async function updateFamilyProfile(
+  familyId,
+  { name, birthDate },
+  { image = null, removeImage = false } = {},
+) {
+  const numericFamilyId = Number(familyId)
+
+  if (!api.isMock) {
+    const updated = await api.updateFamilyProfile(
+      numericFamilyId,
+      { familyName: name, birthDate: toIsoDate(birthDate) },
+      { image, removeImage },
+    )
+    await syncStatus()
+    showToast('수증자 정보가 저장됐어요.')
+    return updated
+  }
+
+  const family = state.families.find((item) => Number(item.id) === numericFamilyId)
+  if (!family) {
+    const error = new Error('수증자 정보를 찾을 수 없습니다.')
+    error.status = 404
+    throw error
+  }
+
+  const nextImage = image
+    ? await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result ?? ''))
+        reader.onerror = () => reject(new Error('이미지를 저장하지 못했습니다.'))
+        reader.readAsDataURL(image)
+      })
+    : removeImage
+      ? null
+      : (family.familyImg ?? null)
+  const relation = family.relationCode ?? relationCode(family.relation)
+  const previousLimit = Number(family.deductionLimit ?? 0)
+  const nextLimit = deductionLimitFor(relation, birthDate)
+
+  Object.assign(family, {
+    name: name.trim(),
+    birthDate: toDotDate(birthDate),
+    familyImg: nextImage,
+    isMinor: isMinorAt(birthDate),
+    peerAverageGiftAmount: peerAverageGiftAmount(birthDate),
+    deductionLimit: nextLimit,
+    remainingDeduction: Math.max(
+      0,
+      Number(family.remainingDeduction ?? previousLimit) + nextLimit - previousLimit,
+    ),
+  })
+  showToast('수증자 정보가 저장됐어요.')
+  return family
+}
+
 function updateProfile(profile) {
   Object.assign(state.user, profile)
   showToast('회원 정보가 저장됐어요.')
@@ -503,6 +559,7 @@ export function useAppStore() {
     markNotificationsRead,
     deleteSimulation,
     addFamily,
+    updateFamilyProfile,
     updateProfile,
     resetDemo,
     clearUserState,

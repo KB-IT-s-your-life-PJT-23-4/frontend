@@ -11,6 +11,7 @@ import {
   loadAuthSession,
   saveAuthSession,
 } from '../utils/authStorage'
+import { fileToDataUrl } from '../utils/profileImage'
 
 export const useAuthStore = defineStore('auth', () => {
   const storedSession = loadAuthSession()
@@ -103,24 +104,30 @@ export const useAuthStore = defineStore('auth', () => {
     return profile
   }
 
-  async function updateUserProfile(changes) {
+  async function updateUserProfile(changes, { image = null, removeImage = false } = {}) {
     const appStore = useAppStore()
     const currentProfile = user.value ?? appStore.state.user
 
     if (api.isMock) {
-      appStore.updateProfile(changes)
-      const profile = { ...currentProfile, ...changes }
+      const nextImage = image
+        ? await fileToDataUrl(image)
+        : removeImage
+          ? null
+          : (currentProfile.img ?? null)
+      appStore.updateProfile({ ...changes, img: nextImage })
+      const profile = { ...currentProfile, ...changes, img: nextImage }
       setUserProfile(profile)
       return profile
     }
 
-    const profile = await updateMyProfile({
-      email: currentProfile.email,
-      name: changes.name ?? currentProfile.name,
-      birthDate: changes.birthDate ?? currentProfile.birthDate ?? null,
-      phone: changes.phone ?? currentProfile.phone,
-      img: currentProfile.img ?? null,
-    })
+    const profile = await updateMyProfile(
+      {
+        name: changes.name ?? currentProfile.name,
+        birthDate: changes.birthDate ?? currentProfile.birthDate ?? null,
+        phone: changes.phone ?? currentProfile.phone,
+      },
+      { image, removeImage },
+    )
     setUserProfile(profile)
     return profile
   }

@@ -7,6 +7,7 @@ import MyPageView from '../pages/MyPageView.vue'
 import ProfileDetailView from '../pages/ProfileDetailView.vue'
 import ProfileEditView from '../pages/ProfileEditView.vue'
 import RecipientDetailView from '../pages/RecipientDetailView.vue'
+import RecipientEditView from '../pages/RecipientEditView.vue'
 import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
@@ -54,6 +55,12 @@ const router = createRouter({
       name: 'recipient-detail',
       component: RecipientDetailView,
       meta: { label: '수증자 상세 정보', requiresAuth: true },
+    },
+    {
+      path: '/my/family/:familyId/edit',
+      name: 'recipient-edit',
+      component: RecipientEditView,
+      meta: { label: '수증자 정보 수정', requiresAuth: true },
     },
     {
       path: '/notifications',
