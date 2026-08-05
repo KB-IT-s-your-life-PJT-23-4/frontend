@@ -18,8 +18,11 @@ const authStore = useAuthStore(pinia)
 configureAuthLifecycleHandlers({
   onSessionRefreshed: (session) => authStore.setAuthSession(session),
   onAuthenticationFailed: async () => {
-    await authStore.clearSession()
-    if (router.currentRoute.value.name !== 'login') await router.replace({ name: 'login' })
+    try {
+      await authStore.clearSession()
+    } finally {
+      if (router.currentRoute.value.name !== 'login') await router.replace({ name: 'login' })
+    }
   },
 })
 

@@ -120,8 +120,8 @@ async function performTokenRefresh() {
     throw new Error('인증 상태가 변경되었습니다.')
   }
 
-  saveAuthSession(session)
   if (onSessionRefreshed) await onSessionRefreshed(session)
+  else saveAuthSession(session)
   authenticationFailurePromise = null
   return session
 }
@@ -141,10 +141,6 @@ export function restoreAuthSession() {
     await handleAuthenticationFailure()
     throw error
   })
-}
-
-function refreshAuthSession() {
-  return restoreAuthSession()
 }
 
 export async function request(path, options = {}) {
@@ -167,7 +163,7 @@ export async function request(path, options = {}) {
           return request(path, { ...options, _retry: true })
         }
 
-        await refreshAuthSession()
+        await restoreAuthSession()
         return request(path, { ...options, _retry: true })
       }
     }

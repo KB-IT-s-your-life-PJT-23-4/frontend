@@ -27,7 +27,15 @@ const form = reactive({
   phone: '',
   agreed: false,
 })
-const errors = reactive({})
+const errors = reactive({
+  name: '',
+  email: '',
+  password: '',
+  passwordConfirm: '',
+  birthDate: '',
+  phone: '',
+  agreed: '',
+})
 const serverError = ref('')
 const emailStatus = ref('idle')
 const checkedEmail = ref('')
@@ -36,7 +44,7 @@ const isSubmitting = ref(false)
 watch(
   () => form.email,
   () => {
-    if (form.email !== checkedEmail.value) {
+    if (form.email.trim() !== checkedEmail.value) {
       emailStatus.value = 'idle'
       checkedEmail.value = ''
     }
@@ -61,6 +69,8 @@ function onPhoneInput(event) {
 }
 
 async function checkEmail() {
+  if (emailStatus.value === 'checking') return
+
   const emailError = validateEmail(form.email)
   if (emailError) {
     errors.email = emailError
@@ -69,10 +79,10 @@ async function checkEmail() {
 
   emailStatus.value = 'checking'
   serverError.value = ''
-  const requestedEmail = form.email
+  const requestedEmail = form.email.trim()
   try {
-    const result = await checkEmailDuplicate(requestedEmail.trim())
-    if (form.email !== requestedEmail) return
+    const result = await checkEmailDuplicate(requestedEmail)
+    if (form.email.trim() !== requestedEmail) return
 
     checkedEmail.value = requestedEmail
     if (result.available) {
@@ -83,7 +93,7 @@ async function checkEmail() {
       errors.email = '이미 사용 중인 이메일입니다.'
     }
   } catch (error) {
-    if (form.email !== requestedEmail) return
+    if (form.email.trim() !== requestedEmail) return
 
     emailStatus.value = 'idle'
     errors.email =
@@ -93,6 +103,11 @@ async function checkEmail() {
   }
 }
 
+function validatePasswordConfirm() {
+  if (!form.passwordConfirm) return '비밀번호를 한 번 더 입력해주세요.'
+  return form.passwordConfirm === form.password ? '' : '비밀번호가 일치하지 않습니다.'
+}
+
 function validateForm() {
   errors.name = validateName(form.name)
   errors.email = validateEmail(form.email)
@@ -100,11 +115,7 @@ function validateForm() {
     errors.email = '이메일 중복 확인이 필요합니다.'
   }
   errors.password = validatePassword(form.password)
-  errors.passwordConfirm = !form.passwordConfirm
-    ? '비밀번호를 한 번 더 입력해주세요.'
-    : form.passwordConfirm === form.password
-      ? ''
-      : '비밀번호가 일치하지 않습니다.'
+  errors.passwordConfirm = validatePasswordConfirm()
   errors.birthDate = validateBirthDate(form.birthDate)
   errors.phone = validatePhone(form.phone)
   errors.agreed = form.agreed ? '' : '이용약관 및 개인정보 처리방침에 동의해주세요.'
@@ -124,6 +135,8 @@ function signupErrorMessage(error) {
 }
 
 async function submitSignup() {
+  if (isSubmitting.value) return
+
   serverError.value = ''
   if (!validateForm()) return
 
@@ -233,13 +246,7 @@ async function submitSignup() {
               placeholder="비밀번호를 한 번 더 입력해주세요"
               :aria-invalid="Boolean(errors.passwordConfirm)"
               @input="clearError('passwordConfirm')"
-              @blur="
-                errors.passwordConfirm = !form.passwordConfirm
-                  ? '비밀번호를 한 번 더 입력해주세요.'
-                  : form.passwordConfirm === form.password
-                    ? ''
-                    : '비밀번호가 일치하지 않습니다.'
-              "
+              @blur="errors.passwordConfirm = validatePasswordConfirm()"
             />
             <p v-if="errors.passwordConfirm" class="auth-message error">
               {{ errors.passwordConfirm }}

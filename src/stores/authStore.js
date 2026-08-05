@@ -25,6 +25,14 @@ export const useAuthStore = defineStore('auth', () => {
     Boolean(accessToken.value && user.value && !accessTokenExpired.value),
   )
 
+  function persistSession() {
+    saveAuthSession({
+      accessToken: accessToken.value,
+      refreshToken: refreshToken.value,
+      user: user.value,
+    })
+  }
+
   function syncExpirationState() {
     clearTimeout(expirationTimer)
     expirationTimer = null
@@ -53,31 +61,12 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = session.refreshToken ?? null
     user.value = session.user ?? null
     syncExpirationState()
-    saveAuthSession({
-      accessToken: accessToken.value,
-      refreshToken: refreshToken.value,
-      user: user.value,
-    })
+    persistSession()
   }
 
   function setUserProfile(profile) {
     user.value = profile ?? null
-    saveAuthSession({
-      accessToken: accessToken.value,
-      refreshToken: refreshToken.value,
-      user: user.value,
-    })
-  }
-
-  function saveToken(nextAccessToken, nextRefreshToken = refreshToken.value) {
-    accessToken.value = nextAccessToken ?? null
-    refreshToken.value = nextRefreshToken ?? null
-    syncExpirationState()
-    saveAuthSession({
-      accessToken: accessToken.value,
-      refreshToken: refreshToken.value,
-      user: user.value,
-    })
+    persistSession()
   }
 
   function clearAuth() {
@@ -88,20 +77,20 @@ export const useAuthStore = defineStore('auth', () => {
     clearStoredAuthSession()
   }
 
-  function deleteToken() {
-    accessToken.value = null
-    refreshToken.value = null
-    syncExpirationState()
-    saveAuthSession({ accessToken: null, refreshToken: null, user: user.value })
-  }
-
   async function clearSession() {
-    clearAuth()
-    await useAppStore().clearUserState()
+    try {
+      clearAuth()
+    } finally {
+      await useAppStore().clearUserState()
+    }
   }
 
   async function login(credentials) {
     const session = await requestLogin(credentials)
+    if (!session?.accessToken || !session?.refreshToken || !session?.user) {
+      throw new Error('로그인 응답이 올바르지 않습니다.')
+    }
+
     await useAppStore().clearUserState()
     setAuthSession(session)
     return session
@@ -116,6 +105,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function updateUserProfile(changes, { image = null, removeImage = false } = {}) {
     const appStore = useAppStore()
     const currentProfile = user.value ?? appStore.state.user
+    if (!currentProfile) throw new Error('회원 정보를 찾을 수 없습니다.')
 
     if (api.isMock) {
       const nextImage = image
@@ -199,9 +189,6 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUserProfile,
     updateUserProfile,
     setAuthSession,
-    saveToken,
-    deleteToken,
-    clearAuth,
     clearSession,
   }
 })

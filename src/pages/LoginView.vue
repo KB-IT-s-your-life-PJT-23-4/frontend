@@ -44,6 +44,8 @@ function getPostLoginPath() {
 }
 
 async function submitLogin() {
+  if (isSubmitting.value) return
+
   serverError.value = ''
   if (!validateForm()) return
 
