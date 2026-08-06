@@ -91,6 +91,7 @@
 ## Code Review Rules
 
 - Check that route changes do not break existing URLs or navigation.
+- For full-width admin layouts, preserve a responsive outer viewport gap and a centered maximum-width frame unless the requested design explicitly requires a full-bleed canvas.
 - When moving a route title from a shared header into page content, do not introduce new back-navigation controls unless the requested design explicitly includes them.
 - When adding an authenticated nested route, verify the post-login redirect allowlist accepts that nested path.
 - Check that API-backed screens handle loading and error states.

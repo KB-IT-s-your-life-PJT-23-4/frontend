@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import AppIcon from './components/layout/AppIcon.vue'
 import BottomNav from './components/layout/BottomNav.vue'
@@ -7,12 +7,20 @@ import { useAppStore } from './stores/appStore.js'
 
 const store = useAppStore()
 const route = useRoute()
+const isAdminLayout = computed(() => route.meta.layout === 'admin')
 const showBottomNav = computed(() => !route.meta.hideBottomNav)
+
+watchEffect(() => {
+  document.body.classList.toggle('admin-route', isAdminLayout.value)
+})
 </script>
 
 <template>
   <a class="skip-link" href="#main-content">본문으로 바로가기</a>
-  <div class="desktop-shell">
+  <main v-if="isAdminLayout" id="main-content" class="admin-app-frame">
+    <RouterView />
+  </main>
+  <div v-else class="desktop-shell">
     <aside class="desktop-brand-panel" aria-label="미리줌 소개">
       <div class="desktop-brand">
         <img src="/src/assets/brand-symbol.png" alt="" />
