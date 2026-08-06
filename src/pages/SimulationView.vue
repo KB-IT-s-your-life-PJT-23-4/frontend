@@ -73,7 +73,27 @@ const allocationProfiles = computed(() => {
         .map(([profile, recommendation]) => [profile, recommendation.portfolio.allocation]),
     )
   }
-  const mockProfiles = getPortfolioAllocations(result.value?.years ?? investmentYears.value)
+  const years = result.value?.years ?? investmentYears.value
+  const savingsProduct = mockProducts
+    .filter((product) => product.type === 'SAVINGS')
+    .sort((a, b) => b.rate - a.rate)[0]
+  const depositProduct = mockProducts
+    .filter((product) => product.type === 'DEPOSIT')
+    .sort((a, b) => b.rate - a.rate)[0]
+  const mockProfiles = getPortfolioAllocations(years, {
+    principal: recommendedScenario.value?.investmentPrincipal,
+    savingsCapacity:
+      savingsProduct?.monthlyMaxAmount == null
+        ? Number.MAX_SAFE_INTEGER
+        : savingsProduct.monthlyMaxAmount * years * 12,
+    depositProduct,
+    savingsProduct,
+    investmentPeriodMonths: years * 12,
+    schedule: recommendedScenario.value?.giftSchedule,
+    years,
+    startDate: result.value?.raw?.input?.asOfDate,
+    endDate: result.value?.raw?.input?.investmentEndDate,
+  })
   return {
     CONSERVATIVE: mockProfiles.STABLE,
     BALANCED: mockProfiles.BALANCED,
@@ -427,7 +447,11 @@ onMounted(async () => {
         </div>
       </section>
 
-      <GiftPlanTimeline :result="result" :recommended-scenario="recommendedScenario" />
+      <GiftPlanTimeline
+        :result="result"
+        :recommended-scenario="recommendedScenario"
+        :selected-products="selectedProducts"
+      />
 
       <PortfolioDonutCard
         v-if="recommendedScenario"

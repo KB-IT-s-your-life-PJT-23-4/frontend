@@ -75,6 +75,16 @@ function mapProduct(product) {
     expectedFutureValue: number(product.expectedFutureValue),
     expectedProfit: number(product.expectedProfit),
     selected: Boolean(product.isSelected),
+    minimumContractMonths:
+      product.minimumContractMonths == null ? null : number(product.minimumContractMonths),
+    maximumContractMonths:
+      product.maximumContractMonths == null ? null : number(product.maximumContractMonths),
+    reinvestmentSchedule: (product.reinvestmentSchedule ?? []).map((item) => ({
+      trancheSequenceNo: number(item.trancheSequenceNo),
+      renewalSequenceNo: number(item.renewalSequenceNo),
+      renewalDate: formatDate(item.renewalDate),
+      completedContractMonths: number(item.completedContractMonths),
+    })),
     selectedPreferentialConditions: product.selectedPreferentialConditions ?? [],
     riskLevel: type === 'ETF' ? 3 : 1,
     detailLoaded: false,
@@ -229,6 +239,7 @@ export function mergeProductDetail(product, response) {
       ratio: number(holding.weightPercent),
     })),
     riskLevel: ETF_RISK_LEVEL[details.riskLevel] ?? product.riskLevel,
+    reinvestmentPolicy: details.reinvestmentPolicy ?? product.reinvestmentPolicy ?? null,
     calculationPolicy: details.calculationPolicy ?? null,
     detailLoaded: true,
   }

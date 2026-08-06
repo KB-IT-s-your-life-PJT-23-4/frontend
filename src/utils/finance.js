@@ -71,22 +71,76 @@ export function calculateEtfFutureValue(principal, annualReturnRate, months) {
   return Math.round(amount * annualGrowthFactor ** (periodMonths / 12))
 }
 
-export function calculateProductFutureValue(product, principal, months) {
+function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
+  const totalMonths = Math.max(0, Math.round(Number(months) || 0))
+  const scheduledPeriods = (product?.reinvestmentSchedule ?? [])
+    .filter(
+      (item) =>
+        trancheSequenceNo == null || Number(item.trancheSequenceNo) === Number(trancheSequenceNo),
+    )
+    .sort((a, b) => Number(a.renewalSequenceNo) - Number(b.renewalSequenceNo))
+    .map((item) => Math.max(0, Number(item.completedContractMonths) || 0))
+    .filter((period) => period > 0)
+
+  if (scheduledPeriods.length) {
+    const completedMonths = scheduledPeriods.reduce((sum, period) => sum + period, 0)
+    const finalPeriod = totalMonths - completedMonths
+    return finalPeriod > 0 ? [...scheduledPeriods, finalPeriod] : scheduledPeriods
+  }
+
+  const minimumMonths = Number(product?.minimumContractMonths)
+  const maximumMonths = Number(product?.maximumContractMonths)
+  if (
+    totalMonths <= 0 ||
+    !Number.isInteger(minimumMonths) ||
+    !Number.isInteger(maximumMonths) ||
+    minimumMonths <= 0 ||
+    maximumMonths < minimumMonths
+  ) {
+    return [totalMonths]
+  }
+
+  const contractCount = Math.ceil(totalMonths / maximumMonths)
+  if (contractCount > Math.floor(totalMonths / minimumMonths)) return []
+
+  const baseMonths = Math.floor(totalMonths / contractCount)
+  const remainder = totalMonths % contractCount
+  if (baseMonths < minimumMonths || baseMonths + (remainder > 0 ? 1 : 0) > maximumMonths) {
+    return []
+  }
+  return Array.from(
+    { length: contractCount },
+    (_, index) => baseMonths + (index < remainder ? 1 : 0),
+  )
+}
+
+export function calculateProductFutureValue(product, principal, months, trancheSequenceNo = null) {
   const productType = product?.type ?? product?.productType
   const method = product?.calculationMethod ?? PRODUCT_CALCULATION_METHOD[productType]
   const annualRate =
     product?.rate ?? product?.annualReturnRatePercent ?? product?.appliedAnnualRatePercent ?? 0
 
   if (method === PRODUCT_CALCULATION_METHOD.DEPOSIT) {
-    return calculateDepositFutureValue(principal, annualRate, months)
+    const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
+    if (!periods.length) return 0
+    return periods.reduce(
+      (maturityValue, period) => calculateDepositFutureValue(maturityValue, annualRate, period),
+      principal,
+    )
   }
 
   if (method === PRODUCT_CALCULATION_METHOD.SAVINGS) {
-    return calculateSavingsFutureValue(
+    const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
+    if (!periods.length) return 0
+    return periods.reduce(
+      (maturityValue, period) =>
+        calculateSavingsFutureValue(
+          maturityValue,
+          annualRate,
+          period,
+          product?.paymentTiming ?? 'END_OF_MONTH',
+        ),
       principal,
-      annualRate,
-      months,
-      product?.paymentTiming ?? 'END_OF_MONTH',
     )
   }
 
@@ -187,30 +241,103 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
   }
 }
 
-export function getPortfolioAllocations(years) {
-  if (years <= 3) {
-    return {
-      STABLE: { DEPOSIT: 45, SAVINGS: 45, ETF: 10 },
-      BALANCED: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
-      GROWTH: { DEPOSIT: 35, SAVINGS: 35, ETF: 30 },
-    }
-  }
-  if (years < 10) {
-    return {
-      STABLE: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
-      BALANCED: { DEPOSIT: 35, SAVINGS: 35, ETF: 30 },
-      GROWTH: { DEPOSIT: 25, SAVINGS: 25, ETF: 50 },
-    }
-  }
+function applySafeAssetReturnPriority({
+  allocation,
+  principal,
+  savingsCapacity,
+  depositProduct,
+  savingsProduct,
+  investmentPeriodMonths,
+  schedule,
+  years,
+  startDate,
+  endDate,
+}) {
+  const investmentPrincipal = Math.max(0, Number(principal) || 0)
+  if (investmentPrincipal <= 0) return allocation
+
+  const etfAmount = Math.round(investmentPrincipal * ((allocation.ETF ?? 0) / 100))
+  const safeAssetAmount = Math.max(0, investmentPrincipal - etfAmount)
+  const projectSafeProduct = (type, product) =>
+    schedule?.length
+      ? calculatePortfolioValue({
+          schedule,
+          allocation: { [type]: 100 },
+          selectedProducts: { [type]: product },
+          years,
+          startDate,
+          endDate,
+        })
+      : calculateProductFutureValue(product, investmentPrincipal, investmentPeriodMonths)
+  const depositProjectedValue = projectSafeProduct('DEPOSIT', depositProduct)
+  const savingsProjectedValue = projectSafeProduct('SAVINGS', savingsProduct)
+  const savingsPreferred = savingsProjectedValue > depositProjectedValue
+  const savingsAmount = savingsPreferred
+    ? Math.min(safeAssetAmount, Math.max(0, Number(savingsCapacity) || 0))
+    : 0
+  const depositAmount = safeAssetAmount - savingsAmount
+  const depositRatio = Math.round((depositAmount / investmentPrincipal) * 10000) / 100
+  const savingsRatio = Math.round((savingsAmount / investmentPrincipal) * 10000) / 100
+
   return {
-    STABLE: { DEPOSIT: 40, SAVINGS: 40, ETF: 20 },
-    BALANCED: { DEPOSIT: 30, SAVINGS: 30, ETF: 40 },
-    GROWTH: { DEPOSIT: 20, SAVINGS: 20, ETF: 60 },
+    DEPOSIT: depositRatio,
+    SAVINGS: savingsRatio,
+    ETF: Math.max(0, Math.round((100 - depositRatio - savingsRatio) * 100) / 100),
   }
 }
 
-export function getPortfolioAllocation(years) {
-  return getPortfolioAllocations(years).BALANCED
+export function getPortfolioAllocations(years, options = {}) {
+  let profiles
+  if (years <= 3) {
+    profiles = {
+      STABLE: { DEPOSIT: 0, SAVINGS: 90, ETF: 10 },
+      BALANCED: { DEPOSIT: 0, SAVINGS: 80, ETF: 20 },
+      GROWTH: { DEPOSIT: 0, SAVINGS: 60, ETF: 40 },
+    }
+  } else if (years < 10) {
+    profiles = {
+      STABLE: { DEPOSIT: 0, SAVINGS: 80, ETF: 20 },
+      BALANCED: { DEPOSIT: 0, SAVINGS: 70, ETF: 30 },
+      GROWTH: { DEPOSIT: 0, SAVINGS: 50, ETF: 50 },
+    }
+  } else {
+    profiles = {
+      STABLE: { DEPOSIT: 0, SAVINGS: 80, ETF: 20 },
+      BALANCED: { DEPOSIT: 0, SAVINGS: 60, ETF: 40 },
+      GROWTH: { DEPOSIT: 0, SAVINGS: 40, ETF: 60 },
+    }
+  }
+
+  if (
+    options.principal == null ||
+    options.savingsCapacity == null ||
+    options.depositProduct == null ||
+    options.savingsProduct == null
+  ) {
+    return profiles
+  }
+
+  return Object.fromEntries(
+    Object.entries(profiles).map(([profile, allocation]) => [
+      profile,
+      applySafeAssetReturnPriority({
+        allocation,
+        principal: options.principal,
+        savingsCapacity: options.savingsCapacity,
+        depositProduct: options.depositProduct,
+        savingsProduct: options.savingsProduct,
+        investmentPeriodMonths: options.investmentPeriodMonths ?? years * 12,
+        schedule: options.schedule,
+        years,
+        startDate: options.startDate,
+        endDate: options.endDate,
+      }),
+    ]),
+  )
+}
+
+export function getPortfolioAllocation(years, options) {
+  return getPortfolioAllocations(years, options).BALANCED
 }
 
 export function calculatePortfolioValue({
@@ -234,7 +361,10 @@ export function calculatePortfolioValue({
         if (!ratio) return total
         const product = selectedProducts[type] ?? { type, rate: 0 }
         const allocatedAmount = installment.investmentAmount * (ratio / 100)
-        return total + calculateProductFutureValue(product, allocatedAmount, remainingMonths)
+        return (
+          total +
+          calculateProductFutureValue(product, allocatedAmount, remainingMonths, installment.order)
+        )
       }, 0)
 
       return scenarioTotal + installmentValue
@@ -273,7 +403,16 @@ export function calculateSimulation({
 
   const resetDate =
     toDate(family.resetDate) ?? addYears(today, Math.min(10, Math.max(1, investmentYears)))
-  const allocation = getPortfolioAllocation(investmentYears)
+  const savingsProduct = products
+    .filter((product) => product.type === 'SAVINGS')
+    .sort((a, b) => b.rate - a.rate)[0]
+  const depositProduct = products
+    .filter((product) => product.type === 'DEPOSIT')
+    .sort((a, b) => b.rate - a.rate)[0]
+  const savingsCapacity =
+    savingsProduct?.monthlyMaxAmount == null
+      ? Number.MAX_SAFE_INTEGER
+      : savingsProduct.monthlyMaxAmount * investmentYears * 12
   const representativeProducts = Object.fromEntries(
     Object.keys(PRODUCT_TYPE_META).map((type) => [
       type,
@@ -344,32 +483,47 @@ export function calculateSimulation({
     currentAmount,
     deferredAmount,
     schedule,
-  }) => ({
-    resultId,
-    scenarioType,
-    scenarioName,
-    description,
-    deductionAmount,
-    taxableAmount: tax.taxableAmount,
-    giftTax: tax.giftTax,
-    filingTaxCredit: tax.filingTaxCredit,
-    estimatedPayableTax: tax.estimatedPayableTax,
-    postTaxAmount,
-    totalDonorOutflow: requestedAmount + (donorPaysTax ? tax.estimatedPayableTax : 0),
-    currentGiftAmount: currentAmount,
-    deferredGiftAmount: deferredAmount,
-    deferredGiftDate: deferredAmount ? formatDate(resetDate) : null,
-    giftSchedule: schedule,
-    portfolioAllocation: allocation,
-    estimatedFutureValue: calculatePortfolioValue({
+  }) => {
+    const allocation = getPortfolioAllocation(investmentYears, {
+      principal: postTaxAmount,
+      savingsCapacity,
+      depositProduct,
+      savingsProduct,
+      investmentPeriodMonths: investmentYears * 12,
       schedule,
-      allocation,
-      selectedProducts: representativeProducts,
       years: investmentYears,
       startDate: today,
-    }),
-    products: decorateProducts(postTaxAmount),
-  })
+      endDate,
+    })
+
+    return {
+      resultId,
+      scenarioType,
+      scenarioName,
+      description,
+      deductionAmount,
+      taxableAmount: tax.taxableAmount,
+      giftTax: tax.giftTax,
+      filingTaxCredit: tax.filingTaxCredit,
+      estimatedPayableTax: tax.estimatedPayableTax,
+      postTaxAmount,
+      investmentPrincipal: postTaxAmount,
+      totalDonorOutflow: requestedAmount + (donorPaysTax ? tax.estimatedPayableTax : 0),
+      currentGiftAmount: currentAmount,
+      deferredGiftAmount: deferredAmount,
+      deferredGiftDate: deferredAmount ? formatDate(resetDate) : null,
+      giftSchedule: schedule,
+      portfolioAllocation: allocation,
+      estimatedFutureValue: calculatePortfolioValue({
+        schedule,
+        allocation,
+        selectedProducts: representativeProducts,
+        years: investmentYears,
+        startDate: today,
+      }),
+      products: decorateProducts(postTaxAmount),
+    }
+  }
 
   const immediateScenario = buildScenario({
     resultId: Date.now() + 1,

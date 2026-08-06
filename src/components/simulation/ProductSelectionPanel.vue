@@ -250,12 +250,31 @@ function updateCondition(product, conditionCode, checked) {
             </button>
 
             <div v-if="expanded.has(product.id)" class="selectable-product-details">
-              <p v-if="detailLoading[product.id]" class="product-detail-feedback">
-                상품 상세정보를 불러오는 중이에요.
-              </p>
-              <p v-else-if="detailErrors[product.id]" class="product-detail-feedback error">
-                {{ detailErrors[product.id] }}
-              </p>
+              <div
+                v-if="detailLoading[product.id]"
+                class="product-detail-feedback loading"
+                role="status"
+                aria-live="polite"
+              >
+                <span class="product-detail-spinner" aria-hidden="true" />
+                <span class="product-detail-feedback-copy">
+                  <strong>상품 상세정보를 불러오는 중이에요.</strong>
+                  <small>금리와 가입 조건을 꼼꼼히 확인하고 있어요.</small>
+                </span>
+              </div>
+              <div
+                v-else-if="detailErrors[product.id]"
+                class="product-detail-feedback error"
+                role="alert"
+              >
+                <span class="product-detail-error-icon" aria-hidden="true">
+                  <AppIcon name="info" :size="15" />
+                </span>
+                <span class="product-detail-feedback-copy">
+                  <strong>상세정보를 불러오지 못했어요.</strong>
+                  <small>{{ detailErrors[product.id] }}</small>
+                </span>
+              </div>
 
               <template v-else-if="product.detailLoaded && product.type === 'ETF'">
                 <div class="product-tracking-index">
@@ -324,12 +343,19 @@ function updateCondition(product, conditionCode, checked) {
                   <span>운용 기간</span>
                   <strong>{{ product.period }}</strong>
                 </div>
+                <div v-if="product.reinvestmentSchedule?.length">
+                  <span>재운용 방식</span>
+                  <strong>만기 원리금 재가입 · {{ product.reinvestmentSchedule.length }}회</strong>
+                </div>
                 <div v-if="product.preferentialConditions?.length" class="product-condition-list">
                   <span>우대 금리 조건</span>
                   <label
                     v-for="condition in product.preferentialConditions"
                     :key="condition.conditionCode"
                     class="preferential-condition-option"
+                    :class="{
+                      checked: isConditionChecked(product, condition.conditionCode),
+                    }"
                   >
                     <input
                       type="checkbox"
@@ -338,8 +364,13 @@ function updateCondition(product, conditionCode, checked) {
                         updateCondition(product, condition.conditionCode, $event.target.checked)
                       "
                     />
-                    <span>{{ condition.description }}</span>
-                    <strong>+{{ condition.additionalRatePercent }}%p</strong>
+                    <span class="preferential-condition-check" aria-hidden="true">
+                      <AppIcon name="check" :size="13" :stroke-width="2.4" />
+                    </span>
+                    <span class="preferential-condition-copy">{{ condition.description }}</span>
+                    <strong class="preferential-condition-rate">
+                      +{{ condition.additionalRatePercent }}%p
+                    </strong>
                   </label>
                 </div>
               </template>
