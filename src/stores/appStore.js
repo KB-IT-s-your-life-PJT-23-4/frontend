@@ -29,7 +29,7 @@ const SERVER_SOURCED_STATE = {
   families: [],
   plans: [],
   giftHistory: [],
-  // 시뮬레이션 이력 API는 아직 없어 저장 시점부터 이 브라우저에 쌓인다. 목 시드는 쓰지 않는다.
+  // 서버의 시뮬레이션 이력 API로 채운다. 목 시드는 쓰지 않는다.
   simulations: [],
   // 서버가 조회 시점에 gift 에서 계산해 내려주는 리마인더 원본. 알림함 카드는 여기서 만든다.
   reminders: [],
@@ -299,6 +299,36 @@ function serverFamilyToState(recipient, deduction) {
   }
 }
 
+function serverSimulationToState(item) {
+  const timestamp = item.updatedAt ?? item.createdAt
+  const parsed = timestamp ? new Date(timestamp) : null
+  const date =
+    parsed && Number.isFinite(parsed.getTime())
+      ? new Intl.DateTimeFormat('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        }).format(parsed)
+      : ''
+
+  return {
+    id: Number(item.simulationId),
+    familyId: Number(item.family?.familyId),
+    date,
+    amount: Number(item.inputSummary?.requestedAmount ?? 0),
+    tax: item.selection?.estimatedGiftTax == null ? null : Number(item.selection.estimatedGiftTax),
+    status: item.status,
+    minimumReturnRate: Number(item.expectedReturnRange?.minimum?.expectedReturnRatePercent ?? 0),
+    maximumReturnRate: Number(item.expectedReturnRange?.maximum?.expectedReturnRatePercent ?? 0),
+    minimumFutureValue: Number(item.expectedReturnRange?.minimum?.expectedFutureValue ?? 0),
+    maximumFutureValue: Number(item.expectedReturnRange?.maximum?.expectedFutureValue ?? 0),
+    source: 'server',
+  }
+}
+
 let statusLoaded = false
 let pendingSync = null
 let statusGeneration = 0
@@ -317,6 +347,7 @@ async function syncStatus() {
     api.listFamilies(),
     api.listGifts(),
     api.listDeductions(),
+    api.listSimulations({ page: 0, size: 50 }),
     api.listReminders(),
   ])
 
@@ -335,6 +366,7 @@ async function syncStatus() {
   state.giftHistory = gifts
     .filter((gift) => gift.status === GIFT_STATUS.COMPLETED)
     .map(completedGiftToHistory)
+  state.simulations = (simulationHistory?.items ?? []).map(serverSimulationToState)
 
   // 선택된 수증자가 DB에서 사라졌거나 아직 없으면 첫 번째 가족으로 맞춘다.
   const familyIds = state.families.map((family) => family.id)

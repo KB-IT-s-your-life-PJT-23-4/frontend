@@ -13,10 +13,14 @@ const authStore = useAuthStore()
 
 <template>
   <header class="app-header">
-    <RouterLink class="brand-lockup" to="/" aria-label="미리줌 홈">
-      <img src="/src/assets/brand-symbol.png" alt="" class="brand-avatar" />
-      <span>미리줌</span>
-    </RouterLink>
+    <div class="brand-lockup" aria-label="미리줌 바로가기">
+      <RouterLink to="/" aria-label="미리줌 홈">
+        <img src="/src/assets/brand-symbol.png" alt="" class="brand-avatar" />
+      </RouterLink>
+      <RouterLink to="/admin/dashboard" aria-label="관리자 대시보드로 이동" title="관리자 대시보드">
+        미리줌
+      </RouterLink>
+    </div>
 
     <span class="header-spacer" />
 

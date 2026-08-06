@@ -24,9 +24,9 @@ const props = defineProps({
 const emit = defineEmits(['update:activeProfile'])
 
 const portfolioProfiles = [
-  { type: 'STABLE', label: '안정형', color: '#5b8def' },
+  { type: 'CONSERVATIVE', label: '안정형', color: '#5b8def' },
   { type: 'BALANCED', label: '균형형', color: '#e4a800' },
-  { type: 'GROWTH', label: '성장형', color: '#ef7b77' },
+  { type: 'AGGRESSIVE', label: '성장형', color: '#ef7b77' },
 ]
 
 const allocation = computed(() => {
@@ -34,20 +34,19 @@ const allocation = computed(() => {
   return profiles[props.activeProfile] ?? profiles.BALANCED ?? Object.values(profiles)[0] ?? {}
 })
 
-const allocationItems = computed(() => {
-  return Object.entries(allocation.value)
+const allocationItems = computed(() =>
+  Object.entries(allocation.value)
     .filter(([, ratio]) => ratio > 0)
     .map(([type, ratio]) => ({
       type,
       ratio,
       ...PRODUCT_TYPE_META[type],
-    }))
-})
+    })),
+)
 
 const donutStyle = computed(() => {
   const depositRatio = allocation.value.DEPOSIT ?? 0
   const savingsRatio = allocation.value.SAVINGS ?? 0
-
   return {
     '--deposit-stop': `${depositRatio}%`,
     '--savings-stop': `${depositRatio + savingsRatio}%`,
@@ -60,7 +59,7 @@ const donutStyle = computed(() => {
     <div class="portfolio-card-heading">
       <div>
         <h2>{{ years }}년을 위한 운용 비중</h2>
-        <p>투자 성향을 선택해 상품별 운용 비중을 비교해 보세요.</p>
+        <p>투자 성향별 상품 운용 비중과 예상 금액을 비교해 보세요.</p>
       </div>
     </div>
 
@@ -117,8 +116,8 @@ const donutStyle = computed(() => {
     </div>
 
     <p class="portfolio-rule-note">
-      선택 상품의 현재 수익률을 가정해 계산한 참고 금액이에요. 실제 수익률은 시장 상황과
-      상품 조건에 따라 달라질 수 있어요.
+      예상 금액은 시뮬레이션 실행 시점의 상품 데이터로 계산한 참고 금액이며 실제 수익률은 시장
+      상황과 상품 조건에 따라 달라질 수 있어요.
     </p>
   </section>
 </template>
