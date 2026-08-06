@@ -1,10 +1,10 @@
 <script setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
-import { faqItems, faqCategories } from '../data/mockData'
 import { startAiConsult, answerAiConsultClarification } from '@/api/aiConsultApi.js'
+import { listFaqCategories } from '@/api/faqApi.js'
 import '../assets/css/chatView.css'
 
 // =============================== 데이터 포맷 설정
@@ -49,6 +49,25 @@ const showEndModal = ref(false)
 const showFaqSheet = ref(false)
 const conversation = ref(null)
 const pendingConsult = ref(null)
+
+// =============================== faq 데이터 로드
+const faqItems = ref([])
+const faqCategories = ref([])
+
+async function loadFaqs() {
+  try {
+    const categories = await listFaqCategories()
+    const etcCategory = categories.find((category) => category.title === 'etc')
+    faqItems.value = etcCategory?.items ?? []
+    faqCategories.value = categories.filter((category) => category.title !== 'etc')
+  } catch (error) {
+    console.error('[FAQ API] 목록 조회 실패', error)
+    faqItems.value = []
+    faqCategories.value = []
+  }
+}
+
+onMounted(loadFaqs)
 
 // =============================== faq 포맷
 function pickFaq(prompt, answer, showBranch, showTaxOffice) {
@@ -520,9 +539,11 @@ function clearConversation() {
         <div class="faq-chip-list">
           <button
             v-for="faq in faqItems"
-            :key="faq.id"
+            :key="faq.faqId"
             type="button"
-            @click="sendMessage(faq.prompt, null, false, true)"
+            @click="
+              sendMessage(faq.prompt, faq.answer, faq.showBranchButton, faq.showTaxOfficeButton)
+            "
           >
             {{ faq.question }}
           </button>
@@ -610,7 +631,7 @@ function clearConversation() {
               <div class="faq-sheet-grid">
                 <button
                   v-for="item in category.items"
-                  :key="item.question"
+                  :key="item.faqId"
                   type="button"
                   @click="
                     pickFaq(
