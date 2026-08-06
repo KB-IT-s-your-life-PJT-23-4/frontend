@@ -2,7 +2,7 @@
 import { computed, reactive, ref, watchEffect } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { PRODUCT_TYPE_META } from '../../utils/finance'
-import '../../assets/css/product-selection-panel.css'
+import '../../assets/css/simulation/product-selection-panel.css'
 
 const props = defineProps({
   products: {

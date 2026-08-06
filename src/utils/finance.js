@@ -377,12 +377,13 @@ export function calculateSimulation({
   family,
   products,
   years = 10,
+  giftDate,
   donorPaysTax = false,
 }) {
   const requestedAmount = Math.max(0, Number(amount) || 0)
   const investmentYears = Math.min(20, Math.max(1, Number(years) || 10))
-  const today = new Date()
-  const endDate = addYears(today, investmentYears)
+  const plannedGiftDate = toDate(giftDate) ?? new Date()
+  const endDate = addYears(plannedGiftDate, investmentYears)
   const remainingDeductionAmount = Math.max(0, family.deductionLimit - family.giftedAmount)
   const immediateDeduction = Math.min(requestedAmount, remainingDeductionAmount)
   const immediateTax = calculateTaxStage(requestedAmount, immediateDeduction, donorPaysTax)
@@ -401,8 +402,12 @@ export function calculateSimulation({
     ? requestedAmount
     : Math.max(0, requestedAmount - deferredTax.estimatedPayableTax)
 
-  const resetDate =
-    toDate(family.resetDate) ?? addYears(today, Math.min(10, Math.max(1, investmentYears)))
+  let resetDate =
+    toDate(family.resetDate) ??
+    addYears(plannedGiftDate, Math.min(10, Math.max(1, investmentYears)))
+  while (resetDate <= plannedGiftDate) {
+    resetDate = addYears(resetDate, 10)
+  }
   const savingsProduct = products
     .filter((product) => product.type === 'SAVINGS')
     .sort((a, b) => b.rate - a.rate)[0]
@@ -440,8 +445,8 @@ export function calculateSimulation({
   const immediateSchedule = [
     {
       order: 1,
-      label: '지금 전액 증여',
-      date: formatDate(today),
+      label: '예정일 전액 증여',
+      date: formatDate(plannedGiftDate),
       amount: requestedAmount,
       investmentAmount: immediateInvestmentAmount,
       withinPeriod: true,
@@ -451,7 +456,7 @@ export function calculateSimulation({
     {
       order: 1,
       label: '공제 한도 먼저',
-      date: formatDate(today),
+      date: formatDate(plannedGiftDate),
       amount: currentGiftAmount,
       investmentAmount: currentGiftAmount,
       withinPeriod: true,
@@ -492,7 +497,7 @@ export function calculateSimulation({
       investmentPeriodMonths: investmentYears * 12,
       schedule,
       years: investmentYears,
-      startDate: today,
+      startDate: plannedGiftDate,
       endDate,
     })
 
@@ -519,7 +524,7 @@ export function calculateSimulation({
         allocation,
         selectedProducts: representativeProducts,
         years: investmentYears,
-        startDate: today,
+        startDate: plannedGiftDate,
       }),
       products: decorateProducts(postTaxAmount),
     }
@@ -555,6 +560,7 @@ export function calculateSimulation({
   return {
     id: Date.now(),
     requestedAmount,
+    giftDate: formatDate(plannedGiftDate),
     years: investmentYears,
     donorPaysTax,
     previousGiftAmount: family.giftedAmount,
