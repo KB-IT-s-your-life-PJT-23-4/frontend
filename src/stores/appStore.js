@@ -11,6 +11,7 @@ import {
   toDotDate,
   toIsoDate,
 } from '../utils/deduction'
+import { calculateEstimatedPayableTax } from '../utils/finance'
 
 // 데모 상태와 서버 연동 상태를 섞으면 목데이터 familyId가 DB 값과 충돌하므로 저장 키를 분리한다.
 const STORAGE_KEY = api.isMock ? 'mirizoom-demo-state-v1' : 'mirizoom-status-state-v1'
@@ -280,7 +281,8 @@ function serverFamilyToState(recipient, deduction) {
 }
 
 function serverSimulationToState(item) {
-  const timestamp = item.updatedAt ?? item.createdAt
+  // 이력 카드의 시간은 저장/상태 전환 시각이 아니라 시뮬레이션 실행 시각이다.
+  const timestamp = item.createdAt ?? item.savedAt ?? item.updatedAt
   const parsed = timestamp ? new Date(timestamp) : null
   const date =
     parsed && Number.isFinite(parsed.getTime())
@@ -294,12 +296,16 @@ function serverSimulationToState(item) {
         }).format(parsed)
       : ''
 
+  const estimatedGiftTax = item.selection?.estimatedGiftTax
+
   return {
     id: Number(item.simulationId),
     familyId: Number(item.family?.familyId),
     date,
     amount: Number(item.inputSummary?.requestedAmount ?? 0),
-    tax: item.selection?.estimatedGiftTax == null ? null : Number(item.selection.estimatedGiftTax),
+    // API의 estimatedGiftTax는 신고세액공제 전 산출세액이다.
+    tax:
+      estimatedGiftTax == null ? null : calculateEstimatedPayableTax(Number(estimatedGiftTax)),
     status: item.status,
     minimumReturnRate: Number(item.expectedReturnRange?.minimum?.expectedReturnRatePercent ?? 0),
     maximumReturnRate: Number(item.expectedReturnRange?.maximum?.expectedReturnRatePercent ?? 0),

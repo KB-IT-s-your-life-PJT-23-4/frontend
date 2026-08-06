@@ -1,4 +1,8 @@
-import { PRODUCT_TYPE_META } from './finance'
+import {
+  calculateEstimatedPayableTax,
+  calculateFilingTaxCredit,
+  PRODUCT_TYPE_META,
+} from './finance'
 
 const SCENARIO_COPY = {
   IMMEDIATE: {
@@ -104,6 +108,7 @@ function mapResult(result, investmentEndDate) {
   const deferredGiftAmount = tranches
     .slice(1)
     .reduce((sum, tranche) => sum + number(tranche.giftAmount), 0)
+  const giftTax = number(result.giftTax)
 
   const mapped = {
     resultId: number(result.resultId),
@@ -112,9 +117,9 @@ function mapResult(result, investmentEndDate) {
     description: copy.description,
     deductionAmount: number(result.deductionAmount),
     taxableAmount: number(result.taxableAmount),
-    giftTax: number(result.giftTax),
-    filingTaxCredit: Math.round(number(result.giftTax) * 0.03),
-    estimatedPayableTax: number(result.giftTax),
+    giftTax,
+    filingTaxCredit: calculateFilingTaxCredit(giftTax),
+    estimatedPayableTax: calculateEstimatedPayableTax(giftTax),
     postTaxAmount: number(result.postTaxAmount),
     investmentPrincipal: number(result.investmentPrincipal),
     totalDonorOutflow: number(result.donorRequiredAmount),

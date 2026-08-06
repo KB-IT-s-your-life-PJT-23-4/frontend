@@ -24,6 +24,18 @@ export function calculateGiftTax(taxableAmount) {
   return Math.max(0, Math.round(taxableAmount * bracket.rate - bracket.deduction))
 }
 
+export function calculateFilingTaxCredit(giftTax) {
+  const amount = Number(giftTax)
+  if (!Number.isFinite(amount) || amount <= 0) return 0
+  return Math.round(amount * 0.03)
+}
+
+export function calculateEstimatedPayableTax(giftTax) {
+  const amount = Number(giftTax)
+  if (!Number.isFinite(amount) || amount <= 0) return 0
+  return Math.max(0, Math.round(amount) - calculateFilingTaxCredit(amount))
+}
+
 export function futureValue(principal, annualRate, years = 10) {
   if (!Number.isFinite(principal) || principal <= 0) return 0
   return Math.round(principal * (1 + annualRate / 100) ** Math.max(0, years))
@@ -154,12 +166,12 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
   if (!donorPaysTax) {
     const taxableAmount = Math.max(0, baseGiftAmount - deduction)
     const giftTax = calculateGiftTax(taxableAmount)
-    const filingTaxCredit = Math.round(giftTax * 0.03)
+    const filingTaxCredit = calculateFilingTaxCredit(giftTax)
     return {
       taxableAmount,
       giftTax,
       filingTaxCredit,
-      estimatedPayableTax: Math.max(0, giftTax - filingTaxCredit),
+      estimatedPayableTax: calculateEstimatedPayableTax(giftTax),
     }
   }
 
@@ -170,8 +182,8 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
   for (let index = 0; index < 30; index += 1) {
     const taxableAmount = Math.max(0, baseGiftAmount + estimatedPayableTax - deduction)
     giftTax = calculateGiftTax(taxableAmount)
-    filingTaxCredit = Math.round(giftTax * 0.03)
-    const nextPayableTax = Math.max(0, giftTax - filingTaxCredit)
+    filingTaxCredit = calculateFilingTaxCredit(giftTax)
+    const nextPayableTax = calculateEstimatedPayableTax(giftTax)
     if (Math.abs(nextPayableTax - estimatedPayableTax) <= 1) {
       estimatedPayableTax = nextPayableTax
       break
