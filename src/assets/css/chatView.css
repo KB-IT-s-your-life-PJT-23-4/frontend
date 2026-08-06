@@ -140,7 +140,8 @@
 }
 
 .explain-button:disabled,
-.chat-plus-button:disabled {
+.chat-plus-button:disabled,
+.faq-chip-list button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }

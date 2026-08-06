@@ -566,13 +566,14 @@ function messageParagraphs(text) {
         <div class="chat-bubble typing" aria-label="답변 작성 중"><span /><span /><span /></div>
       </div>
 
-      <section class="faq-suggestions">
+      <section v-if="!pendingConsult" class="faq-suggestions">
         <span>궁금해하실 내용을 준비했어요</span>
         <div class="faq-chip-list">
           <button
             v-for="faq in faqItems"
             :key="faq.faqId"
             type="button"
+            :disabled="Boolean(pendingConsult) || loading"
             @click="
               sendMessage(faq.prompt, faq.answer, faq.showBranchButton, faq.showTaxOfficeButton)
             "
