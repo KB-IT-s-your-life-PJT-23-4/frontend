@@ -268,6 +268,7 @@ async function submitWithdrawal() {
                 님
               </span>
               <button
+                v-if="item.source !== 'server'"
                 type="button"
                 aria-label="시뮬레이션 이력 삭제"
                 @click="simulationToDelete = item"
@@ -278,9 +279,20 @@ async function submitWithdrawal() {
             <h3>{{ item.date }}</h3>
             <p>
               증여 {{ formatCompactWon(item.amount) }} · 예상 세금
-              {{ formatCompactWon(item.tax) }}
+              {{ item.tax == null ? '미확정' : formatCompactWon(item.tax) }}
             </p>
-            <RouterLink class="soft-button full" to="/simulation">새 조건으로 비교하기</RouterLink>
+            <p v-if="item.source === 'server'">
+              예상 수익률 {{ item.minimumReturnRate }}% ~ {{ item.maximumReturnRate }}%
+            </p>
+            <RouterLink
+              class="soft-button full"
+              :to="{
+                name: 'simulation',
+                query: item.source === 'server' ? { simulationId: item.id } : {},
+              }"
+            >
+              {{ item.source === 'server' ? '결과 다시 보기' : '새 조건으로 비교하기' }}
+            </RouterLink>
           </article>
         </div>
       </section>

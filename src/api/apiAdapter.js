@@ -51,6 +51,7 @@ function requestHeaders(body, customHeaders, accessToken) {
   const headers = new Headers()
 
   if (!isFormData(body)) headers.set('Content-Type', 'application/json')
+  headers.set('Accept', 'application/json')
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
 
   new Headers(customHeaders).forEach((value, key) => headers.set(key, value))
@@ -59,10 +60,15 @@ function requestHeaders(body, customHeaders, accessToken) {
 
 function responseError(response, payload) {
   const error = new Error(payload?.error || '요청을 처리하지 못했습니다.')
+  error.message = payload?.message || error.message
   error.status = response.status
-  error.code = payload?.statusCode ?? response.status
+  error.code = payload?.error ?? payload?.statusCode ?? response.status
   error.payload = payload
   return error
+}
+
+function idempotencyKey() {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
 }
 
 async function fetchResponse(path, options, accessToken = null) {
@@ -206,13 +212,14 @@ export const api = {
 
   async runSimulation({ family, amount, years = 10, donorPaysTax = false }) {
     if (API_BASE) {
-      return request('/simulations', {
+      return request('/gs', {
         method: 'POST',
+        headers: { 'Idempotency-Key': idempotencyKey() },
         body: JSON.stringify({
           familyId: family.id,
-          amount,
-          investmentPeriodYears: years,
-          donorPaysTax,
+          requestedAmount: amount,
+          taxPaymentMethod: donorPaysTax ? 'DONOR_PAYS' : 'RECIPIENT_PAYS',
+          investmentPeriodMonths: years * 12,
         }),
       })
     }
@@ -220,15 +227,38 @@ export const api = {
     return calculateSimulation({ amount, family, products, years, donorPaysTax })
   },
 
-  async saveGiftPlan(resultId, memo = '미리줌에서 저장한 증여 계획') {
-    if (API_BASE) {
-      return request(`/simulation-results/${resultId}/gift-plans`, {
-        method: 'POST',
-        body: JSON.stringify({ memo }),
-      })
+  async getSimulation(simulationId) {
+    if (!API_BASE) return null
+    return request(`/gs/${simulationId}`)
+  },
+
+  async getSimulationProductDetail(simulationId, kbProductVersionId) {
+    if (!API_BASE) return null
+    return request(`/gs/${simulationId}/products/${kbProductVersionId}`)
+  },
+
+  async saveSimulation(simulationId, payload) {
+    if (!API_BASE) {
+      await wait(350)
+      return {
+        simulationId,
+        status: 'SAVED',
+        version: Number(payload.version) + 1,
+      }
     }
-    await wait(350)
-    return { giftPlans: [], message: '증여 계획이 저장되었습니다.' }
+    return request(`/gs/${simulationId}/save`, {
+      method: 'PATCH',
+      headers: { 'Idempotency-Key': idempotencyKey() },
+      body: JSON.stringify(payload),
+    })
+  },
+
+  async listSimulations({ status, familyId, page = 0, size = 20 } = {}) {
+    if (!API_BASE) return { items: [], pagination: null }
+    const params = new URLSearchParams({ page: String(page), size: String(size) })
+    if (status) params.set('status', status)
+    if (familyId != null) params.set('familyId', String(familyId))
+    return request(`/gs?${params}`)
   },
 
   // --- 수증자(가족) : RecipientController @RequestMapping("/api/fm/family") ---

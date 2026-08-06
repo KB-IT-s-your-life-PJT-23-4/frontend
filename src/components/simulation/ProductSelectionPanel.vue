@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watchEffect } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { PRODUCT_TYPE_META } from '../../utils/finance'
+import '../../assets/css/product-selection-panel.css'
 
 const props = defineProps({
   products: {
@@ -20,9 +21,21 @@ const props = defineProps({
     type: String,
     default: 'BALANCED',
   },
+  detailLoading: {
+    type: Object,
+    default: () => ({}),
+  },
+  detailErrors: {
+    type: Object,
+    default: () => ({}),
+  },
+  preferentialSelections: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'request-detail', 'update-conditions'])
 const expanded = reactive(new Set())
 const activeProductType = ref('DEPOSIT')
 const productTypeOrder = ['DEPOSIT', 'SAVINGS', 'ETF']
@@ -39,19 +52,21 @@ const holdingSegmentColors = [
   '#c67d75',
 ]
 const holdingAssetPalettes = {
+  STOCK: ['#675db0', '#8175cd', '#9a8ddd', '#b1a6e8'],
   EQUITY: ['#675db0', '#8175cd', '#9a8ddd', '#b1a6e8'],
   BOND: ['#47779f', '#5d8aae', '#739dbc', '#89afca', '#9dc0d5', '#b2cfdf'],
   CASH: ['#5e9183', '#79a79b', '#96bbb2', '#b4cec7'],
 }
 const holdingAssetLabels = {
+  STOCK: '주식',
   EQUITY: '주식',
   BOND: '채권',
-  CASH: '예금·현금',
+  CASH: '현금·예금',
 }
 const portfolioProfileLabels = {
-  STABLE: '안정형',
+  CONSERVATIVE: '안정형',
   BALANCED: '균형형',
-  GROWTH: '성장형',
+  AGGRESSIVE: '성장형',
 }
 
 const productGroups = computed(() =>
@@ -62,14 +77,7 @@ const productGroups = computed(() =>
       ratio: props.allocation[type],
       ...PRODUCT_TYPE_META[type],
       products: props.products
-        .filter(
-          (product) =>
-            product.type === type &&
-            (type !== 'ETF' ||
-              (Boolean(product.trackingIndex) &&
-                (!product.recommendationProfiles?.length ||
-                  product.recommendationProfiles.includes(props.portfolioProfile)))),
-        )
+        .filter((product) => product.type === type)
         .sort((a, b) => b.rate - a.rate)
         .slice(0, 3),
     })),
@@ -84,30 +92,22 @@ watchEffect(() => {
   }
 })
 
-watchEffect(() => {
-  const etfGroup = productGroups.value.find((group) => group.type === 'ETF')
-  if (!etfGroup?.products.length) return
-
-  const selectedEtfId = props.selectedProducts.ETF?.id
-  if (!etfGroup.products.some((product) => product.id === selectedEtfId)) {
-    emit('select', 'ETF', etfGroup.products[0])
-  }
-})
-
 const activeProductGroup = computed(() =>
   productGroups.value.find((group) => group.type === activeProductType.value),
 )
 
-function toggleDetails(productId) {
-  if (expanded.has(productId)) {
-    expanded.delete(productId)
-  } else {
-    expanded.add(productId)
+function toggleDetails(product) {
+  if (expanded.has(product.id)) {
+    expanded.delete(product.id)
+    return
   }
+
+  expanded.add(product.id)
+  if (!product.detailLoaded) emit('request-detail', product)
 }
 
 function getRateLabel(product) {
-  if (product.type === 'ETF') return `연 평균 수익률 ${product.rate}%`
+  if (product.type === 'ETF') return `최근 5년 연평균 수익률 ${product.rate}%`
   return `연 ${product.minRate}% ~ ${product.maxRate}%`
 }
 
@@ -118,13 +118,11 @@ function getHoldingSegments(topHoldings = []) {
     const assetColorIndex = assetColorIndexes[holding.assetType] ?? 0
     const color = palette?.[assetColorIndex % palette.length] ?? holdingSegmentColors[index]
 
-    if (holding.assetType) {
-      assetColorIndexes[holding.assetType] = assetColorIndex + 1
-    }
+    if (holding.assetType) assetColorIndexes[holding.assetType] = assetColorIndex + 1
 
     return {
       ...holding,
-      rank: index + 1,
+      rank: holding.rank ?? index + 1,
       ratio: Math.max(0, Number(holding.ratio) || 0),
       color,
       assetLabel: holdingAssetLabels[holding.assetType] ?? '',
@@ -146,6 +144,18 @@ function getHoldingSegments(topHoldings = []) {
       isOther: true,
     },
   ]
+}
+
+function isConditionChecked(product, conditionCode) {
+  return (props.preferentialSelections[product.simulationProductId] ?? []).includes(conditionCode)
+}
+
+function updateCondition(product, conditionCode, checked) {
+  const current = props.preferentialSelections[product.simulationProductId] ?? []
+  const next = checked
+    ? [...new Set([...current, conditionCode])]
+    : current.filter((code) => code !== conditionCode)
+  emit('update-conditions', product.simulationProductId, next)
 }
 </script>
 
@@ -194,11 +204,13 @@ function getHoldingSegments(topHoldings = []) {
             <strong>{{ activeProductGroup.label }}</strong>
             <span>{{ activeProductGroup.ratio }}% 운용</span>
           </div>
-          <small>{{
-            activeProductGroup.type === 'ETF'
-              ? `${portfolioProfileLabel} 맞춤 3개`
-              : '수익률 순 3개'
-          }}</small>
+          <small>
+            {{
+              activeProductGroup.type === 'ETF'
+                ? `${portfolioProfileLabel} 맞춤 3개`
+                : '수익률 순 3개'
+            }}
+          </small>
         </div>
 
         <div class="selectable-product-list">
@@ -231,14 +243,21 @@ function getHoldingSegments(topHoldings = []) {
               class="product-detail-toggle"
               type="button"
               :aria-expanded="expanded.has(product.id)"
-              @click="toggleDetails(product.id)"
+              @click="toggleDetails(product)"
             >
               상세 보기
               <AppIcon name="chevron" :size="15" :class="{ expanded: expanded.has(product.id) }" />
             </button>
 
             <div v-if="expanded.has(product.id)" class="selectable-product-details">
-              <template v-if="product.type === 'ETF'">
+              <p v-if="detailLoading[product.id]" class="product-detail-feedback">
+                상품 상세정보를 불러오는 중이에요.
+              </p>
+              <p v-else-if="detailErrors[product.id]" class="product-detail-feedback error">
+                {{ detailErrors[product.id] }}
+              </p>
+
+              <template v-else-if="product.detailLoaded && product.type === 'ETF'">
                 <div class="product-tracking-index">
                   <span>추종 지수</span>
                   <strong>{{ product.trackingIndex }}</strong>
@@ -254,7 +273,7 @@ function getHoldingSegments(topHoldings = []) {
                   >
                     <button
                       v-for="segment in getHoldingSegments(product.topHoldings)"
-                      :key="segment.isOther ? 'other' : segment.name"
+                      :key="segment.isOther ? 'other' : `${segment.rank}-${segment.name}`"
                       type="button"
                       class="product-holding-segment"
                       :class="{ other: segment.isOther }"
@@ -284,15 +303,19 @@ function getHoldingSegments(topHoldings = []) {
                     </button>
                   </div>
                   <ol class="product-holdings-list">
-                    <li v-for="(holding, holdingIndex) in product.topHoldings" :key="holding.name">
-                      <span>{{ holdingIndex + 1 }}</span>
+                    <li
+                      v-for="holding in product.topHoldings"
+                      :key="`${holding.rank}-${holding.name}`"
+                    >
+                      <span>{{ holding.rank }}</span>
                       <strong>{{ holding.name }}</strong>
                       <b>{{ holding.ratio }}%</b>
                     </li>
                   </ol>
                 </div>
               </template>
-              <template v-else>
+
+              <template v-else-if="product.detailLoaded">
                 <div>
                   <span>가입·납입 한도</span>
                   <strong>{{ product.limit }}</strong>
@@ -301,15 +324,28 @@ function getHoldingSegments(topHoldings = []) {
                   <span>운용 기간</span>
                   <strong>{{ product.period }}</strong>
                 </div>
-                <div v-if="product.conditions?.length" class="product-condition-list">
-                  <span>우대 조건</span>
-                  <p v-for="condition in product.conditions" :key="condition">
-                    <AppIcon name="check" :size="14" /> {{ condition }}
-                  </p>
+                <div v-if="product.preferentialConditions?.length" class="product-condition-list">
+                  <span>우대 금리 조건</span>
+                  <label
+                    v-for="condition in product.preferentialConditions"
+                    :key="condition.conditionCode"
+                    class="preferential-condition-option"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="isConditionChecked(product, condition.conditionCode)"
+                      @change="
+                        updateCondition(product, condition.conditionCode, $event.target.checked)
+                      "
+                    />
+                    <span>{{ condition.description }}</span>
+                    <strong>+{{ condition.additionalRatePercent }}%p</strong>
+                  </label>
                 </div>
               </template>
+
               <a
-                v-if="product.siteUrl"
+                v-if="product.detailLoaded && product.siteUrl"
                 class="product-site-link"
                 :href="product.siteUrl"
                 target="_blank"
@@ -325,10 +361,9 @@ function getHoldingSegments(topHoldings = []) {
     </div>
 
     <p class="product-data-notice">
-      <!-- <AppIcon name="info" :size="14" /> -->
-      ETF의 연 평균 수익률은 최근 5년 수익률을 기준으로 계산했어요. <br />
-      상품명과 수익률은 화면 시연을 위한 데모 정보이며, 실제 가입 전 최신 상품 설명서를 확인해야
-      해요.
+      ETF의 연평균 수익률은 최근 5년 수익률을 기준으로 계산했어요.<br />
+      상품명과 수익률은 시뮬레이션 실행 당시의 데이터이며, 실제 가입 전 최신 상품 설명서를 확인해
+      주세요.
     </p>
   </section>
 </template>
