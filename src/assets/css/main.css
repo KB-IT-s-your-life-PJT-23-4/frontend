@@ -5641,7 +5641,6 @@ textarea:focus-visible {
 }
 
 .gift-timeline-fill {
-  right: 6%;
   background: linear-gradient(90deg, #5f8eb6, #9ebbd2);
 }
 

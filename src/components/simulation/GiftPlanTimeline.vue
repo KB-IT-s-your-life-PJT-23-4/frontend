@@ -58,6 +58,30 @@ const reinvestmentSchedule = computed(() => {
     })
   return [...grouped.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
 })
+const timelineEvents = computed(() =>
+  [
+    ...visibleSchedule.value.map((item) => ({
+      ...item,
+      kind: 'gift',
+      key: `gift-${item.order}-${item.date}`,
+    })),
+    ...reinvestmentSchedule.value.map((item) => ({
+      ...item,
+      kind: 'reinvestment',
+      key: `reinvestment-${item.date}`,
+    })),
+  ].sort((a, b) => {
+    const dateCompare = String(a.date).localeCompare(String(b.date))
+    if (dateCompare !== 0) return dateCompare
+    return a.kind === 'gift' ? -1 : 1
+  }),
+)
+
+function reinvestmentLabel(products) {
+  const names = [...new Set(products.map((product) => product.name))]
+  if (names.length <= 1) return `${names[0] ?? '선택 상품'}`
+  return `${names[0]} 외 ${names.length - 1}개 재가입`
+}
 
 function getPosition(item) {
   const itemDate = parseDate(item.date)
@@ -74,7 +98,12 @@ function getPosition(item) {
       <div>
         <div class="timeline-heading-meta">
           <span class="section-kicker">추천 증여 플랜</span>
-          <span class="timeline-count">기간 내 {{ visibleSchedule.length }}회 증여</span>
+          <span class="timeline-count">
+            기간 내 {{ visibleSchedule.length }}회 증여
+            <template v-if="reinvestmentSchedule.length">
+              · {{ reinvestmentSchedule.length }}회 재가입
+            </template>
+          </span>
         </div>
         <h2 id="gift-strategy-title">
           {{
@@ -108,22 +137,45 @@ function getPosition(item) {
     </div>
 
     <section class="selected-timeline-section" aria-label="추천 전략의 증여 일정">
-      <div class="gift-timeline" :aria-label="`${result.years}년 운용 기간 중 증여 일정`">
+      <div
+        class="gift-timeline"
+        :class="{ 'has-reinvestment': reinvestmentSchedule.length }"
+        :aria-label="`${result.years}년 운용 기간 중 증여와 상품 재가입 일정`"
+      >
         <div class="gift-timeline-track">
           <span class="gift-timeline-fill" />
-          <div
-            v-for="item in visibleSchedule"
-            :key="`${item.order}-${item.date}`"
-            class="gift-timeline-point"
-            :style="{ left: `${getPosition(item)}%` }"
-          >
-            <span class="timeline-dot"><AppIcon name="wallet" :size="14" /></span>
-            <div class="timeline-point-copy">
-              <strong>{{ item.label }}</strong>
-              <span>{{ item.date }}</span>
-              <b>{{ formatCompactWon(item.amount) }}</b>
+          <template v-for="item in timelineEvents" :key="item.key">
+            <div
+              v-if="item.kind === 'gift'"
+              class="gift-timeline-point"
+              :style="{ left: `${getPosition(item)}%` }"
+            >
+              <span class="timeline-dot"><AppIcon name="wallet" :size="14" /></span>
+              <div class="timeline-point-copy">
+                <strong>{{ item.label }}</strong>
+                <span>{{ item.date }}</span>
+                <b>{{ formatCompactWon(item.amount) }}</b>
+              </div>
             </div>
-          </div>
+            <div
+              v-else
+              class="gift-timeline-reinvestment"
+              :style="{ left: `${getPosition(item)}%` }"
+            >
+              <span
+                class="reinvestment-timeline-dot"
+                tabindex="0"
+                :aria-label="`${item.date}, ${reinvestmentLabel(item.products)}`"
+              >
+                <AppIcon name="refresh" :size="11" />
+              </span>
+              <div class="reinvestment-timeline-copy">
+                <strong>상품 재가입</strong>
+                <span>{{ item.date }}</span>
+                <b>{{ reinvestmentLabel(item.products) }}</b>
+              </div>
+            </div>
+          </template>
           <div class="gift-timeline-end">
             <span class="timeline-end-dot"><AppIcon name="calendar" :size="14" /></span>
             <div>
@@ -142,36 +194,6 @@ function getPosition(item) {
           금액에 포함하지 않았어요.
         </p>
       </aside>
-
-      <section
-        v-if="reinvestmentSchedule.length"
-        class="product-reinvestment-schedule"
-        aria-labelledby="product-reinvestment-title"
-      >
-        <div class="product-reinvestment-heading">
-          <span class="product-reinvestment-icon">
-            <AppIcon name="refresh" :size="16" />
-          </span>
-          <div>
-            <h3 id="product-reinvestment-title">상품 재가입 일정</h3>
-            <p>만기 원리금을 같은 상품에 다시 운용하는 날짜예요.</p>
-          </div>
-        </div>
-        <ol>
-          <li v-for="renewal in reinvestmentSchedule" :key="renewal.date">
-            <time>{{ renewal.date }}</time>
-            <div>
-              <span
-                v-for="product in renewal.products"
-                :key="`${product.id}-${product.trancheSequenceNo}-${product.renewalSequenceNo}`"
-                :class="`reinvestment-${String(product.type).toLowerCase()}`"
-              >
-                {{ product.name }} 재가입
-              </span>
-            </div>
-          </li>
-        </ol>
-      </section>
     </section>
   </section>
 </template>
