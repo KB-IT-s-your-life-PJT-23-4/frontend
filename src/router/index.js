@@ -12,6 +12,7 @@ import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
+import AdminDashboardView from '../pages/AdminDashboardView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { useAuthStore } from '../stores/authStore'
 
@@ -85,6 +86,18 @@ const router = createRouter({
       component: SignupView,
       meta: { label: '회원가입', hideBottomNav: true },
     },
+    {
+      path: '/admin/dashboard',
+      name: 'admin-dashboard',
+      component: AdminDashboardView,
+      meta: {
+        label: '관리자 대시보드',
+        requiresAuth: true,
+        requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
@@ -93,23 +106,31 @@ router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return true
 
   const authStore = useAuthStore()
-  if (authStore.isLogin) return true
+  if (!authStore.isLogin) {
+    const hadSession = Boolean(authStore.accessToken || authStore.refreshToken || authStore.user)
 
-  const hadSession = Boolean(authStore.accessToken || authStore.refreshToken || authStore.user)
+    if (authStore.refreshToken) {
+      try {
+        const session = await restoreAuthSession()
+        authStore.setAuthSession(session)
+      } catch {}
+    }
 
-  if (authStore.refreshToken) {
-    try {
-      const session = await restoreAuthSession()
-      authStore.setAuthSession(session)
-      if (authStore.isLogin) return true
-    } catch {}
+    if (!authStore.isLogin) {
+      if (hadSession) await authStore.clearSession()
+      return {
+        name: 'login',
+        query: { redirect: to.fullPath },
+      }
+    }
   }
 
-  if (hadSession) await authStore.clearSession()
-  return {
-    name: 'login',
-    query: { redirect: to.fullPath },
+  if (to.meta.requiresAdmin) {
+    const role = String(authStore.user?.role ?? '').toUpperCase()
+    if (!['ADMIN', 'ROLE_ADMIN'].includes(role)) return { name: 'home' }
   }
+
+  return true
 })
 
 export default router
