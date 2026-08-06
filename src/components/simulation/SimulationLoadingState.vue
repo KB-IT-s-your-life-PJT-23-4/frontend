@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
-import '../../assets/css/simulation-loading-state.css'
+import '../../assets/css/simulation/simulation-loading-state.css'
 
 const props = defineProps({
   mode: {

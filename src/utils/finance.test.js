@@ -38,6 +38,20 @@ describe('증여 계산', () => {
     expect(optimized.giftTax).toBe(0)
   })
 
+  it('입력한 증여 예정일부터 증여 일정과 운용 종료일을 계산한다', () => {
+    const result = calculateSimulation({
+      amount: 80000000,
+      family,
+      products,
+      years: 10,
+      giftDate: '2026-09-15',
+    })
+
+    expect(result.giftDate).toBe('2026.09.15')
+    expect(result.results[0].giftSchedule[0].date).toBe('2026.09.15')
+    expect(result.endDate).toBe('2036.09.15')
+  })
+
   it('복리 예상 자산을 계산한다', () => {
     expect(futureValue(10000000, 3, 10)).toBe(13439164)
   })
