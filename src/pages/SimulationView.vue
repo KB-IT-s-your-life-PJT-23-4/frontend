@@ -9,6 +9,7 @@ import PortfolioDonutCard from '../components/simulation/PortfolioDonutCard.vue'
 import ProductSelectionPanel from '../components/simulation/ProductSelectionPanel.vue'
 import SavePlanModal from '../components/simulation/SavePlanModal.vue'
 import SimulationInputContent from '../components/simulation/SimulationInputContent.vue'
+import SimulationLoadingState from '../components/simulation/SimulationLoadingState.vue'
 import { products as mockProducts } from '../data/mockData'
 import { api } from '../api/apiAdapter'
 import { useAppStore } from '../stores/appStore'
@@ -385,9 +386,10 @@ onMounted(async () => {
   <div class="page simulation-page">
     <AppHeader />
 
-    <div v-if="loadingInitialData || loadingHistory" class="page-content simulation-input-content">
-      <p class="field-help">시뮬레이션 결과를 불러오는 중이에요.</p>
-    </div>
+    <SimulationLoadingState
+      v-if="loadingInitialData || loadingHistory"
+      :mode="loadingHistory ? 'history' : 'initial'"
+    />
 
     <SimulationInputContent
       v-else-if="!result"
@@ -463,7 +465,7 @@ onMounted(async () => {
             기한 안에 신고하면 약 {{ formatWon(recommendedScenario.filingTaxCredit) }}을 공제받을 수
             있어요.
           </h2>
-          <p>증여받은 날이 속하는 달의 말일부터 3개월 이내 신고하는 때를 기준으로 안내해요.</p>
+          <p>증여받은 날이 속하는 달의 말일부터 3개월 이내 신고하는 경우를 기준으로 안내해요.</p>
         </div>
       </aside>
 

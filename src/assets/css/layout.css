@@ -116,7 +116,7 @@
 }
 
 .nav-item.router-link-exact-active {
-  color: var(--blue-strong);
+  color: var(--blue-light);
 }
 
 .nav-icon {
