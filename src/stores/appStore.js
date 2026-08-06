@@ -1,6 +1,7 @@
 import { computed, nextTick, reactive, readonly, watch } from 'vue'
 import { api, GIFT_STATUS } from '../api/apiAdapter'
 import { initialState } from '../data/mockData'
+import { REMINDER_GROUPS, toNotification } from '../utils/reminder'
 import {
   deductionLimitFor,
   isMinorAt,
@@ -30,6 +31,8 @@ const SERVER_SOURCED_STATE = {
   giftHistory: [],
   // 시뮬레이션 이력 API는 아직 없어 저장 시점부터 이 브라우저에 쌓인다. 목 시드는 쓰지 않는다.
   simulations: [],
+  // 서버가 조회 시점에 gift 에서 계산해 내려주는 리마인더 원본. 알림함 카드는 여기서 만든다.
+  reminders: [],
   selectedFamilyId: null,
 }
 
@@ -87,7 +90,20 @@ const selectedFamily = computed(
     EMPTY_FAMILY,
 )
 
-const unreadCount = computed(() => state.notifications.filter((item) => item.unread).length)
+/**
+ * 알림함에 뿌릴 목록. 서버 리마인더(신고기한·공제갱신)와 앱에서 생긴 이벤트 알림(계획 저장,
+ * 증여 확정)을 합친다. 리마인더는 기한이 걸린 할 일이라 이벤트 알림보다 앞에 둔다.
+ */
+const notifications = computed(() => {
+  const reminderCards = (state.reminders ?? []).map(toNotification)
+  const ordered = [...reminderCards].sort(
+    (a, b) => REMINDER_GROUPS.indexOf(a.group) - REMINDER_GROUPS.indexOf(b.group),
+  )
+
+  return [...ordered, ...state.notifications]
+})
+
+const unreadCount = computed(() => notifications.value.filter((item) => item.unread).length)
 
 function showToast(message, type = 'success') {
   clearTimeout(toastTimer)
@@ -253,7 +269,10 @@ function completedGiftToHistory(gift) {
 // 공제 한도·누적 증여액·갱신일은 GET /api/gm/deduction 이 산출한 값을 그대로 쓴다.
 // 여기서 다시 계산하지 말 것. 남은 기간 문구만 renewalDisplay 로 만든다.
 function serverFamilyToState(recipient, deduction) {
-  const renewal = renewalDisplay(deduction?.nextRenewalDate ?? null)
+  const renewal = renewalDisplay(
+    deduction?.nextRenewalDate ?? null,
+    deduction?.renewalAmount ?? null,
+  )
 
   return {
     id: Number(recipient.familyId),
@@ -274,6 +293,7 @@ function serverFamilyToState(recipient, deduction) {
     resetLabel: renewal.resetLabel,
     nextRenewalDate: renewal.nextRenewalDate,
     daysUntilRenewal: renewal.daysUntilRenewal,
+    renewalAmount: renewal.renewalAmount,
     tone: Number(recipient.familyId) % 2 ? 'blue' : 'mint',
     source: 'server',
   }
@@ -293,13 +313,16 @@ async function syncStatus() {
 
   const generation = statusGeneration
 
-  const [recipients, gifts, deductions] = await Promise.all([
+  const [recipients, gifts, deductions, reminders] = await Promise.all([
     api.listFamilies(),
     api.listGifts(),
     api.listDeductions(),
+    api.listReminders(),
   ])
 
   if (generation !== statusGeneration) return
+
+  state.reminders = reminders
 
   const deductionByFamily = new Map(
     deductions.map((deduction) => [Number(deduction.familyId), deduction]),
@@ -419,9 +442,35 @@ function toggleSetting(setting) {
   state.settings[setting] = !state.settings[setting]
 }
 
-function markNotificationsRead() {
+/**
+ * 알림함을 열면 호출한다. 앱 이벤트 알림은 로컬에서 바로 끄고,
+ * 서버 리마인더는 안 읽은 것만 골라 읽음 처리한다(이미 읽은 건 다시 보내지 않는다).
+ */
+async function markNotificationsRead() {
   state.notifications.forEach((item) => {
     item.unread = false
+  })
+
+  const unreadReminders = (state.reminders ?? []).filter((reminder) => !reminder.readAt)
+  if (!unreadReminders.length) return
+
+  const readAt = new Date().toISOString()
+
+  // 하나가 실패해도 나머지는 읽음 처리한다. 실패분은 다음 진입 때 다시 시도된다.
+  const results = await Promise.allSettled(
+    unreadReminders.map((reminder) =>
+      api.markReminderRead({ giftId: reminder.giftId, type: reminder.type }),
+    ),
+  )
+
+  results.forEach((result, index) => {
+    if (result.status !== 'fulfilled') return
+    const target = state.reminders.find(
+      (reminder) =>
+        reminder.giftId === unreadReminders[index].giftId &&
+        reminder.type === unreadReminders[index].type,
+    )
+    if (target) target.readAt = readAt
   })
 }
 
@@ -541,6 +590,7 @@ export function useAppStore() {
     mutableState: state,
     isMock: api.isMock,
     selectedFamily,
+    notifications,
     unreadCount,
     toast: readonly(toast),
     showToast,
