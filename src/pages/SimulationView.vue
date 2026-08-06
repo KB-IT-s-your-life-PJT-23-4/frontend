@@ -25,15 +25,23 @@ import { mergeProductDetail, normalizeSimulationResponse } from '../utils/simula
 const store = useAppStore()
 const route = useRoute()
 const router = useRouter()
+const todayDate = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(new Date())
 const selectedFamilyId = ref(store.state.selectedFamilyId)
 const amountText = ref('')
 const investmentYears = ref(10)
+const giftDate = ref(todayDate)
 const donorPaysTax = ref(false)
 const result = ref(null)
 const loading = ref(false)
 const loadingHistory = ref(false)
 const loadingInitialData = ref(!api.isMock)
 const errorMessage = ref('')
+const giftDateError = ref('')
 const selectedPortfolioType = ref('BALANCED')
 const showSaveModal = ref(false)
 const saving = ref(false)
@@ -91,7 +99,7 @@ const allocationProfiles = computed(() => {
     investmentPeriodMonths: years * 12,
     schedule: recommendedScenario.value?.giftSchedule,
     years,
-    startDate: result.value?.raw?.input?.asOfDate,
+    startDate: result.value?.raw?.input?.giftDate ?? result.value?.raw?.input?.asOfDate,
     endDate: result.value?.raw?.input?.investmentEndDate,
   })
   return {
@@ -158,7 +166,7 @@ const recommendedFutureValue = computed(() => {
     allocation: portfolioAllocation.value,
     selectedProducts: calculationProducts.value,
     years: result.value.years,
-    startDate: result.value.raw?.input?.asOfDate,
+    startDate: result.value.raw?.input?.giftDate ?? result.value.raw?.input?.asOfDate,
     endDate: result.value.raw?.input?.investmentEndDate,
   })
 })
@@ -214,8 +222,19 @@ function addAmount(value) {
   setAmount(amount.value + value)
 }
 
+function updateGiftDate(value) {
+  giftDate.value = value
+  giftDateError.value = ''
+}
+
 function applySimulationResponse(response) {
   result.value = normalizeSimulationResponse(response)
+  if (response.input) {
+    setAmount(response.input.requestedAmount)
+    investmentYears.value = Number(response.input.investmentPeriodMonths) / 12
+    giftDate.value = response.input.giftDate ?? response.input.asOfDate ?? todayDate
+    donorPaysTax.value = response.input.taxPaymentMethod === 'DONOR_PAYS'
+  }
   const selectedProfile = response.selection?.portfolioType
   selectedPortfolioType.value =
     selectedProfile && result.value.recommendedByProfile?.[selectedProfile]
@@ -232,6 +251,7 @@ function applySimulationResponse(response) {
 
 async function runSimulation() {
   errorMessage.value = ''
+  giftDateError.value = ''
   if (amount.value < 1000000) {
     errorMessage.value = '100만원 이상의 증여 예정 금액을 입력해 주세요.'
     return
@@ -244,6 +264,14 @@ async function runSimulation() {
     errorMessage.value = '증여 예정 금액을 입력해 주세요.'
     return
   }
+  if (!giftDate.value) {
+    giftDateError.value = '증여 예정일을 선택해 주세요.'
+    return
+  }
+  if (giftDate.value < todayDate) {
+    giftDateError.value = '증여 예정일은 오늘 또는 이후 날짜로 선택해 주세요.'
+    return
+  }
 
   loading.value = true
   try {
@@ -252,6 +280,7 @@ async function runSimulation() {
       family: family.value,
       amount: amount.value,
       years: investmentYears.value,
+      giftDate: giftDate.value,
       donorPaysTax: donorPaysTax.value,
     })
     applySimulationResponse(response)
@@ -421,10 +450,14 @@ onMounted(async () => {
       :error-message="errorMessage"
       :loading="loading"
       :investment-years="investmentYears"
+      :gift-date="giftDate"
+      :min-gift-date="todayDate"
+      :gift-date-error="giftDateError"
       :donor-pays-tax="donorPaysTax"
       @amount-input="setAmount"
       @add-amount="addAmount"
       @update:investment-years="investmentYears = $event"
+      @update:gift-date="updateGiftDate"
       @update:donor-pays-tax="donorPaysTax = $event"
       @submit="runSimulation"
     />
@@ -439,6 +472,10 @@ onMounted(async () => {
         </h2>
         <p>증여 시점과 {{ result.years }}년의 운용 흐름을 함께 계산했어요.</p>
         <div class="result-condition-chips">
+          <span>
+            <AppIcon name="calendar" :size="15" />
+            {{ result.giftDate }} 증여 예정
+          </span>
           <span><AppIcon name="clock" :size="15" /> {{ result.years }}년 운용</span>
           <span>
             <AppIcon name="wallet" :size="15" />

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { formatCompactWon } from '../../utils/finance'
-import '../../assets/css/gift-plan-timeline.css'
+import '../../assets/css/simulation/gift-plan-timeline.css'
 
 const props = defineProps({
   result: {

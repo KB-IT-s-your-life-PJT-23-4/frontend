@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { formatCompactWon } from '../../utils/finance'
-import '../../assets/css/simulation-input-content.css'
+import '../../assets/css/simulation/simulation-input-content.css'
 
 const props = defineProps({
   families: {
@@ -37,6 +37,18 @@ const props = defineProps({
     type: Number,
     default: 10,
   },
+  giftDate: {
+    type: String,
+    required: true,
+  },
+  minGiftDate: {
+    type: String,
+    required: true,
+  },
+  giftDateError: {
+    type: String,
+    default: '',
+  },
   donorPaysTax: {
     type: Boolean,
     default: false,
@@ -56,6 +68,7 @@ const peerAverageGiftAmount = computed(() => {
 defineEmits([
   'update:selectedFamilyId',
   'update:investmentYears',
+  'update:giftDate',
   'update:donorPaysTax',
   'amount-input',
   'add-amount',
@@ -154,9 +167,38 @@ defineEmits([
         </p>
       </section>
 
-      <section class="simulation-input-step period-step">
+      <section class="simulation-input-step gift-date-step">
         <div class="input-step-heading">
           <span>3</span>
+          <div>
+            <h3>언제 증여할까요?</h3>
+            <p>선택한 날짜부터 증여 일정과 운용 기간을 계산해요.</p>
+          </div>
+        </div>
+
+        <label class="gift-date-control" :class="{ invalid: giftDateError }" for="gift-date">
+          <span class="gift-date-icon">
+            <AppIcon name="calendar" :size="20" />
+          </span>
+          <span class="gift-date-copy">
+            <small>증여 예정일</small>
+            <input
+              id="gift-date"
+              :value="giftDate"
+              type="date"
+              :min="minGiftDate"
+              required
+              aria-label="증여 예정일"
+              @input="$emit('update:giftDate', $event.target.value)"
+            />
+          </span>
+        </label>
+        <p v-if="giftDateError" class="field-error">{{ giftDateError }}</p>
+      </section>
+
+      <section class="simulation-input-step period-step">
+        <div class="input-step-heading">
+          <span>4</span>
           <div>
             <h3>얼마 동안 운용할까요?</h3>
             <p>기간에 맞춰 상품 비중과 예상 금액을 계산해요.</p>
@@ -204,7 +246,7 @@ defineEmits([
 
       <section class="simulation-input-step tax-payer-step">
         <div class="input-step-heading">
-          <span>4</span>
+          <span>5</span>
           <div>
             <h3>증여세는 누가 준비할까요?</h3>
             <p>세금 대납 여부까지 반영해 실제 필요한 금액을 계산해요.</p>

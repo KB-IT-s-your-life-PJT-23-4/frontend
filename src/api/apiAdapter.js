@@ -210,7 +210,7 @@ function consultationFallback(question) {
 export const api = {
   isMock: !API_BASE,
 
-  async runSimulation({ family, amount, years = 10, donorPaysTax = false }) {
+  async runSimulation({ family, amount, years = 10, giftDate, donorPaysTax = false }) {
     if (API_BASE) {
       return request('/gs', {
         method: 'POST',
@@ -220,11 +220,12 @@ export const api = {
           requestedAmount: amount,
           taxPaymentMethod: donorPaysTax ? 'DONOR_PAYS' : 'RECIPIENT_PAYS',
           investmentPeriodMonths: years * 12,
+          giftDate,
         }),
       })
     }
     await wait(650)
-    return calculateSimulation({ amount, family, products, years, donorPaysTax })
+    return calculateSimulation({ amount, family, products, years, giftDate, donorPaysTax })
   },
 
   async getSimulation(simulationId) {
