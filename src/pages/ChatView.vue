@@ -428,6 +428,10 @@ function clearConversation() {
   ]
   showEndModal.value = false
 }
+// =============================== 답변 uiux
+function messageParagraphs(text) {
+  return text.split(/\n{2,}/).filter(Boolean)
+}
 </script>
 
 <template>
@@ -439,105 +443,119 @@ function clearConversation() {
 
       <template v-for="message in messages" :key="message.id">
         <div class="chat-row" :class="message.role">
-          <article class="chat-bubble" :class="{ error: message.error }">
-            <p>{{ message.text }}</p>
-            <div v-if="message.clarification" class="clarification-control">
-              <small v-if="message.clarification.reason" class="clarification-reason">
-                {{ message.clarification.reason }}
-              </small>
+          <div class="chat-bubble-group">
+            <article
+              v-for="(paragraph, index) in messageParagraphs(message.text)"
+              :key="index"
+              class="chat-bubble"
+              :class="{ error: message.error }"
+            >
+              <p>{{ paragraph }}</p>
 
-              <div
-                v-if="message.clarification.type === 'boolean'"
-                class="clarification-boolean-actions"
-                role="group"
-                :aria-label="message.text"
-              >
-                <button
-                  type="button"
-                  :class="{ selected: message.clarification.selectedValue === true }"
-                  :disabled="message.clarification.answered || loading"
-                  @click="submitClarification(message, true)"
-                >
-                  예
-                </button>
-                <button
-                  type="button"
-                  :class="{ selected: message.clarification.selectedValue === false }"
-                  :disabled="message.clarification.answered || loading"
-                  @click="submitClarification(message, false)"
-                >
-                  아니오
-                </button>
-              </div>
+              <template v-if="index === messageParagraphs(message.text).length - 1">
+                <div v-if="message.clarification" class="clarification-control">
+                  <small v-if="message.clarification.reason" class="clarification-reason">
+                    {{ message.clarification.reason }}
+                  </small>
 
-              <form
-                v-else-if="!message.clarification.answered"
-                class="clarification-input-form"
-                @submit.prevent="submitClarification(message, message.clarification.draftValue)"
-              >
-                <div class="clarification-input-wrap">
-                  <input
-                    v-model="message.clarification.draftValue"
-                    :type="clarificationInputType(message.clarification.type)"
-                    :inputmode="message.clarification.type === 'integer' ? 'numeric' : 'text'"
-                    :min="clarificationMinimum(message.clarification)"
-                    :placeholder="clarificationPlaceholder(message.clarification)"
+                  <div
+                    v-if="message.clarification.type === 'boolean'"
+                    class="clarification-boolean-actions"
+                    role="group"
                     :aria-label="message.text"
-                  />
-                  <span v-if="clarificationUnit(message.clarification)">
-                    {{ clarificationUnit(message.clarification) }}
+                  >
+                    <button
+                      type="button"
+                      :class="{ selected: message.clarification.selectedValue === true }"
+                      :disabled="message.clarification.answered || loading"
+                      @click="submitClarification(message, true)"
+                    >
+                      예
+                    </button>
+                    <button
+                      type="button"
+                      :class="{ selected: message.clarification.selectedValue === false }"
+                      :disabled="message.clarification.answered || loading"
+                      @click="submitClarification(message, false)"
+                    >
+                      아니오
+                    </button>
+                  </div>
+
+                  <form
+                    v-else-if="!message.clarification.answered"
+                    class="clarification-input-form"
+                    @submit.prevent="submitClarification(message, message.clarification.draftValue)"
+                  >
+                    <div class="clarification-input-wrap">
+                      <input
+                        v-model="message.clarification.draftValue"
+                        :type="clarificationInputType(message.clarification.type)"
+                        :inputmode="message.clarification.type === 'integer' ? 'numeric' : 'text'"
+                        :min="clarificationMinimum(message.clarification)"
+                        :placeholder="clarificationPlaceholder(message.clarification)"
+                        :aria-label="message.text"
+                      />
+                      <span v-if="clarificationUnit(message.clarification)">
+                        {{ clarificationUnit(message.clarification) }}
+                      </span>
+                    </div>
+                    <button
+                      type="submit"
+                      :disabled="!hasDraftClarificationAnswer(message.clarification) || loading"
+                    >
+                      확인
+                    </button>
+                  </form>
+
+                  <div v-else class="clarification-answer-summary">
+                    {{
+                      displayClarificationAnswer(
+                        message.clarification,
+                        message.clarification.selectedValue,
+                      )
+                    }}
+                  </div>
+
+                  <small
+                    v-if="message.clarification.error"
+                    class="clarification-error"
+                    role="alert"
+                  >
+                    {{ message.clarification.error }}
+                  </small>
+                </div>
+                <div v-if="message.references?.length" class="reference-block">
+                  <AppIcon name="document" :size="17" />
+                  <span>
+                    {{ message.references[0].lawName }}
+                    {{ message.references[0].articleNo }}<br />
+                    {{ message.references[0].title }}
                   </span>
                 </div>
-                <button
-                  type="submit"
-                  :disabled="!hasDraftClarificationAnswer(message.clarification) || loading"
-                >
-                  확인
-                </button>
-              </form>
-
-              <div v-else class="clarification-answer-summary">
-                {{
-                  displayClarificationAnswer(
-                    message.clarification,
-                    message.clarification.selectedValue,
-                  )
-                }}
-              </div>
-
-              <small v-if="message.clarification.error" class="clarification-error" role="alert">
-                {{ message.clarification.error }}
-              </small>
-            </div>
-            <div v-if="message.references?.length" class="reference-block">
-              <AppIcon name="document" :size="17" />
-              <span>
-                {{ message.references[0].lawName }}
-                {{ message.references[0].articleNo }}<br />
-                {{ message.references[0].title }}
-              </span>
-            </div>
-            <div v-if="message.actions" class="chat-actions">
-              <a
-                v-if="message.showBranchButton"
-                class="primary-button compact"
-                href="https://map.naver.com/p/search/근처 국민은행"
-                target="_blank"
-                rel="noreferrer"
-              >
-                가까운 영업점 알아보기
-              </a>
-              <a
-                v-if="message.showTaxOfficeButton"
-                class="secondary-button compact"
-                href="https://www.nts.go.kr/nts/taxSrch/taxSrchPage.do?mi=6761"
-                target="_blank"
-                rel="noreferrer"
-              >
-                근처 세무서 알아보기
-              </a>
-            </div>
-          </article>
+                <div v-if="message.actions" class="chat-actions">
+                  <a
+                    v-if="message.showBranchButton"
+                    class="primary-button compact"
+                    href="https://map.naver.com/p/search/근처 국민은행"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    가까운 영업점 알아보기
+                  </a>
+                  <a
+                    v-if="message.showTaxOfficeButton"
+                    class="secondary-button compact"
+                    href="https://www.nts.go.kr/nts/taxSrch/taxSrchPage.do?mi=6761"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    근처 세무서 알아보기
+                  </a>
+                </div>
+              </template>
+            </article>
+          </div>
           <time>{{ message.createdAt }}</time>
         </div>
       </template>
