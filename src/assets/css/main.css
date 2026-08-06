@@ -3224,6 +3224,14 @@ textarea:focus-visible {
   font-size: 11px;
 }
 
+/* 갱신일에 늘어나는 공제액. 카운트다운 바로 아래 붙여 한 문장처럼 읽히게 한다. */
+.renewal-note {
+  margin: 4px 0 0;
+  color: rgba(54, 45, 0, 0.78);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .status-section {
   margin-top: 8px;
 }
