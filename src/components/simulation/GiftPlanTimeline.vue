@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import { formatCompactWon } from '../../utils/finance'
+import '../../assets/css/gift-plan-timeline.css'
 
 const props = defineProps({
   result: {
@@ -11,6 +12,10 @@ const props = defineProps({
   recommendedScenario: {
     type: Object,
     required: true,
+  },
+  selectedProducts: {
+    type: Object,
+    default: () => ({}),
   },
 })
 
@@ -29,6 +34,30 @@ const visibleSchedule = computed(() =>
 const outsideSchedule = computed(() =>
   scenario.value.giftSchedule.filter((item) => !item.withinPeriod),
 )
+const reinvestmentSchedule = computed(() => {
+  const grouped = new Map()
+  Object.values(props.selectedProducts)
+    .filter(Boolean)
+    .forEach((product) => {
+      ;(product.reinvestmentSchedule ?? []).forEach((item) => {
+        const key = item.renewalDate
+        if (!key) return
+        const entry = grouped.get(key) ?? {
+          date: key,
+          products: [],
+        }
+        entry.products.push({
+          id: product.id,
+          name: product.name,
+          type: product.type,
+          trancheSequenceNo: item.trancheSequenceNo,
+          renewalSequenceNo: item.renewalSequenceNo,
+        })
+        grouped.set(key, entry)
+      })
+    })
+  return [...grouped.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
+})
 
 function getPosition(item) {
   const itemDate = parseDate(item.date)
@@ -113,6 +142,36 @@ function getPosition(item) {
           금액에 포함하지 않았어요.
         </p>
       </aside>
+
+      <section
+        v-if="reinvestmentSchedule.length"
+        class="product-reinvestment-schedule"
+        aria-labelledby="product-reinvestment-title"
+      >
+        <div class="product-reinvestment-heading">
+          <span class="product-reinvestment-icon">
+            <AppIcon name="refresh" :size="16" />
+          </span>
+          <div>
+            <h3 id="product-reinvestment-title">상품 재가입 일정</h3>
+            <p>만기 원리금을 같은 상품에 다시 운용하는 날짜예요.</p>
+          </div>
+        </div>
+        <ol>
+          <li v-for="renewal in reinvestmentSchedule" :key="renewal.date">
+            <time>{{ renewal.date }}</time>
+            <div>
+              <span
+                v-for="product in renewal.products"
+                :key="`${product.id}-${product.trancheSequenceNo}-${product.renewalSequenceNo}`"
+                :class="`reinvestment-${String(product.type).toLowerCase()}`"
+              >
+                {{ product.name }} 재가입
+              </span>
+            </div>
+          </li>
+        </ol>
+      </section>
     </section>
   </section>
 </template>

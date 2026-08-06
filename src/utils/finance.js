@@ -71,22 +71,76 @@ export function calculateEtfFutureValue(principal, annualReturnRate, months) {
   return Math.round(amount * annualGrowthFactor ** (periodMonths / 12))
 }
 
-export function calculateProductFutureValue(product, principal, months) {
+function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
+  const totalMonths = Math.max(0, Math.round(Number(months) || 0))
+  const scheduledPeriods = (product?.reinvestmentSchedule ?? [])
+    .filter(
+      (item) =>
+        trancheSequenceNo == null || Number(item.trancheSequenceNo) === Number(trancheSequenceNo),
+    )
+    .sort((a, b) => Number(a.renewalSequenceNo) - Number(b.renewalSequenceNo))
+    .map((item) => Math.max(0, Number(item.completedContractMonths) || 0))
+    .filter((period) => period > 0)
+
+  if (scheduledPeriods.length) {
+    const completedMonths = scheduledPeriods.reduce((sum, period) => sum + period, 0)
+    const finalPeriod = totalMonths - completedMonths
+    return finalPeriod > 0 ? [...scheduledPeriods, finalPeriod] : scheduledPeriods
+  }
+
+  const minimumMonths = Number(product?.minimumContractMonths)
+  const maximumMonths = Number(product?.maximumContractMonths)
+  if (
+    totalMonths <= 0 ||
+    !Number.isInteger(minimumMonths) ||
+    !Number.isInteger(maximumMonths) ||
+    minimumMonths <= 0 ||
+    maximumMonths < minimumMonths
+  ) {
+    return [totalMonths]
+  }
+
+  const contractCount = Math.ceil(totalMonths / maximumMonths)
+  if (contractCount > Math.floor(totalMonths / minimumMonths)) return []
+
+  const baseMonths = Math.floor(totalMonths / contractCount)
+  const remainder = totalMonths % contractCount
+  if (baseMonths < minimumMonths || baseMonths + (remainder > 0 ? 1 : 0) > maximumMonths) {
+    return []
+  }
+  return Array.from(
+    { length: contractCount },
+    (_, index) => baseMonths + (index < remainder ? 1 : 0),
+  )
+}
+
+export function calculateProductFutureValue(product, principal, months, trancheSequenceNo = null) {
   const productType = product?.type ?? product?.productType
   const method = product?.calculationMethod ?? PRODUCT_CALCULATION_METHOD[productType]
   const annualRate =
     product?.rate ?? product?.annualReturnRatePercent ?? product?.appliedAnnualRatePercent ?? 0
 
   if (method === PRODUCT_CALCULATION_METHOD.DEPOSIT) {
-    return calculateDepositFutureValue(principal, annualRate, months)
+    const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
+    if (!periods.length) return 0
+    return periods.reduce(
+      (maturityValue, period) => calculateDepositFutureValue(maturityValue, annualRate, period),
+      principal,
+    )
   }
 
   if (method === PRODUCT_CALCULATION_METHOD.SAVINGS) {
-    return calculateSavingsFutureValue(
+    const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
+    if (!periods.length) return 0
+    return periods.reduce(
+      (maturityValue, period) =>
+        calculateSavingsFutureValue(
+          maturityValue,
+          annualRate,
+          period,
+          product?.paymentTiming ?? 'END_OF_MONTH',
+        ),
       principal,
-      annualRate,
-      months,
-      product?.paymentTiming ?? 'END_OF_MONTH',
     )
   }
 
@@ -307,7 +361,10 @@ export function calculatePortfolioValue({
         if (!ratio) return total
         const product = selectedProducts[type] ?? { type, rate: 0 }
         const allocatedAmount = installment.investmentAmount * (ratio / 100)
-        return total + calculateProductFutureValue(product, allocatedAmount, remainingMonths)
+        return (
+          total +
+          calculateProductFutureValue(product, allocatedAmount, remainingMonths, installment.order)
+        )
       }, 0)
 
       return scenarioTotal + installmentValue

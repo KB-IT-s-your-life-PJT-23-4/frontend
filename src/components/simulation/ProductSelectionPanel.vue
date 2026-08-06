@@ -343,6 +343,10 @@ function updateCondition(product, conditionCode, checked) {
                   <span>운용 기간</span>
                   <strong>{{ product.period }}</strong>
                 </div>
+                <div v-if="product.reinvestmentSchedule?.length">
+                  <span>재운용 방식</span>
+                  <strong>만기 원리금 재가입 · {{ product.reinvestmentSchedule.length }}회</strong>
+                </div>
                 <div v-if="product.preferentialConditions?.length" class="product-condition-list">
                   <span>우대 금리 조건</span>
                   <label

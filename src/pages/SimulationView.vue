@@ -447,7 +447,11 @@ onMounted(async () => {
         </div>
       </section>
 
-      <GiftPlanTimeline :result="result" :recommended-scenario="recommendedScenario" />
+      <GiftPlanTimeline
+        :result="result"
+        :recommended-scenario="recommendedScenario"
+        :selected-products="selectedProducts"
+      />
 
       <PortfolioDonutCard
         v-if="recommendedScenario"

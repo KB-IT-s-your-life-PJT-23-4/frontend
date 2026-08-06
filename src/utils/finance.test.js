@@ -3,6 +3,7 @@ import {
   calculateDepositFutureValue,
   calculateEtfFutureValue,
   calculateGiftTax,
+  calculateProductFutureValue,
   calculateSavingsFutureValue,
   calculateSimulation,
   futureValue,
@@ -51,6 +52,34 @@ describe('증여 계산', () => {
 
   it('ETF는 연 평균 수익률을 연복리로 계산한다', () => {
     expect(calculateEtfFutureValue(18642000, 5.1, 36)).toBe(21642162)
+  })
+
+  it('예금은 만기 원리금을 동일 상품에 재가입해 계산한다', () => {
+    expect(
+      calculateProductFutureValue(
+        {
+          type: 'DEPOSIT',
+          rate: 3.4,
+          minimumContractMonths: 12,
+          maximumContractMonths: 12,
+          reinvestmentSchedule: [
+            {
+              trancheSequenceNo: 1,
+              renewalSequenceNo: 1,
+              completedContractMonths: 12,
+            },
+            {
+              trancheSequenceNo: 1,
+              renewalSequenceNo: 2,
+              completedContractMonths: 12,
+            },
+          ],
+        },
+        100000000,
+        36,
+        1,
+      ),
+    ).toBe(110550730)
   })
 
   it('투자 성향별 포트폴리오 비중의 합은 100%이다', () => {

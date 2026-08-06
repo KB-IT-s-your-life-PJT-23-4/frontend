@@ -1,0 +1,101 @@
+.product-reinvestment-schedule {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #e4e9ed;
+  border-radius: 14px;
+  background: #f7f9fa;
+}
+
+.product-reinvestment-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-reinvestment-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 10px;
+  color: #527b9f;
+  background: #e7f0f5;
+}
+
+.product-reinvestment-heading h3 {
+  margin: 0;
+  color: #344454;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.product-reinvestment-heading p {
+  margin: 3px 0 0;
+  color: #788591;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.product-reinvestment-schedule ol {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.product-reinvestment-schedule li {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding-top: 7px;
+  border-top: 1px solid #e5e9ed;
+}
+
+.product-reinvestment-schedule time {
+  padding-top: 4px;
+  color: #65727e;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.product-reinvestment-schedule li > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.product-reinvestment-schedule li span {
+  padding: 4px 7px;
+  border-radius: 7px;
+  color: #526372;
+  background: #edf1f4;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.product-reinvestment-schedule li .reinvestment-deposit {
+  color: #456b8b;
+  background: #e7eff5;
+}
+
+.product-reinvestment-schedule li .reinvestment-savings {
+  color: #4f768c;
+  background: #e6f1f5;
+}
+
+@media (max-width: 420px) {
+  .product-reinvestment-schedule li {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .product-reinvestment-schedule time {
+    padding-top: 0;
+  }
+}
