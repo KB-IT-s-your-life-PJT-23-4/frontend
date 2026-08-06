@@ -23,7 +23,7 @@ const router = createRouter({
       path: '/simulation',
       name: 'simulation',
       component: SimulationView,
-      meta: { label: '시뮬레이션' },
+      meta: { label: '시뮬레이션', requiresAuth: true },
     },
     { path: '/status', name: 'status', component: StatusView, meta: { label: '증여 현황' } },
     {

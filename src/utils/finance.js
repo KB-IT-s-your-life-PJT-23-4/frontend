@@ -75,10 +75,7 @@ export function calculateProductFutureValue(product, principal, months) {
   const productType = product?.type ?? product?.productType
   const method = product?.calculationMethod ?? PRODUCT_CALCULATION_METHOD[productType]
   const annualRate =
-    product?.rate ??
-    product?.annualReturnRatePercent ??
-    product?.appliedAnnualRatePercent ??
-    0
+    product?.rate ?? product?.annualReturnRatePercent ?? product?.appliedAnnualRatePercent ?? 0
 
   if (method === PRODUCT_CALCULATION_METHOD.DEPOSIT) {
     return calculateDepositFutureValue(principal, annualRate, months)
@@ -144,10 +141,10 @@ function formatDate(date) {
 }
 
 function monthsBetween(start, end) {
-  const wholeMonths =
+  let wholeMonths =
     (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
-  const dayFraction = (end.getDate() - start.getDate()) / 30.4375
-  return Math.max(0, wholeMonths + dayFraction)
+  if (end.getDate() < start.getDate()) wholeMonths -= 1
+  return Math.max(0, wholeMonths)
 }
 
 function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
@@ -222,9 +219,10 @@ export function calculatePortfolioValue({
   selectedProducts,
   years,
   startDate,
+  endDate,
 }) {
   const start = toDate(startDate) ?? new Date()
-  const end = addYears(start, years)
+  const end = toDate(endDate) ?? addYears(start, years)
 
   return Math.round(
     schedule.reduce((scenarioTotal, installment) => {
@@ -236,9 +234,7 @@ export function calculatePortfolioValue({
         if (!ratio) return total
         const product = selectedProducts[type] ?? { type, rate: 0 }
         const allocatedAmount = installment.investmentAmount * (ratio / 100)
-        return (
-          total + calculateProductFutureValue(product, allocatedAmount, remainingMonths)
-        )
+        return total + calculateProductFutureValue(product, allocatedAmount, remainingMonths)
       }, 0)
 
       return scenarioTotal + installmentValue
@@ -296,8 +292,7 @@ export function calculateSimulation({
       return {
         ...product,
         principal,
-        calculationMethod:
-          product.calculationMethod ?? PRODUCT_CALCULATION_METHOD[product.type],
+        calculationMethod: product.calculationMethod ?? PRODUCT_CALCULATION_METHOD[product.type],
         expectedFutureValue,
         expectedProfit: expectedFutureValue - principal,
       }
