@@ -443,6 +443,8 @@ function messageParagraphs(text) {
 
       <template v-for="message in messages" :key="message.id">
         <div class="chat-row" :class="message.role">
+          <time v-if="message.role === 'user'">{{ message.createdAt }}</time>
+
           <div class="chat-bubble-group">
             <article
               v-for="(paragraph, index) in messageParagraphs(message.text)"
@@ -556,7 +558,7 @@ function messageParagraphs(text) {
               </template>
             </article>
           </div>
-          <time>{{ message.createdAt }}</time>
+          <time v-if="message.role !== 'user'">{{ message.createdAt }}</time>
         </div>
       </template>
 

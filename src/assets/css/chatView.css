@@ -204,23 +204,25 @@
   min-width: 0;
   margin-bottom: 13px;
   align-items: flex-end;
-  gap: 0;
+  gap: 0px;
 }
 
 .chat-row.user {
-  justify-content: flex-start;
-  flex-direction: row-reverse;
+  /* display: block; */
+  text-align: right;
+  justify-content: flex-end;
 }
 
 .chat-row time {
   flex: none;
   color: #9aa4b0;
   font-size: 9px;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 .chat-bubble {
-  min-width: 64px;
+  box-sizing: content-box;
+  /* min-width: 64px; */
   max-width: min(82%, 390px);
   padding: 14px;
   border: 1px solid #e4e9f0;
@@ -232,26 +234,34 @@
 .chat-bubble-group {
   min-width: 0;
   max-width: 100%;
+  width: fit-content;
 }
 
 .chat-bubble-group > .chat-bubble + .chat-bubble {
   margin-top: 6px;
 }
 
-.chat-bubble:has(.clarification-control) {
-  min-width: calc(min(280px, 68vw) + 30px);
+.chat-bubble:has(.clarification-control),
+.chat-bubble:has(.clarification-boolean-actions),
+.chat-bubble:has(.clarification-input-form) {
+  min-width: calc(min(280px, 65vw));
 }
-
 .chat-row.user .chat-bubble {
   border: 0;
   border-radius: 18px 8px 18px 18px;
   background: #4b779b;
   color: #fff;
+  text-align: left;
+  display: inline-block;
+  max-width: min(82%, 390px);
 }
-
+.chat-row.user time {
+  margin-right: 6px;
+}
 .chat-bubble.error {
   border-color: #f5caca;
   background: #fff8f8;
+  color: #4f4f4f;
 }
 
 .chat-bubble p {
@@ -259,6 +269,7 @@
   font-size: 13px;
   line-height: 1.7;
   white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .reference-block {
