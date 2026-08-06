@@ -343,12 +343,12 @@ async function syncStatus() {
 
   const generation = statusGeneration
 
-  const [recipients, gifts, deductions, reminders] = await Promise.all([
+  const [recipients, gifts, deductions, reminders, simulationHistory] = await Promise.all([
     api.listFamilies(),
     api.listGifts(),
     api.listDeductions(),
-    api.listSimulations({ page: 0, size: 50 }),
     api.listReminders(),
+    api.listSimulations({ page: 0, size: 50 }),
   ])
 
   if (generation !== statusGeneration) return
