@@ -59,10 +59,37 @@ describe('증여 계산', () => {
     })
   })
 
-  it('적금 한도를 먼저 채우고 남은 안전자산은 예금에 배분한다', () => {
+  it('예금 실수익률이 높으면 안전자산을 예금에 우선 배분한다', () => {
     const allocation = getPortfolioAllocations(3, {
       principal: 100000000,
       savingsCapacity: 18000000,
+      depositProduct: {
+        type: 'DEPOSIT',
+        rate: 3.2,
+      },
+      savingsProduct: {
+        type: 'SAVINGS',
+        rate: 4,
+      },
+      investmentPeriodMonths: 36,
+    }).BALANCED
+
+    expect(allocation).toEqual({ DEPOSIT: 80, SAVINGS: 0, ETF: 20 })
+  })
+
+  it('적금 실수익률이 높으면 한도까지 적금에 배분한다', () => {
+    const allocation = getPortfolioAllocations(3, {
+      principal: 100000000,
+      savingsCapacity: 18000000,
+      depositProduct: {
+        type: 'DEPOSIT',
+        rate: 1,
+      },
+      savingsProduct: {
+        type: 'SAVINGS',
+        rate: 8,
+      },
+      investmentPeriodMonths: 36,
     }).BALANCED
 
     expect(allocation).toEqual({ DEPOSIT: 62, SAVINGS: 18, ETF: 20 })

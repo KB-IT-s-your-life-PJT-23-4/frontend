@@ -187,13 +187,40 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
   }
 }
 
-function applySavingsCapacity(allocation, principal, savingsCapacity) {
+function applySafeAssetReturnPriority({
+  allocation,
+  principal,
+  savingsCapacity,
+  depositProduct,
+  savingsProduct,
+  investmentPeriodMonths,
+  schedule,
+  years,
+  startDate,
+  endDate,
+}) {
   const investmentPrincipal = Math.max(0, Number(principal) || 0)
   if (investmentPrincipal <= 0) return allocation
 
   const etfAmount = Math.round(investmentPrincipal * ((allocation.ETF ?? 0) / 100))
   const safeAssetAmount = Math.max(0, investmentPrincipal - etfAmount)
-  const savingsAmount = Math.min(safeAssetAmount, Math.max(0, Number(savingsCapacity) || 0))
+  const projectSafeProduct = (type, product) =>
+    schedule?.length
+      ? calculatePortfolioValue({
+          schedule,
+          allocation: { [type]: 100 },
+          selectedProducts: { [type]: product },
+          years,
+          startDate,
+          endDate,
+        })
+      : calculateProductFutureValue(product, investmentPrincipal, investmentPeriodMonths)
+  const depositProjectedValue = projectSafeProduct('DEPOSIT', depositProduct)
+  const savingsProjectedValue = projectSafeProduct('SAVINGS', savingsProduct)
+  const savingsPreferred = savingsProjectedValue > depositProjectedValue
+  const savingsAmount = savingsPreferred
+    ? Math.min(safeAssetAmount, Math.max(0, Number(savingsCapacity) || 0))
+    : 0
   const depositAmount = safeAssetAmount - savingsAmount
   const depositRatio = Math.round((depositAmount / investmentPrincipal) * 10000) / 100
   const savingsRatio = Math.round((savingsAmount / investmentPrincipal) * 10000) / 100
@@ -227,12 +254,30 @@ export function getPortfolioAllocations(years, options = {}) {
     }
   }
 
-  if (options.principal == null || options.savingsCapacity == null) return profiles
+  if (
+    options.principal == null ||
+    options.savingsCapacity == null ||
+    options.depositProduct == null ||
+    options.savingsProduct == null
+  ) {
+    return profiles
+  }
 
   return Object.fromEntries(
     Object.entries(profiles).map(([profile, allocation]) => [
       profile,
-      applySavingsCapacity(allocation, options.principal, options.savingsCapacity),
+      applySafeAssetReturnPriority({
+        allocation,
+        principal: options.principal,
+        savingsCapacity: options.savingsCapacity,
+        depositProduct: options.depositProduct,
+        savingsProduct: options.savingsProduct,
+        investmentPeriodMonths: options.investmentPeriodMonths ?? years * 12,
+        schedule: options.schedule,
+        years,
+        startDate: options.startDate,
+        endDate: options.endDate,
+      }),
     ]),
   )
 }
@@ -303,6 +348,9 @@ export function calculateSimulation({
     toDate(family.resetDate) ?? addYears(today, Math.min(10, Math.max(1, investmentYears)))
   const savingsProduct = products
     .filter((product) => product.type === 'SAVINGS')
+    .sort((a, b) => b.rate - a.rate)[0]
+  const depositProduct = products
+    .filter((product) => product.type === 'DEPOSIT')
     .sort((a, b) => b.rate - a.rate)[0]
   const savingsCapacity =
     savingsProduct?.monthlyMaxAmount == null
@@ -382,6 +430,13 @@ export function calculateSimulation({
     const allocation = getPortfolioAllocation(investmentYears, {
       principal: postTaxAmount,
       savingsCapacity,
+      depositProduct,
+      savingsProduct,
+      investmentPeriodMonths: investmentYears * 12,
+      schedule,
+      years: investmentYears,
+      startDate: today,
+      endDate,
     })
 
     return {
