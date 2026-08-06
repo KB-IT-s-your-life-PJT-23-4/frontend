@@ -59,6 +59,15 @@ describe('증여 계산', () => {
     })
   })
 
+  it('적금 한도를 먼저 채우고 남은 안전자산은 예금에 배분한다', () => {
+    const allocation = getPortfolioAllocations(3, {
+      principal: 100000000,
+      savingsCapacity: 18000000,
+    }).BALANCED
+
+    expect(allocation).toEqual({ DEPOSIT: 62, SAVINGS: 18, ETF: 20 })
+  })
+
   it('기존 대표 포트폴리오는 균형형 비중을 사용한다', () => {
     expect(getPortfolioAllocation(10)).toEqual(getPortfolioAllocations(10).BALANCED)
   })

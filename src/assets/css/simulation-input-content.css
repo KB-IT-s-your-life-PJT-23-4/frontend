@@ -1,0 +1,37 @@
+.amount-step .amount-input-wrap {
+  min-height: 58px;
+  height: auto;
+  margin-top: 16px;
+  padding: 10px 2px 12px;
+  align-items: flex-end;
+}
+
+.amount-step .amount-input-wrap input {
+  height: 32px;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.amount-step .amount-input-wrap > span {
+  padding-bottom: 2px;
+  line-height: 1.2;
+}
+
+.amount-step .field-error {
+  position: relative;
+  z-index: 1;
+  margin: 8px 2px 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 390px) {
+  .amount-step .amount-input-wrap {
+    min-height: 54px;
+    padding-bottom: 7px;
+  }
+
+  .amount-step .field-error {
+    margin-top: 7px;
+  }
+}

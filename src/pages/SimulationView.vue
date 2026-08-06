@@ -73,7 +73,17 @@ const allocationProfiles = computed(() => {
         .map(([profile, recommendation]) => [profile, recommendation.portfolio.allocation]),
     )
   }
-  const mockProfiles = getPortfolioAllocations(result.value?.years ?? investmentYears.value)
+  const years = result.value?.years ?? investmentYears.value
+  const savingsProduct = mockProducts
+    .filter((product) => product.type === 'SAVINGS')
+    .sort((a, b) => b.rate - a.rate)[0]
+  const mockProfiles = getPortfolioAllocations(years, {
+    principal: recommendedScenario.value?.investmentPrincipal,
+    savingsCapacity:
+      savingsProduct?.monthlyMaxAmount == null
+        ? Number.MAX_SAFE_INTEGER
+        : savingsProduct.monthlyMaxAmount * years * 12,
+  })
   return {
     CONSERVATIVE: mockProfiles.STABLE,
     BALANCED: mockProfiles.BALANCED,
