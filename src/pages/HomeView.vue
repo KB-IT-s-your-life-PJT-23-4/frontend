@@ -1,11 +1,17 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import { useAppStore } from '../stores/appStore'
 
 const store = useAppStore()
-const latestNotifications = computed(() => store.state.notifications.slice(0, 2))
+// 서버 리마인더가 앞에 오므로 홈에는 급한 기한 알림이 먼저 노출된다.
+const latestNotifications = computed(() => store.notifications.value.slice(0, 2))
+
+// 홈에서도 알림을 보여주니 여기서 한 번 읽어 둔다. 이미 불러왔으면 재요청하지 않는다.
+onMounted(() => {
+  store.ensureStatusLoaded().catch(() => {})
+})
 
 const guideCards = [
   {

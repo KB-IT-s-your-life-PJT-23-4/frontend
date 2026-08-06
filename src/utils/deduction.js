@@ -132,8 +132,9 @@ function renewalLabel(reference, renewalDate) {
  * 서버가 준 갱신일(nextRenewalDate)을 화면 표기값으로 바꾼다.
  * 남은 기간은 보는 사람 기준이라 서버가 아니라 여기서 계산한다.
  * @param nextRenewalDate 'YYYY-MM-DD' 또는 null(확정 증여 없음)
+ * @param renewalAmount 그날 늘어나는 공제 여력(원). 서버가 10년 창 규칙으로 계산해 준다
  */
-export function renewalDisplay(nextRenewalDate, referenceDate = new Date()) {
+export function renewalDisplay(nextRenewalDate, renewalAmount = null, referenceDate = new Date()) {
   const reference = parseDate(referenceDate) ?? new Date()
   const renewal = parseDate(nextRenewalDate)
 
@@ -144,6 +145,8 @@ export function renewalDisplay(nextRenewalDate, referenceDate = new Date()) {
       : null,
     resetDate: renewal ? toDotDate(renewal) : '미정',
     resetLabel: renewalLabel(reference, renewal),
+    // 0원이면 그날 늘어나는 여력이 없다는 뜻이라 문구를 띄우지 않는다.
+    renewalAmount: renewal && renewalAmount ? renewalAmount : null,
   }
 }
 
