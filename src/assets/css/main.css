@@ -2729,7 +2729,6 @@ textarea:focus-visible {
   display: grid;
   padding: 27px 20px;
   justify-items: center;
-  border: 1px dashed #c9d6e5;
   border-radius: var(--radius-md);
   background: #eef4ff;
   text-align: center;
