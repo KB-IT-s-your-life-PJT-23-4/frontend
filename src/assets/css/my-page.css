@@ -77,6 +77,58 @@
   text-align: center;
 }
 
+.simulation-history-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 12px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.simulation-history-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.simulation-history-tabs button {
+  flex: 0 0 auto;
+  min-width: 58px;
+  padding: 9px 14px;
+  border: 1px solid #dce5ef;
+  border-radius: 999px;
+  background: #fff;
+  color: #738196;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.simulation-history-tabs button.active {
+  border-color: var(--blue-strong);
+  background: var(--blue-strong);
+  color: #fff;
+}
+
+.simulation-history-tabs button:focus-visible {
+  outline: 3px solid rgba(79, 125, 165, 0.3);
+  outline-offset: 2px;
+}
+
+.simulation-history-empty {
+  margin: 0;
+  padding: 28px 16px;
+  border-radius: 17px;
+  background: #f7f9fc;
+  color: #8290a1;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: center;
+}
+
 @media (max-width: 359px) {
   .profile-summary-card.profile-summary-link {
     grid-template-columns: auto minmax(0, 1fr) auto;

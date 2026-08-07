@@ -12,7 +12,7 @@ import {
   toDotDate,
   toIsoDate,
 } from '../utils/deduction'
-import { calculateEstimatedPayableTax } from '../utils/finance'
+import { calculateEstimatedPayableTax, PRODUCT_TYPE_META } from '../utils/finance'
 
 // 데모 상태와 서버 연동 상태를 섞으면 목데이터 familyId가 DB 값과 충돌하므로 저장 키를 분리한다.
 const STORAGE_KEY = api.isMock ? 'mirizoom-demo-state-v1' : 'mirizoom-status-state-v1'
@@ -227,6 +227,10 @@ async function savePlan(plan) {
 
 async function deletePlan(planId) {
   const plan = state.plans.find((item) => item.id === planId)
+  if (!api.isMock && plan?.source === 'simulation') {
+    showToast('저장된 시뮬레이션은 새 시뮬레이션 저장 시 교체할 수 있어요.', 'info')
+    return
+  }
   if (!api.isMock && plan?.source === 'server') {
     // 서버는 PLANNED 상태만 삭제를 허용한다(그 외 409 CONFLICT).
     await api.deleteGift(planId)
@@ -263,6 +267,34 @@ function completedGiftToHistory(gift) {
     amount: Number(gift.amount),
     status: GIFT_STATUS.COMPLETED,
     source: 'server',
+  }
+}
+
+// 최종 저장 시뮬레이션 → 현황 화면에서 사용하는 진행 중인 증여 형태로 변환
+function savedSimulationToPlan(item) {
+  const selectedProducts = item.selection?.selectedProducts ?? []
+  const selectedProductTypes = item.selection?.selectedProductTypes ?? []
+  const productNames = selectedProducts
+    .map((product) => product.productName?.trim())
+    .filter(Boolean)
+  const fallbackProductNames = selectedProductTypes
+    .map((productType) => PRODUCT_TYPE_META[productType]?.label)
+    .filter(Boolean)
+  const requestedAmount = Number(item.inputSummary?.requestedAmount ?? 0)
+
+  return {
+    id: `simulation-${item.simulationId}`,
+    simulationId: Number(item.simulationId),
+    familyId: Number(item.family?.familyId),
+    amount: requestedAmount,
+    currentAmount: requestedAmount,
+    giftDate: toDotDate(item.inputSummary?.investmentEndDate),
+    productName: productNames.join(' · ') || fallbackProductNames.join(' · ') || '저장된 증여 계획',
+    productType: selectedProducts[0]?.productType ?? selectedProductTypes[0] ?? null,
+    rate: Number(item.selection?.expectedReturnRatePercent ?? 0),
+    status: item.status,
+    source: 'simulation',
+    readOnly: true,
   }
 }
 
@@ -324,8 +356,7 @@ function serverSimulationToState(item) {
     date,
     amount: Number(item.inputSummary?.requestedAmount ?? 0),
     // API의 estimatedGiftTax는 신고세액공제 전 산출세액이다.
-    tax:
-      estimatedGiftTax == null ? null : calculateEstimatedPayableTax(Number(estimatedGiftTax)),
+    tax: estimatedGiftTax == null ? null : calculateEstimatedPayableTax(Number(estimatedGiftTax)),
     status: item.status,
     minimumReturnRate: Number(item.expectedReturnRange?.minimum?.expectedReturnRatePercent ?? 0),
     maximumReturnRate: Number(item.expectedReturnRange?.maximum?.expectedReturnRatePercent ?? 0),
@@ -359,6 +390,17 @@ async function syncStatus() {
 
   if (generation !== statusGeneration) return
 
+  const savedSimulationHistories = await Promise.all(
+    recipients.map((recipient) =>
+      api.listSimulations({
+        familyId: Number(recipient.familyId),
+        status: 'SAVED',
+      }),
+    ),
+  )
+
+  if (generation !== statusGeneration) return
+
   state.reminders = reminders
 
   const deductionByFamily = new Map(
@@ -368,7 +410,13 @@ async function syncStatus() {
   state.families = recipients.map((recipient) =>
     serverFamilyToState(recipient, deductionByFamily.get(Number(recipient.familyId))),
   )
-  state.plans = gifts.filter((gift) => gift.status === GIFT_STATUS.PLANNED).map(plannedGiftToPlan)
+  const savedSimulationPlans = savedSimulationHistories.flatMap((history) =>
+    (history?.items ?? []).map(savedSimulationToPlan),
+  )
+  const plannedGiftPlans = gifts
+    .filter((gift) => gift.status === GIFT_STATUS.PLANNED)
+    .map(plannedGiftToPlan)
+  state.plans = [...savedSimulationPlans, ...plannedGiftPlans]
   state.giftHistory = gifts
     .filter((gift) => gift.status === GIFT_STATUS.COMPLETED)
     .map(completedGiftToHistory)
@@ -417,6 +465,10 @@ async function clearUserState() {
 async function confirmPlanGift(planId) {
   const plan = state.plans.find((item) => item.id === planId)
   if (!plan) return
+  if (!api.isMock && plan.source === 'simulation') {
+    showToast('저장된 시뮬레이션은 증여 실행 후 이력을 직접 등록해 주세요.', 'info')
+    return
+  }
   const amount = Number(plan.currentAmount || plan.amount)
   const family = state.families.find((item) => item.id === plan.familyId)
 
