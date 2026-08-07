@@ -15,6 +15,7 @@ import SignupView from '../pages/SignupView.vue'
 import AdminDashboardView from '../pages/AdminDashboardView.vue'
 import AdminUserView from '../pages/AdminUserView.vue'
 import AdminProductsView from '../pages/AdminProductsView.vue'
+import AdminFaqView from '../pages/AdminFaqView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { useAuthStore } from '../stores/authStore'
 
@@ -121,6 +122,18 @@ const router = createRouter({
         requiresAuth: true,
         requiresAdmin: true,
         requiresRole: ['MIDDLE'],
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/faq',
+      name: 'admin-faq',
+      component: AdminFaqView,
+      meta: {
+        label: 'FAQ 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
         layout: 'admin',
         hideBottomNav: true,
       },
