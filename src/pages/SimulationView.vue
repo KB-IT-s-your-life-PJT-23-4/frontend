@@ -284,6 +284,9 @@ async function runSimulation() {
       donorPaysTax: donorPaysTax.value,
     })
     applySimulationResponse(response)
+    // POST /api/gs로 생성된 DRAFT를 마이페이지 이력에 즉시 반영한다.
+    // 응답을 로컬에서 임의 조립하지 않고 GET /api/gs의 최신 목록을 다시 사용한다.
+    await store.syncStatus()
     await router.replace({
       name: 'simulation',
       query: result.value?.simulationId ? { simulationId: result.value.simulationId } : {},
