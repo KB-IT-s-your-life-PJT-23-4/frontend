@@ -167,6 +167,7 @@ export function normalizeSimulationResponse(response) {
     ...response,
     id: number(response.simulationId),
     requestedAmount: number(response.input.requestedAmount),
+    giftDate: formatDate(response.input.giftDate ?? response.input.asOfDate),
     years: number(response.input.investmentPeriodMonths) / 12,
     donorPaysTax: response.input.taxPaymentMethod === 'DONOR_PAYS',
     previousGiftAmount: number(response.giftHistorySummary?.previousGiftAmount),
