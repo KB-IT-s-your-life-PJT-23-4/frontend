@@ -364,7 +364,7 @@
 }
 
 .chat-disclaimer p {
-  color: #1d4ed8;
+  color: var(--blue-strong);
 }
 
 /* --------------채팅 입력창------------- */
