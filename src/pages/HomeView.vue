@@ -15,29 +15,29 @@ onMounted(() => {
 
 const guideCards = [
   {
-    title: '미리줌 사용 가이드라인',
+    title: '미리줌 이용 방법 알아보기',
     to: '/guides/mirizoom',
-    description: '서비스 이용 흐름과 시뮬레이션 결과를 한눈에 살펴보세요.',
+    description: '서비스 흐름과 시뮬레이션 결과를 먼저 살펴보세요.',
   },
   {
-    title: '과세 구간 확인하기',
+    title: '증여세 기준 확인하기',
     to: '/guides/tax-brackets',
-    description: '증여 금액별 세율과 누진공제 기준을 쉽게 확인해요.',
+    description: '공제 한도와 증여 금액별 세율을 확인해요.',
   },
   {
-    title: '증여 신고 방법 A-Z',
+    title: '증여 신고 준비하기',
     to: '/guides/gift-reporting',
-    description: '신고 기한부터 준비 서류까지 순서대로 안내해요.',
+    description: '신고 기한과 준비 서류를 순서대로 확인해요.',
   },
   {
-    title: '현금 외 증여에 대하여',
+    title: '현금 외 자산도 증여할 수 있나요?',
     to: '/guides/non-cash-gifts',
     description: '주식·부동산 등 현금 외 증여 시 유의점을 확인해요.',
   },
 ]
 
-const featuredGuide = guideCards[0]
-const secondaryGuides = guideCards.slice(1)
+const learningSteps = guideCards.slice(0, 3)
+const optionalGuide = guideCards[3]
 </script>
 
 <template>
@@ -81,36 +81,38 @@ const secondaryGuides = guideCards.slice(1)
             <h2>복잡한 증여, 차근차근 알아보기</h2>
           </div>
         </div>
-        <div class="guide-hub">
-          <RouterLink :to="featuredGuide.to" class="guide-feature-card">
-            <span class="guide-feature-copy">
-              <strong>{{ featuredGuide.title }}</strong>
-              <span>{{ featuredGuide.description }}</span>
-            </span>
-            <span class="guide-feature-link">
-              가이드 보기 <AppIcon name="arrow" :size="16" />
-            </span>
-          </RouterLink>
-
-          <div class="guide-compact-list">
+        <div class="home-guide-learning-path">
+          <div class="home-guide-step-list">
             <RouterLink
-              v-for="(guide, index) in secondaryGuides"
+              v-for="(guide, index) in learningSteps"
               :key="guide.to"
               :to="guide.to"
-              class="guide-directory-item"
+              class="home-guide-step-card"
+              :class="`step-${index + 1}`"
             >
-              <span class="guide-directory-number">
-                {{ String(index + 1).padStart(1, '0') }}
+              <span class="home-guide-step-number">
+                {{ String(index + 1).padStart(2, '0') }}
               </span>
-              <span class="guide-directory-copy">
+              <span class="home-guide-step-copy">
                 <strong>{{ guide.title }}</strong>
                 <span>{{ guide.description }}</span>
               </span>
-              <span class="guide-directory-arrow">
+              <span class="home-guide-step-arrow">
                 <AppIcon name="arrow" :size="16" />
               </span>
             </RouterLink>
           </div>
+
+          <RouterLink :to="optionalGuide.to" class="home-guide-optional-card">
+            <span class="home-guide-optional-label">한 걸음 더</span>
+            <span class="home-guide-optional-copy">
+              <strong>{{ optionalGuide.title }}</strong>
+              <span>{{ optionalGuide.description }}</span>
+            </span>
+            <span class="home-guide-step-arrow">
+              <AppIcon name="arrow" :size="16" />
+            </span>
+          </RouterLink>
         </div>
       </section>
 
