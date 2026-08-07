@@ -13,6 +13,7 @@ import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
 import AdminDashboardView from '../pages/AdminDashboardView.vue'
+import AdminProductsView from '../pages/AdminProductsView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { useAuthStore } from '../stores/authStore'
 
@@ -98,6 +99,19 @@ const router = createRouter({
         hideBottomNav: true,
       },
     },
+    {
+      path: '/admin/products',
+      name: 'admin-products',
+      component: AdminProductsView,
+      meta: {
+        label: '상품 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
+        requiresRole: ['MIDDLE'],
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
@@ -127,7 +141,9 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin) {
     const role = String(authStore.user?.role ?? '').toUpperCase()
-    if (!['ADMIN', 'ROLE_ADMIN'].includes(role)) return { name: 'home' }
+    const isAdmin = ['ADMIN', 'ROLE_ADMIN'].includes(role)
+    const allowedRoles = (to.meta.requiresRole ?? []).map((r) => r.toUpperCase())
+    if (!isAdmin && !allowedRoles.includes(role)) return { name: 'home' }
   }
 
   return true
