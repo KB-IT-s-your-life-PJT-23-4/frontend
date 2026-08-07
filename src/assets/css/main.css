@@ -957,7 +957,7 @@ textarea:focus-visible {
 .status-list-card,
 .expert-card,
 .notification-card {
-  border: 1px solid rgba(225, 231, 239, 0.7);
+  border: 1px solid rgba(225, 231, 239, 0.8);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
   z-index: 1;
@@ -2637,9 +2637,9 @@ textarea:focus-visible {
 
 .active-plan-visual {
   position: relative;
-  height: 104px;
+  height: 120px;
   overflow: hidden;
-  background: #edf4ff;
+  background: linear-gradient(155deg, var(--blue) 0%, var(--blue-strong) 55%, #2e638e 100%);
 }
 
 .plan-orbit {
