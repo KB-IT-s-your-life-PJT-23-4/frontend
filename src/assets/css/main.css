@@ -2882,7 +2882,7 @@ textarea:focus-visible {
 .gift-history-list,
 .ongoing-plan-list {
   display: grid;
-  gap: 10px;
+  gap: 5px;
   margin: 15px 0;
 }
 
@@ -2936,14 +2936,13 @@ textarea:focus-visible {
 }
 
 .ongoing-plan-head {
-  display: flex;
-  align-items: flex-start;
+  position: relative;
 }
 
 .ongoing-plan-summary {
   display: grid;
-  grid-template-columns: 1fr auto;
-  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
   min-width: 0;
   padding: 13px;
   gap: 9px;
@@ -2956,11 +2955,16 @@ textarea:focus-visible {
 
 .ongoing-plan-delete {
   flex: none;
-  margin: 13px 10px 0 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 8px;
+  pointer-events: auto;
 }
 
 .ongoing-plan-summary > div {
   display: grid;
+  padding-right: 124px;
   gap: 3px;
 }
 
@@ -2969,11 +2973,14 @@ textarea:focus-visible {
   font-size: 10px;
 }
 
-.ongoing-plan-aside {
+.ongoing-plan-actions {
+  position: absolute;
+  top: 11px;
+  right: 10px;
   display: flex;
   align-items: center;
-  align-self: start;
-  gap: 6px;
+  gap: 5px;
+  pointer-events: none;
 }
 
 .ongoing-plan-caret {
@@ -3250,10 +3257,6 @@ textarea:focus-visible {
   display: block;
   width: 100%;
   height: auto;
-}
-
-.status-pill {
-  align-self: start;
 }
 
 .yellow-text {

@@ -309,7 +309,10 @@ onMounted(() => loadStatus())
         <section v-else class="empty-plan-card">
           <span><AppIcon name="calculator" :size="25" /></span>
           <h2>현재 저장한 증여 계획이 없어요</h2>
-          <p>시뮬레이션을 돌려 우리 가족에게 맞는 계획을 만들어 보세요.</p>
+          <p>
+            시뮬레이션을 실행해<br />
+            우리 가족에게 맞는 계획을 만들어 보세요.
+          </p>
           <RouterLink class="primary-button" to="/simulation">시뮬레이션 시작하기</RouterLink>
         </section>
 
@@ -424,23 +427,25 @@ onMounted(() => loadStatus())
                       <strong>{{ formatCompactWon(plan.currentAmount || plan.amount) }}</strong>
                       <span>증여 신고 전</span>
                     </div>
-                    <span class="ongoing-plan-aside">
-                      <span class="status-pill">진행 중</span>
-                      <span class="ongoing-plan-caret"><AppIcon name="chevron" :size="16" /></span>
-                    </span>
                     <p>
                       <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과 신고 서류를 미리
                       확인하세요.
                     </p>
                   </button>
-                  <button
-                    class="row-delete-button ongoing-plan-delete"
-                    type="button"
-                    :aria-label="`${plan.giftDate} 진행 중인 증여 삭제`"
-                    @click="planToDelete = plan"
-                  >
-                    <AppIcon name="trash" :size="16" />
-                  </button>
+                  <div class="ongoing-plan-actions">
+                    <span class="status-pill">진행 중</span>
+                    <span class="ongoing-plan-caret" aria-hidden="true">
+                      <AppIcon name="chevron" :size="16" />
+                    </span>
+                    <button
+                      class="row-delete-button ongoing-plan-delete"
+                      type="button"
+                      :aria-label="`${plan.giftDate} 진행 중인 증여 삭제`"
+                      @click="planToDelete = plan"
+                    >
+                      <AppIcon name="trash" :size="16" />
+                    </button>
+                  </div>
                 </div>
 
                 <div
