@@ -87,7 +87,7 @@ const optionalGuide = guideCards[3]
               v-for="(guide, index) in learningSteps"
               :key="guide.to"
               :to="guide.to"
-              class="home-guide-step-card"
+              class="quick-card home-guide-step-card"
               :class="`step-${index + 1}`"
             >
               <span class="home-guide-step-number">
@@ -103,7 +103,7 @@ const optionalGuide = guideCards[3]
             </RouterLink>
           </div>
 
-          <RouterLink :to="optionalGuide.to" class="home-guide-optional-card">
+          <RouterLink :to="optionalGuide.to" class="quick-card home-guide-optional-card">
             <span class="home-guide-optional-label">한 걸음 더</span>
             <span class="home-guide-optional-copy">
               <strong>{{ optionalGuide.title }}</strong>
