@@ -16,34 +16,28 @@ onMounted(() => {
 const guideCards = [
   {
     title: '미리줌 사용 가이드라인',
-    badge: 'HOT',
-    icon: 'sparkles',
-    image: '/src/assets/brand-symbol.svg',
-    color: 'purple',
     to: '/guides/mirizoom',
+    description: '서비스 이용 흐름과 시뮬레이션 결과를 한눈에 살펴보세요.',
   },
   {
     title: '과세 구간 확인하기',
-    badge: 'CALCULATE',
-    icon: 'calculator',
-    color: 'yellow',
     to: '/guides/tax-brackets',
+    description: '증여 금액별 세율과 누진공제 기준을 쉽게 확인해요.',
   },
   {
     title: '증여 신고 방법 A-Z',
-    badge: 'GUIDE',
-    icon: 'check',
-    color: 'green',
     to: '/guides/gift-reporting',
+    description: '신고 기한부터 준비 서류까지 순서대로 안내해요.',
   },
   {
     title: '현금 외 증여에 대하여',
-    badge: 'ASSETS',
-    icon: 'arrow',
-    color: 'blue',
     to: '/guides/non-cash-gifts',
+    description: '주식·부동산 등 현금 외 증여 시 유의점을 확인해요.',
   },
 ]
+
+const featuredGuide = guideCards[0]
+const secondaryGuides = guideCards.slice(1)
 </script>
 
 <template>
@@ -81,27 +75,42 @@ const guideCards = [
       </section>
 
       <section class="section-block guide-overview">
-        <div class="section-heading-row">
+        <div class="section-heading-row guide-overview-heading">
           <div>
-            <span class="section-kicker">알아두면 쉬워요</span>
-            <h2>증여 가이드</h2>
+            <span class="section-kicker">미리 알아두면 든든해요</span>
+            <h2>복잡한 증여, 차근차근 알아보기</h2>
           </div>
         </div>
-        <div class="guide-news-scroll">
-          <RouterLink
-            v-for="guide in guideCards"
-            :key="guide.to"
-            :to="guide.to"
-            class="guide-news-card"
-            :class="guide.color"
-          >
-            <div class="guide-news-top">
-              <span class="guide-news-badge">{{ guide.badge }}</span>
-              <h3>{{ guide.title }}</h3>
-            </div>
-            <AppIcon class="guide-news-icon" :name="guide.icon" :size="112" />
-            <span class="guide-news-arrow"><AppIcon name="arrow" :size="18" /></span>
+        <div class="guide-hub">
+          <RouterLink :to="featuredGuide.to" class="guide-feature-card">
+            <span class="guide-feature-copy">
+              <strong>{{ featuredGuide.title }}</strong>
+              <span>{{ featuredGuide.description }}</span>
+            </span>
+            <span class="guide-feature-link">
+              가이드 보기 <AppIcon name="arrow" :size="16" />
+            </span>
           </RouterLink>
+
+          <div class="guide-compact-list">
+            <RouterLink
+              v-for="(guide, index) in secondaryGuides"
+              :key="guide.to"
+              :to="guide.to"
+              class="guide-directory-item"
+            >
+              <span class="guide-directory-number">
+                {{ String(index + 1).padStart(1, '0') }}
+              </span>
+              <span class="guide-directory-copy">
+                <strong>{{ guide.title }}</strong>
+                <span>{{ guide.description }}</span>
+              </span>
+              <span class="guide-directory-arrow">
+                <AppIcon name="arrow" :size="16" />
+              </span>
+            </RouterLink>
+          </div>
         </div>
       </section>
 
