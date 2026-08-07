@@ -256,11 +256,13 @@ export const api = {
     })
   },
 
-  async listSimulations({ status, familyId, page = 0, size = 20 } = {}) {
+  async listSimulations({ status, familyId, page, size } = {}) {
     if (!API_BASE) return { items: [], pagination: null }
-    const params = new URLSearchParams({ page: String(page), size: String(size) })
-    if (status) params.set('status', status)
+    const params = new URLSearchParams()
     if (familyId != null) params.set('familyId', String(familyId))
+    if (status) params.set('status', status)
+    if (page != null) params.set('page', String(page))
+    if (size != null) params.set('size', String(size))
     return request(`/gs?${params}`)
   },
 

@@ -25,8 +25,16 @@ const isWithdrawing = ref(false)
 const withdrawalError = ref('')
 const userImageFailed = ref(false)
 const failedFamilyImages = ref(new Set())
+const selectedHistoryFamilyId = ref(null)
 const displayUser = computed(() => authStore.user ?? store.state.user)
 const displayName = computed(() => displayUser.value?.name?.trim() || '사용자')
+const filteredSimulations = computed(() => {
+  if (selectedHistoryFamilyId.value == null) return store.state.simulations
+
+  return store.state.simulations.filter(
+    (simulation) => Number(simulation.familyId) === Number(selectedHistoryFamilyId.value),
+  )
+})
 // 생년월일 입력 범위. min/max 를 주지 않으면 브라우저가 연도 칸을 6자리(최대 275760년)로 잡아
 // 4자리를 채워도 월 칸으로 넘어가지 않는다. 범위를 좁히면 연도 4자리에서 자동으로 넘어간다.
 // 미래 생년월일을 막는 역할도 겸한다.
@@ -74,7 +82,8 @@ async function submitFamily() {
 
 // 수증자 목록·증여 이력은 DB에서 온다(데모 모드에서는 목데이터 유지).
 onMounted(() => {
-  store.ensureStatusLoaded().catch((error) => {
+  // 마이페이지를 열 때마다 GET /api/gs로 최신 DRAFT/SAVED 이력을 확인한다.
+  store.ensureStatusLoaded({ force: true }).catch((error) => {
     store.showToast(
       error.status === 401
         ? '로그인이 만료됐어요. 다시 로그인해 주세요.'
@@ -258,10 +267,32 @@ async function submitWithdrawal() {
             <span class="section-kicker">RECENT</span>
             <h2>시뮬레이션 이력</h2>
           </div>
-          <span>{{ store.state.simulations.length }}건</span>
+          <span>{{ filteredSimulations.length }}건</span>
         </div>
-        <div class="simulation-history-list">
-          <article v-for="item in store.state.simulations" :key="item.id">
+        <div class="simulation-history-tabs" role="tablist" aria-label="자녀별 시뮬레이션 이력">
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="selectedHistoryFamilyId == null"
+            :class="{ active: selectedHistoryFamilyId == null }"
+            @click="selectedHistoryFamilyId = null"
+          >
+            전체
+          </button>
+          <button
+            v-for="family in store.state.families"
+            :key="family.id"
+            type="button"
+            role="tab"
+            :aria-selected="Number(selectedHistoryFamilyId) === Number(family.id)"
+            :class="{ active: Number(selectedHistoryFamilyId) === Number(family.id) }"
+            @click="selectedHistoryFamilyId = family.id"
+          >
+            {{ family.name }}
+          </button>
+        </div>
+        <div v-if="filteredSimulations.length" class="simulation-history-list">
+          <article v-for="item in filteredSimulations" :key="item.id">
             <div class="history-topline">
               <span>
                 {{ store.state.families.find((family) => family.id === item.familyId)?.name }}
@@ -295,6 +326,7 @@ async function submitWithdrawal() {
             </RouterLink>
           </article>
         </div>
+        <p v-else class="simulation-history-empty">해당 자녀의 시뮬레이션 이력이 아직 없어요.</p>
       </section>
 
       <div class="mypage-footer-actions">

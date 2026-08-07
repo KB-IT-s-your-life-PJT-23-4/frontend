@@ -230,7 +230,12 @@ onMounted(() => loadStatus())
           <div class="plan-card-copy">
             <div class="plan-card-eyebrow">
               <span>저축하며 불려요</span>
-              <button type="button" aria-label="계획 삭제" @click="planToDelete = familyPlans[0]">
+              <button
+                v-if="!familyPlans[0].readOnly"
+                type="button"
+                aria-label="계획 삭제"
+                @click="planToDelete = familyPlans[0]"
+              >
                 <AppIcon name="trash" :size="17" />
               </button>
             </div>
@@ -458,7 +463,7 @@ onMounted(() => loadStatus())
                     </div>
                   </div>
                   <button
-                    v-if="isPlanReadyToConfirm(plan.id)"
+                    v-if="!plan.readOnly && isPlanReadyToConfirm(plan.id)"
                     class="primary-button full confirm-gift-button"
                     type="button"
                     @click="planToConfirm = plan"
