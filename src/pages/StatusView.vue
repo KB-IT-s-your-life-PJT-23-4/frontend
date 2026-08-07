@@ -6,7 +6,7 @@ import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
 import { useAppStore } from '../stores/appStore'
-import { deductionProgress } from '../utils/deduction'
+import { deductionProgress, toIsoDate } from '../utils/deduction'
 import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
 import '../assets/css/status-view.css'
 
@@ -14,10 +14,24 @@ const store = useAppStore()
 const router = useRouter()
 const showAddGift = ref(false)
 const planToDelete = ref(null)
+const giftToDelete = ref(null)
+const deletingGift = ref(false)
 const expandedPlanIds = ref([])
+
+// toISOString()은 UTC라 KST 오전 9시 이전에는 하루 전 날짜가 나온다. 로컬 날짜로 직접 만든다.
+function todayIso() {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
+// 확정 이력은 아직 하지 않은 증여를 기록할 수 없다(서버가 421로 막는다). 달력 상한도 오늘로 맞춘다.
+const today = todayIso()
 const giftForm = reactive({
   amount: '',
-  date: new Date().toISOString().slice(0, 10),
+  date: today,
   memo: '현금 증여',
 })
 
@@ -96,6 +110,12 @@ async function submitGift() {
 const planToConfirm = ref(null)
 const confirming = ref(false)
 
+// 증여일이 아직 안 온 계획은 서버가 확정을 막는다(421). 버튼을 눌러 실패시키는 대신 미리 알린다.
+const confirmBlockedByDate = computed(() => {
+  const giftDate = planToConfirm.value?.giftDate
+  return Boolean(giftDate) && toIsoDate(giftDate) > today
+})
+
 async function confirmGift() {
   if (!planToConfirm.value || confirming.value) return
   confirming.value = true
@@ -146,6 +166,20 @@ async function confirmDelete() {
     planToDelete.value = null
   } catch (error) {
     store.showToast(error.message || '삭제하지 못했습니다.', 'info')
+  }
+}
+
+// 이력 삭제는 누적 증여액이 줄어드는 일이라 계획 삭제보다 되돌리기 어렵다. 확인 모달을 따로 둔다.
+async function confirmGiftHistoryDelete() {
+  if (!giftToDelete.value || deletingGift.value) return
+  deletingGift.value = true
+  try {
+    await store.deleteGiftHistory(giftToDelete.value.id)
+    giftToDelete.value = null
+  } catch (error) {
+    store.showToast(error.message || '증여 이력을 삭제하지 못했습니다.', 'info')
+  } finally {
+    deletingGift.value = false
   }
 }
 
@@ -317,7 +351,17 @@ onMounted(() => loadStatus())
                 <span
                   >{{ gift.date }} <small>{{ gift.type }}</small></span
                 >
-                <strong>{{ formatCompactWon(gift.amount) }}</strong>
+                <span class="gift-history-aside">
+                  <strong>{{ formatCompactWon(gift.amount) }}</strong>
+                  <button
+                    class="row-delete-button"
+                    type="button"
+                    :aria-label="`${gift.date} 증여 이력 삭제`"
+                    @click="giftToDelete = gift"
+                  >
+                    <AppIcon name="trash" :size="15" />
+                  </button>
+                </span>
               </div>
             </div>
             <p v-else-if="loading" class="empty-inline">증여 이력을 불러오는 중이에요.</p>
@@ -344,26 +388,36 @@ onMounted(() => loadStatus())
                 class="ongoing-plan-item"
                 :class="{ open: isPlanExpanded(plan.id) }"
               >
-                <button
-                  class="ongoing-plan-summary"
-                  type="button"
-                  :aria-expanded="isPlanExpanded(plan.id)"
-                  :aria-controls="`plan-documents-${plan.id}`"
-                  @click="togglePlan(plan.id)"
-                >
-                  <div>
-                    <strong>{{ formatCompactWon(plan.currentAmount || plan.amount) }}</strong>
-                    <span>증여 신고 전</span>
-                  </div>
-                  <span class="ongoing-plan-aside">
-                    <span class="status-pill">진행 중</span>
-                    <span class="ongoing-plan-caret"><AppIcon name="chevron" :size="16" /></span>
-                  </span>
-                  <p>
-                    <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과 신고 서류를 미리
-                    확인하세요.
-                  </p>
-                </button>
+                <div class="ongoing-plan-head">
+                  <button
+                    class="ongoing-plan-summary"
+                    type="button"
+                    :aria-expanded="isPlanExpanded(plan.id)"
+                    :aria-controls="`plan-documents-${plan.id}`"
+                    @click="togglePlan(plan.id)"
+                  >
+                    <div>
+                      <strong>{{ formatCompactWon(plan.currentAmount || plan.amount) }}</strong>
+                      <span>증여 신고 전</span>
+                    </div>
+                    <span class="ongoing-plan-aside">
+                      <span class="status-pill">진행 중</span>
+                      <span class="ongoing-plan-caret"><AppIcon name="chevron" :size="16" /></span>
+                    </span>
+                    <p>
+                      <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과 신고 서류를 미리
+                      확인하세요.
+                    </p>
+                  </button>
+                  <button
+                    class="row-delete-button ongoing-plan-delete"
+                    type="button"
+                    :aria-label="`${plan.giftDate} 진행 중인 증여 삭제`"
+                    @click="planToDelete = plan"
+                  >
+                    <AppIcon name="trash" :size="16" />
+                  </button>
+                </div>
 
                 <div
                   v-show="isPlanExpanded(plan.id)"
@@ -510,11 +564,16 @@ onMounted(() => loadStatus())
             <span>원</span>
           </div>
         </label>
-        <!-- 증여일은 계획(PLANNED) 등록도 있어 미래를 막지 않는다. min/max 없이 둔다. -->
+        <!--
+          이 모달은 확정 이력(COMPLETED)만 등록한다. 미래 날짜는 서버가 421로 막으므로
+          달력에서도 오늘까지만 고를 수 있게 해 아예 보내지 않는다.
+          미래에 할 증여는 시뮬레이션에서 저장하는 계획(PLANNED)이 따로 담당한다.
+        -->
         <div class="date-field-row">
           <span>증여 날짜</span>
           <DateField
             v-model="giftForm.date"
+            :max="today"
             placeholder="증여 날짜를 선택하세요"
             aria-label="증여 날짜 선택"
           />
@@ -529,7 +588,10 @@ onMounted(() => loadStatus())
         </label>
         <aside class="info-callout compact">
           <AppIcon name="info" :size="18" />
-          <p>등록한 금액은 최근 10년 누적 증여액과 남은 공제 한도에 바로 반영됩니다.</p>
+          <p>
+            등록한 금액은 최근 10년 누적 증여액과 남은 공제 한도에 바로 반영됩니다. 아직 하지 않은
+            증여는 기록할 수 없어요 — 증여 날짜는 오늘까지만 선택할 수 있습니다.
+          </p>
         </aside>
       </form>
       <template #actions>
@@ -545,7 +607,14 @@ onMounted(() => loadStatus())
       @close="planToConfirm = null"
     >
       <template #icon><AppIcon name="check" :size="25" /></template>
-      <aside v-if="planToConfirm" class="info-callout compact">
+      <aside v-if="confirmBlockedByDate" class="info-callout compact warning">
+        <AppIcon name="info" :size="18" />
+        <p>
+          증여 예정일({{ planToConfirm.giftDate }})이 아직 지나지 않았어요. 확정은 이체를 마쳤다는
+          뜻이라 예정일이 지난 뒤에 눌러 주세요. 그때까지는 진행 중인 증여로 남습니다.
+        </p>
+      </aside>
+      <aside v-else-if="planToConfirm" class="info-callout compact">
         <AppIcon name="info" :size="18" />
         <p>
           {{ family.name }} 님에게
@@ -556,7 +625,12 @@ onMounted(() => loadStatus())
       </aside>
       <template #actions>
         <button class="secondary-button" type="button" @click="planToConfirm = null">취소</button>
-        <button class="primary-button" type="button" :disabled="confirming" @click="confirmGift">
+        <button
+          class="primary-button"
+          type="button"
+          :disabled="confirming || confirmBlockedByDate"
+          @click="confirmGift"
+        >
           {{ confirming ? '처리 중...' : '확정하기' }}
         </button>
       </template>
@@ -593,6 +667,35 @@ onMounted(() => loadStatus())
       <template #actions>
         <button class="secondary-button" type="button" @click="planToDelete = null">취소</button>
         <button class="danger-button" type="button" @click="confirmDelete">삭제하기</button>
+      </template>
+    </ModalSheet>
+
+    <ModalSheet
+      :show="Boolean(giftToDelete)"
+      title="이 증여 이력을 삭제할까요?"
+      description="삭제한 이력은 복구할 수 없고 10년 누적 증여액에서도 빠집니다."
+      danger
+      @close="giftToDelete = null"
+    >
+      <template #icon><AppIcon name="trash" :size="25" /></template>
+      <aside v-if="giftToDelete" class="info-callout compact">
+        <AppIcon name="info" :size="18" />
+        <p>
+          {{ giftToDelete.date }}에 기록한 {{ formatCompactWon(giftToDelete.amount) }}이 사라지고,
+          남은 공제 한도와 갱신 일정이 다시 계산돼요. 실제로 증여했던 건이라면 삭제 대신 그대로 두는
+          편이 신고에 안전해요.
+        </p>
+      </aside>
+      <template #actions>
+        <button class="secondary-button" type="button" @click="giftToDelete = null">취소</button>
+        <button
+          class="danger-button"
+          type="button"
+          :disabled="deletingGift"
+          @click="confirmGiftHistoryDelete"
+        >
+          {{ deletingGift ? '삭제 중...' : '삭제하기' }}
+        </button>
       </template>
     </ModalSheet>
   </div>

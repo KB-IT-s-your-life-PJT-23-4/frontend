@@ -232,7 +232,6 @@ async function deletePlan(planId) {
     return
   }
   if (!api.isMock && plan?.source === 'server') {
-    // 서버는 PLANNED 상태만 삭제를 허용한다(그 외 409 CONFLICT).
     await api.deleteGift(planId)
     await syncStatus()
   } else {
@@ -240,6 +239,26 @@ async function deletePlan(planId) {
   }
   delete state.documentChecks[planId]
   showToast('증여 계획을 삭제했어요.', 'info')
+}
+
+/**
+ * 확정된 증여 이력 삭제. 잘못 등록한 이력을 지우는 용도다.
+ *
+ * 서버 연동 모드에서는 지운 뒤 syncStatus()만 부르면 된다. 누적 증여액·남은 공제·갱신일은
+ * 저장된 값이 아니라 서버가 매 조회마다 10년 창을 다시 합산해 내려주는 값이라 함께 따라온다.
+ * 데모 모드에는 그 계산이 없어 giftedAmount를 직접 되돌린다.
+ */
+async function deleteGiftHistory(giftId) {
+  if (!api.isMock) {
+    await api.deleteGift(giftId)
+    await syncStatus()
+  } else {
+    const gift = state.giftHistory.find((item) => item.id === giftId)
+    const family = state.families.find((item) => item.id === gift?.familyId)
+    if (family && gift) family.giftedAmount = Math.max(0, family.giftedAmount - Number(gift.amount))
+    state.giftHistory = state.giftHistory.filter((item) => item.id !== giftId)
+  }
+  showToast('증여 이력을 삭제했어요. 공제 한도가 다시 계산됐어요.', 'info')
 }
 
 // 서버 gift(PLANNED) → 화면에서 쓰는 진행 중인 증여 형태로 변환
@@ -689,6 +708,7 @@ export function useAppStore() {
     addGift,
     savePlan,
     deletePlan,
+    deleteGiftHistory,
     syncStatus,
     ensureStatusLoaded,
     confirmPlanGift,

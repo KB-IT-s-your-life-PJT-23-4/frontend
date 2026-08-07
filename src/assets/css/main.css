@@ -2296,6 +2296,12 @@ textarea:focus-visible {
   padding: 12px;
 }
 
+/* 안내가 아니라 "지금은 할 수 없다"를 알릴 때. pill.warning 과 같은 색을 쓴다. */
+.info-callout.warning {
+  background: #ffe8e7;
+  color: #d34f55;
+}
+
 .back-text-button {
   display: inline-flex;
   margin-bottom: 18px;
@@ -3309,6 +3315,31 @@ textarea:focus-visible {
   color: var(--muted);
 }
 
+.gift-history-aside {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 목록 행 안의 삭제 버튼. 금액을 밀어내지 않게 아이콘 크기로만 잡는다. */
+.row-delete-button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #b8babf;
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+.row-delete-button:hover {
+  color: #c86462;
+}
+
 .empty-inline {
   margin: 18px 0;
   color: var(--muted);
@@ -3320,10 +3351,16 @@ textarea:focus-visible {
   background: #f7f9fc;
 }
 
+.ongoing-plan-head {
+  display: flex;
+  align-items: flex-start;
+}
+
 .ongoing-plan-summary {
   display: grid;
   grid-template-columns: 1fr auto;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 13px;
   gap: 9px;
   border: 0;
@@ -3331,6 +3368,11 @@ textarea:focus-visible {
   background: none;
   text-align: left;
   cursor: pointer;
+}
+
+.ongoing-plan-delete {
+  flex: none;
+  margin: 13px 10px 0 0;
 }
 
 .ongoing-plan-summary > div {
