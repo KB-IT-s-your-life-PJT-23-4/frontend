@@ -16,6 +16,7 @@ import AdminDashboardView from '../pages/AdminDashboardView.vue'
 import AdminUserView from '../pages/AdminUserView.vue'
 import AdminProductsView from '../pages/AdminProductsView.vue'
 import AdminFaqView from '../pages/AdminFaqView.vue'
+import AdminReportView from '../pages/AdminReportView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { useAuthStore } from '../stores/authStore'
 
@@ -132,6 +133,19 @@ const router = createRouter({
       component: AdminFaqView,
       meta: {
         label: 'FAQ 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/reports',
+      alias: '/admin/report',
+      name: 'admin-reports',
+      component: AdminReportView,
+      meta: {
+        label: '신고 관리',
         requiresAuth: true,
         requiresAdmin: true,
         layout: 'admin',
