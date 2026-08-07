@@ -1,6 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
 import { getAdminDashboard } from '../api/adminDashboardApi'
 import AdminDashboardState from '../components/admin/AdminDashboardState.vue'
 import AdminErrorSummary from '../components/admin/AdminErrorSummary.vue'
@@ -12,8 +11,6 @@ import SignupTrendChart from '../components/admin/SignupTrendChart.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import '../assets/css/admin-dashboard.css'
 
-const route = useRoute()
-const router = useRouter()
 const dashboard = ref(null)
 const viewState = ref('loading')
 const errorMessage = ref('')
@@ -33,31 +30,63 @@ const dateTimeFormatter = new Intl.DateTimeFormat('ko-KR', {
   hour12: false,
 })
 
-const scenario = computed(() => {
-  const state = route.query.state
-  return ['error', 'empty'].includes(state) ? state : 'success'
-})
+const consultationAvailable = computed(() => dashboard.value?.consultations?.available === true)
+const fastApiAvailable = computed(() => dashboard.value?.fastApi?.available === true)
 
 const fastApiStatus = computed(() => {
-  const status = dashboard.value?.fastApi.status
-  if (status === 'healthy')
-    return { status: 'healthy', label: '정상', description: '안정적으로 응답 중' }
-  if (status === 'warning')
-    return { status: 'warning', label: '주의', description: '응답 지연 확인 필요' }
-  return { status: 'danger', label: '위험', description: '즉시 점검 필요' }
+  if (!fastApiAvailable.value) {
+    return {
+      status: 'warning',
+      label: '미수집',
+      description: '모니터링 데이터가 수집되지 않았습니다.',
+      icon: 'info',
+    }
+  }
+
+  const status = dashboard.value?.fastApi?.status
+  if (status === 'healthy') {
+    return {
+      status: 'healthy',
+      label: '정상',
+      description: '안정적으로 응답 중',
+      icon: 'check',
+    }
+  }
+  if (status === 'warning') {
+    return {
+      status: 'warning',
+      label: '주의',
+      description: '응답 지연 확인 필요',
+      icon: 'info',
+    }
+  }
+  return { status: 'danger', label: '위험', description: '즉시 점검 필요', icon: 'info' }
 })
 
 const formattedUpdatedAt = computed(() =>
   dashboard.value?.updatedAt ? dateTimeFormatter.format(new Date(dashboard.value.updatedAt)) : '-',
 )
 const formattedProductDate = computed(() =>
-  dashboard.value?.products.asOfDate
+  dashboard.value?.products?.available && dashboard.value.products.asOfDate
     ? dateFormatter.format(new Date(`${dashboard.value.products.asOfDate}T00:00:00`))
     : '-',
 )
+const simulationSaveRate = computed(() => {
+  const rate = Number(dashboard.value?.simulations?.saveRate)
+  return Number.isFinite(rate) ? Math.min(Math.max(rate, 0), 100) : 0
+})
+
+function hasValue(value) {
+  return value !== null && value !== undefined
+}
 
 function formatNumber(value) {
-  return numberFormatter.format(value ?? 0)
+  return hasValue(value) ? numberFormatter.format(value) : '-'
+}
+
+function formatRate(value) {
+  const rate = Number(value)
+  return Number.isFinite(rate) ? rate.toFixed(1) : '-'
 }
 
 async function loadDashboard({ refresh = false } = {}) {
@@ -66,28 +95,17 @@ async function loadDashboard({ refresh = false } = {}) {
   errorMessage.value = ''
 
   try {
-    dashboard.value = await getAdminDashboard({ scenario: scenario.value })
+    dashboard.value = await getAdminDashboard()
     viewState.value = dashboard.value ? 'success' : 'empty'
   } catch (error) {
     dashboard.value = null
     viewState.value = 'error'
-    errorMessage.value = error.message || '알 수 없는 오류가 발생했습니다.'
+    errorMessage.value = error.message || '대시보드 데이터를 불러오지 못했습니다.'
   } finally {
     isRefreshing.value = false
   }
 }
 
-async function retryDefaultState() {
-  if (scenario.value !== 'success') {
-    const query = { ...route.query }
-    delete query.state
-    await router.replace({ query })
-    return
-  }
-  await loadDashboard()
-}
-
-watch(scenario, () => loadDashboard())
 onMounted(() => loadDashboard())
 </script>
 
@@ -100,7 +118,6 @@ onMounted(() => loadDashboard())
         <p>미리줌 서비스의 핵심 지표와 시스템 상태를 한눈에 확인하세요.</p>
       </div>
       <div class="admin-dashboard-actions">
-        <span class="admin-source-badge"><span aria-hidden="true" /> 데모 데이터</span>
         <span class="admin-updated-at">
           <AppIcon name="clock" :size="16" />
           마지막 갱신 {{ formattedUpdatedAt }}
@@ -122,7 +139,7 @@ onMounted(() => loadDashboard())
       v-if="viewState !== 'success'"
       :state="viewState"
       :message="errorMessage"
-      @retry="retryDefaultState"
+      @retry="loadDashboard()"
     />
 
     <template v-else>
@@ -144,17 +161,25 @@ onMounted(() => loadDashboard())
         />
         <AdminMetricCard
           title="AI 상담 요청"
-          :value="formatNumber(dashboard.consultations.requests)"
-          unit="건"
-          :description="`성공 ${formatNumber(dashboard.consultations.successes)}건 · 실패 ${formatNumber(dashboard.consultations.failures)}건`"
+          :value="consultationAvailable ? formatNumber(dashboard.consultations.requests) : '-'"
+          :unit="consultationAvailable ? '건' : ''"
+          :description="
+            consultationAvailable
+              ? `성공 ${formatNumber(dashboard.consultations.successes)}건 · 실패 ${formatNumber(dashboard.consultations.failures)}건`
+              : '상담 요청 데이터가 수집되지 않았습니다.'
+          "
           icon="chat"
           tone="navy"
         />
         <AdminMetricCard
           title="AI 상담 성공률"
-          :value="dashboard.consultations.successRate.toFixed(1)"
-          unit="%"
-          description="전체 상담 요청 대비 성공 비율"
+          :value="consultationAvailable ? formatRate(dashboard.consultations.successRate) : '-'"
+          :unit="consultationAvailable ? '%' : ''"
+          :description="
+            consultationAvailable
+              ? '전체 상담 요청 대비 성공 비율'
+              : '상담 성공률 데이터가 수집되지 않았습니다.'
+          "
           icon="check"
           tone="green"
         />
@@ -174,11 +199,14 @@ onMounted(() => loadDashboard())
           <div class="fastapi-status__metric">
             <span>평균 응답 시간</span>
             <p>
-              <strong>{{ formatNumber(dashboard.fastApi.averageResponseMs) }}</strong> ms
+              <strong>{{ formatNumber(dashboard.fastApi.averageResponseMs) }}</strong>
+              <template v-if="fastApiAvailable && hasValue(dashboard.fastApi.averageResponseMs)">
+                ms
+              </template>
             </p>
           </div>
           <div class="fastapi-status__notice" :class="`is-${fastApiStatus.status}`">
-            <AppIcon name="check" :size="18" />
+            <AppIcon :name="fastApiStatus.icon" :size="18" />
             <span>
               <strong>{{ fastApiStatus.label }}</strong>
               {{ fastApiStatus.description }}
@@ -211,14 +239,14 @@ onMounted(() => loadDashboard())
           <div class="simulation-summary__rate">
             <div>
               <span>저장 전환율</span>
-              <strong>{{ dashboard.simulations.saveRate.toFixed(1) }}%</strong>
+              <strong>{{ formatRate(dashboard.simulations.saveRate) }}%</strong>
             </div>
             <div
               class="simulation-summary__track"
               role="img"
-              :aria-label="`시뮬레이션 저장 전환율 ${dashboard.simulations.saveRate.toFixed(1)}%`"
+              :aria-label="`시뮬레이션 저장 전환율 ${formatRate(dashboard.simulations.saveRate)}%`"
             >
-              <span :style="{ width: `${dashboard.simulations.saveRate}%` }" />
+              <span :style="{ width: `${simulationSaveRate}%` }" />
             </div>
           </div>
         </section>

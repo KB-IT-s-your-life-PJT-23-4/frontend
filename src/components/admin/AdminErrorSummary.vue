@@ -5,6 +5,10 @@ defineProps({
   errors: { type: Object, required: true },
 })
 
+function formatCount(value) {
+  return value === null || value === undefined ? '-' : value.toLocaleString('ko-KR')
+}
+
 const items = [
   { key: 'http422', code: 'HTTP 422', label: '요청 검증 오류', tone: 'warning' },
   { key: 'http500', code: 'HTTP 500', label: '서버 처리 오류', tone: 'danger' },
@@ -28,8 +32,14 @@ const items = [
           <strong>{{ item.code }}</strong>
           <small>{{ item.label }}</small>
         </div>
-        <b>{{ errors[item.key].toLocaleString('ko-KR') }}<small>건</small></b>
+        <b>
+          {{ formatCount(errors[item.key]) }}
+          <small v-if="errors[item.key] !== null && errors[item.key] !== undefined">건</small>
+        </b>
       </div>
     </div>
+    <p v-if="!errors.available" class="admin-panel__unavailable">
+      오류 집계 데이터가 수집되지 않았습니다.
+    </p>
   </section>
 </template>

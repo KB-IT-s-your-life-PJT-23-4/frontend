@@ -11,6 +11,10 @@ const items = [
   { key: 'savings', label: '적금', tone: 'blue' },
   { key: 'etfs', label: 'ETF', tone: 'navy' },
 ]
+
+function formatCount(value) {
+  return value === null || value === undefined ? '-' : value.toLocaleString('ko-KR')
+}
 </script>
 
 <template>
@@ -29,15 +33,21 @@ const items = [
       </div>
       <div>
         <dt>버전</dt>
-        <dd>{{ products.version }}</dd>
+        <dd>{{ products.version || '-' }}</dd>
       </div>
     </dl>
     <div class="product-summary__counts">
       <div v-for="item in items" :key="item.key">
         <span :class="`is-${item.tone}`" aria-hidden="true" />
         <small>{{ item.label }}</small>
-        <strong>{{ products[item.key].toLocaleString('ko-KR') }}<b>개</b></strong>
+        <strong>
+          {{ formatCount(products.available ? products[item.key] : null) }}
+          <b v-if="products.available">개</b>
+        </strong>
       </div>
     </div>
+    <p v-if="!products.available" class="admin-panel__unavailable">
+      상품 데이터가 수집되지 않았습니다.
+    </p>
   </section>
 </template>

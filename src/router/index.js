@@ -13,6 +13,7 @@ import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
 import AdminDashboardView from '../pages/AdminDashboardView.vue'
+import AdminUserView from '../pages/AdminUserView.vue'
 import AdminProductsView from '../pages/AdminProductsView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { useAuthStore } from '../stores/authStore'
@@ -100,6 +101,18 @@ const router = createRouter({
       },
     },
     {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: AdminUserView,
+      meta: {
+        label: '회원 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
       path: '/admin/products',
       name: 'admin-products',
       component: AdminProductsView,
@@ -141,9 +154,13 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin) {
     const role = String(authStore.user?.role ?? '').toUpperCase()
-    const isAdmin = ['ADMIN', 'ROLE_ADMIN'].includes(role)
-    const allowedRoles = (to.meta.requiresRole ?? []).map((r) => r.toUpperCase())
-    if (!isAdmin && !allowedRoles.includes(role)) return { name: 'home' }
+    const adminRoles = ['ROOT', 'MIDDLE', 'DEFAULT']
+    if (!adminRoles.includes(role)) return { name: 'home' }
+
+    const allowedRoles = (to.meta.requiresRole ?? []).map((allowedRole) =>
+      String(allowedRole).toUpperCase(),
+    )
+    if (allowedRoles.length > 0 && !allowedRoles.includes(role)) return { name: 'home' }
   }
 
   return true
