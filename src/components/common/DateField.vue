@@ -179,9 +179,17 @@ onBeforeUnmount(() => {
       :aria-expanded="open"
       @click="toggle"
     >
-      <span v-if="modelValue">{{ displayLabel }}</span>
-      <span v-else class="date-field-placeholder">{{ placeholder }}</span>
-      <AppIcon name="calendar" :size="18" />
+      <slot
+        name="trigger"
+        :display-label="displayLabel"
+        :has-value="Boolean(modelValue)"
+        :is-open="open"
+        :placeholder="placeholder"
+      >
+        <span v-if="modelValue">{{ displayLabel }}</span>
+        <span v-else class="date-field-placeholder">{{ placeholder }}</span>
+        <AppIcon name="calendar" :size="18" />
+      </slot>
     </button>
 
     <div v-if="open" class="date-field-panel">

@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
+import DateField from '../common/DateField.vue'
 import { formatCompactWon } from '../../utils/finance'
 import '../../assets/css/simulation/simulation-input-content.css'
 
@@ -176,23 +177,28 @@ defineEmits([
           </div>
         </div>
 
-        <label class="gift-date-control" :class="{ invalid: giftDateError }" for="gift-date">
-          <span class="gift-date-icon">
-            <AppIcon name="calendar" :size="20" />
-          </span>
-          <span class="gift-date-copy">
-            <small>증여 예정일</small>
-            <input
-              id="gift-date"
-              :value="giftDate"
-              type="date"
-              :min="minGiftDate"
-              required
-              aria-label="증여 예정일"
-              @input="$emit('update:giftDate', $event.target.value)"
-            />
-          </span>
-        </label>
+        <DateField
+          :model-value="giftDate"
+          :min="minGiftDate"
+          class="gift-date-control"
+          :class="{ invalid: giftDateError }"
+          aria-label="증여 예정일 선택"
+          placeholder="증여 예정일을 선택해 주세요"
+          @update:model-value="$emit('update:giftDate', $event)"
+        >
+          <template #trigger="{ displayLabel, hasValue, isOpen, placeholder }">
+            <span class="gift-date-icon">
+              <AppIcon name="calendar" :size="20" />
+            </span>
+            <span class="gift-date-copy">
+              <small>증여 예정일</small>
+              <strong :class="{ placeholder: !hasValue }">
+                {{ hasValue ? displayLabel : placeholder }}
+              </strong>
+            </span>
+            <AppIcon name="chevron" :size="17" class="gift-date-caret" :class="{ open: isOpen }" />
+          </template>
+        </DateField>
         <p v-if="giftDateError" class="field-error">{{ giftDateError }}</p>
       </section>
 

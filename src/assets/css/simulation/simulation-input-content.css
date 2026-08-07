@@ -33,9 +33,16 @@
 }
 
 .gift-date-control {
-  display: flex;
-  min-height: 70px;
+  position: relative;
+  z-index: 4;
   margin-top: 20px;
+}
+
+.gift-date-control .date-field-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 70px;
+  height: auto;
   padding: 12px 15px;
   align-items: center;
   gap: 12px;
@@ -49,17 +56,19 @@
     box-shadow 160ms ease;
 }
 
-.gift-date-control:hover {
+.gift-date-control .date-field-trigger:hover {
   background: #f2f6fa;
 }
 
-.gift-date-control:focus-within {
+.gift-date-control .date-field-trigger:focus-visible,
+.gift-date-control.is-open .date-field-trigger {
   border-color: #7da3c2;
+  outline: 0;
   background: #f4f9ff;
   box-shadow: 0 0 0 3px rgba(79, 125, 165, 0.12);
 }
 
-.gift-date-control.invalid {
+.gift-date-control.invalid .date-field-trigger {
   border-color: #d97b7b;
   background: #fff8f8;
 }
@@ -88,24 +97,67 @@
   font-weight: 500;
 }
 
-.gift-date-copy input {
-  width: 100%;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
+.gift-date-copy strong {
   color: #273747;
-  background: transparent;
-  font-family: inherit;
   font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.02em;
-  cursor: pointer;
 }
 
-.gift-date-copy input::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.58;
+.gift-date-copy strong.placeholder {
+  color: #97a2b1;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.gift-date-caret {
+  flex: none;
+  margin-left: auto;
+  color: #7890a4;
+  transform: rotate(90deg);
+  transition: transform 180ms ease;
+}
+
+.gift-date-caret.open {
+  transform: rotate(-90deg);
+}
+
+.gift-date-control .date-field-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 30;
+  width: min(100%, 360px);
+  padding: 18px;
+  border-color: #dce6ef;
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(37, 60, 82, 0.16);
+}
+
+.gift-date-control .date-field-head {
+  margin-bottom: 14px;
+}
+
+.gift-date-control .date-field-selects select {
+  border-color: #e0e8f0;
+  background: #f5f8fb;
+  color: #34495d;
+  font-weight: 500;
+}
+
+.gift-date-control .date-field-day {
+  border-radius: 50%;
+}
+
+.gift-date-control .date-field-day.is-selected {
+  background: #ffcc00;
+  box-shadow: 0 5px 12px rgba(255, 190, 0, 0.22);
+}
+
+.gift-date-control .date-field-day.is-today:not(.is-selected) {
+  color: #3d6f99;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px #8eafca;
 }
 
 .gift-date-step .field-error {
@@ -126,6 +178,10 @@
   }
 
   .gift-date-control {
+    margin-top: 18px;
+  }
+
+  .gift-date-control .date-field-trigger {
     min-height: 66px;
     padding: 11px 13px;
   }
@@ -133,5 +189,10 @@
   .gift-date-icon {
     width: 40px;
     height: 40px;
+  }
+
+  .gift-date-control .date-field-panel {
+    width: 100%;
+    padding: 14px 12px;
   }
 }
