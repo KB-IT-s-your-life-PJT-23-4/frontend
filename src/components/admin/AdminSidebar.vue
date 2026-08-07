@@ -10,7 +10,7 @@ const emit = defineEmits(['close'])
 const menuItems = [
   { label: '대시보드', icon: 'chart', to: '/admin/dashboard', available: true },
   { label: '회원 관리', icon: 'user', to: '/admin/users', available: true },
-  { label: '상품 관리', icon: 'wallet' },
+  { label: '상품 관리', icon: 'wallet', to: '/admin/products', available: true },
   { label: '신고 관리', icon: 'document' },
   { label: '세법 관리', icon: 'shield' },
   { label: 'FAQ 및 상담 콘텐츠 관리', icon: 'chat' },

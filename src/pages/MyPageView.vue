@@ -27,6 +27,20 @@ const userImageFailed = ref(false)
 const failedFamilyImages = ref(new Set())
 const displayUser = computed(() => authStore.user ?? store.state.user)
 const displayName = computed(() => displayUser.value?.name?.trim() || '사용자')
+const selectedHistoryFamilyId = ref(null)
+const familySimulations = computed(() => {
+  if (selectedHistoryFamilyId.value == null) return store.state.simulations
+
+  return store.state.simulations.filter(
+    (simulation) => Number(simulation.familyId) === selectedHistoryFamilyId.value,
+  )
+})
+
+function simulationFamilyName(familyId) {
+  return (
+    store.state.families.find((family) => Number(family.id) === Number(familyId))?.name ?? '수증자'
+  )
+}
 // 생년월일 입력 범위. min/max 를 주지 않으면 브라우저가 연도 칸을 6자리(최대 275760년)로 잡아
 // 4자리를 채워도 월 칸으로 넘어가지 않는다. 범위를 좁히면 연도 4자리에서 자동으로 넘어간다.
 // 미래 생년월일을 막는 역할도 겸한다.
@@ -74,7 +88,8 @@ async function submitFamily() {
 
 // 수증자 목록·증여 이력은 DB에서 온다(데모 모드에서는 목데이터 유지).
 onMounted(() => {
-  store.ensureStatusLoaded().catch((error) => {
+  // 마이페이지를 열 때마다 GET /api/gs로 최신 DRAFT/SAVED 이력을 확인한다.
+  store.ensureStatusLoaded({ force: true }).catch((error) => {
     store.showToast(
       error.status === 401
         ? '로그인이 만료됐어요. 다시 로그인해 주세요.'
@@ -258,14 +273,36 @@ async function submitWithdrawal() {
             <span class="section-kicker">RECENT</span>
             <h2>시뮬레이션 이력</h2>
           </div>
-          <span>{{ store.state.simulations.length }}건</span>
+          <span>{{ familySimulations.length }}건</span>
         </div>
-        <div class="simulation-history-list">
-          <article v-for="item in store.state.simulations" :key="item.id">
+        <section
+          v-if="store.state.families.length"
+          class="family-switcher history-family-switcher"
+          aria-label="시뮬레이션 이력 수증자 선택"
+        >
+          <button
+            class="all-family-tab"
+            type="button"
+            :class="{ active: selectedHistoryFamilyId == null }"
+            @click="selectedHistoryFamilyId = null"
+          >
+            전체
+          </button>
+          <button
+            v-for="family in store.state.families"
+            :key="family.id"
+            type="button"
+            :class="{ active: Number(family.id) === selectedHistoryFamilyId }"
+            @click="selectedHistoryFamilyId = Number(family.id)"
+          >
+            {{ family.name }}
+          </button>
+        </section>
+        <div v-if="familySimulations.length" class="simulation-history-list">
+          <article v-for="item in familySimulations" :key="item.id">
             <div class="history-topline">
-              <span>
-                {{ store.state.families.find((family) => family.id === item.familyId)?.name }}
-                님
+              <span v-if="selectedHistoryFamilyId == null">
+                {{ simulationFamilyName(item.familyId) }} 님
               </span>
               <button
                 v-if="item.source !== 'server'"
@@ -294,6 +331,11 @@ async function submitWithdrawal() {
               {{ item.source === 'server' ? '결과 다시 보기' : '새 조건으로 비교하기' }}
             </RouterLink>
           </article>
+        </div>
+        <div v-else class="simulation-history-empty">
+          <span><AppIcon name="document" :size="21" /></span>
+          <strong>아직 시뮬레이션 이력이 없어요</strong>
+          <p>선택한 수증자의 증여 시뮬레이션을 실행하면 이곳에서 다시 확인할 수 있어요.</p>
         </div>
       </section>
 

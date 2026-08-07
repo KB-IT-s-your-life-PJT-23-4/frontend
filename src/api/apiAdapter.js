@@ -256,11 +256,13 @@ export const api = {
     })
   },
 
-  async listSimulations({ status, familyId, page = 0, size = 20 } = {}) {
+  async listSimulations({ status, familyId, page, size } = {}) {
     if (!API_BASE) return { items: [], pagination: null }
-    const params = new URLSearchParams({ page: String(page), size: String(size) })
-    if (status) params.set('status', status)
+    const params = new URLSearchParams()
     if (familyId != null) params.set('familyId', String(familyId))
+    if (status) params.set('status', status)
+    if (page != null) params.set('page', String(page))
+    if (size != null) params.set('size', String(size))
     return request(`/gs?${params}`)
   },
 
@@ -350,7 +352,8 @@ export const api = {
     })
   },
 
-  // DELETE /api/gm/gift/{giftId} — PLANNED 상태만 삭제 가능(그 외 409)
+  // DELETE /api/gm/gift/{giftId} — 상태와 무관하게 삭제된다(PLANNED/COMPLETED 모두).
+  // 확정 이력을 지우면 10년 합산에서 빠지므로 이후 listDeductions()를 다시 읽어야 한다.
   async deleteGift(giftId) {
     if (!API_BASE) return null
     return request(`${GIFT_PATH}/${giftId}`, { method: 'DELETE' })

@@ -37,6 +37,126 @@
   padding-bottom: 48px;
 }
 
+.history-section > .section-heading-row > span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #62788c;
+  background: #edf3f8;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.history-family-switcher {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 14px;
+  padding: 5px;
+  box-sizing: border-box;
+  gap: 5px;
+  border-color: #e3eaf1;
+  border-radius: 15px;
+  background: #f0f4f8;
+  box-shadow: inset 0 1px 2px rgba(59, 78, 96, 0.035);
+}
+
+.history-family-switcher button {
+  display: inline-flex;
+  min-width: 88px;
+  padding: 9px 13px;
+  flex: 1 0 88px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 11px;
+  color: #718092;
+  font-size: 11px;
+  transition:
+    color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+.history-family-switcher .all-family-tab {
+  min-width: 64px;
+  flex-basis: 64px;
+}
+
+.history-family-switcher button::before {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: #b8c5d0;
+  content: '';
+  transition:
+    background-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.history-family-switcher button:hover {
+  color: #506b82;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.history-family-switcher button.active {
+  color: #3e6484;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(55, 82, 106, 0.11);
+}
+
+.history-family-switcher button.active::before {
+  background: #5c82a2;
+  box-shadow: 0 0 0 3px rgba(92, 130, 162, 0.12);
+}
+
+.history-family-switcher button:active {
+  transform: translateY(1px);
+}
+
+.history-family-switcher button:focus-visible {
+  outline: 2px solid rgba(79, 125, 165, 0.4);
+  outline-offset: 1px;
+}
+
+.simulation-history-empty {
+  display: grid;
+  min-height: 150px;
+  padding: 24px 18px;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  border: 1px dashed #dce5ee;
+  border-radius: 17px;
+  color: #788698;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.simulation-history-empty > span {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 2px;
+  place-items: center;
+  border-radius: 13px;
+  color: #587a98;
+  background: #e8f1f8;
+}
+
+.simulation-history-empty strong {
+  color: #4e6276;
+  font-size: 13px;
+}
+
+.simulation-history-empty p {
+  max-width: 260px;
+  margin: 0;
+  color: #8a96a4;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
 .withdrawal-text-button {
   padding: 6px 8px;
   border: 0;
