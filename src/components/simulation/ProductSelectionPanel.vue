@@ -151,6 +151,9 @@ function isConditionChecked(product, conditionCode) {
 }
 
 function updateCondition(product, conditionCode, checked) {
+  if (props.selectedProducts[product.type]?.id !== product.id) {
+    emit('select', product.type, product)
+  }
   const current = props.preferentialSelections[product.simulationProductId] ?? []
   const next = checked
     ? [...new Set([...current, conditionCode])]
