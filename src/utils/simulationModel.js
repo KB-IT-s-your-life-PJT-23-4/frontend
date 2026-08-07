@@ -47,8 +47,9 @@ function allocationRatios(allocation, principal) {
   )
 }
 
-function mapProduct(product) {
+function mapProduct(product, selectedProductById = new Map()) {
   const type = product.productType
+  const savedSelection = selectedProductById.get(number(product.simulationProductId))
   const baseRate = number(
     product.returnMetric?.baseRatePercent,
     number(product.appliedAnnualRatePercent),
@@ -89,13 +90,15 @@ function mapProduct(product) {
       renewalDate: formatDate(item.renewalDate),
       completedContractMonths: number(item.completedContractMonths),
     })),
-    selectedPreferentialConditions: product.selectedPreferentialConditions ?? [],
+    selectedPreferentialConditions: product.selectedPreferentialConditions?.length
+      ? product.selectedPreferentialConditions
+      : (savedSelection?.selectedPreferentialConditions ?? []),
     riskLevel: type === 'ETF' ? 3 : 1,
     detailLoaded: false,
   }
 }
 
-function mapPortfolio(portfolio, result) {
+function mapPortfolio(portfolio, result, selectedProductById) {
   return {
     portfolioId: number(portfolio.portfolioId),
     portfolioType: portfolio.portfolioType,
@@ -104,11 +107,13 @@ function mapPortfolio(portfolio, result) {
     recommended: Boolean(portfolio.recommended),
     selected: Boolean(portfolio.selected),
     allocation: allocationRatios(portfolio.allocation, result.investmentPrincipal),
-    products: (portfolio.productCandidates ?? []).map(mapProduct),
+    products: (portfolio.productCandidates ?? []).map((product) =>
+      mapProduct(product, selectedProductById),
+    ),
   }
 }
 
-function mapResult(result, investmentEndDate) {
+function mapResult(result, investmentEndDate, selectedProductById) {
   const copy = SCENARIO_COPY[result.scenarioType] ?? {
     name: result.scenarioType,
     description: '',
@@ -148,15 +153,23 @@ function mapResult(result, investmentEndDate) {
         String(tranche.giftDate) <= String(investmentEndDate),
     })),
   }
-  mapped.portfolios = (result.portfolios ?? []).map((portfolio) => mapPortfolio(portfolio, mapped))
+  mapped.portfolios = (result.portfolios ?? []).map((portfolio) =>
+    mapPortfolio(portfolio, mapped, selectedProductById),
+  )
   return mapped
 }
 
 export function normalizeSimulationResponse(response) {
   if (!response?.input) return response
 
+  const selectedProductById = new Map(
+    (response.selection?.selectedProducts ?? []).map((product) => [
+      number(product.simulationProductId),
+      product,
+    ]),
+  )
   const results = (response.results ?? []).map((result) =>
-    mapResult(result, response.input.investmentEndDate),
+    mapResult(result, response.input.investmentEndDate, selectedProductById),
   )
   const recommendedByProfile = Object.fromEntries(
     (response.recommendations ?? []).map((recommendation) => {
