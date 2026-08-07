@@ -60,6 +60,17 @@ const familyPlans = computed(() =>
 const history = computed(() =>
   store.state.giftHistory.filter((gift) => gift.familyId === family.value.id),
 )
+const todayDate = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(new Date())
+
+function planProgressCopy(plan) {
+  const plannedGiftDate = String(plan.plannedGiftDate ?? '').replaceAll('.', '-')
+  return plannedGiftDate && plannedGiftDate < todayDate ? '불리고 있어요' : '불릴 예정이에요'
+}
 
 function completedDocuments(planId) {
   return store.checkedDocumentCount(planId)
@@ -262,18 +273,21 @@ onMounted(() => loadStatus())
             <span class="plan-document"><AppIcon name="document" :size="31" /></span>
           </div>
           <div class="plan-card-copy">
-            <div class="plan-card-eyebrow">
-              <span>저축하며 불려요</span>
-              <button
-                v-if="!familyPlans[0].readOnly"
-                type="button"
-                aria-label="계획 삭제"
-                @click="planToDelete = familyPlans[0]"
-              >
+            <div v-if="!familyPlans[0].readOnly" class="plan-card-eyebrow">
+              <button type="button" aria-label="계획 삭제" @click="planToDelete = familyPlans[0]">
                 <AppIcon name="trash" :size="17" />
               </button>
             </div>
-            <h2>{{ formatCompactWon(familyPlans[0].amount) }}을 준비하고 있어요</h2>
+            <h2>
+              <template v-if="familyPlans[0].expectedFutureValue">
+                {{ formatCompactWon(familyPlans[0].amount) }}을
+                {{ formatCompactWon(familyPlans[0].expectedFutureValue) }}으로<br />
+                {{ planProgressCopy(familyPlans[0]) }}
+              </template>
+              <template v-else>
+                {{ formatCompactWon(familyPlans[0].amount) }}을 준비하고 있어요
+              </template>
+            </h2>
             <strong>{{ familyPlans[0].productName }}</strong>
             <div class="plan-card-meta">
               <span v-if="familyPlans[0].rate">예상 수익률 연 {{ familyPlans[0].rate }}%</span>

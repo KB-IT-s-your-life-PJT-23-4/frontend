@@ -307,6 +307,8 @@ function savedSimulationToPlan(item) {
     familyId: Number(item.family?.familyId),
     amount: requestedAmount,
     currentAmount: requestedAmount,
+    expectedFutureValue: Number(item.selection?.expectedFutureValue ?? requestedAmount),
+    plannedGiftDate: toDotDate(item.inputSummary?.giftDate),
     giftDate: toDotDate(item.inputSummary?.investmentEndDate),
     productName: productNames.join(' · ') || fallbackProductNames.join(' · ') || '저장된 증여 계획',
     productType: selectedProducts[0]?.productType ?? selectedProductTypes[0] ?? null,
