@@ -1344,6 +1344,12 @@ textarea:focus-visible {
   line-height: 1.55;
 }
 @media (max-width: 390px) {
+  .hero-copy h2 {
+    font-size: clamp(28px, 4vw, 30px);
+  }
+  .quick-copy h3 {
+    font-size: 16px;
+  }
   .guide-highlight-card,
   .guide-step-card {
     padding: 18px;
@@ -1646,7 +1652,7 @@ textarea:focus-visible {
 
 .home-guide-step-copy > span,
 .home-guide-optional-copy > span {
-  color: #84909d;
+  color: var(--muted);
   font-size: 10px;
   line-height: 1.45;
   overflow-wrap: anywhere;
