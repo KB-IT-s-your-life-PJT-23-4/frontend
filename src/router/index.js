@@ -13,6 +13,7 @@ import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
 import AdminDashboardView from '../pages/AdminDashboardView.vue'
+import AdminUserView from '../pages/AdminUserView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { useAuthStore } from '../stores/authStore'
 
@@ -98,6 +99,18 @@ const router = createRouter({
         hideBottomNav: true,
       },
     },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: AdminUserView,
+      meta: {
+        label: '회원 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
@@ -127,7 +140,7 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin) {
     const role = String(authStore.user?.role ?? '').toUpperCase()
-    if (!['ADMIN', 'ROLE_ADMIN'].includes(role)) return { name: 'home' }
+    if (!['ROOT', 'MIDDLE', 'DEFAULT'].includes(role)) return { name: 'home' }
   }
 
   return true

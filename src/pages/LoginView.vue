@@ -39,7 +39,7 @@ function loginErrorMessage(error) {
 function getPostLoginPath() {
   const redirect = route.query.redirect
   return typeof redirect === 'string' &&
-    /^\/(?:my(?:\/|[?#]|$)|chat(?:[?#]|$)|admin\/dashboard(?:[?#]|$))/.test(redirect)
+    /^\/(?:my(?:\/|[?#]|$)|chat(?:[?#]|$)|admin\/(?:dashboard|users)(?:[?#]|$))/.test(redirect)
     ? redirect
     : '/'
 }
