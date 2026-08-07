@@ -76,6 +76,9 @@ const timelineEvents = computed(() =>
     return a.kind === 'gift' ? -1 : 1
   }),
 )
+const timelineMinWidth = computed(
+  () => `${Math.max(520, 160 + timelineEvents.value.length * 44)}px`,
+)
 
 function reinvestmentLabel(products) {
   const names = [...new Set(products.map((product) => product.name))]
@@ -85,10 +88,17 @@ function reinvestmentLabel(products) {
 
 function getPosition(item) {
   const itemDate = parseDate(item.date)
-  if (!itemDate) return 12
+  if (!itemDate) return 0
   const total = Math.max(1, finishDate.value.getTime() - startDate.value.getTime())
   const elapsed = itemDate.getTime() - startDate.value.getTime()
-  return Math.min(78, Math.max(12, 12 + (elapsed / total) * 66))
+  return Math.min(100, Math.max(0, (elapsed / total) * 100))
+}
+
+function getPositionClass(item) {
+  const position = getPosition(item)
+  if (position <= 10) return 'is-near-start'
+  if (position >= 90) return 'is-near-end'
+  return ''
 }
 </script>
 
@@ -140,6 +150,7 @@ function getPosition(item) {
       <div
         class="gift-timeline"
         :class="{ 'has-reinvestment': reinvestmentSchedule.length }"
+        :style="{ '--timeline-min-width': timelineMinWidth }"
         :aria-label="`${result.years}년 운용 기간 중 증여와 상품 재가입 일정`"
       >
         <div class="gift-timeline-track">
@@ -148,7 +159,11 @@ function getPosition(item) {
             <div
               v-if="item.kind === 'gift'"
               class="gift-timeline-point"
-              :style="{ left: `${getPosition(item)}%` }"
+              :class="getPositionClass(item)"
+              :style="{
+                '--timeline-position': `${getPosition(item)}%`,
+                left: `${getPosition(item)}%`,
+              }"
             >
               <span class="timeline-dot"><AppIcon name="wallet" :size="14" /></span>
               <div class="timeline-point-copy">
@@ -160,7 +175,11 @@ function getPosition(item) {
             <div
               v-else
               class="gift-timeline-reinvestment"
-              :style="{ left: `${getPosition(item)}%` }"
+              :class="getPositionClass(item)"
+              :style="{
+                '--timeline-position': `${getPosition(item)}%`,
+                left: `${getPosition(item)}%`,
+              }"
             >
               <span
                 class="reinvestment-timeline-dot"
