@@ -779,9 +779,9 @@ textarea:focus-visible {
 }
 
 /* --------------홈------------- */
-.home-page {
+/* .home-page {
   background: linear-gradient(180deg, #e7edf7 0%, #f5f7fb 340px);
-}
+} */
 
 .home-content {
   display: grid;
@@ -828,8 +828,9 @@ textarea:focus-visible {
   max-width: 260px;
   margin: 0;
   color: rgba(255, 255, 255, 0.74);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.65;
+  font-weight: 500;
 }
 
 .hero-orbit {
@@ -969,6 +970,7 @@ textarea:focus-visible {
   box-shadow: var(--shadow-md);
   min-width: 0;
   width: 100%;
+  z-index: 1;
 }
 
 .quick-icon,
@@ -983,7 +985,7 @@ textarea:focus-visible {
 .quick-icon.yellow {
   background: #fff6cb;
   color: #9c7700;
-  box-shadow: 0 6px 16px rgba(238, 184, 0, 0.18);
+  /* box-shadow: 0 6px 16px rgba(238, 184, 0, 0.18); */
 }
 
 .quick-copy h3 {
@@ -3868,7 +3870,7 @@ textarea:focus-visible {
   }
 
   .hero-copy p {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .overview-grid,

@@ -56,7 +56,7 @@ const guideCards = [
         <div class="hero-copy">
           <span class="hero-kicker">미리 준비하는 가족의 다음 10년</span>
           <h2>증여, 미리 알면<br />가족의 계획이 쉬워져요.</h2>
-          <!-- <p>세금과 절차를 한눈에 비교해 보세요.</p> -->
+          <!-- <p>세금과 운용 전략을 한눈에 비교해 보세요.</p> -->
         </div>
         <div class="hero-visual" aria-hidden="true">
           <span class="hero-coin coin-one">₩</span>
@@ -73,7 +73,7 @@ const guideCards = [
         <div class="quick-copy">
           <span class="section-kicker">3분이면 충분해요</span>
           <h3>우리 가족 증여, 지금 바로 계산하기</h3>
-          <!-- <p>공제 한도부터 10년 후 예상 자산까지 비교해 보세요.</p> -->
+          <p>공제 한도부터 10년 후 예상 자산까지 비교해 보세요.</p>
         </div>
         <RouterLink class="primary-button full" to="/simulation">
           증여 시뮬레이션 시작하기 <AppIcon name="arrow" :size="19" />
