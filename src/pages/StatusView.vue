@@ -72,6 +72,15 @@ function planProgressCopy(plan) {
   return plannedGiftDate && plannedGiftDate < todayDate ? '불리고 있어요' : '불릴 예정이에요'
 }
 
+function planScheduleCopy(plan) {
+  const plannedGiftDate = String(plan.plannedGiftDate ?? '').replaceAll('.', '-')
+  const giftStarted = plannedGiftDate && plannedGiftDate < todayDate
+
+  if (!giftStarted && plan.plannedGiftDate) return `${plan.plannedGiftDate} 증여 예정`
+  if (plan.giftDate) return `${plan.giftDate} 운용 종료 예정`
+  return '일정 미정'
+}
+
 function completedDocuments(planId) {
   return store.checkedDocumentCount(planId)
 }
@@ -291,7 +300,7 @@ onMounted(() => loadStatus())
             <strong>{{ familyPlans[0].productName }}</strong>
             <div class="plan-card-meta">
               <span v-if="familyPlans[0].rate">예상 수익률 연 {{ familyPlans[0].rate }}%</span>
-              <span>{{ familyPlans[0].giftDate }} 예정</span>
+              <span>{{ planScheduleCopy(familyPlans[0]) }}</span>
             </div>
           </div>
         </section>
