@@ -15,6 +15,10 @@ export async function completeProductVersion(versionId) {
   return request(`${ADMIN_PRODUCT_PATH}/versions/${versionId}/complete`, { method: 'PATCH' })
 }
 
+export async function deleteProductVersion(versionId) {
+  return request(`${ADMIN_PRODUCT_PATH}/versions/${versionId}`, { method: 'DELETE' })
+}
+
 export async function getProductsByVersion(versionId, { type = 'all' } = {}) {
   const params = new URLSearchParams()
   if (type && type !== 'all') params.set('type', type.toUpperCase())

@@ -7,6 +7,7 @@ import {
   listProductVersions,
   addProductVersion,
   completeProductVersion,
+  deleteProductVersion,
   getProductsByVersion,
   createProduct,
   updateProduct,
@@ -29,6 +30,14 @@ const filterTabs = [
 
 const statusLabels = { LOADING: '적재 중', COMPLETED: '완료', FAILED: '실패' }
 
+const assetTypeLabels = {
+  STOCK: '주식',
+  BOND: '채권',
+  ETF: 'ETF',
+  FUTURES: '선물',
+  CASH: '현금',
+}
+
 const versions = ref([])
 const selectedVersionId = ref(null)
 const products = ref([])
@@ -49,6 +58,9 @@ const showAddProductModal = ref(false)
 const isCreatingProduct = ref(false)
 const newProductDraft = ref(defaultNewProductDraft())
 
+const showDeleteVersionModal = ref(false)
+const isDeletingVersion = ref(false)
+
 function defaultEditDraft() {
   return {
     productName: '',
@@ -68,7 +80,10 @@ function defaultEditDraft() {
     bondRatioPercent: '',
     riskLevel: 'MEDIUM',
     annualReturn5yPercent: '',
+    rateBaseDate: '',
     rateTiers: [],
+    preferentialConditions: [],
+    etfHoldings: [],
   }
 }
 
@@ -80,13 +95,42 @@ function toNumberOrNull(value) {
   return value === '' || value === null || value === undefined ? null : Number(value)
 }
 
-function toRateTiersPayload(tiers) {
+function toDateOrNull(value) {
+  return value === '' || value === null || value === undefined ? null : value
+}
+
+function toRateTiersPayload(tiers, sharedBaseDate) {
+  const baseDate = toDateOrNull(sharedBaseDate)
   return tiers.map((tier) => ({
     baseInterestRateId: tier.baseInterestRateId ?? null,
     minMonth: toNumberOrNull(tier.minMonth),
     maxMonth: toNumberOrNull(tier.maxMonth),
     baseRatePercent: toNumberOrNull(tier.baseRatePercent),
     maxRatePercent: toNumberOrNull(tier.maxRatePercent),
+    baseDate,
+  }))
+}
+
+function toPreferentialConditionsPayload(conditions) {
+  return conditions.map((condition) => ({
+    preferentialInterestRateId: condition.preferentialInterestRateId ?? null,
+    additionalRatePercent: toNumberOrNull(condition.additionalRatePercent),
+    conditionCode: condition.conditionCode,
+    preferentialCondition: condition.preferentialCondition,
+    baseDate: toDateOrNull(condition.baseDate),
+  }))
+}
+
+function toEtfHoldingsPayload(holdings) {
+  return holdings.map((holding) => ({
+    holdingId: holding.holdingId ?? null,
+    holdingRank: toNumberOrNull(holding.holdingRank),
+    holdingName: holding.holdingName,
+    holdingCode: holding.holdingCode || null,
+    assetType: holding.assetType,
+    countryCode: holding.countryCode || null,
+    weightPercent: toNumberOrNull(holding.weightPercent),
+    baseDate: toDateOrNull(holding.baseDate),
   }))
 }
 
@@ -102,6 +146,37 @@ function addRateTier(tiers) {
 
 function removeRateTier(tiers, index) {
   tiers.splice(index, 1)
+}
+
+function addPreferentialCondition(conditions) {
+  conditions.push({
+    preferentialInterestRateId: null,
+    additionalRatePercent: '',
+    conditionCode: '',
+    preferentialCondition: '',
+    baseDate: '',
+  })
+}
+
+function removePreferentialCondition(conditions, index) {
+  conditions.splice(index, 1)
+}
+
+function addEtfHolding(holdings) {
+  holdings.push({
+    holdingId: null,
+    holdingRank: holdings.length + 1,
+    holdingName: '',
+    holdingCode: '',
+    assetType: 'STOCK',
+    countryCode: 'KR',
+    weightPercent: '',
+    baseDate: '',
+  })
+}
+
+function removeEtfHolding(holdings, index) {
+  holdings.splice(index, 1)
 }
 
 const selectedVersion = computed(
@@ -121,6 +196,9 @@ const totalCount = computed(() => {
   if (!v) return 0
   return (v.depositCount ?? 0) + (v.savingsCount ?? 0) + (v.etfCount ?? 0)
 })
+
+const latestVersion = computed(() => versions.value[0] ?? null)
+const isLatestVersionLoading = computed(() => latestVersion.value?.status === 'LOADING')
 
 async function loadVersions() {
   viewState.value = 'loading'
@@ -174,6 +252,11 @@ function formatTerm(product) {
 }
 
 async function addVersion() {
+  errorMessage.value = ''
+  if (isLatestVersionLoading.value) {
+    errorMessage.value = '가장 최근 버전의 적재를 완료해주세요.'
+    return
+  }
   isCreatingVersion.value = true
   try {
     const created = await addProductVersion()
@@ -183,6 +266,30 @@ async function addVersion() {
     errorMessage.value = error.message || '새 버전을 추가하지 못했습니다.'
   } finally {
     isCreatingVersion.value = false
+  }
+}
+
+function openDeleteVersionModal() {
+  showDeleteVersionModal.value = true
+}
+
+function closeDeleteVersionModal() {
+  showDeleteVersionModal.value = false
+}
+
+async function confirmDeleteVersion() {
+  if (!selectedVersion.value) return
+  isDeletingVersion.value = true
+  try {
+    await deleteProductVersion(selectedVersion.value.productDataVersionId)
+    showDeleteVersionModal.value = false
+    selectedVersionId.value = null
+    await loadVersions()
+    await loadProducts()
+  } catch (error) {
+    errorMessage.value = error.message || '버전을 삭제하지 못했습니다.'
+  } finally {
+    isDeletingVersion.value = false
   }
 }
 
@@ -219,7 +326,12 @@ function openEdit(product) {
     bondRatioPercent: product.bondRatioPercent ?? '',
     riskLevel: product.riskLevel ?? 'MEDIUM',
     annualReturn5yPercent: product.annualReturn5yPercent ?? '',
+    rateBaseDate: product.rateTiers?.[0]?.baseDate ?? '',
     rateTiers: (product.rateTiers ?? []).map((tier) => ({ ...tier })),
+    preferentialConditions: (product.preferentialConditions ?? []).map((condition) => ({
+      ...condition,
+    })),
+    etfHoldings: (product.etfHoldings ?? []).map((holding) => ({ ...holding })),
   }
 }
 
@@ -245,14 +357,16 @@ async function submitEdit() {
       payload.maxAmount = toNumberOrNull(draft.maxAmount)
       payload.minMonth = toNumberOrNull(draft.minMonth)
       payload.maxMonth = toNumberOrNull(draft.maxMonth)
-      payload.rateTiers = toRateTiersPayload(draft.rateTiers)
+      payload.rateTiers = toRateTiersPayload(draft.rateTiers, draft.rateBaseDate)
+      payload.preferentialConditions = toPreferentialConditionsPayload(draft.preferentialConditions)
     } else if (type === 'SAVINGS') {
       payload.savingsCategory = draft.savingsCategory
       payload.monthlyMinAmount = toNumberOrNull(draft.monthlyMinAmount)
       payload.monthlyMaxAmount = toNumberOrNull(draft.monthlyMaxAmount)
       payload.minMonth = toNumberOrNull(draft.minMonth)
       payload.maxMonth = toNumberOrNull(draft.maxMonth)
-      payload.rateTiers = toRateTiersPayload(draft.rateTiers)
+      payload.rateTiers = toRateTiersPayload(draft.rateTiers, draft.rateBaseDate)
+      payload.preferentialConditions = toPreferentialConditionsPayload(draft.preferentialConditions)
     } else if (type === 'ETF') {
       payload.stockCode = draft.stockCode
       payload.etfCategory = draft.etfCategory
@@ -262,6 +376,7 @@ async function submitEdit() {
       if (draft.annualReturn5yPercent !== '') {
         payload.annualReturn5yPercent = Number(draft.annualReturn5yPercent)
       }
+      payload.etfHoldings = toEtfHoldingsPayload(draft.etfHoldings)
     }
 
     const updated = await updateProduct(
@@ -304,14 +419,16 @@ async function submitAddProduct() {
       payload.maxAmount = toNumberOrNull(draft.maxAmount)
       payload.minMonth = toNumberOrNull(draft.minMonth)
       payload.maxMonth = toNumberOrNull(draft.maxMonth)
-      payload.rateTiers = toRateTiersPayload(draft.rateTiers)
+      payload.rateTiers = toRateTiersPayload(draft.rateTiers, draft.rateBaseDate)
+      payload.preferentialConditions = toPreferentialConditionsPayload(draft.preferentialConditions)
     } else if (draft.productType === 'SAVINGS') {
       payload.savingsCategory = draft.savingsCategory
       payload.monthlyMinAmount = toNumberOrNull(draft.monthlyMinAmount)
       payload.monthlyMaxAmount = toNumberOrNull(draft.monthlyMaxAmount)
       payload.minMonth = toNumberOrNull(draft.minMonth)
       payload.maxMonth = toNumberOrNull(draft.maxMonth)
-      payload.rateTiers = toRateTiersPayload(draft.rateTiers)
+      payload.rateTiers = toRateTiersPayload(draft.rateTiers, draft.rateBaseDate)
+      payload.preferentialConditions = toPreferentialConditionsPayload(draft.preferentialConditions)
     } else if (draft.productType === 'ETF') {
       payload.stockCode = draft.stockCode
       payload.etfCategory = draft.etfCategory
@@ -319,6 +436,7 @@ async function submitAddProduct() {
       payload.annualReturn5yPercent = toNumberOrNull(draft.annualReturn5yPercent)
       payload.bondRatioPercent = toNumberOrNull(draft.bondRatioPercent)
       payload.riskLevel = draft.riskLevel
+      payload.etfHoldings = toEtfHoldingsPayload(draft.etfHoldings)
     }
 
     await createProduct(selectedVersionId.value, payload)
@@ -369,6 +487,15 @@ function selectVersion(id) {
         >
           <AppIcon name="plus" :size="16" />
           {{ isCreatingVersion ? '생성 중...' : '새 버전 추가' }}
+        </button>
+        <button
+          v-if="selectedVersion"
+          class="admin-refresh-button is-danger"
+          type="button"
+          @click="openDeleteVersionModal"
+        >
+          <AppIcon name="trash" :size="16" />
+          버전 삭제
         </button>
       </div>
     </section>
@@ -560,6 +687,91 @@ function selectVersion(id) {
           /></label>
           <label>최소 가입기간(개월)<input v-model="editDraft.minMonth" type="number" /></label>
           <label>최대 가입기간(개월)<input v-model="editDraft.maxMonth" type="number" /></label>
+
+          <div class="admin-products-rate-tiers">
+            <div class="admin-products-rate-tiers__header">
+              <span>금리 구간</span>
+              <button
+                type="button"
+                class="secondary-button compact"
+                @click="addRateTier(editDraft.rateTiers)"
+              >
+                + 구간 추가
+              </button>
+            </div>
+            <label class="admin-products-rate-base-date">
+              기준일자 (모든 구간에 동일 적용)
+              <input v-model="editDraft.rateBaseDate" type="date" />
+            </label>
+            <p v-if="editDraft.rateTiers.length === 0" class="admin-products-rate-note">
+              등록된 금리 구간이 없습니다. "구간 추가"로 새로 등록하세요.
+            </p>
+            <div
+              v-for="(tier, index) in editDraft.rateTiers"
+              :key="tier.baseInterestRateId ?? `new-${index}`"
+              class="admin-products-rate-tier-row"
+            >
+              <label>최소(개월)<input v-model="tier.minMonth" type="number" /></label>
+              <label
+                >최대(개월, 무제한은 비움)<input v-model="tier.maxMonth" type="number"
+              /></label>
+              <label
+                >기본금리(%)<input v-model="tier.baseRatePercent" type="number" step="0.01"
+              /></label>
+              <label
+                >최고금리(%)<input v-model="tier.maxRatePercent" type="number" step="0.01"
+              /></label>
+              <button
+                type="button"
+                class="admin-products-rate-tier-remove"
+                aria-label="구간 삭제"
+                @click="removeRateTier(editDraft.rateTiers, index)"
+              >
+                <AppIcon name="trash" :size="16" />
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-products-rate-tiers">
+            <div class="admin-products-rate-tiers__header">
+              <span>우대조건</span>
+              <button
+                type="button"
+                class="secondary-button compact"
+                @click="addPreferentialCondition(editDraft.preferentialConditions)"
+              >
+                + 조건 추가
+              </button>
+            </div>
+            <p v-if="editDraft.preferentialConditions.length === 0" class="admin-products-rate-note">
+              등록된 우대조건이 없습니다.
+            </p>
+            <div
+              v-for="(condition, index) in editDraft.preferentialConditions"
+              :key="condition.preferentialInterestRateId ?? `new-${index}`"
+              class="admin-products-rate-tier-row"
+            >
+              <label>조건코드<input v-model="condition.conditionCode" type="text" /></label>
+              <label
+                >가산금리(%)<input
+                  v-model="condition.additionalRatePercent"
+                  type="number"
+                  step="0.01"
+              /></label>
+              <label>기준일자<input v-model="condition.baseDate" type="date" /></label>
+              <label class="is-wide"
+                >조건 설명<input v-model="condition.preferentialCondition" type="text"
+              /></label>
+              <button
+                type="button"
+                class="admin-products-rate-tier-remove"
+                aria-label="조건 삭제"
+                @click="removePreferentialCondition(editDraft.preferentialConditions, index)"
+              >
+                <AppIcon name="trash" :size="16" />
+              </button>
+            </div>
+          </div>
         </template>
 
         <template v-else-if="editingProduct?.productType === 'SAVINGS'">
@@ -574,6 +786,91 @@ function selectVersion(id) {
           <label>월 최대 납입액<input v-model="editDraft.monthlyMaxAmount" type="number" /></label>
           <label>최소 가입기간(개월)<input v-model="editDraft.minMonth" type="number" /></label>
           <label>최대 가입기간(개월)<input v-model="editDraft.maxMonth" type="number" /></label>
+
+          <div class="admin-products-rate-tiers">
+            <div class="admin-products-rate-tiers__header">
+              <span>금리 구간</span>
+              <button
+                type="button"
+                class="secondary-button compact"
+                @click="addRateTier(editDraft.rateTiers)"
+              >
+                + 구간 추가
+              </button>
+            </div>
+            <label class="admin-products-rate-base-date">
+              기준일자 (모든 구간에 동일 적용)
+              <input v-model="editDraft.rateBaseDate" type="date" />
+            </label>
+            <p v-if="editDraft.rateTiers.length === 0" class="admin-products-rate-note">
+              등록된 금리 구간이 없습니다. "구간 추가"로 새로 등록하세요.
+            </p>
+            <div
+              v-for="(tier, index) in editDraft.rateTiers"
+              :key="tier.baseInterestRateId ?? `new-${index}`"
+              class="admin-products-rate-tier-row"
+            >
+              <label>최소(개월)<input v-model="tier.minMonth" type="number" /></label>
+              <label
+                >최대(개월, 무제한은 비움)<input v-model="tier.maxMonth" type="number"
+              /></label>
+              <label
+                >기본금리(%)<input v-model="tier.baseRatePercent" type="number" step="0.01"
+              /></label>
+              <label
+                >최고금리(%)<input v-model="tier.maxRatePercent" type="number" step="0.01"
+              /></label>
+              <button
+                type="button"
+                class="admin-products-rate-tier-remove"
+                aria-label="구간 삭제"
+                @click="removeRateTier(editDraft.rateTiers, index)"
+              >
+                <AppIcon name="trash" :size="16" />
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-products-rate-tiers">
+            <div class="admin-products-rate-tiers__header">
+              <span>우대조건</span>
+              <button
+                type="button"
+                class="secondary-button compact"
+                @click="addPreferentialCondition(editDraft.preferentialConditions)"
+              >
+                + 조건 추가
+              </button>
+            </div>
+            <p v-if="editDraft.preferentialConditions.length === 0" class="admin-products-rate-note">
+              등록된 우대조건이 없습니다.
+            </p>
+            <div
+              v-for="(condition, index) in editDraft.preferentialConditions"
+              :key="condition.preferentialInterestRateId ?? `new-${index}`"
+              class="admin-products-rate-tier-row"
+            >
+              <label>조건코드<input v-model="condition.conditionCode" type="text" /></label>
+              <label
+                >가산금리(%)<input
+                  v-model="condition.additionalRatePercent"
+                  type="number"
+                  step="0.01"
+              /></label>
+              <label>기준일자<input v-model="condition.baseDate" type="date" /></label>
+              <label class="is-wide"
+                >조건 설명<input v-model="condition.preferentialCondition" type="text"
+              /></label>
+              <button
+                type="button"
+                class="admin-products-rate-tier-remove"
+                aria-label="조건 삭제"
+                @click="removePreferentialCondition(editDraft.preferentialConditions, index)"
+              >
+                <AppIcon name="trash" :size="16" />
+              </button>
+            </div>
+          </div>
         </template>
 
         <template v-else-if="editingProduct?.productType === 'ETF'">
@@ -600,52 +897,50 @@ function selectVersion(id) {
               <option value="EX_HIGH">매우높음</option>
             </select>
           </label>
-        </template>
+          <label>
+            5년 연환산 수익률(%)
+            <input v-model="editDraft.annualReturn5yPercent" type="number" step="0.01" />
+          </label>
 
-        <label v-if="editingProduct?.productType === 'ETF'">
-          5년 연환산 수익률(%)
-          <input v-model="editDraft.annualReturn5yPercent" type="number" step="0.01" />
-        </label>
-
-        <template
-          v-else-if="
-            editingProduct?.productType === 'DEPOSIT' || editingProduct?.productType === 'SAVINGS'
-          "
-        >
           <div class="admin-products-rate-tiers">
             <div class="admin-products-rate-tiers__header">
-              <span>금리 구간</span>
+              <span>구성종목 (최대 10개)</span>
               <button
                 type="button"
                 class="secondary-button compact"
-                @click="addRateTier(editDraft.rateTiers)"
+                :disabled="editDraft.etfHoldings.length >= 10"
+                @click="addEtfHolding(editDraft.etfHoldings)"
               >
-                + 구간 추가
+                + 종목 추가
               </button>
             </div>
-            <p v-if="editDraft.rateTiers.length === 0" class="admin-products-rate-note">
-              등록된 금리 구간이 없습니다. "구간 추가"로 새로 등록하세요.
+            <p v-if="editDraft.etfHoldings.length === 0" class="admin-products-rate-note">
+              등록된 구성종목이 없습니다.
             </p>
             <div
-              v-for="(tier, index) in editDraft.rateTiers"
-              :key="tier.baseInterestRateId ?? `new-${index}`"
+              v-for="(holding, index) in editDraft.etfHoldings"
+              :key="holding.holdingId ?? `new-${index}`"
               class="admin-products-rate-tier-row"
             >
-              <label>최소(개월)<input v-model="tier.minMonth" type="number" /></label>
-              <label
-                >최대(개월, 무제한은 비움)<input v-model="tier.maxMonth" type="number"
-              /></label>
-              <label
-                >기본금리(%)<input v-model="tier.baseRatePercent" type="number" step="0.01"
-              /></label>
-              <label
-                >최고금리(%)<input v-model="tier.maxRatePercent" type="number" step="0.01"
-              /></label>
+              <label>순위(1~10)<input v-model="holding.holdingRank" type="number" min="1" max="10" /></label>
+              <label class="is-wide">종목명<input v-model="holding.holdingName" type="text" /></label>
+              <label>종목코드<input v-model="holding.holdingCode" type="text" /></label>
+              <label>
+                자산유형
+                <select v-model="holding.assetType">
+                  <option v-for="(label, value) in assetTypeLabels" :key="value" :value="value">
+                    {{ label }}
+                  </option>
+                </select>
+              </label>
+              <label>국가코드<input v-model="holding.countryCode" type="text" maxlength="2" /></label>
+              <label>비중(%)<input v-model="holding.weightPercent" type="number" step="0.01" /></label>
+              <label>기준일자<input v-model="holding.baseDate" type="date" /></label>
               <button
                 type="button"
                 class="admin-products-rate-tier-remove"
-                aria-label="구간 삭제"
-                @click="removeRateTier(editDraft.rateTiers, index)"
+                aria-label="종목 삭제"
+                @click="removeEtfHolding(editDraft.etfHoldings, index)"
               >
                 <AppIcon name="trash" :size="16" />
               </button>
@@ -713,6 +1008,10 @@ function selectVersion(id) {
                 + 구간 추가
               </button>
             </div>
+            <label class="admin-products-rate-base-date">
+              기준일자 (모든 구간에 동일 적용)
+              <input v-model="newProductDraft.rateBaseDate" type="date" />
+            </label>
             <p v-if="newProductDraft.rateTiers.length === 0" class="admin-products-rate-note">
               등록된 금리 구간이 없습니다. "구간 추가"로 새로 등록하세요.
             </p>
@@ -736,6 +1035,50 @@ function selectVersion(id) {
                 class="admin-products-rate-tier-remove"
                 aria-label="구간 삭제"
                 @click="removeRateTier(newProductDraft.rateTiers, index)"
+              >
+                <AppIcon name="trash" :size="16" />
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-products-rate-tiers">
+            <div class="admin-products-rate-tiers__header">
+              <span>우대조건</span>
+              <button
+                type="button"
+                class="secondary-button compact"
+                @click="addPreferentialCondition(newProductDraft.preferentialConditions)"
+              >
+                + 조건 추가
+              </button>
+            </div>
+            <p
+              v-if="newProductDraft.preferentialConditions.length === 0"
+              class="admin-products-rate-note"
+            >
+              등록된 우대조건이 없습니다.
+            </p>
+            <div
+              v-for="(condition, index) in newProductDraft.preferentialConditions"
+              :key="index"
+              class="admin-products-rate-tier-row"
+            >
+              <label>조건코드<input v-model="condition.conditionCode" type="text" /></label>
+              <label
+                >가산금리(%)<input
+                  v-model="condition.additionalRatePercent"
+                  type="number"
+                  step="0.01"
+              /></label>
+              <label>기준일자<input v-model="condition.baseDate" type="date" /></label>
+              <label class="is-wide"
+                >조건 설명<input v-model="condition.preferentialCondition" type="text"
+              /></label>
+              <button
+                type="button"
+                class="admin-products-rate-tier-remove"
+                aria-label="조건 삭제"
+                @click="removePreferentialCondition(newProductDraft.preferentialConditions, index)"
               >
                 <AppIcon name="trash" :size="16" />
               </button>
@@ -775,6 +1118,10 @@ function selectVersion(id) {
                 + 구간 추가
               </button>
             </div>
+            <label class="admin-products-rate-base-date">
+              기준일자 (모든 구간에 동일 적용)
+              <input v-model="newProductDraft.rateBaseDate" type="date" />
+            </label>
             <p v-if="newProductDraft.rateTiers.length === 0" class="admin-products-rate-note">
               등록된 금리 구간이 없습니다. "구간 추가"로 새로 등록하세요.
             </p>
@@ -798,6 +1145,50 @@ function selectVersion(id) {
                 class="admin-products-rate-tier-remove"
                 aria-label="구간 삭제"
                 @click="removeRateTier(newProductDraft.rateTiers, index)"
+              >
+                <AppIcon name="trash" :size="16" />
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-products-rate-tiers">
+            <div class="admin-products-rate-tiers__header">
+              <span>우대조건</span>
+              <button
+                type="button"
+                class="secondary-button compact"
+                @click="addPreferentialCondition(newProductDraft.preferentialConditions)"
+              >
+                + 조건 추가
+              </button>
+            </div>
+            <p
+              v-if="newProductDraft.preferentialConditions.length === 0"
+              class="admin-products-rate-note"
+            >
+              등록된 우대조건이 없습니다.
+            </p>
+            <div
+              v-for="(condition, index) in newProductDraft.preferentialConditions"
+              :key="index"
+              class="admin-products-rate-tier-row"
+            >
+              <label>조건코드<input v-model="condition.conditionCode" type="text" /></label>
+              <label
+                >가산금리(%)<input
+                  v-model="condition.additionalRatePercent"
+                  type="number"
+                  step="0.01"
+              /></label>
+              <label>기준일자<input v-model="condition.baseDate" type="date" /></label>
+              <label class="is-wide"
+                >조건 설명<input v-model="condition.preferentialCondition" type="text"
+              /></label>
+              <button
+                type="button"
+                class="admin-products-rate-tier-remove"
+                aria-label="조건 삭제"
+                @click="removePreferentialCondition(newProductDraft.preferentialConditions, index)"
               >
                 <AppIcon name="trash" :size="16" />
               </button>
@@ -835,6 +1226,51 @@ function selectVersion(id) {
               <option value="EX_HIGH">매우높음</option>
             </select>
           </label>
+
+          <div class="admin-products-rate-tiers">
+            <div class="admin-products-rate-tiers__header">
+              <span>구성종목 (최대 10개)</span>
+              <button
+                type="button"
+                class="secondary-button compact"
+                :disabled="newProductDraft.etfHoldings.length >= 10"
+                @click="addEtfHolding(newProductDraft.etfHoldings)"
+              >
+                + 종목 추가
+              </button>
+            </div>
+            <p v-if="newProductDraft.etfHoldings.length === 0" class="admin-products-rate-note">
+              등록된 구성종목이 없습니다.
+            </p>
+            <div
+              v-for="(holding, index) in newProductDraft.etfHoldings"
+              :key="index"
+              class="admin-products-rate-tier-row"
+            >
+              <label>순위(1~10)<input v-model="holding.holdingRank" type="number" min="1" max="10" /></label>
+              <label class="is-wide">종목명<input v-model="holding.holdingName" type="text" /></label>
+              <label>종목코드<input v-model="holding.holdingCode" type="text" /></label>
+              <label>
+                자산유형
+                <select v-model="holding.assetType">
+                  <option v-for="(label, value) in assetTypeLabels" :key="value" :value="value">
+                    {{ label }}
+                  </option>
+                </select>
+              </label>
+              <label>국가코드<input v-model="holding.countryCode" type="text" maxlength="2" /></label>
+              <label>비중(%)<input v-model="holding.weightPercent" type="number" step="0.01" /></label>
+              <label>기준일자<input v-model="holding.baseDate" type="date" /></label>
+              <button
+                type="button"
+                class="admin-products-rate-tier-remove"
+                aria-label="종목 삭제"
+                @click="removeEtfHolding(newProductDraft.etfHoldings, index)"
+              >
+                <AppIcon name="trash" :size="16" />
+              </button>
+            </div>
+          </div>
         </template>
       </div>
       <template #actions>
@@ -848,6 +1284,34 @@ function selectVersion(id) {
           @click="submitAddProduct"
         >
           {{ isCreatingProduct ? '등록 중...' : '등록' }}
+        </button>
+      </template>
+    </ModalSheet>
+
+    <ModalSheet
+      :show="showDeleteVersionModal"
+      title="버전을 삭제하시겠습니까?"
+      :description="`${selectedVersion?.versionCode ?? ''} 버전과 소속 상품 데이터가 모두 삭제됩니다. 삭제 후에는 복구할 수 없습니다.`"
+      danger
+      @close="closeDeleteVersionModal"
+    >
+      <template #icon><AppIcon name="trash" :size="25" /></template>
+      <template #actions>
+        <button
+          class="secondary-button"
+          type="button"
+          :disabled="isDeletingVersion"
+          @click="closeDeleteVersionModal"
+        >
+          취소
+        </button>
+        <button
+          class="danger-button"
+          type="button"
+          :disabled="isDeletingVersion"
+          @click="confirmDeleteVersion"
+        >
+          {{ isDeletingVersion ? '삭제 중...' : '삭제하기' }}
         </button>
       </template>
     </ModalSheet>
