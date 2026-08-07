@@ -86,7 +86,7 @@ defineEmits([
     <form class="simulation-form" @submit.prevent="$emit('submit')">
       <section class="simulation-input-step">
         <div class="input-step-heading">
-          <span>1</span>
+          <span class="step-number">1</span>
           <div>
             <h3>누구에게 증여할까요?</h3>
           </div>
@@ -133,7 +133,7 @@ defineEmits([
 
       <section class="simulation-input-step amount-step">
         <div class="input-step-heading">
-          <span>2</span>
+          <span class="step-number">2</span>
           <div class="amount-heading-copy">
             <h3>얼마를 증여할까요?</h3>
           </div>
@@ -170,7 +170,7 @@ defineEmits([
 
       <section class="simulation-input-step gift-date-step">
         <div class="input-step-heading">
-          <span>3</span>
+          <span class="step-number">3</span>
           <div>
             <h3>언제 증여할까요?</h3>
             <p>선택한 날짜부터 증여 일정과 운용 기간을 계산해요.</p>
@@ -204,7 +204,7 @@ defineEmits([
 
       <section class="simulation-input-step period-step">
         <div class="input-step-heading">
-          <span>4</span>
+          <span class="step-number">4</span>
           <div>
             <h3>얼마 동안 운용할까요?</h3>
             <p>기간에 맞춰 상품 비중과 예상 금액을 계산해요.</p>
@@ -252,7 +252,7 @@ defineEmits([
 
       <section class="simulation-input-step tax-payer-step">
         <div class="input-step-heading">
-          <span>5</span>
+          <span class="step-number">5</span>
           <div>
             <h3>증여세는 누가 준비할까요?</h3>
             <p>세금 대납 여부까지 반영해 실제 필요한 금액을 계산해요.</p>

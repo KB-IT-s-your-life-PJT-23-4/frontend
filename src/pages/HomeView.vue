@@ -90,7 +90,7 @@ const optionalGuide = guideCards[3]
               class="quick-card home-guide-step-card"
               :class="`step-${index + 1}`"
             >
-              <span class="home-guide-step-number">
+              <span class="step-number home-guide-step-number">
                 {{ String(index + 1).padStart(2, '0') }}
               </span>
               <span class="home-guide-step-copy">
