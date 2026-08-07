@@ -229,7 +229,7 @@ onMounted(() => loadStatus())
           </div>
           <div class="plan-card-copy">
             <div class="plan-card-eyebrow">
-              <span>저축하며 불러요</span>
+              <span>저축하며 불려요</span>
               <button type="button" aria-label="계획 삭제" @click="planToDelete = familyPlans[0]">
                 <AppIcon name="trash" :size="17" />
               </button>
@@ -282,8 +282,15 @@ onMounted(() => loadStatus())
             <span>한도 갱신까지</span>
             <h2 v-if="hasRenewalSchedule">{{ family.resetLabel }} 남았어요</h2>
             <h2 v-else>아직 갱신 일정이 없어요</h2>
+            <!--
+              날짜만으로는 "그래서 얼마가 생기나"가 안 보인다.
+              늘어나는 여력이 0이면(초과분을 메우는 데 다 쓰이는 경우) 문구를 띄우지 않는다.
+            -->
+            <p v-if="family.renewalAmount" class="renewal-note">
+              {{ hasRenewalSchedule ? family.resetDate : '증여 이력 없음' }}부터
+              {{ formatCompactWon(family.renewalAmount) }}까지 세금없이 증여할 수 있어요
+            </p>
           </div>
-          <strong>{{ hasRenewalSchedule ? family.resetDate : '증여 이력 없음' }}</strong>
         </section>
 
         <section class="status-section">

@@ -10,9 +10,11 @@ import {
 const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
 
 // 증여는 /api/gm, 수증자는 /api/fm 으로 네임스페이스가 나뉜다.
+// 리마인더는 둘을 가로질러 한 목록으로 합치는 화면이라 어느 한쪽 밑에 두지 않았다.
 const GIFT_PATH = '/gm/gift'
 const DEDUCTION_PATH = '/gm/deduction'
 const FAMILY_PATH = '/fm/family'
+const REMINDER_PATH = '/rm'
 
 // gift.status ENUM (백엔드 com.example.project.gift.domain.Status)
 export const GIFT_STATUS = {
@@ -210,7 +212,7 @@ function consultationFallback(question) {
 export const api = {
   isMock: !API_BASE,
 
-  async runSimulation({ family, amount, years = 10, donorPaysTax = false }) {
+  async runSimulation({ family, amount, years = 10, giftDate, donorPaysTax = false }) {
     if (API_BASE) {
       return request('/gs', {
         method: 'POST',
@@ -220,11 +222,12 @@ export const api = {
           requestedAmount: amount,
           taxPaymentMethod: donorPaysTax ? 'DONOR_PAYS' : 'RECIPIENT_PAYS',
           investmentPeriodMonths: years * 12,
+          giftDate,
         }),
       })
     }
     await wait(650)
-    return calculateSimulation({ amount, family, products, years, donorPaysTax })
+    return calculateSimulation({ amount, family, products, years, giftDate, donorPaysTax })
   },
 
   async getSimulation(simulationId) {
@@ -359,6 +362,27 @@ export const api = {
     return request(`${GIFT_PATH}/${giftId}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
+    })
+  },
+
+  // --- 리마인더 : ReminderController @RequestMapping("/api/rm") ---
+
+  // GET /api/rm — 신고기한·공제갱신일을 targetDate 오름차순으로.
+  // 서버가 저장하지 않고 조회 시점에 gift 에서 계산하므로 항상 최신이다.
+  // 언제 뜨고 언제 사라지는지(마일스톤)는 서버가 정하므로 클라이언트가 넘길 조건이 없다.
+  async listReminders() {
+    if (!API_BASE) return []
+    const data = await request(REMINDER_PATH)
+    return Array.isArray(data) ? data : []
+  },
+
+  // POST /api/rm/read — 리마인더에는 고유 id 가 없어 (giftId, type) 으로 지목한다.
+  // 여러 번 눌러도 행은 하나고 읽은 시각만 갱신된다.
+  async markReminderRead({ giftId, type }) {
+    if (!API_BASE) return null
+    return request(`${REMINDER_PATH}/read`, {
+      method: 'POST',
+      body: JSON.stringify({ giftId, type }),
     })
   },
 

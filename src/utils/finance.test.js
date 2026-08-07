@@ -3,6 +3,7 @@ import {
   calculateDepositFutureValue,
   calculateEtfFutureValue,
   calculateGiftTax,
+  calculateProductFutureValue,
   calculateSavingsFutureValue,
   calculateSimulation,
   futureValue,
@@ -37,6 +38,20 @@ describe('증여 계산', () => {
     expect(optimized.giftTax).toBe(0)
   })
 
+  it('입력한 증여 예정일부터 증여 일정과 운용 종료일을 계산한다', () => {
+    const result = calculateSimulation({
+      amount: 80000000,
+      family,
+      products,
+      years: 10,
+      giftDate: '2026-09-15',
+    })
+
+    expect(result.giftDate).toBe('2026.09.15')
+    expect(result.results[0].giftSchedule[0].date).toBe('2026.09.15')
+    expect(result.endDate).toBe('2036.09.15')
+  })
+
   it('복리 예상 자산을 계산한다', () => {
     expect(futureValue(10000000, 3, 10)).toBe(13439164)
   })
@@ -53,10 +68,74 @@ describe('증여 계산', () => {
     expect(calculateEtfFutureValue(18642000, 5.1, 36)).toBe(21642162)
   })
 
+  it('예금은 만기 원리금을 동일 상품에 재가입해 계산한다', () => {
+    expect(
+      calculateProductFutureValue(
+        {
+          type: 'DEPOSIT',
+          rate: 3.4,
+          minimumContractMonths: 12,
+          maximumContractMonths: 12,
+          reinvestmentSchedule: [
+            {
+              trancheSequenceNo: 1,
+              renewalSequenceNo: 1,
+              completedContractMonths: 12,
+            },
+            {
+              trancheSequenceNo: 1,
+              renewalSequenceNo: 2,
+              completedContractMonths: 12,
+            },
+          ],
+        },
+        100000000,
+        36,
+        1,
+      ),
+    ).toBe(110550730)
+  })
+
   it('투자 성향별 포트폴리오 비중의 합은 100%이다', () => {
     Object.values(getPortfolioAllocations(10)).forEach((allocation) => {
       expect(Object.values(allocation).reduce((sum, ratio) => sum + ratio, 0)).toBe(100)
     })
+  })
+
+  it('예금 실수익률이 높으면 안전자산을 예금에 우선 배분한다', () => {
+    const allocation = getPortfolioAllocations(3, {
+      principal: 100000000,
+      savingsCapacity: 18000000,
+      depositProduct: {
+        type: 'DEPOSIT',
+        rate: 3.2,
+      },
+      savingsProduct: {
+        type: 'SAVINGS',
+        rate: 4,
+      },
+      investmentPeriodMonths: 36,
+    }).BALANCED
+
+    expect(allocation).toEqual({ DEPOSIT: 80, SAVINGS: 0, ETF: 20 })
+  })
+
+  it('적금 실수익률이 높으면 한도까지 적금에 배분한다', () => {
+    const allocation = getPortfolioAllocations(3, {
+      principal: 100000000,
+      savingsCapacity: 18000000,
+      depositProduct: {
+        type: 'DEPOSIT',
+        rate: 1,
+      },
+      savingsProduct: {
+        type: 'SAVINGS',
+        rate: 8,
+      },
+      investmentPeriodMonths: 36,
+    }).BALANCED
+
+    expect(allocation).toEqual({ DEPOSIT: 62, SAVINGS: 18, ETF: 20 })
   })
 
   it('기존 대표 포트폴리오는 균형형 비중을 사용한다', () => {
