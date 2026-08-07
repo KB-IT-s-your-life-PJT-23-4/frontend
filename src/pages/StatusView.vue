@@ -276,7 +276,7 @@ onMounted(() => loadStatus())
             <h2>{{ formatCompactWon(familyPlans[0].amount) }}을 준비하고 있어요</h2>
             <strong>{{ familyPlans[0].productName }}</strong>
             <div class="plan-card-meta">
-              <span v-if="familyPlans[0].rate">예상 수익률 연 {{ familyPlans[0].rate }}%</span>
+              <span v-if="familyPlans[0].rate"> 예상 수익률 연 {{ familyPlans[0].rate }}% </span>
               <span>{{ familyPlans[0].giftDate }} 예정</span>
             </div>
           </div>
