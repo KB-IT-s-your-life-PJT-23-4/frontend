@@ -13,7 +13,7 @@ const menuItems = [
   { label: '상품 관리', icon: 'wallet', to: '/admin/products', available: true },
   { label: '신고 관리', icon: 'document' },
   { label: '세법 관리', icon: 'shield' },
-  { label: 'FAQ 및 상담 콘텐츠 관리', icon: 'chat', to: '/admin/faq', available: true },
+  { label: 'FAQ 관리', icon: 'chat', to: '/admin/faq', available: true },
   { label: '배치 작업 관리', icon: 'refresh' },
   { label: '권한 관리', icon: 'settings' },
   { label: '감사 로그', icon: 'clock' },

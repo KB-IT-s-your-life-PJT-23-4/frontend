@@ -131,7 +131,7 @@ const router = createRouter({
       name: 'admin-faq',
       component: AdminFaqView,
       meta: {
-        label: 'FAQ 및 상담 콘텐츠 관리',
+        label: 'FAQ 관리',
         requiresAuth: true,
         requiresAdmin: true,
         layout: 'admin',
