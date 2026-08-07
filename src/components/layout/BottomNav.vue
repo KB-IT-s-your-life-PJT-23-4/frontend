@@ -23,21 +23,13 @@ const items = [
       v-for="item in items"
       :key="item.to"
       :to="item.to"
-      :class="item.featured ? 'nav-item--featured' : 'nav-item'"
+      class="nav-item"
+      :class="{ 'nav-item--featured': item.featured }"
     >
-      <template v-if="item.featured" :key="`featured-${item.to}`">
-        <div class="nav-item-circle">
-          <span class="nav-icon">
-            <AppIcon :name="item.icon" :size="28" />
-          </span>
-        </div>
-      </template>
-      <template v-else :key="`normal-${item.to}`">
-        <span class="nav-icon">
-          <AppIcon :name="item.icon" :size="24" />
-        </span>
-        <span class="nav-label">{{ item.label }}</span>
-      </template>
+      <span class="nav-icon">
+        <AppIcon :name="item.icon" :size="item.featured ? 24 : 22" />
+      </span>
+      <span class="nav-label">{{ item.label }}</span>
     </RouterLink>
   </nav>
 </template>
