@@ -1,8 +1,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { getAdminUser, getAdminUsers } from '../api/adminUserApi'
+import { deleteAdminUser, getAdminUser, getAdminUsers } from '../api/adminUserApi'
 import AdminLayout from '../components/admin/AdminLayout.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
+import ModalSheet from '../components/layout/ModalSheet.vue'
 import '../assets/css/admin-dashboard.css'
 import '../assets/css/admin-user.css'
 
@@ -28,6 +29,10 @@ const selectedUserId = ref(null)
 const selectedUser = ref(null)
 const detailState = ref('idle')
 const detailError = ref('')
+const deleteTarget = ref(null)
+const deletingUser = ref(false)
+const deleteError = ref('')
+const feedbackMessage = ref('')
 
 const totalElements = computed(() => pagination.value?.totalElements ?? 0)
 const currentPage = computed(() => pagination.value?.page ?? 0)
@@ -130,6 +135,39 @@ function changePage(page) {
   loadUsers(page)
 }
 
+function openDeleteModal(user) {
+  deleteTarget.value = user
+  deleteError.value = ''
+}
+
+function closeDeleteModal() {
+  if (deletingUser.value) return
+  deleteTarget.value = null
+  deleteError.value = ''
+}
+
+async function confirmDeleteUser() {
+  if (!deleteTarget.value || deletingUser.value) return
+
+  deletingUser.value = true
+  deleteError.value = ''
+  feedbackMessage.value = ''
+  const deletedUserId = deleteTarget.value.userId
+  const targetPage =
+    users.value.length === 1 && currentPage.value > 0 ? currentPage.value - 1 : currentPage.value
+
+  try {
+    await deleteAdminUser(deletedUserId)
+    deleteTarget.value = null
+    feedbackMessage.value = `회원 #${deletedUserId}을(를) 삭제했습니다.`
+    await loadUsers(targetPage)
+  } catch (error) {
+    deleteError.value = error.message || '회원을 삭제하지 못했습니다.'
+  } finally {
+    deletingUser.value = false
+  }
+}
+
 onMounted(() => loadUsers())
 </script>
 
@@ -191,6 +229,10 @@ onMounted(() => loadUsers())
       </p>
     </section>
 
+    <p v-if="feedbackMessage" class="admin-user-feedback" role="status">
+      {{ feedbackMessage }}
+    </p>
+
     <div class="admin-user-content-grid">
       <section class="admin-user-list admin-panel" aria-labelledby="admin-user-list-title">
         <div class="admin-panel__heading admin-user-list__heading">
@@ -235,7 +277,9 @@ onMounted(() => loadUsers())
                   <th scope="col">ID</th>
                   <th scope="col">회원</th>
                   <th scope="col">가입일</th>
+                  <th scope="col">수정일</th>
                   <th scope="col">권한</th>
+                  <th scope="col">상태</th>
                   <th scope="col">수증자</th>
                   <th scope="col">증여</th>
                   <th scope="col">시뮬레이션</th>
@@ -258,8 +302,13 @@ onMounted(() => loadUsers())
                     </span>
                   </td>
                   <td>{{ formatDateTime(user.createdAt) }}</td>
+                  <td>{{ formatDateTime(user.updatedAt) }}</td>
                   <td>
                     <span class="admin-user-role">{{ roleLabel(user.role) }}</span>
+                  </td>
+                  <td>
+                    <span v-if="user.accountStatusAvailable">{{ user.accountStatus || '-' }}</span>
+                    <span v-else class="admin-user-unavailable">미지원</span>
                   </td>
                   <td>{{ formatNumber(user.recipientCount) }}</td>
                   <td>{{ formatNumber(user.giftCount) }}</td>
@@ -399,8 +448,49 @@ onMounted(() => loadUsers())
               현재 API에서 정지·탈퇴 상태를 제공하지 않습니다.
             </p>
           </div>
+
+          <button
+            class="admin-user-delete-button"
+            type="button"
+            @click="openDeleteModal(selectedUser)"
+          >
+            <AppIcon name="trash" :size="16" />
+            회원 삭제
+          </button>
         </div>
       </aside>
     </div>
+
+    <ModalSheet
+      :show="Boolean(deleteTarget)"
+      title="정말 해당 회원을 삭제하시겠습니까?"
+      description="회원 정보와 ON DELETE CASCADE로 연결된 수증자·증여·시뮬레이션 데이터가 함께 삭제되며 복구할 수 없습니다."
+      danger
+      @close="closeDeleteModal"
+    >
+      <template #icon><AppIcon name="trash" :size="25" /></template>
+      <p v-if="deleteTarget" class="admin-user-delete-target">
+        삭제 대상: #{{ deleteTarget.userId }} {{ deleteTarget.name }} ({{ deleteTarget.email }})
+      </p>
+      <p v-if="deleteError" class="admin-user-delete-error" role="alert">{{ deleteError }}</p>
+      <template #actions>
+        <button
+          class="secondary-button"
+          type="button"
+          :disabled="deletingUser"
+          @click="closeDeleteModal"
+        >
+          취소
+        </button>
+        <button
+          class="danger-button"
+          type="button"
+          :disabled="deletingUser"
+          @click="confirmDeleteUser"
+        >
+          {{ deletingUser ? '삭제 중...' : '삭제하기' }}
+        </button>
+      </template>
+    </ModalSheet>
   </AdminLayout>
 </template>

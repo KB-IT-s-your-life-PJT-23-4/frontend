@@ -15,3 +15,7 @@ export function getAdminUsers({ userId, email, name, page = 0, size = 20 } = {})
 export function getAdminUser(userId) {
   return request(`/admin/users/${encodeURIComponent(userId)}`)
 }
+
+export function deleteAdminUser(userId) {
+  return request(`/admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' })
+}

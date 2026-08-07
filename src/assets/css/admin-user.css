@@ -115,6 +115,16 @@
   font-size: 9px;
 }
 
+.admin-user-feedback {
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #cfe5d7;
+  border-radius: 10px;
+  background: #f2faf5;
+  color: #2d6d47;
+  font-size: 9px;
+}
+
 .admin-user-content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
@@ -144,7 +154,7 @@
 
 .admin-user-table {
   width: 100%;
-  min-width: 830px;
+  min-width: 1000px;
   border-collapse: collapse;
   table-layout: auto;
 }
@@ -220,6 +230,12 @@
   border-radius: 8px;
   background: #edf3f8;
   color: #386687;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.admin-user-unavailable {
+  color: #8b7123;
   font-size: 8px;
   font-weight: 700;
 }
@@ -499,6 +515,40 @@
   color: #8c97a1;
   font-size: 8px;
   line-height: 1.5;
+}
+
+.admin-user-delete-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 38px;
+  margin-top: 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #e1b7b4;
+  border-radius: 10px;
+  background: #fff7f6;
+  color: #a43e3e;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-user-delete-target,
+.admin-user-delete-error {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.admin-user-delete-target {
+  color: #566675;
+}
+
+.admin-user-delete-error {
+  margin-top: 8px;
+  color: #b04c4c;
 }
 
 @media (max-width: 1180px) {
