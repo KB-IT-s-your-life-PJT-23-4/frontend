@@ -46,6 +46,9 @@ const showAddVersionModal = ref(false)
 const newVersionDraft = ref({ versionCode: '', dataDate: '' })
 const isCreatingVersion = ref(false)
 
+const isSalesStatusOpen = ref(false)
+const isVersionSelectOpen = ref(false)
+
 const selectedVersion = computed(
   () =>
     versions.value.find((version) => version.productDataVersionId === selectedVersionId.value) ??
@@ -167,6 +170,16 @@ async function submitAddVersion() {
     isCreatingVersion.value = false
   }
 }
+
+function selectSalesStatus(value) {
+  editDraft.value.salesStatus = value
+  isSalesStatusOpen.value = false
+}
+
+function selectVersion(id) {
+  selectedVersionId.value = id
+  isVersionSelectOpen.value = false
+}
 </script>
 
 <template>
@@ -192,16 +205,39 @@ async function submitAddVersion() {
     <template v-else>
       <section class="admin-panel admin-products-summary" aria-label="버전 요약">
         <div class="admin-products-version-select">
-          <label for="product-version">상품 데이터 버전</label>
-          <select id="product-version" v-model="selectedVersionId">
-            <option
-              v-for="version in versions"
-              :key="version.productDataVersionId"
-              :value="version.productDataVersionId"
+          <span id="product-version-label">상품 데이터 버전</span>
+          <div class="admin-products-custom-select" :class="{ 'is-open': isVersionSelectOpen }">
+            <button
+              type="button"
+              class="admin-products-custom-select__trigger"
+              aria-haspopup="listbox"
+              :aria-expanded="isVersionSelectOpen"
+              aria-labelledby="product-version-label"
+              @click="isVersionSelectOpen = !isVersionSelectOpen"
             >
-              {{ version.versionCode }} ({{ statusLabels[version.status] ?? version.status }})
-            </option>
-          </select>
+              {{
+                selectedVersion
+                  ? `${selectedVersion.versionCode} (${statusLabels[selectedVersion.status] ?? selectedVersion.status})`
+                  : '버전을 선택하세요'
+              }}
+              <span class="admin-products-custom-select__arrow" aria-hidden="true" />
+            </button>
+            <ul
+              v-if="isVersionSelectOpen"
+              class="admin-products-custom-select__list"
+              role="listbox"
+            >
+              <li
+                v-for="version in versions"
+                :key="version.productDataVersionId"
+                role="option"
+                :class="{ 'is-selected': version.productDataVersionId === selectedVersionId }"
+                @click="selectVersion(version.productDataVersionId)"
+              >
+                {{ version.versionCode }} ({{ statusLabels[version.status] ?? version.status }})
+              </li>
+            </ul>
+          </div>
         </div>
 
         <dl class="admin-products-meta">
@@ -253,7 +289,7 @@ async function submitAddVersion() {
           </thead>
           <tbody>
             <tr v-for="product in products" :key="product.productVersionId">
-              <td>
+              <td data-label="유형">
                 <span
                   class="admin-products-type-badge"
                   :class="`is-${product.productType?.toLowerCase()}`"
@@ -261,13 +297,15 @@ async function submitAddVersion() {
                   {{ typeLabel(product.productType) }}
                 </span>
               </td>
-              <td>{{ product.productName }}</td>
-              <td>{{ product.productCode }}</td>
-              <td>{{ formatRate(product) }}</td>
-              <td>{{ formatTerm(product) }}</td>
-              <td>{{ product.salesStatus === 'ON_SALE' ? '판매중' : '판매중지' }}</td>
-              <td>{{ product.createdAt?.slice(0, 10) }}</td>
-              <td>
+              <td data-label="상품명">{{ product.productName }}</td>
+              <td data-label="상품코드">{{ product.productCode }}</td>
+              <td data-label="금리/수익률">{{ formatRate(product) }}</td>
+              <td data-label="기간/위험도">{{ formatTerm(product) }}</td>
+              <td data-label="판매상태">
+                {{ product.salesStatus === 'ON_SALE' ? '판매중' : '판매중지' }}
+              </td>
+              <td data-label="등록일">{{ product.createdAt?.slice(0, 10) }}</td>
+              <td data-label="">
                 <button class="secondary-button compact" type="button" @click="openEdit(product)">
                   수정
                 </button>
@@ -302,10 +340,32 @@ async function submitAddVersion() {
         </label>
         <label>
           판매상태
-          <select v-model="editDraft.salesStatus">
-            <option value="ON_SALE">판매중</option>
-            <option value="DISCONTINUED">판매중지</option>
-          </select>
+          <div class="admin-products-custom-select" :class="{ 'is-open': isSalesStatusOpen }">
+            <button
+              type="button"
+              class="admin-products-custom-select__trigger"
+              @click="isSalesStatusOpen = !isSalesStatusOpen"
+            >
+              {{ editDraft.salesStatus === 'ON_SALE' ? '판매중' : '판매중지' }}
+              <span class="admin-products-custom-select__arrow" aria-hidden="true" />
+            </button>
+            <ul v-if="isSalesStatusOpen" class="admin-products-custom-select__list" role="listbox">
+              <li
+                role="option"
+                :class="{ 'is-selected': editDraft.salesStatus === 'ON_SALE' }"
+                @click="selectSalesStatus('ON_SALE')"
+              >
+                판매중
+              </li>
+              <li
+                role="option"
+                :class="{ 'is-selected': editDraft.salesStatus === 'DISCONTINUED' }"
+                @click="selectSalesStatus('DISCONTINUED')"
+              >
+                판매중지
+              </li>
+            </ul>
+          </div>
         </label>
       </div>
       <template #actions>
