@@ -14,3 +14,11 @@
 .page-content.status-content {
   grid-template-columns: minmax(0, 1fr);
 }
+
+.active-plan-card .plan-card-eyebrow {
+  justify-content: flex-end;
+}
+
+.renewal-card .renewal-note {
+  font-weight: 400;
+}
