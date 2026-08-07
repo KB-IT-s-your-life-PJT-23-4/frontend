@@ -11,7 +11,7 @@ const menuItems = [
   { label: '대시보드', icon: 'chart', to: '/admin/dashboard', available: true },
   { label: '회원 관리', icon: 'user', to: '/admin/users', available: true },
   { label: '상품 관리', icon: 'wallet', to: '/admin/products', available: true },
-  { label: '신고 관리', icon: 'document' },
+  { label: '신고 관리', icon: 'document', to: '/admin/reports', available: true },
   { label: '세법 관리', icon: 'shield' },
   { label: 'FAQ 관리', icon: 'chat', to: '/admin/faq', available: true },
   { label: '배치 작업 관리', icon: 'refresh' },
