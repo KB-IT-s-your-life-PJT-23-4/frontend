@@ -712,9 +712,7 @@ function selectVersion(id) {
               class="admin-products-rate-tier-row"
             >
               <label>최소(개월)<input v-model="tier.minMonth" type="number" /></label>
-              <label
-                >최대(개월, 무제한은 비움)<input v-model="tier.maxMonth" type="number"
-              /></label>
+              <label>최대(개월)<input v-model="tier.maxMonth" type="number" /></label>
               <label
                 >기본금리(%)<input v-model="tier.baseRatePercent" type="number" step="0.01"
               /></label>
@@ -743,7 +741,10 @@ function selectVersion(id) {
                 + 조건 추가
               </button>
             </div>
-            <p v-if="editDraft.preferentialConditions.length === 0" class="admin-products-rate-note">
+            <p
+              v-if="editDraft.preferentialConditions.length === 0"
+              class="admin-products-rate-note"
+            >
               등록된 우대조건이 없습니다.
             </p>
             <div
@@ -811,9 +812,7 @@ function selectVersion(id) {
               class="admin-products-rate-tier-row"
             >
               <label>최소(개월)<input v-model="tier.minMonth" type="number" /></label>
-              <label
-                >최대(개월, 무제한은 비움)<input v-model="tier.maxMonth" type="number"
-              /></label>
+              <label>최대(개월)<input v-model="tier.maxMonth" type="number" /></label>
               <label
                 >기본금리(%)<input v-model="tier.baseRatePercent" type="number" step="0.01"
               /></label>
@@ -842,7 +841,10 @@ function selectVersion(id) {
                 + 조건 추가
               </button>
             </div>
-            <p v-if="editDraft.preferentialConditions.length === 0" class="admin-products-rate-note">
+            <p
+              v-if="editDraft.preferentialConditions.length === 0"
+              class="admin-products-rate-note"
+            >
               등록된 우대조건이 없습니다.
             </p>
             <div
@@ -922,8 +924,12 @@ function selectVersion(id) {
               :key="holding.holdingId ?? `new-${index}`"
               class="admin-products-rate-tier-row"
             >
-              <label>순위(1~10)<input v-model="holding.holdingRank" type="number" min="1" max="10" /></label>
-              <label class="is-wide">종목명<input v-model="holding.holdingName" type="text" /></label>
+              <label
+                >순위(1~10)<input v-model="holding.holdingRank" type="number" min="1" max="10"
+              /></label>
+              <label class="is-wide"
+                >종목명<input v-model="holding.holdingName" type="text"
+              /></label>
               <label>종목코드<input v-model="holding.holdingCode" type="text" /></label>
               <label>
                 자산유형
@@ -933,8 +939,12 @@ function selectVersion(id) {
                   </option>
                 </select>
               </label>
-              <label>국가코드<input v-model="holding.countryCode" type="text" maxlength="2" /></label>
-              <label>비중(%)<input v-model="holding.weightPercent" type="number" step="0.01" /></label>
+              <label
+                >국가코드<input v-model="holding.countryCode" type="text" maxlength="2"
+              /></label>
+              <label
+                >비중(%)<input v-model="holding.weightPercent" type="number" step="0.01"
+              /></label>
               <label>기준일자<input v-model="holding.baseDate" type="date" /></label>
               <button
                 type="button"
@@ -1021,9 +1031,7 @@ function selectVersion(id) {
               class="admin-products-rate-tier-row"
             >
               <label>최소(개월)<input v-model="tier.minMonth" type="number" /></label>
-              <label
-                >최대(개월, 무제한은 비움)<input v-model="tier.maxMonth" type="number"
-              /></label>
+              <label>최대(개월)<input v-model="tier.maxMonth" type="number" /></label>
               <label
                 >기본금리(%)<input v-model="tier.baseRatePercent" type="number" step="0.01"
               /></label>
@@ -1119,7 +1127,7 @@ function selectVersion(id) {
               </button>
             </div>
             <label class="admin-products-rate-base-date">
-              기준일자 (모든 구간에 동일 적용)
+              기준일자
               <input v-model="newProductDraft.rateBaseDate" type="date" />
             </label>
             <p v-if="newProductDraft.rateTiers.length === 0" class="admin-products-rate-note">
@@ -1131,9 +1139,7 @@ function selectVersion(id) {
               class="admin-products-rate-tier-row"
             >
               <label>최소(개월)<input v-model="tier.minMonth" type="number" /></label>
-              <label
-                >최대(개월, 무제한은 비움)<input v-model="tier.maxMonth" type="number"
-              /></label>
+              <label>최대(개월)<input v-model="tier.maxMonth" type="number" /></label>
               <label
                 >기본금리(%)<input v-model="tier.baseRatePercent" type="number" step="0.01"
               /></label>
@@ -1229,7 +1235,7 @@ function selectVersion(id) {
 
           <div class="admin-products-rate-tiers">
             <div class="admin-products-rate-tiers__header">
-              <span>구성종목 (최대 10개)</span>
+              <span>구성종목</span>
               <button
                 type="button"
                 class="secondary-button compact"
@@ -1247,8 +1253,12 @@ function selectVersion(id) {
               :key="index"
               class="admin-products-rate-tier-row"
             >
-              <label>순위(1~10)<input v-model="holding.holdingRank" type="number" min="1" max="10" /></label>
-              <label class="is-wide">종목명<input v-model="holding.holdingName" type="text" /></label>
+              <label
+                >순위(1~10)<input v-model="holding.holdingRank" type="number" min="1" max="10"
+              /></label>
+              <label class="is-wide"
+                >종목명<input v-model="holding.holdingName" type="text"
+              /></label>
               <label>종목코드<input v-model="holding.holdingCode" type="text" /></label>
               <label>
                 자산유형
@@ -1258,8 +1268,12 @@ function selectVersion(id) {
                   </option>
                 </select>
               </label>
-              <label>국가코드<input v-model="holding.countryCode" type="text" maxlength="2" /></label>
-              <label>비중(%)<input v-model="holding.weightPercent" type="number" step="0.01" /></label>
+              <label
+                >국가코드<input v-model="holding.countryCode" type="text" maxlength="2"
+              /></label>
+              <label
+                >비중(%)<input v-model="holding.weightPercent" type="number" step="0.01"
+              /></label>
               <label>기준일자<input v-model="holding.baseDate" type="date" /></label>
               <button
                 type="button"
