@@ -122,7 +122,7 @@ const router = createRouter({
         label: '상품 관리',
         requiresAuth: true,
         requiresAdmin: true,
-        requiresRole: ['ADMIN', 'MIDDLE'],
+        requiresRole: ['ROOT', 'MIDDLE'],
         layout: 'admin',
         hideBottomNav: true,
       },
