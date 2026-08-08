@@ -136,6 +136,21 @@ const confirmBlockedByDate = computed(() => {
   return Boolean(giftDate) && toIsoDate(giftDate) > today
 })
 
+// 저장된 시뮬레이션은 아직 gift 가 없어 확정할 수 없다. 여기서 진행 중인 증여로 만든 뒤 확정 흐름을 탄다.
+const registeringPlanId = ref(null)
+
+async function registerPlan(plan) {
+  if (registeringPlanId.value) return
+  registeringPlanId.value = plan.id
+  try {
+    await store.registerSimulationAsGift(plan.id)
+  } catch (error) {
+    store.showToast(error.message || '증여로 등록하지 못했습니다.', 'info')
+  } finally {
+    registeringPlanId.value = null
+  }
+}
+
 async function confirmGift() {
   if (!planToConfirm.value || confirming.value) return
   confirming.value = true
@@ -545,8 +560,22 @@ onMounted(() => loadStatus())
                       </div>
                     </div>
                   </div>
+                  <template v-if="plan.source === 'simulation'">
+                    <button
+                      class="primary-button full confirm-gift-button"
+                      type="button"
+                      :disabled="registeringPlanId === plan.id"
+                      @click="registerPlan(plan)"
+                    >
+                      <AppIcon name="check" :size="16" />
+                      {{ registeringPlanId === plan.id ? '등록 중...' : '증여로 등록하기' }}
+                    </button>
+                    <p class="register-gift-note">
+                      저장한 시뮬레이션이에요. 증여로 등록하면 서류를 준비한 뒤 확정할 수 있어요.
+                    </p>
+                  </template>
                   <button
-                    v-if="!plan.readOnly && isPlanReadyToConfirm(plan.id)"
+                    v-else-if="isPlanReadyToConfirm(plan.id)"
                     class="primary-button full confirm-gift-button"
                     type="button"
                     @click="planToConfirm = plan"

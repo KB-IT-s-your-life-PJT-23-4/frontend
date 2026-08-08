@@ -490,6 +490,38 @@ async function clearUserState() {
   localStorage.removeItem(STORAGE_KEY)
 }
 
+/**
+ * 저장된 시뮬레이션을 진행 중인 증여(PLANNED gift)로 등록한다.
+ *
+ * 시뮬레이션을 저장하는 시점에는 gift 행을 만들지 않는다. 진행 중인 증여는 사용자가 지울 수 있어야 하는데,
+ * 저장과 동시에 만들면 둘이 한 몸이 되어 시뮬레이션을 지우지 않고는 증여만 취소할 수 없기 때문이다.
+ * gift 는 이 버튼을 누른 시점에 생기고, 그때부터 서류 체크 → 확정 흐름을 탈 수 있다.
+ *
+ * 증여일은 투자 만기일(giftDate)이 아니라 증여 예정일(plannedGiftDate)을 쓴다.
+ */
+async function registerSimulationAsGift(planId) {
+  const plan = state.plans.find((item) => item.id === planId)
+  if (!plan || plan.source !== 'simulation' || api.isMock) return
+
+  const created = await api.createGift({
+    familyId: Number(plan.familyId),
+    amount: Number(plan.currentAmount || plan.amount),
+    giftDate: toIsoDate(plan.plannedGiftDate || plan.giftDate),
+    memo: plan.productName || '진행 중인 증여',
+    status: GIFT_STATUS.PLANNED,
+  })
+
+  // 서류 체크는 planId 로 묶여 있다. 새로 생긴 gift 의 id 로 옮기지 않으면 체크가 사라진 것처럼 보인다.
+  const checkedDocuments = state.documentChecks[planId]
+  if (created?.giftId != null && checkedDocuments?.length) {
+    state.documentChecks[created.giftId] = checkedDocuments
+  }
+  delete state.documentChecks[planId]
+
+  await syncStatus()
+  showToast('증여로 등록했어요. 서류를 준비한 뒤 확정할 수 있어요.')
+}
+
 async function confirmPlanGift(planId) {
   const plan = state.plans.find((item) => item.id === planId)
   if (!plan) return
@@ -720,6 +752,7 @@ export function useAppStore() {
     deleteGiftHistory,
     syncStatus,
     ensureStatusLoaded,
+    registerSimulationAsGift,
     confirmPlanGift,
     toggleDocument,
     isDocumentChecked,
