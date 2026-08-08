@@ -181,7 +181,7 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin) {
     const role = String(authStore.user?.role ?? '').toUpperCase()
-    const adminRoles = ['ADMIN', 'MIDDLE', 'DEFAULT']
+    const adminRoles = ['ROOT', 'MIDDLE', 'DEFAULT']
     if (!adminRoles.includes(role)) return { name: 'home' }
 
     const allowedRoles = (to.meta.requiresRole ?? []).map((allowedRole) =>
