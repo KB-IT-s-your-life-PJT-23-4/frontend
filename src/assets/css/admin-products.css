@@ -247,6 +247,145 @@
   color: #173e61;
   font-weight: 600;
 }
+.admin-products-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.admin-products-filter {
+  margin-bottom: 0;
+}
+
+.admin-products-form select {
+  width: 100%;
+  height: 42px;
+  padding: 0 36px 0 12px;
+  box-sizing: border-box;
+  border: 1px solid #dfe5eb;
+  border-radius: 10px;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 8l5 5 5-5' stroke='%2371808e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color: #1c2e3f;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.admin-products-rate-tiers {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-products-rate-tiers__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-products-rate-tiers__header span {
+  color: #48657f;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-products-rate-tier-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) auto;
+  gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid #eef1f4;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.admin-products-rate-tier-row label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: #8c98a4;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.admin-products-rate-tier-row label.is-wide {
+  grid-column: 1 / -1;
+}
+
+.admin-products-rate-tier-row input,
+.admin-products-rate-tier-row select {
+  width: 100%;
+  height: 36px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.admin-products-rate-tier-row select {
+  padding-right: 24px;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 8l5 5 5-5' stroke='%2371808e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+.admin-products-rate-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed #dfe5eb;
+  border-radius: 10px;
+  color: #8c98a4;
+  font-size: 11px;
+}
+
+.admin-products-rate-base-date {
+  display: grid;
+  gap: 6px;
+  max-width: 220px;
+  color: #48657f;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-products-rate-base-date input {
+  height: 38px;
+}
+
+.admin-refresh-button.is-danger {
+  background: #fff8f8;
+  border: 1px solid #f5caca;
+  color: #b23b3b;
+}
+
+.admin-products-rate-tier-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #f5caca;
+  border-radius: 8px;
+  background: #fff8f8;
+  color: #b23b3b;
+  cursor: pointer;
+}
 
 @media (max-width: 640px) {
   .admin-products-table-wrap {
@@ -318,5 +457,17 @@
   .admin-products-version-select .admin-products-custom-select__trigger {
     width: 100%;
     min-width: 0;
+  }
+  .admin-products-rate-tier-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-products-rate-tier-row label.is-wide {
+    grid-column: 1 / -1;
+  }
+
+  .admin-products-rate-tier-remove {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }
