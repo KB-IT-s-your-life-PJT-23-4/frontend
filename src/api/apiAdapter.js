@@ -1,5 +1,7 @@
 import { faqItems, products } from '../data/mockData'
 import { calculateSimulation } from '../utils/finance'
+import { showBlockedAccess } from '../stores/accountAccessStore'
+import { shouldShowBlockedAccessForResponse } from '../utils/accountAccess'
 import {
   clearAuthSession,
   getAccessToken,
@@ -74,7 +76,7 @@ function idempotencyKey() {
 }
 
 async function fetchResponse(path, options, accessToken = null) {
-  const { headers: customHeaders, _retry, ...fetchOptions } = options
+  const { headers: customHeaders, _retry, _suppressBlockedAccess, ...fetchOptions } = options
 
   try {
     return await fetch(`${API_BASE}${path}`, {
@@ -176,7 +178,18 @@ export async function request(path, options = {}) {
       }
     }
 
-    throw responseError(response, payload)
+    const error = responseError(response, payload)
+    if (
+      shouldShowBlockedAccessForResponse({
+        status: response.status,
+        path,
+        errorCode: error.code,
+        suppressed: options._suppressBlockedAccess,
+      })
+    ) {
+      showBlockedAccess()
+    }
+    throw error
   }
 
   if (normalizedPath(path) === '/auth/login') authenticationFailurePromise = null
@@ -256,14 +269,14 @@ export const api = {
     })
   },
 
-  async listSimulations({ status, familyId, page, size } = {}) {
+  async listSimulations({ status, familyId, page, size, suppressBlockedAccess = false } = {}) {
     if (!API_BASE) return { items: [], pagination: null }
     const params = new URLSearchParams()
     if (familyId != null) params.set('familyId', String(familyId))
     if (status) params.set('status', status)
     if (page != null) params.set('page', String(page))
     if (size != null) params.set('size', String(size))
-    return request(`/gs?${params}`)
+    return request(`/gs?${params}`, { _suppressBlockedAccess: suppressBlockedAccess })
   },
 
   // --- 수증자(가족) : RecipientController @RequestMapping("/api/fm/family") ---

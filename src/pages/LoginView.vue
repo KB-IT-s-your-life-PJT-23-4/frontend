@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import PageHeading from '../components/layout/PageHeading.vue'
 import { useAuthStore } from '../stores/authStore'
+import { resolvePostLoginPath } from '../utils/authRedirect'
 import { validateEmail, validatePassword } from '../utils/authValidation'
 import '../assets/css/auth-view.css'
 
@@ -36,16 +37,6 @@ function loginErrorMessage(error) {
   return error.message || '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
 }
 
-function getPostLoginPath() {
-  const redirect = route.query.redirect
-  return typeof redirect === 'string' &&
-    /^\/(?:my(?:\/|[?#]|$)|chat(?:[?#]|$)|admin\/(?:dashboard|users|faq|reports?)(?:[?#]|$))/.test(
-      redirect,
-    )
-    ? redirect
-    : '/'
-}
-
 async function submitLogin() {
   if (isSubmitting.value) return
 
@@ -58,7 +49,7 @@ async function submitLogin() {
       email: form.email.trim(),
       password: form.password,
     })
-    await router.replace(getPostLoginPath())
+    await router.replace(resolvePostLoginPath(route.query.redirect))
   } catch (error) {
     serverError.value = loginErrorMessage(error)
   } finally {
