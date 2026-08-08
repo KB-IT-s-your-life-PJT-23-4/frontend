@@ -3250,6 +3250,14 @@ textarea:focus-visible {
   gap: 6px;
 }
 
+.register-gift-note {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .document-sample-view {
   display: grid;
   justify-items: center;
