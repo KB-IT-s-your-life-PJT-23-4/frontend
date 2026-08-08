@@ -15,35 +15,29 @@ onMounted(() => {
 
 const guideCards = [
   {
-    title: '미리줌 사용 가이드라인',
-    badge: 'HOT',
-    icon: 'sparkles',
-    image: '/src/assets/brand-symbol.svg',
-    color: 'purple',
+    title: '미리줌 이용 방법 알아보기',
     to: '/guides/mirizoom',
+    description: '서비스 흐름과 시뮬레이션 결과를 먼저 살펴보세요.',
   },
   {
-    title: '과세 구간 확인하기',
-    badge: 'CALCULATE',
-    icon: 'calculator',
-    color: 'yellow',
+    title: '증여세 기준 확인하기',
     to: '/guides/tax-brackets',
+    description: '공제 한도와 증여 금액별 세율을 확인해요.',
   },
   {
-    title: '증여 신고 방법 A-Z',
-    badge: 'GUIDE',
-    icon: 'check',
-    color: 'green',
+    title: '증여 신고 준비하기',
     to: '/guides/gift-reporting',
+    description: '신고 기한과 준비 서류를 순서대로 확인해요.',
   },
   {
-    title: '현금 외 증여에 대하여',
-    badge: 'ASSETS',
-    icon: 'arrow',
-    color: 'blue',
+    title: '현금 외 자산도 증여할 수 있나요?',
     to: '/guides/non-cash-gifts',
+    description: '주식·부동산 등 현금 외 증여 시 유의점을 확인해요.',
   },
 ]
+
+const learningSteps = guideCards.slice(0, 3)
+const optionalGuide = guideCards[3]
 </script>
 
 <template>
@@ -56,7 +50,7 @@ const guideCards = [
         <div class="hero-copy">
           <span class="hero-kicker">미리 준비하는 가족의 다음 10년</span>
           <h2>증여, 미리 알면<br />가족의 계획이 쉬워져요.</h2>
-          <!-- <p>세금과 절차를 한눈에 비교해 보세요.</p> -->
+          <!-- <p>세금과 운용 전략을 한눈에 비교해 보세요.</p> -->
         </div>
         <div class="hero-visual" aria-hidden="true">
           <span class="hero-coin coin-one">₩</span>
@@ -73,7 +67,7 @@ const guideCards = [
         <div class="quick-copy">
           <span class="section-kicker">3분이면 충분해요</span>
           <h3>우리 가족 증여, 지금 바로 계산하기</h3>
-          <!-- <p>공제 한도부터 10년 후 예상 자산까지 비교해 보세요.</p> -->
+          <p>공제 한도부터 10년 후 예상 자산까지 비교해 보세요.</p>
         </div>
         <RouterLink class="primary-button full" to="/simulation">
           증여 시뮬레이션 시작하기 <AppIcon name="arrow" :size="19" />
@@ -81,26 +75,43 @@ const guideCards = [
       </section>
 
       <section class="section-block guide-overview">
-        <div class="section-heading-row">
+        <div class="section-heading-row guide-overview-heading">
           <div>
-            <span class="section-kicker">알아두면 쉬워요</span>
-            <h2>증여 가이드</h2>
+            <span class="section-kicker">미리 알아두면 든든해요</span>
+            <h2>복잡한 증여, 차근차근 알아보기</h2>
           </div>
         </div>
-        <div class="guide-news-scroll">
-          <RouterLink
-            v-for="guide in guideCards"
-            :key="guide.to"
-            :to="guide.to"
-            class="guide-news-card"
-            :class="guide.color"
-          >
-            <div class="guide-news-top">
-              <span class="guide-news-badge">{{ guide.badge }}</span>
-              <h3>{{ guide.title }}</h3>
-            </div>
-            <AppIcon class="guide-news-icon" :name="guide.icon" :size="112" />
-            <span class="guide-news-arrow"><AppIcon name="arrow" :size="18" /></span>
+        <div class="home-guide-learning-path">
+          <div class="home-guide-step-list">
+            <RouterLink
+              v-for="(guide, index) in learningSteps"
+              :key="guide.to"
+              :to="guide.to"
+              class="quick-card home-guide-step-card"
+              :class="`step-${index + 1}`"
+            >
+              <span class="step-number home-guide-step-number">
+                {{ String(index + 1).padStart(2, '0') }}
+              </span>
+              <span class="home-guide-step-copy">
+                <strong>{{ guide.title }}</strong>
+                <span>{{ guide.description }}</span>
+              </span>
+              <span class="home-guide-step-arrow">
+                <AppIcon name="arrow" :size="16" />
+              </span>
+            </RouterLink>
+          </div>
+
+          <RouterLink :to="optionalGuide.to" class="quick-card home-guide-optional-card">
+            <span class="home-guide-optional-label">한 걸음 더</span>
+            <span class="home-guide-optional-copy">
+              <strong>{{ optionalGuide.title }}</strong>
+              <span>{{ optionalGuide.description }}</span>
+            </span>
+            <span class="home-guide-step-arrow">
+              <AppIcon name="arrow" :size="16" />
+            </span>
           </RouterLink>
         </div>
       </section>

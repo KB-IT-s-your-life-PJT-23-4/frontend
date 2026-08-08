@@ -31,7 +31,7 @@ watchEffect(() => {
       </div>
       <div class="desktop-message">
         <h2>복잡한 증여를<br />가족의 계획으로.</h2>
-        <p>세금부터 장기 운용까지, 한 번에 비교하고 미리 준비하세요.</p>
+        <p>세금부터 장기 운용까지,<br />한 번에 비교하고 미리 준비하세요.</p>
       </div>
       <nav class="desktop-nav" aria-label="데스크톱 주요 메뉴">
         <RouterLink to="/"><AppIcon name="home" :size="20" /> 홈</RouterLink>

@@ -40,7 +40,7 @@ const messages = ref([
   {
     id: 1,
     role: 'assistant',
-    text: '반갑습니다! 증여세와 절세 혜택에 대해 무엇이든 물어보세요. \n아래의 자주 묻는 질문들을 통해 상담을 시작하실 수도 있습니다.',
+    text: '반갑습니다! \n증여세와 절세 혜택에 대해 무엇이든 물어보세요. \n아래의 자주 묻는 질문들을 통해 상담을 시작하실 수도 있습니다.',
     createdAt: getCurrentTimeFormat(),
   },
 ])

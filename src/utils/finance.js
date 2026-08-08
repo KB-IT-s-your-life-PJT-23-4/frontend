@@ -36,6 +36,27 @@ export function calculateEstimatedPayableTax(giftTax) {
   return Math.max(0, Math.round(amount) - calculateFilingTaxCredit(amount))
 }
 
+export function annualizeTotalReturn(totalReturnRatePercent, investmentPeriodMonths) {
+  const totalReturnRate = Number(totalReturnRatePercent)
+  const periodMonths = Number(investmentPeriodMonths)
+
+  if (
+    !Number.isFinite(totalReturnRate) ||
+    !Number.isFinite(periodMonths) ||
+    periodMonths <= 0
+  ) {
+    return 0
+  }
+
+  const totalGrowthFactor = 1 + totalReturnRate / 100
+  if (totalGrowthFactor <= 0) return -100
+
+  const annualizedRate = (totalGrowthFactor ** (12 / periodMonths) - 1) * 100
+  const roundedRate = Number(annualizedRate.toFixed(2))
+
+  return Object.is(roundedRate, -0) ? 0 : roundedRate
+}
+
 export function futureValue(principal, annualRate, years = 10) {
   if (!Number.isFinite(principal) || principal <= 0) return 0
   return Math.round(principal * (1 + annualRate / 100) ** Math.max(0, years))

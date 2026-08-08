@@ -81,15 +81,6 @@
   --radius-md: 20px;
   --radius-lg: 26px;
   --nav-height: 60px;
-  /* 가이드 카테고리 컬러: 톤을 통일해 하나의 팔레트처럼 보이도록 */
-  --icon-a: #7c5cff;
-  --icon-a-bg: #f2effc;
-  --icon-b: #b8790a;
-  --icon-b-bg: #fbf1de;
-  --icon-c: #1f9d63;
-  --icon-c-bg: #ecf7f1;
-  --icon-d: #2f7fd1;
-  --icon-d-bg: #ecf3fb;
 }
 
 * {
@@ -377,9 +368,20 @@ textarea:focus-visible {
 .section-heading-row h2 {
   margin: 4px 0 0;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.3;
   letter-spacing: -0.03em;
+}
+
+.step-number {
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #3e617f;
+  background: #e8f1ff;
+  font-weight: 700;
 }
 
 .text-link {
@@ -779,9 +781,9 @@ textarea:focus-visible {
 }
 
 /* --------------홈------------- */
-.home-page {
+/* .home-page {
   background: linear-gradient(180deg, #e7edf7 0%, #f5f7fb 340px);
-}
+} */
 
 .home-content {
   display: grid;
@@ -828,8 +830,9 @@ textarea:focus-visible {
   max-width: 260px;
   margin: 0;
   color: rgba(255, 255, 255, 0.74);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.65;
+  font-weight: 500;
 }
 
 .hero-orbit {
@@ -954,9 +957,10 @@ textarea:focus-visible {
 .status-list-card,
 .expert-card,
 .notification-card {
-  border: 1px solid rgba(225, 231, 239, 0.92);
+  border: 1px solid rgba(225, 231, 239, 0.8);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
+  z-index: 1;
 }
 
 .simulation-cta-card {
@@ -965,7 +969,6 @@ textarea:focus-visible {
   gap: 12px 14px;
   padding: 20px;
   border-radius: var(--radius-md);
-  border-color: rgba(225, 231, 239, 0.6);
   box-shadow: var(--shadow-md);
   min-width: 0;
   width: 100%;
@@ -983,7 +986,7 @@ textarea:focus-visible {
 .quick-icon.yellow {
   background: #fff6cb;
   color: #9c7700;
-  box-shadow: 0 6px 16px rgba(238, 184, 0, 0.18);
+  /* box-shadow: 0 6px 16px rgba(238, 184, 0, 0.18); */
 }
 
 .quick-copy h3 {
@@ -1341,6 +1344,12 @@ textarea:focus-visible {
   line-height: 1.55;
 }
 @media (max-width: 390px) {
+  .hero-copy h2 {
+    font-size: clamp(28px, 4vw, 30px);
+  }
+  .quick-copy h3 {
+    font-size: 16px;
+  }
   .guide-highlight-card,
   .guide-step-card {
     padding: 18px;
@@ -1563,120 +1572,130 @@ textarea:focus-visible {
   font-size: 11px !important;
   line-height: 1.55 !important;
 }
-.guide-news-scroll {
-  display: flex;
-  margin: 0 -18px;
-  padding: 4px 18px 12px;
+.guide-overview-heading {
+  margin-bottom: 12px;
+}
+
+.guide-overview-heading h2 {
+  line-height: 1.35;
+}
+
+.home-guide-learning-path {
+  display: grid;
   gap: 14px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
 }
-.guide-news-scroll::-webkit-scrollbar {
-  display: none;
-}
-.guide-news-card {
+
+.home-guide-step-list {
   position: relative;
-  display: flex;
-  flex: 0 0 auto;
-  width: 250px;
-  height: 320px;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  padding: 24px;
-  border: 1px solid rgba(225, 231, 239, 0.9);
-  border-radius: 26px;
-  background: #fff;
-  color: inherit;
-  text-decoration: none;
-  scroll-snap-align: start;
-  box-shadow: 0 10px 24px rgba(34, 52, 77, 0.05);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-.guide-news-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 32px rgba(34, 52, 77, 0.1);
-}
-.guide-news-card:active {
-  transform: scale(0.97);
-}
-.guide-news-top {
-  position: relative;
-  z-index: 2;
   display: grid;
   gap: 10px;
 }
-.guide-news-badge {
-  display: inline-flex;
-  width: max-content;
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-.guide-news-card.purple .guide-news-badge {
-  background: #f2effc;
-  color: #7c5cff;
-}
-.guide-news-card.yellow .guide-news-badge {
-  background: #fbf1de;
-  color: #b8790a;
-}
-.guide-news-card.green .guide-news-badge {
-  background: #ecf7f1;
-  color: #1f9d63;
-}
-.guide-news-card.blue .guide-news-badge {
-  background: #ecf3fb;
-  color: #2f7fd1;
-}
-.guide-news-card h3 {
-  margin: 0;
-  font-size: 19px;
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: -0.02em;
-}
-.guide-news-icon {
+
+.home-guide-step-list::before {
   position: absolute;
-  right: -14px;
-  bottom: 64px;
-  z-index: 1;
-  opacity: 0.14;
+  top: 28px;
+  bottom: 28px;
+  left: 33px;
+  width: 2px;
+  background: #d8e1e9;
+  content: '';
 }
-.guide-news-card.purple .guide-news-icon {
-  color: #7c5cff;
-}
-.guide-news-card.yellow .guide-news-icon {
-  color: #b8790a;
-}
-.guide-news-card.green .guide-news-icon {
-  color: #1f9d63;
-}
-.guide-news-card.blue .guide-news-icon {
-  color: #2f7fd1;
-}
-.guide-news-icon--image {
-  width: 108px;
-  height: auto;
-  opacity: 0.9;
-}
-.guide-news-arrow {
+
+.home-guide-step-card {
   position: relative;
-  z-index: 2;
   display: grid;
-  align-self: flex-end;
-  width: 42px;
-  height: 42px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 82px;
+  padding: 15px 16px;
+  align-items: center;
+  gap: 14px;
+  border-radius: 17px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.16s ease;
+}
+
+.home-guide-step-card:hover {
+  background: #f8fafb;
+}
+
+.home-guide-step-card:active,
+.home-guide-optional-card:active,
+.home-guide-optional-card:hover {
+  background: #f1f5f7;
+}
+
+.home-guide-step-number {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border: 3px solid #fff;
+  background: #e8f1ff;
+  font-size: 10px;
+}
+
+.home-guide-step-copy,
+.home-guide-optional-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.home-guide-step-copy strong,
+.home-guide-optional-copy strong {
+  color: #3c4f61;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.home-guide-step-copy > span,
+.home-guide-optional-copy > span {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+  white-space: normal;
+}
+
+.home-guide-step-arrow {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: none;
   place-items: center;
-  border-radius: 50%;
-  background: #f3f5f8;
-  color: #20242c;
+  color: #7e8b98;
+}
+
+.home-guide-optional-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  padding: 14px 16px;
+  align-items: center;
+  gap: 13px;
+  border-radius: 15px;
+  background: #f5f8fa;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.16s ease;
+}
+
+.home-guide-optional-label {
+  display: inline-flex;
+  min-width: 58px;
+  height: 28px;
+  padding: 0 9px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d5dfe7;
+  border-radius: 8px;
+  color: #63798c;
+  background: #fff;
+  font-size: 9px;
+  font-weight: 700;
 }
 /* --------------알림------------- */
 .notification-group + .notification-group {
@@ -1831,16 +1850,10 @@ textarea:focus-visible {
 }
 
 .input-step-heading > span {
-  display: grid;
   width: 25px;
   height: 25px;
-  flex: none;
-  place-items: center;
-  border-radius: 50%;
-  color: #3e617f;
   background: #e8f1ff;
   font-size: 11px;
-  font-weight: 800;
 }
 
 .input-step-heading h3 {
@@ -2630,9 +2643,9 @@ textarea:focus-visible {
 
 .active-plan-visual {
   position: relative;
-  height: 104px;
+  height: 120px;
   overflow: hidden;
-  background: #edf4ff;
+  background: linear-gradient(155deg, var(--blue) 0%, var(--blue-strong) 55%, #2e638e 100%);
 }
 
 .plan-orbit {
@@ -2722,7 +2735,6 @@ textarea:focus-visible {
   display: grid;
   padding: 27px 20px;
   justify-items: center;
-  border: 1px dashed #c9d6e5;
   border-radius: var(--radius-md);
   background: #eef4ff;
   text-align: center;
@@ -2876,7 +2888,7 @@ textarea:focus-visible {
 .gift-history-list,
 .ongoing-plan-list {
   display: grid;
-  gap: 10px;
+  gap: 5px;
   margin: 15px 0;
 }
 
@@ -2930,14 +2942,13 @@ textarea:focus-visible {
 }
 
 .ongoing-plan-head {
-  display: flex;
-  align-items: flex-start;
+  position: relative;
 }
 
 .ongoing-plan-summary {
   display: grid;
-  grid-template-columns: 1fr auto;
-  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
   min-width: 0;
   padding: 13px;
   gap: 9px;
@@ -2950,11 +2961,16 @@ textarea:focus-visible {
 
 .ongoing-plan-delete {
   flex: none;
-  margin: 13px 10px 0 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 8px;
+  pointer-events: auto;
 }
 
 .ongoing-plan-summary > div {
   display: grid;
+  padding-right: 124px;
   gap: 3px;
 }
 
@@ -2963,11 +2979,14 @@ textarea:focus-visible {
   font-size: 10px;
 }
 
-.ongoing-plan-aside {
+.ongoing-plan-actions {
+  position: absolute;
+  top: 11px;
+  right: 10px;
   display: flex;
   align-items: center;
-  align-self: start;
-  gap: 6px;
+  gap: 5px;
+  pointer-events: none;
 }
 
 .ongoing-plan-caret {
@@ -3244,10 +3263,6 @@ textarea:focus-visible {
   display: block;
   width: 100%;
   height: auto;
-}
-
-.status-pill {
-  align-self: start;
 }
 
 .yellow-text {
@@ -3868,7 +3883,7 @@ textarea:focus-visible {
   }
 
   .hero-copy p {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .overview-grid,
@@ -5586,7 +5601,7 @@ textarea:focus-visible {
   }
 }
 
-/* --------------홈 화면 카드뉴스_반응형------------- */
+/* --------------홈 화면 가이드_반응형------------- */
 
 @media (max-width: 390px) {
   .asset-hero,
@@ -5600,14 +5615,10 @@ textarea:focus-visible {
   .info-pair {
     grid-template-columns: 1fr;
   }
-  .guide-news-scroll {
-    margin: 0 -14px;
-    padding: 4px 14px 12px;
-  }
-  .guide-news-card {
-    width: 220px;
-    height: 300px;
-    padding: 20px;
+  .home-guide-step-card,
+  .home-guide-optional-card {
+    padding: 14px;
+    gap: 11px;
   }
 }
 @media (min-width: 760px) {
@@ -5617,14 +5628,30 @@ textarea:focus-visible {
   .non-cash-guide {
     gap: 16px;
   }
-  .guide-news-scroll {
-    margin: 0 -26px;
-    padding: 4px 26px 12px;
-    gap: 16px;
+  .home-guide-step-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 12px;
   }
-  .guide-news-card {
-    width: 270px;
-    height: 330px;
+  .home-guide-step-list::before {
+    display: none;
+  }
+  .home-guide-step-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 148px;
+    padding: 18px;
+    align-content: start;
+  }
+  .home-guide-step-number {
+    grid-column: 1;
+  }
+  .home-guide-step-copy {
+    grid-column: 1 / -1;
+  }
+  .home-guide-step-card > .home-guide-step-arrow {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
   }
 }
 .stock-guide,
@@ -5923,19 +5950,4 @@ textarea:focus-visible {
   color: #637184;
   font-size: 13px;
   line-height: 1.65;
-}
-@media (min-width: 1024px) {
-  .guide-news-scroll {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin: 0;
-    padding: 4px 0 12px;
-    gap: 16px;
-    overflow: visible;
-    scroll-snap-type: none;
-  }
-  .guide-news-card {
-    width: 100%;
-    height: 330px;
-  }
 }

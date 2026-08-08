@@ -12,7 +12,11 @@ import {
   toDotDate,
   toIsoDate,
 } from '../utils/deduction'
-import { calculateEstimatedPayableTax, PRODUCT_TYPE_META } from '../utils/finance'
+import {
+  annualizeTotalReturn,
+  calculateEstimatedPayableTax,
+  PRODUCT_TYPE_META,
+} from '../utils/finance'
 
 // 데모 상태와 서버 연동 상태를 섞으면 목데이터 familyId가 DB 값과 충돌하므로 저장 키를 분리한다.
 const STORAGE_KEY = api.isMock ? 'mirizoom-demo-state-v1' : 'mirizoom-status-state-v1'
@@ -312,7 +316,10 @@ function savedSimulationToPlan(item) {
     giftDate: toDotDate(item.inputSummary?.investmentEndDate),
     productName: productNames.join(' · ') || fallbackProductNames.join(' · ') || '저장된 증여 계획',
     productType: selectedProducts[0]?.productType ?? selectedProductTypes[0] ?? null,
-    rate: Number(item.selection?.expectedReturnRatePercent ?? 0),
+    rate: annualizeTotalReturn(
+      item.selection?.expectedReturnRatePercent,
+      item.inputSummary?.investmentPeriodMonths,
+    ),
     status: item.status,
     source: 'simulation',
     readOnly: true,
