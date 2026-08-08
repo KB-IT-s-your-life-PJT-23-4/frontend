@@ -362,7 +362,6 @@ onMounted(() => loadStatus())
         <section class="status-section">
           <div class="section-heading-row">
             <h2>증여 현황</h2>
-            <span>{{ history.length + familyPlans.length }}건</span>
           </div>
 
           <article class="status-list-card">
