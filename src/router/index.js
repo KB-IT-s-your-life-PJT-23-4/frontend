@@ -122,7 +122,7 @@ const router = createRouter({
         label: '상품 관리',
         requiresAuth: true,
         requiresAdmin: true,
-        requiresRole: ['MIDDLE'],
+        requiresRole: ['ADMIN', 'MIDDLE'],
         layout: 'admin',
         hideBottomNav: true,
       },
@@ -181,7 +181,7 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin) {
     const role = String(authStore.user?.role ?? '').toUpperCase()
-    const adminRoles = ['ROOT', 'MIDDLE', 'DEFAULT']
+    const adminRoles = ['ADMIN', 'MIDDLE', 'DEFAULT']
     if (!adminRoles.includes(role)) return { name: 'home' }
 
     const allowedRoles = (to.meta.requiresRole ?? []).map((allowedRole) =>
