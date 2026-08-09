@@ -11,6 +11,13 @@ export function getAdminAuthPage({ page = 0, size = 10 } = {}) {
   return request(`${ADMIN_AUTH_PATH}?${params.toString()}`)
 }
 
+export function createAdminAccount(admin) {
+  return request(`${ADMIN_AUTH_PATH}/create`, {
+    method: 'POST',
+    body: JSON.stringify(admin),
+  })
+}
+
 export function changeAdminRole(userId, role) {
   return request(`${ADMIN_AUTH_PATH}/${encodeURIComponent(userId)}`, {
     method: 'PATCH',

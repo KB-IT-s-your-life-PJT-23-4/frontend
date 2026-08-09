@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import {
   changeAdminRole,
+  createAdminAccount,
   deleteAdminAccount,
   getAdminAuthPage,
   getCurrentAdmin,
@@ -17,17 +18,14 @@ const roleOptions = [
   {
     value: 'ROOT',
     label: '최고 관리자',
-    description: '모든 관리자 기능과 다른 관리자의 권한을 변경할 수 있습니다.',
   },
   {
     value: 'MIDDLE',
     label: '중간 관리자',
-    description: '운영 관리 기능을 사용할 수 있지만 관리자 권한은 변경할 수 없습니다.',
   },
   {
     value: 'DEFAULT',
     label: '일반 관리자',
-    description: '기본 관리자 조회 및 제한된 운영 기능을 사용할 수 있습니다.',
   },
 ]
 
@@ -39,6 +37,12 @@ const listError = ref('')
 const identityError = ref('')
 const feedbackMessage = ref('')
 const selectedAdmin = ref(null)
+
+const showCreateModal = ref(false)
+const createDraft = ref(emptyCreateDraft())
+const createFormError = ref('')
+const isCreatingAdmin = ref(false)
+const isCreateRoleOpen = ref(false)
 
 const showRoleModal = ref(false)
 const roleDraft = ref('DEFAULT')
@@ -77,6 +81,17 @@ function isSelf(admin) {
   return Boolean(admin && currentAdmin.value?.userId === admin.adminId)
 }
 
+function emptyCreateDraft() {
+  return {
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: '',
+    phone: '',
+    role: 'DEFAULT',
+  }
+}
+
 function formatDateTime(value) {
   if (!value) return '-'
   const date = new Date(value)
@@ -93,6 +108,7 @@ function formatDateTime(value) {
 function errorMessage(error, fallback) {
   if (error?.status === 403) return '최고 관리자만 권한을 변경할 수 있습니다.'
   if (error?.status === 404) return '대상 관리자를 찾을 수 없습니다.'
+  if (error?.status === 409) return '이미 사용 중인 이메일 또는 전화번호입니다.'
   if (error?.status === 400) return '요청한 관리자 권한이 올바르지 않습니다.'
   return error?.message || fallback
 }
@@ -135,6 +151,98 @@ async function initialize() {
 
 function selectAdmin(admin) {
   selectedAdmin.value = admin
+}
+
+function openCreateAdmin() {
+  if (!isRoot.value) return
+  createDraft.value = emptyCreateDraft()
+  createFormError.value = ''
+  isCreateRoleOpen.value = false
+  showCreateModal.value = true
+}
+
+function closeCreateAdmin() {
+  if (isCreatingAdmin.value) return
+  isCreateRoleOpen.value = false
+  showCreateModal.value = false
+}
+
+function selectCreateRole(role) {
+  createDraft.value.role = role
+  isCreateRoleOpen.value = false
+}
+
+function closeCreateRoleOnFocusOut(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    isCreateRoleOpen.value = false
+  }
+}
+
+function validateCreateDraft() {
+  const email = createDraft.value.email.trim()
+  const password = createDraft.value.password
+  const name = createDraft.value.name.trim()
+  const phone = createDraft.value.phone.trim()
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return '올바른 이메일을 입력해주세요.'
+  }
+  if (password.length < 8 || password.length > 64) {
+    return '비밀번호는 8자 이상 64자 이하로 입력해주세요.'
+  }
+  if (!/^[\x21-\x7e]+$/.test(password)) {
+    return '비밀번호는 공백 없는 영문, 숫자, 특수문자로 입력해주세요.'
+  }
+  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+    return '비밀번호는 영문과 숫자를 포함해야 합니다.'
+  }
+  if (![...password].some((character) => !/[A-Za-z0-9]/.test(character))) {
+    return '비밀번호는 특수문자를 포함해야 합니다.'
+  }
+  if (password !== createDraft.value.confirmPassword) {
+    return '비밀번호 확인이 일치하지 않습니다.'
+  }
+  if (name.length < 2 || name.length > 100) {
+    return '이름은 2자 이상 100자 이하로 입력해주세요.'
+  }
+  if (!/^01[016789]-\d{3,4}-\d{4}$/.test(phone)) {
+    return '전화번호를 010-1234-5678 형식으로 입력해주세요.'
+  }
+  if (!roleOptions.some((role) => role.value === createDraft.value.role)) {
+    return '관리자 역할을 선택해주세요.'
+  }
+  return ''
+}
+
+async function submitCreateAdmin() {
+  if (!isRoot.value) return
+  const validationError = validateCreateDraft()
+  if (validationError) {
+    createFormError.value = validationError
+    return
+  }
+
+  isCreatingAdmin.value = true
+  createFormError.value = ''
+  try {
+    const createdAdmin = await createAdminAccount({
+      email: createDraft.value.email.trim().toLowerCase(),
+      password: createDraft.value.password,
+      name: createDraft.value.name.trim(),
+      phone: createDraft.value.phone.trim(),
+      role: createDraft.value.role,
+    })
+    showCreateModal.value = false
+    isCreateRoleOpen.value = false
+    feedbackMessage.value = `${createdAdmin?.name || createDraft.value.name} 관리자 계정을 생성했습니다.`
+    await loadAdmins(0)
+    selectedAdmin.value =
+      admins.value.find((admin) => admin.adminId === createdAdmin?.adminId) ?? null
+  } catch (error) {
+    createFormError.value = errorMessage(error, '관리자 계정을 생성하지 못했습니다.')
+  } finally {
+    isCreatingAdmin.value = false
+  }
 }
 
 function openRoleChange(admin = selectedAdmin.value) {
@@ -203,10 +311,21 @@ onMounted(initialize)
         <h1 id="admin-authorization-title">권한 관리</h1>
         <p>관리자 계정의 역할을 확인하고 운영 권한을 조정하세요.</p>
       </div>
-      <div class="admin-authorization-heading-summary">
-        <span>전체 관리자</span>
-        <strong>{{ totalElements.toLocaleString('ko-KR') }}<small>명</small></strong>
-        <em v-if="currentAdmin">내 권한 · {{ roleLabel(currentAdmin.role) }}</em>
+      <div class="admin-authorization-heading-actions">
+        <div class="admin-authorization-heading-summary">
+          <span>전체 관리자</span>
+          <strong>{{ totalElements.toLocaleString('ko-KR') }}<small>명</small></strong>
+          <em v-if="currentAdmin">내 권한 · {{ roleLabel(currentAdmin.role) }}</em>
+        </div>
+        <button
+          type="button"
+          class="admin-authorization-create-button"
+          :disabled="!isRoot"
+          :title="!isRoot ? '최고 관리자만 계정을 생성할 수 있습니다.' : undefined"
+          @click="openCreateAdmin"
+        >
+          <AppIcon name="plus" :size="16" /> 관리자 생성
+        </button>
       </div>
     </section>
 
@@ -426,6 +545,146 @@ onMounted(initialize)
         </div>
       </aside>
     </div>
+
+    <ModalSheet
+      :show="showCreateModal"
+      title="관리자 계정 생성"
+      description="관리자가 사용할 로그인 정보와 초기 운영 역할을 입력하세요."
+      @close="closeCreateAdmin"
+    >
+      <form
+        id="admin-create-form"
+        class="admin-authorization-create-form"
+        @submit.prevent="submitCreateAdmin"
+      >
+        <label>
+          <span>이메일</span>
+          <input
+            v-model="createDraft.email"
+            type="email"
+            maxlength="255"
+            autocomplete="off"
+            placeholder="admin@example.com"
+          />
+        </label>
+        <label>
+          <span>이름</span>
+          <input
+            v-model="createDraft.name"
+            type="text"
+            maxlength="100"
+            autocomplete="off"
+            placeholder="관리자 이름"
+          />
+        </label>
+        <label>
+          <span>전화번호</span>
+          <input
+            v-model="createDraft.phone"
+            type="tel"
+            maxlength="20"
+            autocomplete="off"
+            placeholder="010-1234-5678"
+          />
+        </label>
+        <div class="admin-authorization-create-field">
+          <span>초기 역할</span>
+          <div
+            class="admin-authorization-role-select"
+            :class="{ 'is-open': isCreateRoleOpen }"
+            @focusout="closeCreateRoleOnFocusOut"
+            @keydown.esc="isCreateRoleOpen = false"
+          >
+            <button
+              type="button"
+              class="admin-authorization-role-select__trigger"
+              aria-haspopup="listbox"
+              :aria-expanded="isCreateRoleOpen"
+              aria-controls="admin-create-role-options"
+              @click="isCreateRoleOpen = !isCreateRoleOpen"
+              @keydown.down.prevent="isCreateRoleOpen = true"
+            >
+              <span>
+                <strong>{{ roleLabel(createDraft.role) }}</strong>
+                <small>{{ roleInfo(createDraft.role)?.description }}</small>
+              </span>
+              <span class="admin-authorization-role-select__arrow" aria-hidden="true" />
+            </button>
+            <ul
+              v-if="isCreateRoleOpen"
+              id="admin-create-role-options"
+              class="admin-authorization-role-select__menu"
+              role="listbox"
+              aria-label="초기 관리자 역할"
+            >
+              <li v-for="role in roleOptions" :key="role.value" role="presentation">
+                <button
+                  type="button"
+                  role="option"
+                  :aria-selected="createDraft.role === role.value"
+                  :class="{ 'is-selected': createDraft.role === role.value }"
+                  @click="selectCreateRole(role.value)"
+                >
+                  <span>
+                    <strong>{{ role.label }}</strong>
+                    <small>{{ role.description }}</small>
+                  </span>
+                  <AppIcon
+                    v-if="createDraft.role === role.value"
+                    name="check"
+                    :size="15"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <label>
+          <span>초기 비밀번호</span>
+          <input
+            v-model="createDraft.password"
+            type="password"
+            maxlength="64"
+            autocomplete="new-password"
+            placeholder="영문·숫자·특수문자 포함 8자 이상"
+          />
+        </label>
+        <label>
+          <span>비밀번호 확인</span>
+          <input
+            v-model="createDraft.confirmPassword"
+            type="password"
+            maxlength="64"
+            autocomplete="new-password"
+            placeholder="비밀번호를 다시 입력하세요"
+          />
+        </label>
+        <p class="admin-authorization-create-help">
+          생성된 관리자는 입력한 이메일과 초기 비밀번호로 바로 로그인할 수 있습니다.
+        </p>
+        <p v-if="createFormError" class="admin-authorization-form-error" role="alert">
+          {{ createFormError }}
+        </p>
+      </form>
+      <template #actions
+        ><button
+          type="button"
+          class="secondary-button"
+          :disabled="isCreatingAdmin"
+          @click="closeCreateAdmin"
+        >
+          취소</button
+        ><button
+          type="submit"
+          form="admin-create-form"
+          class="primary-button"
+          :disabled="isCreatingAdmin"
+        >
+          {{ isCreatingAdmin ? '생성 중...' : '관리자 생성' }}
+        </button></template
+      >
+    </ModalSheet>
 
     <ModalSheet
       :show="showRoleModal"

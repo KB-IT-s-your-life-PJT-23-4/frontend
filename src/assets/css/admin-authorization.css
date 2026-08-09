@@ -1,3 +1,9 @@
+.admin-authorization-heading-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+}
+
 .admin-authorization-heading-summary {
   display: grid;
   min-width: 155px;
@@ -6,6 +12,28 @@
   border: 1px solid #dfe5eb;
   border-radius: 12px;
   background: #fff;
+}
+
+.admin-authorization-create-button {
+  display: inline-flex;
+  min-width: 124px;
+  padding: 0 14px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 12px;
+  background: #173e61;
+  color: #fff;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-authorization-create-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .admin-authorization-heading-summary > span {
@@ -526,6 +554,176 @@
   gap: 8px;
 }
 
+.admin-authorization-create-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-authorization-create-form > label,
+.admin-authorization-create-field {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.admin-authorization-create-form label > span,
+.admin-authorization-create-field > span {
+  color: #637382;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.admin-authorization-create-form input {
+  width: 100%;
+  height: 41px;
+  padding: 0 11px;
+  box-sizing: border-box;
+  border: 1px solid #dfe5eb;
+  border-radius: 10px;
+  outline: none;
+  background: #fafbfc;
+  color: #263b4d;
+  font: inherit;
+  font-size: 10px;
+}
+
+.admin-authorization-create-form input:focus {
+  border-color: #6e96b5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(69, 114, 150, 0.12);
+}
+
+.admin-authorization-create-form input::placeholder {
+  color: #9ba6af;
+}
+
+.admin-authorization-role-select {
+  position: relative;
+}
+
+.admin-authorization-role-select__trigger {
+  display: flex;
+  width: 100%;
+  min-height: 41px;
+  padding: 7px 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #dfe5eb;
+  border-radius: 10px;
+  background: #fafbfc;
+  color: #263b4d;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-authorization-role-select__trigger > span,
+.admin-authorization-role-select__menu button > span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.admin-authorization-role-select__trigger strong,
+.admin-authorization-role-select__menu strong {
+  color: #365269;
+  font-size: 10px;
+}
+
+.admin-authorization-role-select__trigger small,
+.admin-authorization-role-select__menu small {
+  overflow: hidden;
+  color: #84919c;
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-authorization-role-select__arrow {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  margin: -4px 3px 0 0;
+  transform: rotate(45deg);
+  border-right: 1.5px solid #71808e;
+  border-bottom: 1.5px solid #71808e;
+  transition: transform 0.18s ease;
+}
+
+.admin-authorization-role-select.is-open .admin-authorization-role-select__trigger {
+  border-color: #6e96b5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(69, 114, 150, 0.12);
+}
+
+.admin-authorization-role-select.is-open .admin-authorization-role-select__arrow {
+  margin-top: 3px;
+  transform: rotate(225deg);
+}
+
+.admin-authorization-role-select__menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid #dfe5eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(23, 62, 97, 0.16);
+  list-style: none;
+}
+
+.admin-authorization-role-select__menu button {
+  display: flex;
+  width: 100%;
+  padding: 9px 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-authorization-role-select__menu button:hover,
+.admin-authorization-role-select__menu button:focus-visible,
+.admin-authorization-role-select__menu button.is-selected {
+  outline: none;
+  background: #edf4f8;
+}
+
+.admin-authorization-role-select__menu button.is-selected strong,
+.admin-authorization-role-select__menu button.is-selected > svg {
+  color: #173e61;
+}
+
+.admin-authorization-create-help,
+.admin-authorization-create-form .admin-authorization-form-error {
+  grid-column: 1 / -1;
+}
+
+.admin-authorization-create-help {
+  margin: 0;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: #f2f6f9;
+  color: #697d8d;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
 .admin-authorization-target {
   margin: 0 0 5px;
   padding: 11px 12px;
@@ -644,6 +842,11 @@
 }
 
 @media (max-width: 480px) {
+  .admin-authorization-heading-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
   .admin-authorization-heading-summary {
     width: 100%;
     box-sizing: border-box;
@@ -651,5 +854,18 @@
 
   .admin-authorization-notice {
     align-items: flex-start;
+  }
+
+  .admin-authorization-create-button {
+    min-height: 44px;
+  }
+
+  .admin-authorization-create-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-authorization-create-help,
+  .admin-authorization-create-form .admin-authorization-form-error {
+    grid-column: auto;
   }
 }
