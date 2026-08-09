@@ -17,17 +17,14 @@ const guideCards = [
   {
     title: '미리줌 이용 방법 알아보기',
     to: '/guides/mirizoom',
-    description: '서비스 흐름과 시뮬레이션 결과를 먼저 살펴보세요.',
   },
   {
     title: '증여세 기준 확인하기',
     to: '/guides/tax-brackets',
-    description: '공제 한도와 증여 금액별 세율을 확인해요.',
   },
   {
     title: '증여 신고 준비하기',
     to: '/guides/gift-reporting',
-    description: '신고 기한과 준비 서류를 순서대로 확인해요.',
   },
   {
     title: '현금 외 자산도 증여할 수 있나요?',
@@ -65,7 +62,6 @@ const optionalGuide = guideCards[3]
       <section class="quick-card simulation-cta-card">
         <div class="quick-icon yellow"><AppIcon name="calculator" :size="23" /></div>
         <div class="quick-copy">
-          <span class="section-kicker">3분이면 충분해요</span>
           <h3>우리 가족 증여, 지금 바로 계산하기</h3>
           <p>공제 한도부터 10년 후 예상 자산까지 비교해 보세요.</p>
         </div>
@@ -77,7 +73,6 @@ const optionalGuide = guideCards[3]
       <section class="section-block guide-overview">
         <div class="section-heading-row guide-overview-heading">
           <div>
-            <span class="section-kicker">미리 알아두면 든든해요</span>
             <h2>복잡한 증여, 차근차근 알아보기</h2>
           </div>
         </div>
@@ -95,7 +90,7 @@ const optionalGuide = guideCards[3]
               </span>
               <span class="home-guide-step-copy">
                 <strong>{{ guide.title }}</strong>
-                <span>{{ guide.description }}</span>
+                <span v-if="guide.description">{{ guide.description }}</span>
               </span>
               <span class="home-guide-step-arrow">
                 <AppIcon name="arrow" :size="16" />

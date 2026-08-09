@@ -152,9 +152,9 @@ defineEmits([
         </div>
         <p v-if="errorMessage" class="field-error">{{ errorMessage }}</p>
         <div class="amount-quick-buttons">
-          <button type="button" @click="$emit('add-amount', 10000000)">+1천만원</button>
-          <button type="button" @click="$emit('add-amount', 30000000)">+3천만원</button>
-          <button type="button" @click="$emit('add-amount', 50000000)">+5천만원</button>
+          <button type="button" @click="$emit('add-amount', 10000000)">+1백만원</button>
+          <button type="button" @click="$emit('add-amount', 30000000)">+5백만원</button>
+          <button type="button" @click="$emit('add-amount', 50000000)">+1천만원</button>
         </div>
         <p class="peer-average-insight">
           <span class="peer-average-icon"><AppIcon name="chart" :size="14" /></span>
@@ -173,7 +173,6 @@ defineEmits([
           <span class="step-number">3</span>
           <div>
             <h3>언제 증여할까요?</h3>
-            <p>선택한 날짜부터 증여 일정과 운용 기간을 계산해요.</p>
           </div>
         </div>
 
@@ -255,7 +254,6 @@ defineEmits([
           <span class="step-number">5</span>
           <div>
             <h3>증여세는 누가 준비할까요?</h3>
-            <p>세금 대납 여부까지 반영해 실제 필요한 금액을 계산해요.</p>
           </div>
         </div>
 
