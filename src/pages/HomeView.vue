@@ -11,16 +11,12 @@ import { formatCompactWon } from '../utils/finance'
 import { resolveProfileImageUrl } from '../utils/profileImage'
 
 const store = useAppStore()
-// 서버 리마인더가 앞에 오므로 홈에는 급한 기한 알림이 먼저 노출된다.
 const latestNotifications = computed(() => store.notifications.value.slice(0, 2))
 
-// 홈에서도 알림을 보여주니 여기서 한 번 읽어 둔다. 이미 불러왔으면 재요청하지 않는다.
 onMounted(() => {
   store.ensureStatusLoaded().catch(() => {})
 })
 
-// 증여 현황 요약 카드: 선택된 자녀 기준으로 진행 중인 증여가 있을 때만 홈에 요약을 보여준다.
-// (증여 현황 상세 페이지(StatusView)는 그대로 두고, 홈에는 압축한 한 장짜리 카드만 노출한다.)
 const selectedFamily = store.selectedFamily
 const selectedFamilyPlans = computed(() =>
   store.state.plans.filter((plan) => plan.familyId === selectedFamily.value.id),
@@ -28,8 +24,7 @@ const selectedFamilyPlans = computed(() =>
 const selectedFamilyHistory = computed(() =>
   store.state.giftHistory.filter((gift) => gift.familyId === selectedFamily.value.id),
 )
-// 진행 중인 증여도, 완료된 이력도 하나도 없으면 카드 자체를 숨기지 않고
-// "증여 이력이 없습니다" 문구로 대체한다.
+
 const hasGiftRecord = computed(
   () => selectedFamilyPlans.value.length > 0 || selectedFamilyHistory.value.length > 0,
 )
@@ -45,12 +40,11 @@ const giftProgress = computed(() =>
     deductionLimit: selectedFamily.value?.deductionLimit ?? 0,
   }),
 )
-// 원 둘레 기준으로 진행률만큼만 그리고 나머지는 비워서 링 그래프를 만든다.
+
 const RING_RADIUS = 52
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 const ringDashOffset = computed(() => RING_CIRCUMFERENCE * (1 - giftProgress.value / 100))
 
-// 접혔을 땐 선택된 자녀 한 명만 보여주고, 화살표를 누르면 전체 자녀가 옆으로 펼쳐진다.
 const familyPickerExpanded = ref(false)
 
 function pickFamily(familyId) {
@@ -58,7 +52,6 @@ function pickFamily(familyId) {
   familyPickerExpanded.value = false
 }
 
-// 자녀 추가 모달 — MyPageView.vue의 수증자 등록 모달과 동일한 폼/제출 로직을 그대로 쓴다.
 const showAddFamily = ref(false)
 const savingFamily = ref(false)
 const BIRTH_DATE_MIN = '1900-01-01'
@@ -122,6 +115,9 @@ const optionalGuide = guideCards[3]
       <section class="hero-card">
         <div class="hero-orbit hero-orbit-one" />
         <div class="hero-orbit hero-orbit-two" />
+        <div class="hero-orbit-orbiter" aria-hidden="true">
+          <span class="hero-orbit-dot" />
+        </div>
         <img :src="brandMark" class="hero-brand-mark" alt="" aria-hidden="true" />
         <div class="hero-copy">
           <span class="hero-kicker">미리 준비하는 다음 10년</span>
@@ -142,16 +138,7 @@ const optionalGuide = guideCards[3]
           <span class="hero-family-dot dot-three" />
         </div> -->
       </section>
-
-      <!--
-        카드 위에 겹쳐 띄우니 붕 뜬 느낌이라 별로였다. 대신 요약 카드 제목 옆에
-        자녀 아바타+이름을 그대로 두고, 누르면 카드 안에서 자연스럽게 펼쳐지는
-        선택 목록으로 바꿨다 — 카드 밖으로 나가거나 겹치는 요소가 없다.
-      -->
-      <section
-        v-if="store.state.families.length > 0"
-        class="quick-card home-gift-summary-card"
-      >
+      <section v-if="store.state.families.length > 0" class="quick-card home-gift-summary-card">
         <div class="home-gift-summary-head">
           <Transition name="family-picker-swap" mode="out-in">
             <button
@@ -254,8 +241,6 @@ const optionalGuide = guideCards[3]
           전체 현황 보기 <AppIcon name="arrow" :size="14" />
         </RouterLink>
       </section>
-
-      <!-- 등록된 수증자가 한 명도 없으면 증여 현황 카드 대신 등록을 유도하는 카드를 보여준다. -->
       <section v-else class="quick-card home-family-empty-card">
         <div class="home-family-empty-icon">
           <AppIcon name="user" :size="22" />
@@ -264,7 +249,11 @@ const optionalGuide = guideCards[3]
           <strong>등록된 수증자가 없어요</strong>
           <span>수증자를 등록하면 자녀별 증여 한도와 현황을 관리할 수 있어요.</span>
         </div>
-        <button type="button" class="primary-button home-family-empty-button" @click="openAddFamily">
+        <button
+          type="button"
+          class="primary-button home-family-empty-button"
+          @click="openAddFamily"
+        >
           수증자 등록하기
         </button>
       </section>

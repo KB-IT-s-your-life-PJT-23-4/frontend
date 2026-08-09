@@ -886,6 +886,61 @@ textarea:focus-visible {
   border-color: rgba(255, 204, 0, 0.18);
 }
 
+/* hero-orbit-one과 정확히 같은 위치·크기의 래퍼를 두고 그 자체를 계속 회전시키면,
+   래퍼 상단 가운데에 찍은 점이 링 테두리를 따라 도는 것처럼 보인다. */
+.hero-orbit-orbiter {
+  position: absolute;
+  top: -90px;
+  right: -50px;
+  z-index: 0;
+  width: 270px;
+  height: 270px;
+  animation: hero-orbit-spin 16s linear infinite;
+}
+
+.hero-orbit-dot {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--kb-yellow);
+  box-shadow: 0 0 10px 2px rgba(255, 204, 0, 0.55);
+}
+
+@keyframes hero-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 브랜드 마크가 아주 천천히 떠 있는 듯 흔들려 화면이 조금 더 살아있어 보이게 한다. */
+.hero-brand-mark {
+  animation: hero-mark-float 9s ease-in-out infinite;
+}
+
+@keyframes hero-mark-float {
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-orbit-orbiter,
+  .hero-brand-mark {
+    animation: none;
+  }
+}
+
 .hero-cta-button {
   position: relative;
   z-index: 3;
