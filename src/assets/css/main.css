@@ -800,11 +800,41 @@ textarea:focus-visible {
   box-shadow: var(--shadow-lg);
 }
 
+/* 밋밋했던 배경에 깊이를 더한다: 왼쪽 위는 흰 하이라이트, 오른쪽 아래는 브랜드
+   옐로 톤 글로우 — 아래에 겹쳐 얹는 브랜드 마크와 자연스럽게 어우러지도록 짝을 맞췄다. */
+.hero-card::before {
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  z-index: 0;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(255, 204, 0, 0.22), transparent 62%);
+  content: '';
+  pointer-events: none;
+}
+
 .hero-card::after {
   position: absolute;
   inset: 0;
   background: radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.14), transparent 55%);
   content: '';
+  pointer-events: none;
+}
+
+/* 서비스 로고 마크를 카드 오른쪽 아래에 크게, 아주 옅게 얹어 첫 화면에 브랜드
+   존재감을 준다. soft-light로 배경 그라데이션에 녹아들게 하고, overflow:hidden으로
+   카드 밖으로 살짝 잘려 나가게 해 기존 코인/오빗 장식과 톤을 맞췄다. */
+.hero-brand-mark {
+  position: absolute;
+  right: -38px;
+  bottom: -22px;
+  z-index: 1;
+  width: 210px;
+  height: auto;
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+  transform: rotate(-6deg);
   pointer-events: none;
 }
 
@@ -836,7 +866,8 @@ textarea:focus-visible {
 
 .hero-orbit {
   position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  z-index: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
 }
 
@@ -852,6 +883,7 @@ textarea:focus-visible {
   bottom: -105px;
   width: 220px;
   height: 220px;
+  border-color: rgba(255, 204, 0, 0.18);
 }
 
 .hero-cta-button {

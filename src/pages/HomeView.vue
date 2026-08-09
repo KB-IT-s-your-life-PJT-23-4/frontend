@@ -4,6 +4,7 @@ import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import DateField from '../components/common/DateField.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
+import brandMark from '../assets/brand-mark.png'
 import { useAppStore } from '../stores/appStore'
 import { deductionProgress, RELATION_OPTIONS } from '../utils/deduction'
 import { formatCompactWon } from '../utils/finance'
@@ -121,6 +122,7 @@ const optionalGuide = guideCards[3]
       <section class="hero-card">
         <div class="hero-orbit hero-orbit-one" />
         <div class="hero-orbit hero-orbit-two" />
+        <img :src="brandMark" class="hero-brand-mark" alt="" aria-hidden="true" />
         <div class="hero-copy">
           <span class="hero-kicker">미리 준비하는 다음 10년</span>
           <h2>현금 증여,<br />미리 알면 쉬워요.</h2>
