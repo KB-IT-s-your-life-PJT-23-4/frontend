@@ -12,7 +12,7 @@ import ModalSheet from '../components/layout/ModalSheet.vue'
 import '../assets/css/admin-dashboard.css'
 import '../assets/css/admin-report.css'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 
 const statusOptions = [
   { value: '', label: '전체 상태' },

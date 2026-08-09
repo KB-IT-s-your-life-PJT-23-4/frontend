@@ -1,0 +1,655 @@
+.admin-authorization-heading-summary {
+  display: grid;
+  min-width: 155px;
+  padding: 11px 15px;
+  gap: 2px;
+  border: 1px solid #dfe5eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admin-authorization-heading-summary > span {
+  color: #7d8a97;
+  font-size: 8px;
+}
+
+.admin-authorization-heading-summary > strong {
+  color: #1d3549;
+  font-size: 22px;
+}
+
+.admin-authorization-heading-summary small {
+  margin-left: 3px;
+  color: #71808e;
+  font-size: 8px;
+}
+
+.admin-authorization-heading-summary em {
+  color: #52718a;
+  font-size: 8px;
+  font-style: normal;
+}
+
+.admin-authorization-feedback {
+  display: flex;
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #cfe5d7;
+  border-radius: 10px;
+  background: #f2faf5;
+  color: #2d6d47;
+  font-size: 10px;
+}
+
+.admin-authorization-feedback button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.admin-authorization-notice {
+  display: flex;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #d8e4ed;
+  border-radius: 11px;
+  background: #f2f7fb;
+  color: #41647f;
+}
+
+.admin-authorization-notice.is-error {
+  border-color: #ecd3d3;
+  background: #fff6f6;
+  color: #a14d4d;
+}
+
+.admin-authorization-notice p {
+  display: grid;
+  margin: 0;
+  gap: 2px;
+}
+
+.admin-authorization-notice strong {
+  font-size: 10px;
+}
+
+.admin-authorization-notice span {
+  font-size: 9px;
+}
+
+.admin-authorization-notice button {
+  margin-left: auto;
+  padding: 7px 10px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.admin-authorization-role-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 14px;
+  gap: 10px;
+}
+
+.admin-authorization-role-summary article {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-authorization-role-summary article > strong {
+  color: #294760;
+  font-size: 20px;
+}
+
+.admin-authorization-role-summary article > strong small {
+  margin-left: 2px;
+  color: #82909c;
+  font-size: 8px;
+}
+
+.admin-authorization-role-summary article > p {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  color: #7a8995;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.admin-authorization-role-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-authorization-role-badge.is-root {
+  background: #fff0cc;
+  color: #805f0d;
+}
+
+.admin-authorization-role-badge.is-middle {
+  background: #e2eef8;
+  color: #38688c;
+}
+
+.admin-authorization-role-badge.is-default {
+  background: #e7f3ea;
+  color: #3e7350;
+}
+
+.admin-authorization-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(290px, 340px);
+  align-items: start;
+  gap: 14px;
+}
+
+.admin-authorization-list {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-authorization-list__heading {
+  align-items: flex-end;
+}
+
+.admin-authorization-list__heading > p {
+  margin: 0;
+  color: #7b8996;
+  font-size: 9px;
+}
+
+.admin-authorization-state {
+  display: grid;
+  min-height: 280px;
+  padding: 28px;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  color: #71808e;
+  text-align: center;
+}
+
+.admin-authorization-state strong {
+  color: #334d63;
+  font-size: 12px;
+}
+
+.admin-authorization-state p {
+  margin: 0;
+  font-size: 10px;
+}
+
+.admin-authorization-state button {
+  margin-top: 4px;
+  padding: 7px 12px;
+  border: 1px solid #d8e0e7;
+  border-radius: 8px;
+  background: #fff;
+  color: #3d617f;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.admin-authorization-state.is-error {
+  color: #aa5353;
+}
+
+.admin-authorization-table-wrap {
+  margin: 18px -21px 0;
+  overflow-x: auto;
+  border-top: 1px solid #edf0f3;
+}
+
+.admin-authorization-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+}
+
+.admin-authorization-table th,
+.admin-authorization-table td {
+  padding: 13px 10px;
+  border-bottom: 1px solid #edf0f3;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-authorization-table th:first-child,
+.admin-authorization-table td:first-child {
+  padding-left: 21px;
+}
+
+.admin-authorization-table th:last-child,
+.admin-authorization-table td:last-child {
+  padding-right: 21px;
+  text-align: right;
+}
+
+.admin-authorization-table th {
+  background: #f7f9fb;
+  color: #7a8895;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.admin-authorization-table td {
+  color: #596a78;
+  font-size: 9px;
+}
+
+.admin-authorization-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-authorization-table tbody tr:hover,
+.admin-authorization-table tbody tr.is-selected {
+  background: #f5f9fc;
+}
+
+.admin-authorization-table td:first-child > strong {
+  color: #345f81;
+}
+
+.admin-authorization-table td:first-child > small {
+  margin-left: 5px;
+  padding: 3px 5px;
+  border-radius: 5px;
+  background: #edf2f6;
+  color: #617685;
+  font-size: 7px;
+}
+
+.admin-authorization-identity {
+  display: grid;
+  min-width: 150px;
+  gap: 3px;
+}
+
+.admin-authorization-identity strong {
+  color: #2d4356;
+  font-size: 10px;
+}
+
+.admin-authorization-identity small {
+  color: #84919c;
+  font-size: 8px;
+}
+
+.admin-authorization-detail-button {
+  display: inline-flex;
+  min-height: 30px;
+  padding: 0 9px;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid #dce3e9;
+  border-radius: 8px;
+  background: #fff;
+  color: #49677f;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-authorization-pagination {
+  display: flex;
+  padding-top: 18px;
+  justify-content: center;
+  gap: 5px;
+}
+
+.admin-authorization-pagination button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #617382;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.admin-authorization-pagination button.is-active {
+  border-color: #173e61;
+  background: #173e61;
+  color: #fff;
+}
+
+.admin-authorization-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.admin-authorization-detail {
+  position: sticky;
+  top: 80px;
+}
+
+.admin-authorization-detail__empty {
+  display: grid;
+  min-height: 300px;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  color: #84919c;
+  text-align: center;
+}
+
+.admin-authorization-detail__empty > span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf3f7;
+  color: #52718a;
+}
+
+.admin-authorization-detail__empty strong {
+  color: #3c5367;
+  font-size: 11px;
+}
+
+.admin-authorization-detail__empty p {
+  max-width: 230px;
+  margin: 0;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.admin-authorization-detail__body {
+  display: grid;
+  margin-top: 18px;
+  gap: 12px;
+}
+
+.admin-authorization-profile {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.admin-authorization-profile > span {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: 50%;
+  background: #dce9f2;
+  color: #315c7d;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.admin-authorization-profile > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.admin-authorization-profile strong {
+  color: #2e465a;
+  font-size: 11px;
+}
+
+.admin-authorization-profile small {
+  overflow: hidden;
+  color: #82909b;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-authorization-current-role {
+  display: grid;
+  padding: 12px;
+  gap: 4px;
+  border: 1px solid #e2e8ed;
+  border-radius: 10px;
+  background: #f7f9fb;
+}
+
+.admin-authorization-current-role > span {
+  color: #83919c;
+  font-size: 8px;
+}
+
+.admin-authorization-current-role > strong {
+  color: #2e526d;
+  font-size: 12px;
+}
+
+.admin-authorization-current-role > p {
+  margin: 0;
+  color: #788995;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.admin-authorization-detail__body dl {
+  display: grid;
+  margin: 0;
+  gap: 7px;
+}
+
+.admin-authorization-detail__body dl > div {
+  display: flex;
+  padding: 9px 10px;
+  justify-content: space-between;
+  border-bottom: 1px solid #edf0f3;
+}
+
+.admin-authorization-detail__body dt {
+  color: #84919c;
+  font-size: 8px;
+}
+
+.admin-authorization-detail__body dd {
+  margin: 0;
+  color: #425b70;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.admin-authorization-self-warning {
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  gap: 7px;
+  border-radius: 9px;
+  background: #fff7dd;
+  color: #796315;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.admin-authorization-change-button,
+.admin-authorization-delete-button {
+  display: flex;
+  min-height: 41px;
+  padding: 0 13px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-authorization-change-button {
+  border: 0;
+  background: #173e61;
+  color: #fff;
+}
+
+.admin-authorization-delete-button {
+  border: 1px solid #e4c7c7;
+  background: #fff8f8;
+  color: #a04b4b;
+}
+
+.admin-authorization-change-button:disabled,
+.admin-authorization-delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.admin-authorization-role-form {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-authorization-target {
+  margin: 0 0 5px;
+  padding: 11px 12px;
+  overflow-wrap: anywhere;
+  border-radius: 9px;
+  background: #f2f6f9;
+  color: #3d5970;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.admin-authorization-role-form > label {
+  display: flex;
+  padding: 11px;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid #e1e6eb;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.admin-authorization-role-form > label.is-selected {
+  border-color: #6f94b0;
+  background: #f3f8fb;
+  box-shadow: 0 0 0 2px rgba(70, 110, 142, 0.1);
+}
+
+.admin-authorization-role-form input {
+  margin-top: 2px;
+  accent-color: #173e61;
+}
+
+.admin-authorization-role-form label > span {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-authorization-role-form strong {
+  color: #365269;
+  font-size: 10px;
+}
+
+.admin-authorization-role-form small {
+  color: #7b8a96;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.admin-authorization-form-error {
+  margin: 5px 0 0;
+  color: #ad4f4f;
+  font-size: 9px;
+}
+
+@media (max-width: 1120px) {
+  .admin-authorization-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-authorization-detail {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-authorization-role-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-authorization-table-wrap {
+    margin-right: 0;
+    margin-left: 0;
+    overflow-x: visible;
+    border-top: 0;
+  }
+
+  .admin-authorization-table,
+  .admin-authorization-table tbody,
+  .admin-authorization-table tr,
+  .admin-authorization-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-authorization-table thead {
+    display: none;
+  }
+
+  .admin-authorization-table tr {
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 11px 13px;
+    border: 1px solid #e5eaef;
+    border-radius: 12px;
+  }
+
+  .admin-authorization-table td,
+  .admin-authorization-table td:first-child,
+  .admin-authorization-table td:last-child {
+    display: flex;
+    padding: 7px 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: 0;
+    text-align: right;
+  }
+
+  .admin-authorization-table td::before {
+    content: attr(data-label);
+    color: #8b97a2;
+    font-size: 8px;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-authorization-heading-summary {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-authorization-notice {
+    align-items: flex-start;
+  }
+}

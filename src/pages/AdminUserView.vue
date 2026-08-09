@@ -7,7 +7,7 @@ import ModalSheet from '../components/layout/ModalSheet.vue'
 import '../assets/css/admin-dashboard.css'
 import '../assets/css/admin-user.css'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 const numberFormatter = new Intl.NumberFormat('ko-KR')
 const dateTimeFormatter = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
