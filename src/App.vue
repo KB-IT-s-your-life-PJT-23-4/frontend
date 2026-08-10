@@ -1,18 +1,27 @@
 <script setup>
 import { computed, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppIcon from './components/layout/AppIcon.vue'
 import BottomNav from './components/layout/BottomNav.vue'
+import ModalSheet from './components/layout/ModalSheet.vue'
+import { useAccountAccessStore } from './stores/accountAccessStore.js'
 import { useAppStore } from './stores/appStore.js'
 
 const store = useAppStore()
+const accountAccessStore = useAccountAccessStore()
 const route = useRoute()
+const router = useRouter()
 const isAdminLayout = computed(() => route.meta.layout === 'admin')
 const showBottomNav = computed(() => !route.meta.hideBottomNav)
 
 watchEffect(() => {
   document.body.classList.toggle('admin-route', isAdminLayout.value)
 })
+
+async function confirmBlockedAccess() {
+  accountAccessStore.closeBlockedAccess()
+  if (router.currentRoute.value.name !== 'home') await router.replace({ name: 'home' })
+}
 </script>
 
 <template>
@@ -63,4 +72,15 @@ watchEffect(() => {
       <span>{{ store.toast.message }}</span>
     </div>
   </Transition>
+
+  <ModalSheet
+    :show="accountAccessStore.state.visible"
+    title="접근 제한"
+    :description="accountAccessStore.state.message"
+    @close="confirmBlockedAccess"
+  >
+    <template #actions>
+      <button class="primary-button full" type="button" @click="confirmBlockedAccess">확인</button>
+    </template>
+  </ModalSheet>
 </template>

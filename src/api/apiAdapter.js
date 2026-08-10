@@ -1,5 +1,7 @@
 import { faqItems, products } from '../data/mockData'
 import { calculateSimulation } from '../utils/finance'
+import { showBlockedAccess } from '../stores/accountAccessStore'
+import { shouldShowBlockedAccessForResponse } from '../utils/accountAccess'
 import {
   clearAuthSession,
   getAccessToken,
@@ -74,7 +76,7 @@ function idempotencyKey() {
 }
 
 async function fetchResponse(path, options, accessToken = null) {
-  const { headers: customHeaders, _retry, ...fetchOptions } = options
+  const { headers: customHeaders, _retry, _suppressBlockedAccess, ...fetchOptions } = options
 
   try {
     return await fetch(`${API_BASE}${path}`, {
@@ -176,7 +178,18 @@ export async function request(path, options = {}) {
       }
     }
 
-    throw responseError(response, payload)
+    const error = responseError(response, payload)
+    if (
+      shouldShowBlockedAccessForResponse({
+        status: response.status,
+        path,
+        errorCode: error.code,
+        suppressed: options._suppressBlockedAccess,
+      })
+    ) {
+      showBlockedAccess()
+    }
+    throw error
   }
 
   if (normalizedPath(path) === '/auth/login') authenticationFailurePromise = null
@@ -256,14 +269,14 @@ export const api = {
     })
   },
 
-  async listSimulations({ status, familyId, page, size } = {}) {
+  async listSimulations({ status, familyId, page, size, suppressBlockedAccess = false } = {}) {
     if (!API_BASE) return { items: [], pagination: null }
     const params = new URLSearchParams()
     if (familyId != null) params.set('familyId', String(familyId))
     if (status) params.set('status', status)
     if (page != null) params.set('page', String(page))
     if (size != null) params.set('size', String(size))
-    return request(`/gs?${params}`)
+    return request(`/gs?${params}`, { _suppressBlockedAccess: suppressBlockedAccess })
   },
 
   // --- 수증자(가족) : RecipientController @RequestMapping("/api/fm/family") ---
@@ -350,6 +363,19 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ familyId, amount, giftDate, status, memo }),
     })
+  },
+
+  // POST /api/gm/gift/from-simulation — 저장된 시뮬레이션을 진행 중인 증여로 등록한다.
+  // 분할 증여면 회차 수만큼 gift 가 만들어져 배열로 돌아온다.
+  // 금액·증여일·수증자는 서버가 회차 원본에서 읽으므로 여기서 보내지 않는다.
+  // 같은 시뮬레이션을 두 번 등록하면 422(SIMULATION_ALREADY_REGISTERED)로 거절된다.
+  async registerGiftFromSimulation({ simulationId, memo } = {}) {
+    if (!API_BASE) return []
+    const data = await request(`${GIFT_PATH}/from-simulation`, {
+      method: 'POST',
+      body: JSON.stringify({ simulationId, memo }),
+    })
+    return Array.isArray(data) ? data : []
   },
 
   // DELETE /api/gm/gift/{giftId} — 상태와 무관하게 삭제된다(PLANNED/COMPLETED 모두).

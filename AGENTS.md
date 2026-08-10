@@ -5,6 +5,7 @@
 - This is a Vue 3 frontend application built with Vite.
 - Use Pinia for shared state and Vue Router for routing.
 - Use npm as the package manager.
+- On Windows PowerShell, use `npm.cmd` when the execution policy blocks `npm.ps1`.
 
 ## Environment
 
@@ -63,6 +64,7 @@
 ## Verification
 
 - Check syntax and import paths in every changed file.
+- When a source module is imported by a standalone Node ESM test, include its explicit `.js` import extensions so the test does not rely on Vite resolution.
 - Apply the repository's formatting rules when needed.
 - Run `npm run build` after code changes.
 - When the API adapter supports mock mode, verify new API-backed routes and mutations reuse the existing Pinia demo state instead of relying on no-op API fallbacks.
@@ -91,6 +93,7 @@
 ## Code Review Rules
 
 - Check that route changes do not break existing URLs or navigation.
+- When adding a control or behavior to an existing UI, preserve its established visual structure and styling unless the user explicitly requests a redesign.
 - For destructive admin actions, verify whether the backend performs a role/status transition or deletes the underlying account, keep button and confirmation copy aligned with that exact behavior, and disclose cascading data deletion when applicable.
 - For full-width admin layouts, preserve a responsive outer viewport gap and a centered maximum-width frame unless the requested design explicitly requires a full-bleed canvas.
 - When moving a route title from a shared header into page content, do not introduce new back-navigation controls unless the requested design explicitly includes them.

@@ -90,6 +90,8 @@ export const initialState = {
       status: 'PLANNED',
     },
   ],
+  // 저장했지만 아직 증여로 등록하지 않은 시뮬레이션. 데모 모드에는 등록 흐름이 없어 비워 둔다.
+  simulationPlans: [],
   simulations: [
     { id: 301, familyId: 1, date: '2026.07.20 14:30', amount: 80000000, tax: 5000000 },
     { id: 302, familyId: 1, date: '2026.07.15 10:20', amount: 60000000, tax: 3000000 },
@@ -131,13 +133,38 @@ export const initialState = {
     {
       id: 'family',
       label: '가족관계증명서',
+      // 증여자와 수증자의 관계는 회차가 바뀌어도 그대로라 한 번 발급하면 회차 전체에 쓴다.
+      scope: 'plan',
       description: '수증자와의 관계 증명',
       intro:
-        '증여자와 수증자가 어떤 가족 관계인지 확인하는 서류예요. 관계에 따라 공제 한도(직계존비속 5,000만원, 배우자 6억원 등)가 달라지기 때문에 꼭 필요해요. 주민센터나 정부24에서 발급할 수 있어요.',
+        '증여자와 수증자가 어떤 가족 관계인지 확인하는 서류예요. 관계에 따라 공제 한도(직계존비속 5,000만원, 배우자 6억원 등)가 달라지기 때문에 꼭 필요해요. 주민센터나 아래 사이트에서 발급할 수 있어요.',
+      guide: {
+        title: '발급할 때 확인하세요',
+        plain: true,
+        steps: [
+          '증여자 기준으로 발급해야 수증자와의 관계가 나타나요',
+          '일반 증명서에는 관계가 일부만 나오니 상세 증명서로 발급하세요',
+        ],
+      },
+      links: [
+        {
+          label: '전자가족관계등록시스템',
+          icon: 'external',
+          primary: true,
+          href: 'https://efamily.scourt.go.kr',
+        },
+        {
+          label: '정부24',
+          icon: 'external',
+          href: 'https://www.gov.kr',
+        },
+      ],
     },
     {
       id: 'transfer',
       label: '이체확인증',
+      // 회차마다 송금이 따로 일어나므로 회차별로 다시 발급해야 한다.
+      scope: 'tranche',
       description: '실제 자금 이동 기록',
       guide: {
         title: 'KB스타뱅킹 발급 방법',
@@ -155,6 +182,8 @@ export const initialState = {
     {
       id: 'tax',
       label: '증여세 신고서',
+      // 회차마다 증여일이 달라 신고기한도 따로 온다. 회차별로 각각 신고한다.
+      scope: 'tranche',
       description: '세무서 제출용 서식',
       intro:
         '홈택스(PC/모바일) 또는 세무서에서 직접 작성할 수 있습니다. 증여재산 평가 명세서와 함께 제출해야 합니다.',

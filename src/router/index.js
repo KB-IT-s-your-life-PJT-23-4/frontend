@@ -19,7 +19,9 @@ import AdminFaqView from '../pages/AdminFaqView.vue'
 import AdminReportView from '../pages/AdminReportView.vue'
 import AdminAuthorizationView from '../pages/AdminAuthorizationView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
+import { showBlockedAccess } from '../stores/accountAccessStore'
 import { useAuthStore } from '../stores/authStore'
+import { isAccountBlocked } from '../utils/accountAccess'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,14 +31,14 @@ const router = createRouter({
       path: '/simulation',
       name: 'simulation',
       component: SimulationView,
-      meta: { label: '시뮬레이션', requiresAuth: true },
+      meta: { label: '시뮬레이션', requiresAuth: true, requiresActiveAccount: true },
     },
     { path: '/status', name: 'status', component: StatusView, meta: { label: '증여 현황' } },
     {
       path: '/chat',
       name: 'chat',
       component: ChatView,
-      meta: { label: 'AI 상담', requiresAuth: true },
+      meta: { label: 'AI 상담', requiresAuth: true, requiresActiveAccount: true },
     },
     {
       path: '/my',
@@ -206,6 +208,24 @@ router.beforeEach(async (to) => {
       String(allowedRole).toUpperCase(),
     )
     if (allowedRoles.length > 0 && !allowedRoles.includes(role)) return { name: 'home' }
+  }
+
+  if (to.meta.requiresActiveAccount) {
+    try {
+      const profile = await authStore.fetchUserProfile()
+      if (isAccountBlocked(profile)) {
+        showBlockedAccess()
+        return false
+      }
+    } catch {
+      if (!authStore.isLogin) {
+        return {
+          name: 'login',
+          query: { redirect: to.fullPath },
+        }
+      }
+      return { name: 'home' }
+    }
   }
 
   return true

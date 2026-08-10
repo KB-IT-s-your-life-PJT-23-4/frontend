@@ -1,11 +1,12 @@
 import { request } from './apiAdapter'
+import { blockAdminUser } from './adminUserApi'
 
 const ADMIN_REPORT_PATH = '/admin/report'
 
-// 백엔드 처리/차단 API가 추가되면 각 값을 true로 전환하고 아래 함수를 실제 요청으로 교체한다.
+// 신고 처리 API는 아직 없지만, 회원 차단은 기존 관리자 회원 API를 재사용한다.
 export const adminReportCapabilities = Object.freeze({
   processReport: false,
-  blockUser: false,
+  blockUser: true,
 })
 
 export function getAdminReportPage({ page = 0, size = 10, status, reportType } = {}) {
@@ -25,6 +26,6 @@ export function processAdminReport(_reportId, _changes) {
   return Promise.reject(unavailableApiError('신고 처리'))
 }
 
-export function blockReportedUser(_userId, _options = {}) {
-  return Promise.reject(unavailableApiError('사용자 차단'))
+export function blockReportedUser(userId, { blockedUntil } = {}) {
+  return blockAdminUser(userId, blockedUntil)
 }

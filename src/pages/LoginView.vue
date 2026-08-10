@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import PageHeading from '../components/layout/PageHeading.vue'
 import { useAuthStore } from '../stores/authStore'
+import { resolvePostLoginPath } from '../utils/authRedirect'
 import { validateEmail, validatePassword } from '../utils/authValidation'
 import '../assets/css/auth-view.css'
 
@@ -58,7 +59,7 @@ async function submitLogin() {
       email: form.email.trim(),
       password: form.password,
     })
-    await router.replace(getPostLoginPath())
+    await router.replace(resolvePostLoginPath(route.query.redirect))
   } catch (error) {
     serverError.value = loginErrorMessage(error)
   } finally {

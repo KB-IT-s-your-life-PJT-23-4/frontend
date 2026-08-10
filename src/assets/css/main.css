@@ -3367,6 +3367,75 @@ textarea:focus-visible {
   font-size: 10px;
 }
 
+.ongoing-plan-summary .tranche-pill {
+  justify-self: start;
+  display: inline-flex;
+  min-height: 20px;
+  padding: 0 8px;
+  align-items: center;
+  border-radius: 10px;
+  background: #edf3fb;
+  color: #5e7891;
+  font-weight: 600;
+}
+
+/* 회차 마커 라벨이 양 끝에서 트랙 밖으로 반쯤 나가므로 좌우 여백을 넉넉히 둔다. */
+.tranche-track {
+  position: relative;
+  height: 6px;
+  margin: 24px 38px 56px;
+  border-radius: 999px;
+  background: #e8eef6;
+}
+
+.tranche-track-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7aa7d9, #4a7fb5);
+}
+
+.tranche-marker {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  justify-items: center;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tranche-marker::before {
+  content: '';
+  width: 11px;
+  height: 11px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #b8c6d6;
+  box-shadow: 0 0 0 1px #cfdae7;
+}
+
+.tranche-marker.done::before {
+  background: #4a7fb5;
+  box-shadow: 0 0 0 1px #4a7fb5;
+}
+
+.tranche-marker em {
+  position: absolute;
+  top: 15px;
+  color: #426c90;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.tranche-marker small {
+  position: absolute;
+  top: 30px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
 .ongoing-plan-actions {
   position: absolute;
   top: 11px;
@@ -3404,6 +3473,36 @@ textarea:focus-visible {
 
 .plan-document-panel {
   padding: 0 13px 13px;
+}
+
+/*
+  헤더 생김새는 .plan-document-heading 을 그대로 쓰고, 여기서는 button 이라 안 먹는 것만 되돌린다.
+  font 을 빼면 이 헤더만 브라우저 기본 폰트로 렌더링돼 SCHEDULE 헤더와 크기·서체가 어긋난다.
+*/
+.plan-document-toggle {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #e5eaf0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plan-document-toggle > div {
+  margin-right: auto;
+}
+
+.plan-document-caret {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.plan-document-panel.open .plan-document-caret {
+  transform: rotate(180deg);
 }
 
 .plan-document-heading {
@@ -3644,6 +3743,14 @@ textarea:focus-visible {
   font-size: 12px;
   line-height: 1.5;
   text-align: center;
+}
+
+.register-simulation-button {
+  display: inline-flex;
+  margin-top: 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .document-sample-view {
