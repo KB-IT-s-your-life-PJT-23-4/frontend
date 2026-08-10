@@ -230,9 +230,9 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', closeFamilyPic
         </div>
         <p v-if="errorMessage" class="field-error">{{ errorMessage }}</p>
         <div class="amount-quick-buttons">
-          <button type="button" @click="$emit('add-amount', 10000000)">+1백만원</button>
-          <button type="button" @click="$emit('add-amount', 30000000)">+5백만원</button>
-          <button type="button" @click="$emit('add-amount', 50000000)">+1천만원</button>
+          <button type="button" @click="$emit('add-amount', 1000000)">+1백만원</button>
+          <button type="button" @click="$emit('add-amount', 5000000)">+5백만원</button>
+          <button type="button" @click="$emit('add-amount', 10000000)">+1천만원</button>
         </div>
         <p class="peer-average-insight">
           <span class="peer-average-icon"><AppIcon name="chart" :size="14" /></span>
