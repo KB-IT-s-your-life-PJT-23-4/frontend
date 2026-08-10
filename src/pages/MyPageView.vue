@@ -189,6 +189,13 @@ function goToHistoryPage(page) {
   loadHistoryPage(page)
 }
 
+function scrollToHistoryTop() {
+  document.getElementById('simulation-history')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
+}
+
 // 수증자 목록·증여 이력은 DB에서 온다(데모 모드에서는 목데이터 유지).
 onMounted(async () => {
   try {
@@ -471,6 +478,15 @@ async function submitWithdrawal() {
               다음 <AppIcon name="arrow" :size="14" />
             </button>
           </nav>
+          <button
+            class="history-scroll-top-button"
+            type="button"
+            aria-label="시뮬레이션 이력 상단으로 이동"
+            @click="scrollToHistoryTop"
+          >
+            시뮬레이션 이력 상단으로
+            <AppIcon name="arrow" :size="14" />
+          </button>
         </template>
         <div v-else class="simulation-history-empty">
           <span><AppIcon name="document" :size="21" /></span>
