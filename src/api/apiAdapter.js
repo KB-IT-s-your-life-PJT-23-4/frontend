@@ -352,6 +352,19 @@ export const api = {
     })
   },
 
+  // POST /api/gm/gift/from-simulation — 저장된 시뮬레이션을 진행 중인 증여로 등록한다.
+  // 분할 증여면 회차 수만큼 gift 가 만들어져 배열로 돌아온다.
+  // 금액·증여일·수증자는 서버가 회차 원본에서 읽으므로 여기서 보내지 않는다.
+  // 같은 시뮬레이션을 두 번 등록하면 422(SIMULATION_ALREADY_REGISTERED)로 거절된다.
+  async registerGiftFromSimulation({ simulationId, memo } = {}) {
+    if (!API_BASE) return []
+    const data = await request(`${GIFT_PATH}/from-simulation`, {
+      method: 'POST',
+      body: JSON.stringify({ simulationId, memo }),
+    })
+    return Array.isArray(data) ? data : []
+  },
+
   // DELETE /api/gm/gift/{giftId} — 상태와 무관하게 삭제된다(PLANNED/COMPLETED 모두).
   // 확정 이력을 지우면 10년 합산에서 빠지므로 이후 listDeductions()를 다시 읽어야 한다.
   async deleteGift(giftId) {
