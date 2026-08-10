@@ -401,7 +401,6 @@ onMounted(() => loadStatus())
             <h2>
               <template v-if="familySimulation.expectedFutureValue">
                 {{ formatCompactWon(familySimulation.amount) }}을
-                {{ formatCompactWon(familySimulation.expectedFutureValue) }}으로<br />
                 {{ planProgressCopy(familySimulation) }}
               </template>
               <template v-else>
@@ -429,8 +428,7 @@ onMounted(() => loadStatus())
               }}
             </button>
             <p class="register-gift-note">
-              저장한 시뮬레이션이에요. 증여를 진행하면 아래 진행 중인 증여로 옮겨가고, 거기서 서류를
-              준비한 뒤 확정할 수 있어요.
+              증여를 진행하면 '진행 중인 증여'에서 서류 준비와 완료 처리를 이어갈 수 있어요.
             </p>
           </div>
         </section>
