@@ -352,15 +352,10 @@
   line-height: 1.35;
 }
 
-.tax-option-badge {
-  display: inline-flex;
-  padding: 3px 7px;
-  align-items: center;
-  border-radius: 999px;
-  color: #5e4b00;
-  background: #fff3bd;
+.tax-option-context {
+  color: #84909d;
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.3;
 }
 
@@ -394,8 +389,7 @@
   margin-top: 1px;
 }
 
-.tax-deduction-notice p,
-.tax-calculation-guide {
+.tax-deduction-notice p {
   margin: 0;
   font-size: 11px;
   line-height: 1.65;
@@ -404,12 +398,6 @@
 
 .tax-deduction-notice strong {
   font-weight: 600;
-}
-
-.tax-calculation-guide {
-  margin-top: 10px;
-  padding: 0 2px;
-  color: #7a8795;
 }
 
 @media (min-width: 600px) {
