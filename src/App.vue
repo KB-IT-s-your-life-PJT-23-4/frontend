@@ -51,7 +51,7 @@ async function confirmBlockedAccess() {
       </nav>
       <div class="desktop-security">
         <AppIcon name="shield" :size="19" />
-        <span>데모 데이터는 브라우저에만 저장됩니다.</span>
+        <span>미리줌과 함께 자산 계획을 시작해 보세요.</span>
       </div>
     </aside>
 

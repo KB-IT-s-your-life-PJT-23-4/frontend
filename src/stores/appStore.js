@@ -796,17 +796,6 @@ function updateProfile(profile) {
   showToast('회원 정보가 저장됐어요.')
 }
 
-async function resetDemo() {
-  // 서버 연동 모드에서는 되돌릴 데모 데이터가 없으므로 DB 상태를 다시 읽어온다.
-  if (!api.isMock) {
-    await ensureStatusLoaded({ force: true })
-    showToast('서버 데이터를 다시 불러왔어요.', 'info')
-    return
-  }
-  Object.assign(state, clone(initialState))
-  showToast('데모 데이터를 처음 상태로 되돌렸어요.', 'info')
-}
-
 export function useAppStore() {
   return {
     state: readonly(state),
@@ -837,7 +826,6 @@ export function useAppStore() {
     addFamily,
     updateFamilyProfile,
     updateProfile,
-    resetDemo,
     clearUserState,
   }
 }

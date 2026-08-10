@@ -468,12 +468,11 @@ async function submitWithdrawal() {
         <button type="button" :disabled="isLoggingOut" @click="submitLogout">
           {{ isLoggingOut ? '로그아웃 중...' : '로그아웃' }}
         </button>
-        <button type="button" @click="store.resetDemo">데모 초기화</button>
         <button class="withdrawal-text-button" type="button" @click="openWithdrawal">
           회원탈퇴
         </button>
       </div>
-      <p class="version-label">미리줌 데모 1.0</p>
+      <p class="version-label">미리줌 1.0</p>
     </div>
 
     <AddFamilyModal :show="showAddFamily" @close="showAddFamily = false" />
