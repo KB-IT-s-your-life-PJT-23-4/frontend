@@ -286,7 +286,7 @@ async function runSimulation() {
     applySimulationResponse(response)
     // POST /api/gs로 생성된 DRAFT를 마이페이지 이력에 즉시 반영한다.
     // 응답을 로컬에서 임의 조립하지 않고 GET /api/gs의 최신 목록을 다시 사용한다.
-    await store.syncStatus()
+    await store.syncStatus({ suppressSimulationAccessNotice: false })
     await router.replace({
       name: 'simulation',
       query: result.value?.simulationId ? { simulationId: result.value.simulationId } : {},
@@ -402,7 +402,7 @@ async function savePlan() {
     result.value.savedAt = response.savedAt
     result.value.expiresAt = response.expiresAt
     showSaveModal.value = false
-    await store.syncStatus()
+    await store.syncStatus({ suppressSimulationAccessNotice: false })
     store.showToast('증여 시뮬레이션을 최종 저장했어요.')
     await router.push('/my')
   } catch (error) {
@@ -420,7 +420,7 @@ async function savePlan() {
 onMounted(async () => {
   try {
     if (!api.isMock) {
-      await store.ensureStatusLoaded()
+      await store.ensureStatusLoaded({ suppressSimulationAccessNotice: false })
     }
 
     selectedFamilyId.value = store.state.selectedFamilyId

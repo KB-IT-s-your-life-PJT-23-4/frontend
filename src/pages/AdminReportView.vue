@@ -9,10 +9,17 @@ import {
 import AdminLayout from '../components/admin/AdminLayout.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
+import { useAuthStore } from '../stores/authStore'
+import {
+  canManageUserBlock,
+  defaultBlockedUntilValue,
+  normalizeBlockedUntil,
+} from '../utils/adminUserBlock'
 import '../assets/css/admin-dashboard.css'
 import '../assets/css/admin-report.css'
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 20
+const authStore = useAuthStore()
 
 const statusOptions = [
   { value: '', label: '전체 상태' },
@@ -38,9 +45,13 @@ const filterForm = ref({ status: '', reportType: '' })
 const appliedFilters = ref({ status: '', reportType: '' })
 
 const showProcessingModal = ref(false)
-const processingDraft = ref({ status: 'IN_REVIEW', resolutionNote: '', blockUser: false })
+const processingDraft = ref({ status: 'IN_REVIEW', resolutionNote: '' })
 const processingError = ref('')
 const isProcessing = ref(false)
+const showBlockModal = ref(false)
+const blockedUntilInput = ref('')
+const blockError = ref('')
+const isBlocking = ref(false)
 
 const currentPage = computed(() => pagination.value?.page ?? 0)
 const totalElements = computed(() => pagination.value?.totalElements ?? 0)
@@ -53,6 +64,9 @@ const pageButtons = computed(() => {
   const start = Math.max(0, Math.min(currentPage.value - 2, total - 5))
   return Array.from({ length: Math.min(5, total) }, (_, index) => start + index)
 })
+const canBlockReportedUsers = computed(
+  () => adminReportCapabilities.blockUser && canManageUserBlock(authStore.user?.role),
+)
 
 function statusLabel(status) {
   return statusOptions.find((option) => option.value === status)?.label ?? status ?? '-'
@@ -137,7 +151,6 @@ function openProcessing(report = selectedReport.value) {
   processingDraft.value = {
     status: report.status === 'OPEN' ? 'IN_REVIEW' : report.status,
     resolutionNote: report.resolutionNote ?? '',
-    blockUser: false,
   }
   processingError.value = ''
   showProcessingModal.value = true
@@ -158,22 +171,50 @@ async function submitProcessing() {
       resolutionNote: processingDraft.value.resolutionNote.trim(),
     })
 
-    if (processingDraft.value.blockUser) {
-      await blockReportedUser(selectedReport.value.userId, {
-        reportId: selectedReport.value.aiSafetyReportId,
-        reason: processingDraft.value.resolutionNote.trim(),
-      })
-    }
-
     showProcessingModal.value = false
-    feedbackMessage.value = processingDraft.value.blockUser
-      ? '신고 처리와 사용자 차단을 완료했습니다.'
-      : '신고 처리를 완료했습니다.'
+    feedbackMessage.value = '신고 처리를 완료했습니다.'
     await loadReports(currentPage.value)
   } catch (error) {
     processingError.value = reportErrorMessage(error, '신고를 처리하지 못했습니다.')
   } finally {
     isProcessing.value = false
+  }
+}
+
+function openBlockModal() {
+  if (!selectedReport.value?.userId || !canBlockReportedUsers.value) return
+  blockedUntilInput.value = defaultBlockedUntilValue()
+  blockError.value = ''
+  showBlockModal.value = true
+}
+
+function closeBlockModal() {
+  if (isBlocking.value) return
+  showBlockModal.value = false
+  blockedUntilInput.value = ''
+  blockError.value = ''
+}
+
+async function confirmBlockReportedUser() {
+  if (!selectedReport.value?.userId || !canBlockReportedUsers.value || isBlocking.value) return
+
+  const blockedUntil = normalizeBlockedUntil(blockedUntilInput.value)
+  if (!blockedUntil) {
+    blockError.value = '현재 시각보다 이후인 차단 만료 시각을 입력해주세요.'
+    return
+  }
+
+  isBlocking.value = true
+  blockError.value = ''
+  feedbackMessage.value = ''
+  try {
+    await blockReportedUser(selectedReport.value.userId, { blockedUntil })
+    showBlockModal.value = false
+    feedbackMessage.value = `사용자 #${selectedReport.value.userId} 차단을 완료했습니다.`
+  } catch (error) {
+    blockError.value = error?.message || '사용자를 차단하지 못했습니다.'
+  } finally {
+    isBlocking.value = false
   }
 }
 
@@ -438,10 +479,17 @@ onMounted(() => loadReports(0))
           <button
             type="button"
             class="admin-report-block-button"
-            :disabled="!adminReportCapabilities.blockUser"
-            title="사용자 차단 API 연동 후 활성화됩니다."
+            :disabled="!canBlockReportedUsers || !selectedReport.userId"
+            :title="
+              !selectedReport.userId
+                ? '차단할 사용자 정보가 없습니다.'
+                : !canBlockReportedUsers
+                  ? 'ROOT 또는 MIDDLE 관리자만 사용할 수 있습니다.'
+                  : undefined
+            "
+            @click="openBlockModal"
           >
-            <AppIcon name="shield" :size="16" /> 사용자 차단 <small>API 연동 대기</small>
+            <AppIcon name="shield" :size="16" /> 사용자 차단
           </button>
         </div>
       </aside>
@@ -450,7 +498,7 @@ onMounted(() => loadReports(0))
     <ModalSheet
       :show="showProcessingModal"
       title="신고 처리"
-      description="처리 상태와 관리자 메모를 기록하고, 필요한 경우 대상 사용자를 함께 차단합니다."
+      description="처리 상태와 관리자 메모를 기록합니다."
       @close="showProcessingModal = false"
     >
       <form
@@ -482,22 +530,6 @@ onMounted(() => loadReports(0))
             placeholder="판단 근거와 처리 내용을 입력하세요."
           />
         </label>
-        <label
-          class="admin-report-block-option"
-          :class="{ 'is-disabled': !adminReportCapabilities.blockUser }"
-          ><input
-            v-model="processingDraft.blockUser"
-            type="checkbox"
-            :disabled="!adminReportCapabilities.blockUser"
-          /><span
-            ><strong>신고 처리와 함께 사용자 차단</strong
-            ><small>{{
-              adminReportCapabilities.blockUser
-                ? '대상 계정을 차단합니다.'
-                : '사용자 차단 API 연동 후 선택할 수 있습니다.'
-            }}</small></span
-          ></label
-        >
         <div
           v-if="!adminReportCapabilities.processReport"
           class="admin-report-api-notice"
@@ -544,6 +576,49 @@ onMounted(() => loadReports(0))
           }}
         </button></template
       >
+    </ModalSheet>
+    <ModalSheet
+      :show="showBlockModal"
+      title="신고 대상 사용자 차단"
+      description="신고 처리 상태는 변경하지 않고 대상 회원 계정만 차단합니다."
+      danger
+      @close="closeBlockModal"
+    >
+      <template #icon><AppIcon name="shield" :size="25" /></template>
+      <form
+        id="admin-report-block-form"
+        class="admin-report-block-form"
+        @submit.prevent="confirmBlockReportedUser"
+      >
+        <p v-if="selectedReport">
+          대상: 사용자 #{{ selectedReport.userId }} · 신고 #{{ selectedReport.aiSafetyReportId }}
+        </p>
+        <label>
+          <span>차단 만료 시각</span>
+          <input v-model="blockedUntilInput" type="datetime-local" required />
+        </label>
+        <p v-if="blockError" class="admin-report-form-error" role="alert">
+          {{ blockError }}
+        </p>
+      </form>
+      <template #actions>
+        <button
+          class="secondary-button"
+          type="button"
+          :disabled="isBlocking"
+          @click="closeBlockModal"
+        >
+          취소
+        </button>
+        <button
+          class="danger-button"
+          type="submit"
+          form="admin-report-block-form"
+          :disabled="isBlocking"
+        >
+          {{ isBlocking ? '차단 중...' : '차단하기' }}
+        </button>
+      </template>
     </ModalSheet>
   </AdminLayout>
 </template>

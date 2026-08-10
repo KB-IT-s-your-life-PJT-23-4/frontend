@@ -403,16 +403,24 @@ let statusGeneration = 0
  * 증여를 등록/확정/삭제한 뒤에는 이 함수만 호출하면 된다(공제도 같이 갱신된다).
  * VITE_API_BASE_URL이 없으면(api.isMock) 데모 데이터를 그대로 사용한다.
  */
-async function syncStatus() {
+async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
   if (api.isMock) return
 
   const generation = statusGeneration
+
+  // GET /api/gs는 일반 화면에서 기존 이력을 표시하기 위한 읽기 API다.
+  // 조회 실패를 빈 이력으로 바꾸지 않아 실제 데이터가 없는 상태와 오류를 구분한다.
+  const listSimulationHistory = (params) =>
+    api.listSimulations({
+      ...params,
+      suppressBlockedAccess: suppressSimulationAccessNotice,
+    })
 
   const [recipients, gifts, deductions, simulationHistory, reminders] = await Promise.all([
     api.listFamilies(),
     api.listGifts(),
     api.listDeductions(),
-    api.listSimulations({ page: 0, size: 50 }),
+    listSimulationHistory({ page: 0, size: 50 }),
     api.listReminders(),
   ])
 
@@ -420,7 +428,7 @@ async function syncStatus() {
 
   const savedSimulationHistories = await Promise.all(
     recipients.map((recipient) =>
-      api.listSimulations({
+      listSimulationHistory({
         familyId: Number(recipient.familyId),
         status: 'SAVED',
       }),
@@ -460,11 +468,11 @@ async function syncStatus() {
 }
 
 /** 화면 진입 시 호출. 이미 불러왔으면 재요청하지 않고, 동시 호출은 한 번으로 합친다. */
-async function ensureStatusLoaded({ force = false } = {}) {
+async function ensureStatusLoaded({ force = false, suppressSimulationAccessNotice = true } = {}) {
   if (api.isMock) return
   if (statusLoaded && !force) return
   if (!pendingSync) {
-    const trackedSync = syncStatus().finally(() => {
+    const trackedSync = syncStatus({ suppressSimulationAccessNotice }).finally(() => {
       if (pendingSync === trackedSync) pendingSync = null
     })
     pendingSync = trackedSync

@@ -5,6 +5,7 @@
 - This is a Vue 3 frontend application built with Vite.
 - Use Pinia for shared state and Vue Router for routing.
 - Use npm as the package manager.
+- On Windows PowerShell, use `npm.cmd` when the execution policy blocks `npm.ps1`.
 
 ## Environment
 
@@ -63,6 +64,7 @@
 ## Verification
 
 - Check syntax and import paths in every changed file.
+- When a source module is imported by a standalone Node ESM test, include its explicit `.js` import extensions so the test does not rely on Vite resolution.
 - Apply the repository's formatting rules when needed.
 - Run `npm run build` after code changes.
 - When the API adapter supports mock mode, verify new API-backed routes and mutations reuse the existing Pinia demo state instead of relying on no-op API fallbacks.
