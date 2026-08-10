@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import AddFamilyModal from '../components/common/AddFamilyModal.vue'
 import DateField from '../components/common/DateField.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
@@ -11,8 +11,8 @@ import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
 import '../assets/css/status-view.css'
 
 const store = useAppStore()
-const router = useRouter()
 const showAddGift = ref(false)
+const showAddFamily = ref(false)
 const planToDelete = ref(null)
 const giftToDelete = ref(null)
 const deletingGift = ref(false)
@@ -57,15 +57,113 @@ const hasRenewalSchedule = computed(() =>
 const familyPlans = computed(() =>
   store.state.plans.filter((plan) => plan.familyId === family.value.id),
 )
+// 저장된 시뮬레이션은 수증자당 최신 1건이라 첫 건만 쓴다. 아직 증여가 아니라서 familyPlans 와 분리돼 있다.
+const familySimulation = computed(
+  () =>
+    (store.state.simulationPlans ?? []).find((plan) => plan.familyId === family.value.id) ?? null,
+)
 const history = computed(() =>
   store.state.giftHistory.filter((gift) => gift.familyId === family.value.id),
 )
+
+/**
+ * 진행 중인 증여를 화면 단위로 묶는다.
+ *
+ * 분할 증여는 같은 simulResultId 를 공유하는 gift 여러 행이라, 그대로 펼치면 목록이 회차 수만큼
+ * 늘어나 언제 시작한 건인지 알 수 없다. 묶어서 총액과 시작일을 먼저 보여주고 회차는 안에 넣는다.
+ *
+ * 확정된 회차(giftHistory)도 함께 넣는다. 시간축 진행률은 "몇 회차까지 왔나"를 보여주는 것이라
+ * 이미 끝난 회차가 빠지면 바가 항상 처음으로 되돌아가고 총액도 확정할 때마다 줄어든다.
+ * 대신 묶음이 목록에 뜨는 조건은 아직 확정 안 된 회차가 하나라도 남아 있을 때다.
+ */
+const familyPlanGroups = computed(() => {
+  const groups = []
+  const bySimulResult = new Map()
+
+  const trancheHistory = history.value.filter((gift) => gift.simulResultId != null)
+
+  for (const plan of [...familyPlans.value, ...trancheHistory]) {
+    if (plan.simulResultId == null) {
+      groups.push({
+        id: `gift-${plan.id}`,
+        split: false,
+        hasPending: true,
+        totalAmount: Number(plan.currentAmount || plan.amount),
+        startDate: plan.giftDate,
+        endDate: plan.giftDate,
+        tranches: [plan],
+      })
+      continue
+    }
+
+    let group = bySimulResult.get(plan.simulResultId)
+    if (!group) {
+      group = { id: `simul-${plan.simulResultId}`, tranches: [] }
+      bySimulResult.set(plan.simulResultId, group)
+      groups.push(group)
+    }
+    group.tranches.push(plan)
+  }
+
+  for (const group of bySimulResult.values()) {
+    group.tranches.sort((first, second) => (first.sequenceNo ?? 0) - (second.sequenceNo ?? 0))
+    group.split = group.tranches.length > 1
+    group.hasPending = group.tranches.some((tranche) => tranche.status !== 'COMPLETED')
+    group.totalAmount = group.tranches.reduce(
+      (sum, tranche) => sum + Number(tranche.currentAmount || tranche.amount),
+      0,
+    )
+    group.startDate = group.tranches[0]?.giftDate ?? ''
+    group.endDate = group.tranches[group.tranches.length - 1]?.giftDate ?? ''
+  }
+
+  return groups.filter((group) => group.hasPending)
+})
+
+function dateValue(value) {
+  const iso = toIsoDate(value)
+  return iso ? new Date(`${iso}T00:00:00`).getTime() : NaN
+}
+
+// 시간축 위치(%). 첫 회차가 0%, 마지막 회차가 100%다.
+function timelinePercent(group, value) {
+  const start = dateValue(group.startDate)
+  const end = dateValue(group.endDate)
+  const point = dateValue(value)
+
+  if (!Number.isFinite(start) || !Number.isFinite(end) || !Number.isFinite(point)) return 0
+  if (end <= start) return point >= end ? 100 : 0
+
+  return Math.min(100, Math.max(0, ((point - start) / (end - start)) * 100))
+}
+
+function groupProgress(group) {
+  return timelinePercent(group, today)
+}
+
+function completedTrancheCount(group) {
+  return group.tranches.filter((tranche) => tranche.status === 'COMPLETED').length
+}
+
+function isTrancheDone(tranche) {
+  return tranche.status === 'COMPLETED'
+}
 const todayDate = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Seoul',
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
 }).format(new Date())
+
+// 서류 목록은 기본으로 접어 둔다. 회차마다 3종씩 펼쳐지면 묶음 하나가 화면을 가득 채운다.
+// 펼침 상태는 회차 카드(gift id)와 키가 겹치지 않게 접두어를 붙여 expandedPlanIds 에 함께 담는다.
+function documentPanelKey(planId) {
+  return `docs-${planId}`
+}
+
+function isDocumentPanelOpen(planId) {
+  return isPlanExpanded(documentPanelKey(planId))
+}
 
 function planProgressCopy(plan) {
   const plannedGiftDate = String(plan.plannedGiftDate ?? '').replaceAll('.', '-')
@@ -248,7 +346,8 @@ onMounted(() => loadStatus())
   <div class="page status-page">
     <AppHeader />
     <div class="page-content status-content">
-      <section class="family-switcher" aria-label="수증자 선택">
+      <!-- 수증자가 없으면 고를 대상도 추가 버튼도 필요 없다. 아래 빈 상태 카드가 등록을 안내한다. -->
+      <section v-if="hasFamily" class="family-switcher" aria-label="수증자 선택">
         <button
           v-for="item in store.state.families"
           :key="item.id"
@@ -262,7 +361,7 @@ onMounted(() => loadStatus())
           class="add-family-tab"
           type="button"
           aria-label="수증자 추가"
-          @click="router.push('/my')"
+          @click="showAddFamily = true"
         >
           <AppIcon name="plus" :size="18" />
         </button>
@@ -285,43 +384,58 @@ onMounted(() => loadStatus())
       <section v-if="!hasFamily && !loading" class="empty-plan-card">
         <span><AppIcon name="user" :size="25" /></span>
         <h2>등록된 수증자가 없어요</h2>
-        <p>마이페이지에서 수증자를 등록하면 가족별 증여 현황과 공제 한도를 관리할 수 있어요.</p>
-        <RouterLink class="primary-button" to="/my">수증자 등록하기</RouterLink>
+        <p>수증자를 등록하면 가족별 증여 현황과 공제 한도를 관리할 수 있어요.</p>
+        <button class="primary-button" type="button" @click="showAddFamily = true">
+          수증자 등록하기
+        </button>
       </section>
 
       <template v-else>
-        <section v-if="familyPlans.length" class="active-plan-card">
+        <section v-if="familySimulation" class="active-plan-card">
           <div class="active-plan-visual">
             <div class="plan-orbit" />
             <span class="plan-coin">₩</span>
             <span class="plan-document"><AppIcon name="document" :size="31" /></span>
           </div>
           <div class="plan-card-copy">
-            <div v-if="!familyPlans[0].readOnly" class="plan-card-eyebrow">
-              <button type="button" aria-label="계획 삭제" @click="planToDelete = familyPlans[0]">
-                <AppIcon name="trash" :size="17" />
-              </button>
-            </div>
             <h2>
-              <template v-if="familyPlans[0].expectedFutureValue">
-                {{ formatCompactWon(familyPlans[0].amount) }}을
-                {{ formatCompactWon(familyPlans[0].expectedFutureValue) }}으로<br />
-                {{ planProgressCopy(familyPlans[0]) }}
+              <template v-if="familySimulation.expectedFutureValue">
+                {{ formatCompactWon(familySimulation.amount) }}을
+                {{ formatCompactWon(familySimulation.expectedFutureValue) }}으로<br />
+                {{ planProgressCopy(familySimulation) }}
               </template>
               <template v-else>
-                {{ formatCompactWon(familyPlans[0].amount) }}을 준비하고 있어요
+                {{ formatCompactWon(familySimulation.amount) }}을 준비하고 있어요
               </template>
             </h2>
-            <strong>{{ familyPlans[0].productName }}</strong>
+            <strong>{{ familySimulation.productName }}</strong>
             <div class="plan-card-meta">
-              <span v-if="familyPlans[0].rate"> 예상 수익률 연 {{ familyPlans[0].rate }}% </span>
-              <span>{{ familyPlans[0].giftDate }} 예정</span>
-              <!-- <span>{{ planScheduleCopy(familyPlans[0]) }}</span> -->
+              <span v-if="familySimulation.rate">
+                예상 수익률 연 {{ familySimulation.rate }}%
+              </span>
+              <span>{{ familySimulation.giftDate }} 예정</span>
             </div>
+            <button
+              class="primary-button full register-simulation-button"
+              type="button"
+              :disabled="registeringPlanId === familySimulation.id"
+              @click="registerPlan(familySimulation)"
+            >
+              <AppIcon name="check" :size="16" />
+              {{
+                registeringPlanId === familySimulation.id
+                  ? '등록 중...'
+                  : '이 시뮬레이션으로 증여 진행하기'
+              }}
+            </button>
+            <p class="register-gift-note">
+              저장한 시뮬레이션이에요. 증여를 진행하면 아래 진행 중인 증여로 옮겨가고, 거기서 서류를
+              준비한 뒤 확정할 수 있어요.
+            </p>
           </div>
         </section>
 
-        <section v-else class="empty-plan-card">
+        <section v-else-if="!familyPlans.length" class="empty-plan-card">
           <span><AppIcon name="calculator" :size="25" /></span>
           <h2>현재 저장한 증여 계획이 없어요</h2>
           <p>
@@ -420,30 +534,40 @@ onMounted(() => loadStatus())
                 /></span>
                 <strong>진행 중인 증여</strong>
               </div>
-              <span>{{ familyPlans.length }}건</span>
+              <span>{{ familyPlanGroups.length }}건</span>
             </div>
-            <div v-if="familyPlans.length" class="ongoing-plan-list">
+            <div v-if="familyPlanGroups.length" class="ongoing-plan-list">
               <div
-                v-for="plan in familyPlans"
-                :key="plan.id"
+                v-for="group in familyPlanGroups"
+                :key="group.id"
                 class="ongoing-plan-item"
-                :class="{ open: isPlanExpanded(plan.id) }"
+                :class="{ open: isPlanExpanded(group.id) }"
               >
                 <div class="ongoing-plan-head">
                   <button
                     class="ongoing-plan-summary"
                     type="button"
-                    :aria-expanded="isPlanExpanded(plan.id)"
-                    :aria-controls="`plan-documents-${plan.id}`"
-                    @click="togglePlan(plan.id)"
+                    :aria-expanded="isPlanExpanded(group.id)"
+                    :aria-controls="`plan-documents-${group.id}`"
+                    @click="togglePlan(group.id)"
                   >
                     <div>
-                      <strong>{{ formatCompactWon(plan.currentAmount || plan.amount) }}</strong>
+                      <strong>{{ formatCompactWon(group.totalAmount) }}</strong>
+                      <span v-if="group.split" class="tranche-pill">
+                        {{ group.tranches.length }}회 분할
+                      </span>
                       <span>증여 신고 전</span>
                     </div>
                     <p>
-                      <AppIcon name="info" :size="16" /> {{ plan.giftDate }} 일정과 신고 서류를 미리
-                      확인하세요.
+                      <AppIcon name="info" :size="16" />
+                      <template v-if="group.split">
+                        {{ group.startDate }} 시작 · {{ completedTrancheCount(group) }}/{{
+                          group.tranches.length
+                        }}회차 완료
+                      </template>
+                      <template v-else>
+                        {{ group.startDate }} 일정과 신고 서류를 미리 확인하세요.
+                      </template>
                     </p>
                   </button>
                   <div class="ongoing-plan-actions">
@@ -452,135 +576,177 @@ onMounted(() => loadStatus())
                       <AppIcon name="chevron" :size="16" />
                     </span>
                     <button
+                      v-if="!group.split"
                       class="row-delete-button ongoing-plan-delete"
                       type="button"
-                      :aria-label="`${plan.giftDate} 진행 중인 증여 삭제`"
-                      @click="planToDelete = plan"
+                      :aria-label="`${group.startDate} 진행 중인 증여 삭제`"
+                      @click="planToDelete = group.tranches[0]"
                     >
                       <AppIcon name="trash" :size="16" />
                     </button>
                   </div>
                 </div>
 
-                <div
-                  v-show="isPlanExpanded(plan.id)"
-                  :id="`plan-documents-${plan.id}`"
-                  class="plan-document-panel"
-                >
-                  <div class="plan-document-heading">
-                    <div>
-                      <span class="section-kicker">CHECKLIST</span>
-                      <strong>필수 증빙 서류</strong>
+                <div v-show="isPlanExpanded(group.id)" :id="`plan-documents-${group.id}`">
+                  <!--
+                    시간축은 첫 회차 0%, 마지막 회차 100%다. 채워진 길이는 오늘 위치라
+                    회차 사이 기간이 길수록 천천히 찬다.
+                  -->
+                  <div v-if="group.split" class="plan-document-panel tranche-timeline">
+                    <div class="plan-document-heading">
+                      <div>
+                        <span class="section-kicker">SCHEDULE</span>
+                        <strong>증여 이행 현황</strong>
+                      </div>
+                      <span class="yellow-text">
+                        {{ completedTrancheCount(group) }}/{{ group.tranches.length }}회차
+                      </span>
                     </div>
-                    <span class="yellow-text"
-                      >{{ completedDocuments(plan.id) }}/{{
-                        store.state.documents.length
-                      }}
-                      준비</span
-                    >
-                  </div>
-                  <div class="document-list">
-                    <div
-                      v-for="document in store.state.documents"
-                      :key="document.id"
-                      class="document-row"
-                      :class="{ open: isDocumentOpen(plan.id, document.id) }"
-                    >
-                      <div
-                        class="document-row-head"
-                        :class="{ done: isDocumentDone(plan.id, document.id) }"
+                    <div class="tranche-track">
+                      <span
+                        class="tranche-track-fill"
+                        :style="{ width: `${groupProgress(group)}%` }"
+                      />
+                      <span
+                        v-for="tranche in group.tranches"
+                        :key="`marker-${tranche.id}`"
+                        class="tranche-marker"
+                        :class="{ done: isTrancheDone(tranche) }"
+                        :style="{ left: `${timelinePercent(group, tranche.giftDate)}%` }"
                       >
-                        <span class="document-icon"><AppIcon name="document" :size="19" /></span>
-                        <div class="document-row-text">
-                          <button
-                            class="document-name"
-                            type="button"
-                            :aria-expanded="isDocumentOpen(plan.id, document.id)"
-                            :aria-controls="`document-detail-${plan.id}-${document.id}`"
-                            @click="toggleDocumentDetail(plan.id, document.id)"
-                          >
-                            <strong>{{ document.label }}</strong>
-                            <span class="document-name-caret"
-                              ><AppIcon name="chevron" :size="14"
-                            /></span>
-                          </button>
-                          <small>{{ document.description }}</small>
-                        </div>
-                        <button
-                          class="document-check-button"
-                          type="button"
-                          :aria-pressed="isDocumentDone(plan.id, document.id)"
-                          :aria-label="`${document.label} 준비 완료`"
-                          @click="store.toggleDocument(plan.id, document.id)"
-                        >
-                          <span class="document-check"><AppIcon name="check" :size="15" /></span>
-                        </button>
-                      </div>
-                      <div
-                        v-show="isDocumentOpen(plan.id, document.id)"
-                        :id="`document-detail-${plan.id}-${document.id}`"
-                        class="document-detail"
-                      >
-                        <p v-if="document.intro">{{ document.intro }}</p>
-                        <div
-                          v-if="document.guide"
-                          class="document-guide"
-                          :class="{ plain: document.guide.plain }"
-                        >
-                          <strong>
-                            <AppIcon v-if="!document.guide.plain" name="document" :size="15" />
-                            {{ document.guide.title }}
-                          </strong>
-                          <ol>
-                            <li v-for="step in document.guide.steps" :key="step">{{ step }}</li>
-                          </ol>
-                        </div>
-                        <button
-                          v-if="document.sampleImage"
-                          class="document-sample-button"
-                          type="button"
-                          @click="openSample(document)"
-                        >
-                          예시 보기
-                        </button>
-                        <div v-if="document.links" class="document-link-row">
-                          <a
-                            v-for="link in document.links"
-                            :key="link.href"
-                            class="document-link"
-                            :class="{ primary: link.primary }"
-                            :href="link.href"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <AppIcon :name="link.icon" :size="15" /> {{ link.label }}
-                          </a>
-                        </div>
-                      </div>
+                        <em>{{ tranche.sequenceNo }}회차</em>
+                        <small>{{ tranche.giftDate }}</small>
+                      </span>
                     </div>
                   </div>
-                  <template v-if="plan.source === 'simulation'">
+
+                  <!--
+                    서류와 확정은 회차마다 따로다. 회차별 신고기한이 달라 한 묶음으로 처리할 수 없다.
+                    이미 확정된 회차는 준비할 것이 없어 건너뛴다.
+                  -->
+                  <div
+                    v-for="plan in group.tranches.filter((tranche) => !isTrancheDone(tranche))"
+                    :key="`docs-${plan.id}`"
+                    class="plan-document-panel"
+                    :class="{ open: isDocumentPanelOpen(plan.id) }"
+                  >
                     <button
+                      class="plan-document-heading plan-document-toggle"
+                      type="button"
+                      :aria-expanded="isDocumentPanelOpen(plan.id)"
+                      :aria-controls="`document-list-${plan.id}`"
+                      @click="togglePlan(documentPanelKey(plan.id))"
+                    >
+                      <div>
+                        <span class="section-kicker">CHECKLIST</span>
+                        <strong>
+                          <template v-if="group.split">{{ plan.sequenceNo }}회차 </template>
+                          필수 증빙 서류
+                        </strong>
+                      </div>
+                      <span class="yellow-text"
+                        >{{ completedDocuments(plan.id) }}/{{
+                          store.state.documents.length
+                        }}
+                        준비</span
+                      >
+                      <span class="plan-document-caret" aria-hidden="true">
+                        <AppIcon name="chevron" :size="16" />
+                      </span>
+                    </button>
+                    <div
+                      v-show="isDocumentPanelOpen(plan.id)"
+                      :id="`document-list-${plan.id}`"
+                      class="document-list"
+                    >
+                      <div
+                        v-for="document in store.state.documents"
+                        :key="document.id"
+                        class="document-row"
+                        :class="{ open: isDocumentOpen(plan.id, document.id) }"
+                      >
+                        <div
+                          class="document-row-head"
+                          :class="{ done: isDocumentDone(plan.id, document.id) }"
+                        >
+                          <span class="document-icon"><AppIcon name="document" :size="19" /></span>
+                          <div class="document-row-text">
+                            <button
+                              class="document-name"
+                              type="button"
+                              :aria-expanded="isDocumentOpen(plan.id, document.id)"
+                              :aria-controls="`document-detail-${plan.id}-${document.id}`"
+                              @click="toggleDocumentDetail(plan.id, document.id)"
+                            >
+                              <strong>{{ document.label }}</strong>
+                              <span class="document-name-caret"
+                                ><AppIcon name="chevron" :size="14"
+                              /></span>
+                            </button>
+                            <small>{{ document.description }}</small>
+                          </div>
+                          <button
+                            class="document-check-button"
+                            type="button"
+                            :aria-pressed="isDocumentDone(plan.id, document.id)"
+                            :aria-label="`${document.label} 준비 완료`"
+                            @click="store.toggleDocument(plan.id, document.id)"
+                          >
+                            <span class="document-check"><AppIcon name="check" :size="15" /></span>
+                          </button>
+                        </div>
+                        <div
+                          v-show="isDocumentOpen(plan.id, document.id)"
+                          :id="`document-detail-${plan.id}-${document.id}`"
+                          class="document-detail"
+                        >
+                          <p v-if="document.intro">{{ document.intro }}</p>
+                          <div
+                            v-if="document.guide"
+                            class="document-guide"
+                            :class="{ plain: document.guide.plain }"
+                          >
+                            <strong>
+                              <AppIcon v-if="!document.guide.plain" name="document" :size="15" />
+                              {{ document.guide.title }}
+                            </strong>
+                            <ol>
+                              <li v-for="step in document.guide.steps" :key="step">{{ step }}</li>
+                            </ol>
+                          </div>
+                          <button
+                            v-if="document.sampleImage"
+                            class="document-sample-button"
+                            type="button"
+                            @click="openSample(document)"
+                          >
+                            예시 보기
+                          </button>
+                          <div v-if="document.links" class="document-link-row">
+                            <a
+                              v-for="link in document.links"
+                              :key="link.href"
+                              class="document-link"
+                              :class="{ primary: link.primary }"
+                              :href="link.href"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <AppIcon :name="link.icon" :size="15" /> {{ link.label }}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      v-if="isPlanReadyToConfirm(plan.id)"
                       class="primary-button full confirm-gift-button"
                       type="button"
-                      :disabled="registeringPlanId === plan.id"
-                      @click="registerPlan(plan)"
+                      @click="planToConfirm = plan"
                     >
-                      <AppIcon name="check" :size="16" />
-                      {{ registeringPlanId === plan.id ? '등록 중...' : '증여로 등록하기' }}
+                      <AppIcon name="check" :size="16" /> 증여 확정하기
                     </button>
-                    <p class="register-gift-note">
-                      저장한 시뮬레이션이에요. 증여로 등록하면 서류를 준비한 뒤 확정할 수 있어요.
-                    </p>
-                  </template>
-                  <button
-                    v-else-if="isPlanReadyToConfirm(plan.id)"
-                    class="primary-button full confirm-gift-button"
-                    type="button"
-                    @click="planToConfirm = plan"
-                  >
-                    <AppIcon name="check" :size="16" /> 증여 확정하기
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -755,5 +921,7 @@ onMounted(() => loadStatus())
         </button>
       </template>
     </ModalSheet>
+
+    <AddFamilyModal :show="showAddFamily" @close="showAddFamily = false" />
   </div>
 </template>

@@ -1,13 +1,12 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import DateField from '../components/common/DateField.vue'
+import AddFamilyModal from '../components/common/AddFamilyModal.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
 import { useAppStore } from '../stores/appStore'
 import { useAuthStore } from '../stores/authStore'
-import { RELATION_OPTIONS } from '../utils/deduction'
 import { formatCompactWon } from '../utils/finance'
 import { resolveProfileImageUrl } from '../utils/profileImage'
 import '../assets/css/my-page.css'
@@ -19,7 +18,6 @@ const showAddFamily = ref(false)
 const showSettings = ref(false)
 const showWithdrawal = ref(false)
 const simulationToDelete = ref(null)
-const savingFamily = ref(false)
 const isLoggingOut = ref(false)
 const isWithdrawing = ref(false)
 const withdrawalError = ref('')
@@ -41,17 +39,6 @@ function simulationFamilyName(familyId) {
     store.state.families.find((family) => Number(family.id) === Number(familyId))?.name ?? '수증자'
   )
 }
-// 생년월일 입력 범위. min/max 를 주지 않으면 브라우저가 연도 칸을 6자리(최대 275760년)로 잡아
-// 4자리를 채워도 월 칸으로 넘어가지 않는다. 범위를 좁히면 연도 4자리에서 자동으로 넘어간다.
-// 미래 생년월일을 막는 역할도 겸한다.
-const BIRTH_DATE_MIN = '1900-01-01'
-const birthDateMax = new Date().toISOString().slice(0, 10)
-// 백엔드 family.relation 은 ENUM(LINEAL_DESCENDANT/OTHER) 이라 코드로 보낸다.
-const familyForm = reactive({
-  name: '',
-  birthDate: '',
-})
-
 function openFamilyDetail(familyId) {
   router.push({ name: 'recipient-detail', params: { familyId } })
 }
@@ -66,24 +53,6 @@ function openProfileEdit() {
 
 function markFamilyImageFailed(familyId) {
   failedFamilyImages.value = new Set(failedFamilyImages.value).add(Number(familyId))
-}
-
-async function submitFamily() {
-  if (!familyForm.name || !familyForm.birthDate || savingFamily.value) return
-  savingFamily.value = true
-  try {
-    await store.addFamily({
-      ...familyForm,
-      relation: RELATION_OPTIONS[0].code,
-    })
-    familyForm.name = ''
-    familyForm.birthDate = ''
-    showAddFamily.value = false
-  } catch (error) {
-    store.showToast(error.message || '수증자를 등록하지 못했습니다.', 'info')
-  } finally {
-    savingFamily.value = false
-  }
 }
 
 // 수증자 목록·증여 이력은 DB에서 온다(데모 모드에서는 목데이터 유지).
@@ -247,8 +216,7 @@ async function submitWithdrawal() {
         </button>
         <button type="button" @click="openProfileEdit">
           <span class="menu-icon"><AppIcon name="user" :size="20" /></span>
-          <span
-            ><strong>회원 정보 수정</strong></span>
+          <span><strong>회원 정보 수정</strong></span>
           <AppIcon name="chevron" :size="17" />
         </button>
         <button
@@ -256,10 +224,7 @@ async function submitWithdrawal() {
           @click="store.showToast('약관 화면은 실제 서비스 연동 시 제공돼요.', 'info')"
         >
           <span class="menu-icon"><AppIcon name="document" :size="20" /></span>
-          <span
-            ><strong>이용약관 · 개인정보 처리방침</strong
-            ></span
-          >
+          <span><strong>이용약관 · 개인정보 처리방침</strong></span>
           <AppIcon name="chevron" :size="17" />
         </button>
       </section>
@@ -348,50 +313,7 @@ async function submitWithdrawal() {
       <p class="version-label">미리줌 데모 1.0</p>
     </div>
 
-    <ModalSheet
-      :show="showAddFamily"
-      title="수증자 정보를 등록할까요?"
-      description="이름과 관계, 생년월일을 입력하면 가족별 증여 한도를 따로 관리할 수 있어요."
-      @close="showAddFamily = false"
-    >
-      <form id="family-form" class="modal-form" @submit.prevent="submitFamily">
-        <label>
-          <span>이름</span>
-          <input
-            v-model.trim="familyForm.name"
-            type="text"
-            placeholder="이름을 입력하세요"
-            required
-          />
-        </label>
-        <label>
-          <span>관계</span>
-          <input :value="RELATION_OPTIONS[0].label" type="text" readonly aria-readonly="true" />
-        </label>
-        <div class="date-field-row">
-          <span>생년월일</span>
-          <DateField
-            v-model="familyForm.birthDate"
-            :min="BIRTH_DATE_MIN"
-            :max="birthDateMax"
-            placeholder="생년월일을 선택하세요"
-            aria-label="생년월일 선택"
-          />
-        </div>
-      </form>
-      <template #actions>
-        <button class="secondary-button" type="button" @click="showAddFamily = false">취소</button>
-        <!-- 생년월일은 DateField(button) 이라 네이티브 required 검증이 안 걸린다. 버튼으로 막는다. -->
-        <button
-          class="primary-button"
-          type="submit"
-          form="family-form"
-          :disabled="savingFamily || !familyForm.birthDate"
-        >
-          {{ savingFamily ? '등록 중...' : '등록' }}
-        </button>
-      </template>
-    </ModalSheet>
+    <AddFamilyModal :show="showAddFamily" @close="showAddFamily = false" />
 
     <ModalSheet
       :show="showSettings"

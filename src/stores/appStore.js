@@ -33,6 +33,9 @@ const REFERENCE_KEYS = ['documents']
 const SERVER_SOURCED_STATE = {
   families: [],
   plans: [],
+  // 저장했지만 아직 증여로 등록하지 않은 시뮬레이션. plans(진행 중인 증여)와 섞지 않는다.
+  // 둘은 단계가 다르다 — 여기서 "증여 진행하기"를 눌러야 gift 가 생기고 plans 로 넘어간다.
+  simulationPlans: [],
   giftHistory: [],
   // 서버의 시뮬레이션 이력 API로 채운다. 목 시드는 쓰지 않는다.
   simulations: [],
@@ -231,10 +234,6 @@ async function savePlan(plan) {
 
 async function deletePlan(planId) {
   const plan = state.plans.find((item) => item.id === planId)
-  if (!api.isMock && plan?.source === 'simulation') {
-    showToast('저장된 시뮬레이션은 새 시뮬레이션 저장 시 교체할 수 있어요.', 'info')
-    return
-  }
   if (!api.isMock && plan?.source === 'server') {
     await api.deleteGift(planId)
     await syncStatus()
@@ -270,6 +269,8 @@ function plannedGiftToPlan(gift) {
   return {
     id: gift.giftId,
     familyId: Number(gift.familyId),
+    simulResultId: gift.simulResultId ?? null,
+    sequenceNo: gift.sequenceNo ?? null,
     amount: Number(gift.amount),
     currentAmount: Number(gift.amount),
     giftDate: toDotDate(gift.giftDate),
@@ -285,7 +286,11 @@ function completedGiftToHistory(gift) {
   return {
     id: gift.giftId,
     familyId: Number(gift.familyId),
+    // 확정된 회차도 이행 현황 시간축에 "완료" 마커로 찍혀야 해서 출처를 함께 들고 간다.
+    simulResultId: gift.simulResultId ?? null,
+    sequenceNo: gift.sequenceNo ?? null,
     date: toDotDate(gift.giftDate),
+    giftDate: toDotDate(gift.giftDate),
     type: gift.memo || '현금',
     amount: Number(gift.amount),
     status: GIFT_STATUS.COMPLETED,
@@ -308,6 +313,8 @@ function savedSimulationToPlan(item) {
   return {
     id: `simulation-${item.simulationId}`,
     simulationId: Number(item.simulationId),
+    // 증여로 등록되면 gift.simulResultId 가 이 값을 물고 간다. 중복 제거의 연결 키다.
+    simulResultId: item.selection?.resultId == null ? null : Number(item.selection.resultId),
     familyId: Number(item.family?.familyId),
     amount: requestedAmount,
     currentAmount: requestedAmount,
@@ -446,13 +453,22 @@ async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
   state.families = recipients.map((recipient) =>
     serverFamilyToState(recipient, deductionByFamily.get(Number(recipient.familyId))),
   )
-  const savedSimulationPlans = savedSimulationHistories.flatMap((history) =>
-    (history?.items ?? []).map(savedSimulationToPlan),
+  // 증여로 등록이 끝난 시뮬레이션은 gift 쪽에서 이미 보이므로 계획 목록에서 뺀다.
+  // 빼지 않으면 같은 증여가 시뮬레이션으로 한 번, gift 로 한 번 총 두 줄로 뜬다.
+  //
+  // 판정 대상은 PLANNED 가 아니라 gift 전체다. COMPLETED 만 남은 시점에 PLANNED 로만 걸러 보면
+  // 등록된 적 없는 시뮬레이션으로 되살아나, 확정한 증여가 이력과 진행 중에 동시에 보인다.
+  const registeredResultIds = new Set(
+    gifts
+      .map((gift) => gift.simulResultId)
+      .filter((resultId) => resultId != null)
+      .map(Number),
   )
-  const plannedGiftPlans = gifts
-    .filter((gift) => gift.status === GIFT_STATUS.PLANNED)
-    .map(plannedGiftToPlan)
-  state.plans = [...savedSimulationPlans, ...plannedGiftPlans]
+  const savedSimulationPlans = savedSimulationHistories
+    .flatMap((history) => (history?.items ?? []).map(savedSimulationToPlan))
+    .filter((plan) => plan.simulResultId == null || !registeredResultIds.has(plan.simulResultId))
+  state.simulationPlans = savedSimulationPlans
+  state.plans = gifts.filter((gift) => gift.status === GIFT_STATUS.PLANNED).map(plannedGiftToPlan)
   state.giftHistory = gifts
     .filter((gift) => gift.status === GIFT_STATUS.COMPLETED)
     .map(completedGiftToHistory)
@@ -505,38 +521,45 @@ async function clearUserState() {
  * 저장과 동시에 만들면 둘이 한 몸이 되어 시뮬레이션을 지우지 않고는 증여만 취소할 수 없기 때문이다.
  * gift 는 이 버튼을 누른 시점에 생기고, 그때부터 서류 체크 → 확정 흐름을 탈 수 있다.
  *
- * 증여일은 투자 만기일(giftDate)이 아니라 증여 예정일(plannedGiftDate)을 쓴다.
+ * 금액과 증여일은 서버가 회차 원본(simulation_tranche)에서 읽는다. 분할 증여면 회차 수만큼 gift 가 생긴다.
  */
 async function registerSimulationAsGift(planId) {
-  const plan = state.plans.find((item) => item.id === planId)
-  if (!plan || plan.source !== 'simulation' || api.isMock) return
+  const plan = state.simulationPlans.find((item) => item.id === planId)
+  if (!plan || api.isMock) return
 
-  const created = await api.createGift({
-    familyId: Number(plan.familyId),
-    amount: Number(plan.currentAmount || plan.amount),
-    giftDate: toIsoDate(plan.plannedGiftDate || plan.giftDate),
-    memo: plan.productName || '진행 중인 증여',
-    status: GIFT_STATUS.PLANNED,
+  const created = await api.registerGiftFromSimulation({
+    simulationId: Number(plan.simulationId),
   })
 
-  // 서류 체크는 planId 로 묶여 있다. 새로 생긴 gift 의 id 로 옮기지 않으면 체크가 사라진 것처럼 보인다.
-  const checkedDocuments = state.documentChecks[planId]
-  if (created?.giftId != null && checkedDocuments?.length) {
-    state.documentChecks[created.giftId] = checkedDocuments
+  // 서류 체크는 giftId 로 묶이므로 회차가 나뉘면 체크도 회차별로 따로 쌓인다.
+  // 등록 전에 planId 로 해 둔 체크는 회차가 없던 시절의 것이라 성격을 나눠 옮긴다.
+  // 관계 증명처럼 회차와 무관한 서류(scope: 'plan')만 전 회차에 물려주고,
+  // 이체확인증·신고서처럼 회차마다 다시 준비해야 하는 것은 물려주지 않는다.
+  // 물려주면 아직 송금도 하지 않은 회차가 준비 완료로 보여 확정 버튼이 열린다.
+  const planScopedDocumentIds = new Set(
+    state.documents.filter((document) => document.scope === 'plan').map((document) => document.id),
+  )
+  const carriedOver = (state.documentChecks[planId] ?? []).filter((documentId) =>
+    planScopedDocumentIds.has(documentId),
+  )
+  if (carriedOver.length) {
+    for (const gift of created) {
+      if (gift.giftId != null) state.documentChecks[gift.giftId] = [...carriedOver]
+    }
   }
   delete state.documentChecks[planId]
 
   await syncStatus()
-  showToast('증여로 등록했어요. 서류를 준비한 뒤 확정할 수 있어요.')
+  showToast(
+    created.length > 1
+      ? `${created.length}회차 증여로 등록했어요. 회차마다 서류를 준비한 뒤 확정할 수 있어요.`
+      : '증여로 등록했어요. 서류를 준비한 뒤 확정할 수 있어요.',
+  )
 }
 
 async function confirmPlanGift(planId) {
   const plan = state.plans.find((item) => item.id === planId)
   if (!plan) return
-  if (!api.isMock && plan.source === 'simulation') {
-    showToast('저장된 시뮬레이션은 증여 실행 후 이력을 직접 등록해 주세요.', 'info')
-    return
-  }
   const amount = Number(plan.currentAmount || plan.amount)
   const family = state.families.find((item) => item.id === plan.familyId)
 
