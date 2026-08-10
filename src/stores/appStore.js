@@ -459,6 +459,48 @@ async function syncStatus() {
   statusLoaded = true
 }
 
+async function loadSimulationHistoryPage({ familyId, page = 0, size = 10 } = {}) {
+  const normalizedPage = Math.max(0, Number(page) || 0)
+  const normalizedSize = Math.max(1, Number(size) || 10)
+
+  if (api.isMock) {
+    const filteredItems =
+      familyId == null
+        ? state.simulations
+        : state.simulations.filter((item) => Number(item.familyId) === Number(familyId))
+    const totalElements = filteredItems.length
+    const totalPages = Math.ceil(totalElements / normalizedSize)
+    const start = normalizedPage * normalizedSize
+    const items = filteredItems.slice(start, start + normalizedSize)
+
+    return {
+      items,
+      pagination: {
+        page: normalizedPage,
+        size: normalizedSize,
+        totalElements,
+        totalPages,
+        numberOfElements: items.length,
+        first: normalizedPage === 0,
+        last: normalizedPage + 1 >= totalPages,
+        hasNext: normalizedPage + 1 < totalPages,
+        hasPrevious: normalizedPage > 0,
+      },
+    }
+  }
+
+  const response = await api.listSimulations({
+    familyId,
+    page: normalizedPage,
+    size: normalizedSize,
+  })
+
+  return {
+    items: (response?.items ?? []).map(serverSimulationToState),
+    pagination: response?.pagination ?? null,
+  }
+}
+
 /** 화면 진입 시 호출. 이미 불러왔으면 재요청하지 않고, 동시 호출은 한 번으로 합친다. */
 async function ensureStatusLoaded({ force = false } = {}) {
   if (api.isMock) return
@@ -752,6 +794,7 @@ export function useAppStore() {
     deleteGiftHistory,
     syncStatus,
     ensureStatusLoaded,
+    loadSimulationHistoryPage,
     registerSimulationAsGift,
     confirmPlanGift,
     toggleDocument,

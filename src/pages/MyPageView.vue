@@ -27,14 +27,17 @@ const userImageFailed = ref(false)
 const failedFamilyImages = ref(new Set())
 const displayUser = computed(() => authStore.user ?? store.state.user)
 const displayName = computed(() => displayUser.value?.name?.trim() || '사용자')
+const HISTORY_PAGE_SIZE = 10
 const selectedHistoryFamilyId = ref(null)
-const familySimulations = computed(() => {
-  if (selectedHistoryFamilyId.value == null) return store.state.simulations
-
-  return store.state.simulations.filter(
-    (simulation) => Number(simulation.familyId) === selectedHistoryFamilyId.value,
-  )
-})
+const historyItems = ref([])
+const historyPagination = ref(null)
+const historyLoading = ref(false)
+const historyPageCache = new Map()
+const historyPageRequests = new Map()
+let historyRequestSequence = 0
+const historyPage = computed(() => Number(historyPagination.value?.page ?? 0))
+const historyTotalElements = computed(() => Number(historyPagination.value?.totalElements ?? 0))
+const familySimulations = computed(() => historyItems.value)
 
 function simulationFamilyName(familyId) {
   return (
@@ -86,23 +89,128 @@ async function submitFamily() {
   }
 }
 
+function historyCacheKey(familyId, page) {
+  return `${familyId == null ? 'all' : Number(familyId)}:${Number(page)}`
+}
+
+async function fetchHistoryPage(familyId, page, { force = false } = {}) {
+  const cacheKey = historyCacheKey(familyId, page)
+  if (!force && historyPageCache.has(cacheKey)) return historyPageCache.get(cacheKey)
+  if (!force && historyPageRequests.has(cacheKey)) return historyPageRequests.get(cacheKey)
+
+  const request = store
+    .loadSimulationHistoryPage({
+      familyId,
+      page,
+      size: HISTORY_PAGE_SIZE,
+    })
+    .then((response) => {
+      historyPageCache.set(cacheKey, response)
+      return response
+    })
+    .finally(() => {
+      if (historyPageRequests.get(cacheKey) === request) historyPageRequests.delete(cacheKey)
+    })
+
+  historyPageRequests.set(cacheKey, request)
+  return request
+}
+
+function prefetchNextHistoryPage(response, familyId) {
+  const pagination = response?.pagination
+  if (!pagination?.hasNext) return
+
+  void fetchHistoryPage(familyId, Number(pagination.page) + 1).catch(() => {
+    // 선조회 실패는 현재 화면에 영향을 주지 않고 실제 이동 시 다시 요청한다.
+  })
+}
+
+function applyHistoryPage(response) {
+  historyItems.value = response?.items ?? []
+  historyPagination.value = response?.pagination ?? null
+}
+
+async function loadHistoryPage(page = 0, { clearCurrent = false, force = false } = {}) {
+  const requestId = ++historyRequestSequence
+  const familyId = selectedHistoryFamilyId.value
+  const cacheKey = historyCacheKey(familyId, page)
+  const cachedResponse = !force ? historyPageCache.get(cacheKey) : null
+
+  if (cachedResponse) {
+    applyHistoryPage(cachedResponse)
+    historyLoading.value = false
+    prefetchNextHistoryPage(cachedResponse, familyId)
+    return
+  }
+
+  if (clearCurrent) {
+    historyItems.value = []
+    historyPagination.value = null
+  }
+  historyLoading.value = true
+  try {
+    const response = await fetchHistoryPage(familyId, page, { force })
+    if (requestId !== historyRequestSequence) return
+    applyHistoryPage(response)
+    prefetchNextHistoryPage(response, familyId)
+  } catch (error) {
+    if (requestId !== historyRequestSequence) return
+    if (clearCurrent || !historyItems.value.length) {
+      historyItems.value = []
+      historyPagination.value = null
+    }
+    store.showToast(
+      error.status === 401
+        ? '로그인이 만료됐어요. 다시 로그인해 주세요.'
+        : error.message || '시뮬레이션 이력을 불러오지 못했습니다.',
+      'info',
+    )
+  } finally {
+    if (requestId === historyRequestSequence) historyLoading.value = false
+  }
+}
+
+function selectHistoryFamily(familyId) {
+  const normalizedFamilyId = familyId == null ? null : Number(familyId)
+  if (selectedHistoryFamilyId.value === normalizedFamilyId) return
+  selectedHistoryFamilyId.value = normalizedFamilyId
+  loadHistoryPage(0, { clearCurrent: true })
+}
+
+function goToHistoryPage(page) {
+  if (
+    historyLoading.value ||
+    page < 0 ||
+    page >= Number(historyPagination.value?.totalPages ?? 0) ||
+    page === historyPage.value
+  ) {
+    return
+  }
+  loadHistoryPage(page)
+}
+
 // 수증자 목록·증여 이력은 DB에서 온다(데모 모드에서는 목데이터 유지).
-onMounted(() => {
-  // 마이페이지를 열 때마다 GET /api/gs로 최신 DRAFT/SAVED 이력을 확인한다.
-  store.ensureStatusLoaded({ force: true }).catch((error) => {
+onMounted(async () => {
+  try {
+    // 마이페이지를 열 때마다 GET /api/gs로 최신 DRAFT/SAVED 이력을 확인한다.
+    await store.ensureStatusLoaded({ force: true })
+    await loadHistoryPage(0, { clearCurrent: true })
+  } catch (error) {
     store.showToast(
       error.status === 401
         ? '로그인이 만료됐어요. 다시 로그인해 주세요.'
         : error.message || '가족 정보를 불러오지 못했습니다.',
       'info',
     )
-  })
+  }
 })
 
-function confirmSimulationDelete() {
+async function confirmSimulationDelete() {
   if (!simulationToDelete.value) return
   store.deleteSimulation(simulationToDelete.value.id)
   simulationToDelete.value = null
+  historyPageCache.clear()
+  await loadHistoryPage(historyPage.value, { force: true })
 }
 
 async function submitLogout() {
@@ -266,7 +374,7 @@ async function submitWithdrawal() {
             <!-- <span class="section-kicker">RECENT</span> -->
             <h2>시뮬레이션 이력</h2>
           </div>
-          <span>{{ familySimulations.length }}건</span>
+          <span>{{ historyTotalElements }}건</span>
         </div>
         <section
           v-if="store.state.families.length"
@@ -277,7 +385,7 @@ async function submitWithdrawal() {
             class="all-family-tab"
             type="button"
             :class="{ active: selectedHistoryFamilyId == null }"
-            @click="selectedHistoryFamilyId = null"
+            @click="selectHistoryFamily(null)"
           >
             전체
           </button>
@@ -286,45 +394,84 @@ async function submitWithdrawal() {
             :key="family.id"
             type="button"
             :class="{ active: Number(family.id) === selectedHistoryFamilyId }"
-            @click="selectedHistoryFamilyId = Number(family.id)"
+            @click="selectHistoryFamily(family.id)"
           >
             {{ family.name }}
           </button>
         </section>
-        <div v-if="familySimulations.length" class="simulation-history-list">
-          <article v-for="item in familySimulations" :key="item.id">
-            <div class="history-topline">
-              <span v-if="selectedHistoryFamilyId == null">
-                {{ simulationFamilyName(item.familyId) }} 님
-              </span>
-              <button
-                v-if="item.source !== 'server'"
-                type="button"
-                aria-label="시뮬레이션 이력 삭제"
-                @click="simulationToDelete = item"
-              >
-                <AppIcon name="trash" :size="16" />
-              </button>
-            </div>
-            <h3>{{ item.date }}</h3>
-            <p>
-              증여 {{ formatCompactWon(item.amount) }} · 예상 세금
-              {{ item.tax == null ? '미확정' : formatCompactWon(item.tax) }}
-            </p>
-            <p v-if="item.source === 'server'">
-              예상 수익률 {{ item.minimumReturnRate }}% ~ {{ item.maximumReturnRate }}%
-            </p>
-            <RouterLink
-              class="soft-button full"
-              :to="{
-                name: 'simulation',
-                query: item.source === 'server' ? { simulationId: item.id, from: 'history' } : {},
-              }"
-            >
-              {{ item.source === 'server' ? '결과 다시 보기' : '새 조건으로 비교하기' }}
-            </RouterLink>
-          </article>
+        <div
+          v-if="historyLoading && !familySimulations.length"
+          class="simulation-history-loading"
+          role="status"
+        >
+          시뮬레이션 이력을 불러오고 있어요.
         </div>
+        <template v-else-if="familySimulations.length">
+          <div
+            class="simulation-history-list"
+            :class="{ 'is-page-loading': historyLoading }"
+            :aria-busy="historyLoading"
+          >
+            <article v-for="item in familySimulations" :key="item.id">
+              <div class="history-topline">
+                <span v-if="selectedHistoryFamilyId == null">
+                  {{ simulationFamilyName(item.familyId) }} 님
+                </span>
+                <button
+                  v-if="item.source !== 'server'"
+                  type="button"
+                  aria-label="시뮬레이션 이력 삭제"
+                  @click="simulationToDelete = item"
+                >
+                  <AppIcon name="trash" :size="16" />
+                </button>
+              </div>
+              <h3>{{ item.date }}</h3>
+              <p>
+                증여 {{ formatCompactWon(item.amount) }} · 예상 세금
+                {{ item.tax == null ? '미확정' : formatCompactWon(item.tax) }}
+              </p>
+              <p v-if="item.source === 'server'">
+                예상 수익률 {{ item.minimumReturnRate }}% ~ {{ item.maximumReturnRate }}%
+              </p>
+              <RouterLink
+                class="soft-button full"
+                :to="{
+                  name: 'simulation',
+                  query: item.source === 'server' ? { simulationId: item.id, from: 'history' } : {},
+                }"
+              >
+                {{ item.source === 'server' ? '결과 다시 보기' : '새 조건으로 비교하기' }}
+              </RouterLink>
+            </article>
+          </div>
+          <nav
+            v-if="historyPagination?.totalPages > 1"
+            class="simulation-history-pagination"
+            aria-label="시뮬레이션 이력 페이지"
+          >
+            <button
+              type="button"
+              :disabled="historyLoading || !historyPagination.hasPrevious"
+              @click="goToHistoryPage(historyPage - 1)"
+            >
+              <AppIcon name="back" :size="14" /> 이전
+            </button>
+            <span aria-live="polite">
+              <template v-if="historyLoading">불러오는 중</template>
+              <template v-else>
+                <strong>{{ historyPage + 1 }}</strong> / {{ historyPagination.totalPages }}
+              </template>
+            </span>
+            <button
+              type="button"
+              :disabled="historyLoading || !historyPagination.hasNext"
+              @click="goToHistoryPage(historyPage + 1)"
+            >
+              다음 <AppIcon name="arrow" :size="14" />
+            </button>
+          </nav>
+        </template>
         <div v-else class="simulation-history-empty">
           <span><AppIcon name="document" :size="21" /></span>
           <strong>아직 시뮬레이션 이력이 없어요</strong>
