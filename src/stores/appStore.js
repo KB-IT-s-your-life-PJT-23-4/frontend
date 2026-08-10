@@ -376,7 +376,7 @@ function serverSimulationToState(item) {
         }).format(parsed)
       : ''
 
-  const estimatedGiftTax = item.selection?.estimatedGiftTax
+  const estimatedGiftTax = item.selection?.estimatedGiftTax ?? item.estimatedGiftTax
 
   return {
     id: Number(item.simulationId),
