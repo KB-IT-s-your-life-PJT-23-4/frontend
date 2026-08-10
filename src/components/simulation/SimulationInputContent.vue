@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import DateField from '../common/DateField.vue'
 import { formatCompactWon } from '../../utils/finance'
@@ -74,7 +74,10 @@ const exceedsRemainingDeduction = computed(
 )
 const deductionExcessAmount = computed(() => Math.max(0, enteredAmount.value - props.remaining))
 
-defineEmits([
+const showFamilyPicker = ref(false)
+const recipientPickerRoot = ref(null)
+
+const emit = defineEmits([
   'update:selectedFamilyId',
   'update:investmentYears',
   'update:giftDate',
@@ -83,6 +86,27 @@ defineEmits([
   'add-amount',
   'submit',
 ])
+
+function familyRemainingLabel(item) {
+  const value = item.remainingDeductionIfPlanned ?? item.remainingDeduction
+  return Number.isFinite(Number(value))
+    ? `남은 공제 ${formatCompactWon(Number(value))}`
+    : '공제 한도 확인'
+}
+
+function selectFamily(familyId) {
+  emit('update:selectedFamilyId', Number(familyId))
+  showFamilyPicker.value = false
+}
+
+function closeFamilyPickerOnOutsideClick(event) {
+  if (showFamilyPicker.value && !recipientPickerRoot.value?.contains(event.target)) {
+    showFamilyPicker.value = false
+  }
+}
+
+onMounted(() => document.addEventListener('pointerdown', closeFamilyPickerOnOutsideClick))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', closeFamilyPickerOnOutsideClick))
 </script>
 
 <template>
@@ -100,33 +124,73 @@ defineEmits([
           </div>
         </div>
 
-        <label class="recipient-picker" for="family-select">
-          <span class="recipient-avatar">{{ family.name.slice(-2) }}</span>
-          <span class="recipient-copy">
-            <strong>{{ family.name }}</strong>
-            <small class="recipient-meta">
-              <span>{{ family.relation }}</span>
-              <span v-if="family.giftedAmount > 0 && family.resetDate" class="renewal-date-inline">
-                <i aria-hidden="true">·</i>
-                공제 갱신 {{ family.resetDate }}
-              </span>
-            </small>
-          </span>
-          <span class="recipient-change">
-            변경
-            <AppIcon name="chevron" :size="15" />
-          </span>
-          <select
+        <div
+          ref="recipientPickerRoot"
+          class="recipient-picker-control"
+          @keydown.esc="showFamilyPicker = false"
+        >
+          <button
             id="family-select"
-            :value="selectedFamilyId"
+            class="recipient-picker"
+            type="button"
+            aria-haspopup="listbox"
+            aria-controls="family-select-options"
+            :aria-expanded="showFamilyPicker"
             aria-label="수증자 변경"
-            @change="$emit('update:selectedFamilyId', Number($event.target.value))"
+            @click="showFamilyPicker = !showFamilyPicker"
           >
-            <option v-for="item in families" :key="item.id" :value="item.id">
-              {{ item.name }} ({{ item.relation }})
-            </option>
-          </select>
-        </label>
+            <span class="recipient-avatar">{{ family.name.slice(-2) }}</span>
+            <span class="recipient-copy">
+              <strong>{{ family.name }}</strong>
+              <small class="recipient-meta">
+                <span>{{ family.relation }}</span>
+                <span
+                  v-if="family.giftedAmount > 0 && family.resetDate"
+                  class="renewal-date-inline"
+                >
+                  <i aria-hidden="true">·</i>
+                  공제 갱신 {{ family.resetDate }}
+                </span>
+              </small>
+            </span>
+            <span class="recipient-change" :class="{ open: showFamilyPicker }">
+              변경
+              <AppIcon name="chevron" :size="15" />
+            </span>
+          </button>
+
+          <div
+            v-if="showFamilyPicker"
+            id="family-select-options"
+            class="recipient-picker-dropdown"
+            role="listbox"
+            aria-label="수증자 선택"
+          >
+            <button
+              v-for="item in families"
+              :key="item.id"
+              class="recipient-picker-option"
+              :class="{ selected: Number(item.id) === Number(selectedFamilyId) }"
+              type="button"
+              role="option"
+              :aria-selected="Number(item.id) === Number(selectedFamilyId)"
+              @click="selectFamily(item.id)"
+            >
+              <span class="recipient-option-avatar">{{ item.name.slice(-2) }}</span>
+              <span class="recipient-option-copy">
+                <strong>{{ item.name }}</strong>
+                <small>
+                  <span>{{ item.relation }}</span>
+                  <i aria-hidden="true">·</i>
+                  <span>{{ familyRemainingLabel(item) }}</span>
+                </small>
+              </span>
+              <span class="recipient-option-check" aria-hidden="true">
+                <AppIcon name="check" :size="15" />
+              </span>
+            </button>
+          </div>
+        </div>
 
         <div class="recipient-deduction-summary">
           <div class="recipient-history-row">
