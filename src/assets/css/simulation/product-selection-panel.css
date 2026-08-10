@@ -1,3 +1,102 @@
+.product-risk-summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.product-volatility-text {
+  display: inline-flex;
+  min-width: 0;
+  margin-left: 2px;
+  padding-left: 8px;
+  align-items: baseline;
+  gap: 3px;
+  border-left: 1px solid #dce5ed;
+  color: #8796a5;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.product-volatility-text > span {
+  font-size: 8px;
+  font-weight: 400;
+}
+
+.product-volatility-text > strong {
+  color: #42647f;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.selectable-product-details > .product-volatility-guide {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: 30px minmax(0, 1fr);
+  padding: 12px;
+  align-items: start;
+  gap: 10px;
+  border: 1px solid #dde8f1;
+  background: #f6faff;
+}
+
+.selectable-product-details > .product-volatility-guide.volatility-high {
+  border-color: #f0d8da;
+  background: #fff8f8;
+}
+
+.selectable-product-details > .product-volatility-guide.volatility-medium {
+  border-color: #eee1c4;
+  background: #fffbf2;
+}
+
+.selectable-product-details .product-volatility-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 10px;
+  color: #4f7899;
+  background: #e6f0f8;
+}
+
+.selectable-product-details .volatility-medium .product-volatility-icon {
+  color: #8a6d2a;
+  background: #f8edcf;
+}
+
+.selectable-product-details .volatility-high .product-volatility-icon {
+  color: #ad555c;
+  background: #f9e5e7;
+}
+
+.selectable-product-details .product-volatility-copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.selectable-product-details .product-volatility-copy strong {
+  color: #36536c;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.selectable-product-details .product-volatility-copy p {
+  margin: 0;
+  color: #607487;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.selectable-product-details .product-volatility-copy small {
+  color: #8594a3;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
 .selectable-product-details > .product-detail-feedback {
   position: relative;
   display: flex;
@@ -204,6 +303,11 @@
 }
 
 @media (max-width: 480px) {
+  .selectable-product-main .product-risk-summary {
+    grid-column: 3;
+    justify-content: flex-start;
+  }
+
   .selectable-product-details > .product-detail-feedback {
     min-height: 68px;
     padding: 14px;
