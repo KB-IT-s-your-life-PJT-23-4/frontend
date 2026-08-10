@@ -137,7 +137,28 @@ export const initialState = {
       scope: 'plan',
       description: '수증자와의 관계 증명',
       intro:
-        '증여자와 수증자가 어떤 가족 관계인지 확인하는 서류예요. 관계에 따라 공제 한도(직계존비속 5,000만원, 배우자 6억원 등)가 달라지기 때문에 꼭 필요해요. 주민센터나 정부24에서 발급할 수 있어요.',
+        '증여자와 수증자가 어떤 가족 관계인지 확인하는 서류예요. 관계에 따라 공제 한도(직계존비속 5,000만원, 배우자 6억원 등)가 달라지기 때문에 꼭 필요해요. 주민센터나 아래 사이트에서 발급할 수 있어요.',
+      guide: {
+        title: '발급할 때 확인하세요',
+        plain: true,
+        steps: [
+          '증여자 기준으로 발급해야 수증자와의 관계가 나타나요',
+          '일반 증명서에는 관계가 일부만 나오니 상세 증명서로 발급하세요',
+        ],
+      },
+      links: [
+        {
+          label: '전자가족관계등록시스템',
+          icon: 'external',
+          primary: true,
+          href: 'https://efamily.scourt.go.kr',
+        },
+        {
+          label: '정부24',
+          icon: 'external',
+          href: 'https://www.gov.kr',
+        },
+      ],
     },
     {
       id: 'transfer',
