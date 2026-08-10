@@ -167,6 +167,102 @@
   line-height: 1.5;
 }
 
+.tax-payer-step {
+  scroll-margin-top: 96px;
+}
+
+.tax-payer-step .tax-payer-options {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.tax-payer-step .tax-payer-options button {
+  min-height: 104px;
+  padding: 17px 44px 17px 17px;
+  align-content: start;
+  gap: 8px;
+}
+
+.tax-option-title {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.tax-payer-options .tax-option-title strong {
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.tax-option-badge {
+  display: inline-flex;
+  padding: 3px 7px;
+  align-items: center;
+  border-radius: 999px;
+  color: #5e4b00;
+  background: #fff3bd;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tax-payer-step .tax-payer-options small {
+  color: #66788a;
+  font-size: 11px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.tax-deduction-notice {
+  display: flex;
+  margin-top: 14px;
+  padding: 12px 14px;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid #dce8f2;
+  border-radius: 14px;
+  color: #49677f;
+  background: #f3f8fc;
+}
+
+.tax-deduction-notice.caution {
+  border-color: #f0df9d;
+  color: #67551a;
+  background: #fff9e4;
+}
+
+.tax-deduction-notice svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.tax-deduction-notice p,
+.tax-calculation-guide {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.tax-deduction-notice strong {
+  font-weight: 600;
+}
+
+.tax-calculation-guide {
+  margin-top: 10px;
+  padding: 0 2px;
+  color: #7a8795;
+}
+
+@media (min-width: 600px) {
+  .tax-payer-step .tax-payer-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 390px) {
   .amount-step .amount-input-wrap {
     min-height: 54px;

@@ -66,6 +66,14 @@ const peerAverageGiftAmount = computed(() => {
   return age < 19 ? 18000000 : age < 30 ? 30000000 : 42000000
 })
 
+const enteredAmount = computed(
+  () => Number(String(props.amountText ?? '').replace(/[^\d]/g, '')) || 0,
+)
+const exceedsRemainingDeduction = computed(
+  () => enteredAmount.value > 0 && enteredAmount.value > props.remaining,
+)
+const deductionExcessAmount = computed(() => Math.max(0, enteredAmount.value - props.remaining))
+
 defineEmits([
   'update:selectedFamilyId',
   'update:investmentYears',
@@ -249,11 +257,12 @@ defineEmits([
         </div>
       </section>
 
-      <section class="simulation-input-step tax-payer-step">
+      <section id="tax-payment-method" class="simulation-input-step tax-payer-step">
         <div class="input-step-heading">
           <span class="step-number">5</span>
           <div>
             <h3>증여세는 누가 준비할까요?</h3>
+            <p>선택한 방식에 따라 운용 원금과 주는 분의 총 준비 금액이 달라져요.</p>
           </div>
         </div>
 
@@ -266,8 +275,11 @@ defineEmits([
             @click="$emit('update:donorPaysTax', false)"
           >
             <span class="tax-option-check"><i /></span>
-            <strong>받는 분이 납부</strong>
-            <small>증여 금액에서 예상 세금을 준비해요.</small>
+            <span class="tax-option-title">
+              <strong>받는 분이 납부</strong>
+              <span class="tax-option-badge">일반적인 방식</span>
+            </span>
+            <small>증여받은 금액에서 예상 세금을 납부하고, 남은 금액을 운용해요.</small>
           </button>
           <button
             type="button"
@@ -277,10 +289,34 @@ defineEmits([
             @click="$emit('update:donorPaysTax', true)"
           >
             <span class="tax-option-check"><i /></span>
-            <strong>주는 분이 함께<br class="tax-option-mobile-break" />준비</strong>
-            <small>대납 세금도 추가 증여로 보아 계산해요.</small>
+            <span class="tax-option-title">
+              <strong>주는 분이 함께 준비</strong>
+            </span>
+            <small>
+              증여 금액은 그대로 운용할 수 있지만, 대신 납부한 세금까지 반영돼 총 준비 금액이 늘어날
+              수 있어요.
+            </small>
           </button>
         </div>
+
+        <div
+          class="tax-deduction-notice"
+          :class="exceedsRemainingDeduction ? 'caution' : 'safe'"
+          role="status"
+        >
+          <AppIcon :name="exceedsRemainingDeduction ? 'info' : 'check'" :size="17" />
+          <p v-if="!enteredAmount">증여 금액을 입력하면 남은 공제 한도와 비교해드려요.</p>
+          <p v-else-if="exceedsRemainingDeduction">
+            남은 공제 한도를 <strong>{{ formatCompactWon(deductionExcessAmount) }}</strong>
+            초과해 예상 세금이 발생할 수 있어요.
+          </p>
+          <p v-else>현재 입력 금액은 남은 공제 한도 이내예요.</p>
+        </div>
+
+        <p class="tax-calculation-guide">
+          정확한 예상 세금과 주는 분의 총 준비 금액은 일시·분할 증여 일정을 비교한 뒤 결과에서
+          안내해드려요.
+        </p>
       </section>
 
       <aside class="info-callout">

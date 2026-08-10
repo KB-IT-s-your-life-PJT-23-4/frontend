@@ -4778,6 +4778,45 @@ textarea:focus-visible {
   font-weight: 500;
 }
 
+.result-condition-edit {
+  display: inline-flex;
+  padding: 7px 10px;
+  align-items: center;
+  border: 1px solid #cbdbe8;
+  border-radius: 999px;
+  color: #486b88;
+  background: #fff;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.result-condition-edit:hover,
+.result-condition-edit:focus-visible {
+  border-color: #789bb8;
+  outline: none;
+  color: #2e587a;
+  background: #f6faff;
+}
+
+.result-condition-edit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.result-condition-edit .button-spinner {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+  border-color: rgba(72, 107, 136, 0.25);
+  border-top-color: #486b88;
+}
+
 .portfolio-donut-card,
 .product-selection-panel,
 .investment-growth-card,
