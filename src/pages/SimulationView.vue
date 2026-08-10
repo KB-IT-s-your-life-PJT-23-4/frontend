@@ -50,6 +50,22 @@ const preferentialSelections = reactive({})
 const detailLoading = reactive({})
 const detailErrors = reactive({})
 const isHistoryResult = computed(() => route.query.from === 'history')
+const simulationExecutedAt = computed(() => {
+  if (!isHistoryResult.value) return ''
+
+  const timestamp = result.value?.createdAt ?? result.value?.raw?.createdAt
+  if (!timestamp) return ''
+
+  const parsed = new Date(timestamp)
+  if (!Number.isFinite(parsed.getTime())) return ''
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(parsed)
+})
 
 const family = computed(
   () =>
@@ -482,6 +498,10 @@ onMounted(async () => {
         </h2>
         <p>증여 시점과 {{ result.years }}년의 운용 흐름을 함께 계산했어요.</p>
         <div class="result-condition-chips">
+          <span v-if="isHistoryResult && simulationExecutedAt">
+            <AppIcon name="clock" :size="15" />
+            {{ simulationExecutedAt }} 실행
+          </span>
           <span>
             <AppIcon name="calendar" :size="15" />
             {{ result.giftDate }} 증여 예정
