@@ -1,5 +1,5 @@
 const ALLOWED_POST_LOGIN_PATH =
-  /^\/(?:my(?:\/|[?#]|$)|simulation(?:[?#]|$)|chat(?:[?#]|$)|admin\/(?:dashboard|users|faq|reports?)(?:[?#]|$))/
+  /^\/(?:my(?:\/|[?#]|$)|simulation(?:[?#]|$)|chat(?:[?#]|$)|admin\/(?:dashboard|users|products|faq|reports?|auth|authorization)(?:[?#]|$))/
 
 export function resolvePostLoginPath(redirect) {
   return typeof redirect === 'string' && ALLOWED_POST_LOGIN_PATH.test(redirect) ? redirect : '/'
