@@ -17,7 +17,7 @@ import ModalSheet from '../components/layout/ModalSheet.vue'
 import '../assets/css/admin-dashboard.css'
 import '../assets/css/admin-faq.css'
 
-const PAGE_SIZE = 15
+const PAGE_SIZE = 10
 
 const faqs = ref([])
 const categories = ref([])

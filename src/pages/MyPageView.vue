@@ -242,16 +242,13 @@ async function submitWithdrawal() {
       <section class="mypage-menu-list">
         <button type="button" @click="showSettings = true">
           <span class="menu-icon"><AppIcon name="settings" :size="20" /></span>
-          <span
-            ><strong>알림 및 앱 설정</strong><small>증여 일정과 상품 알림을 관리해요</small></span
-          >
+          <span><strong>알림 및 앱 설정</strong></span>
           <AppIcon name="chevron" :size="17" />
         </button>
         <button type="button" @click="openProfileEdit">
           <span class="menu-icon"><AppIcon name="user" :size="20" /></span>
           <span
-            ><strong>회원 정보 수정</strong><small>이름, 생년월일과 연락처를 수정해요</small></span
-          >
+            ><strong>회원 정보 수정</strong></span>
           <AppIcon name="chevron" :size="17" />
         </button>
         <button
@@ -261,7 +258,7 @@ async function submitWithdrawal() {
           <span class="menu-icon"><AppIcon name="document" :size="20" /></span>
           <span
             ><strong>이용약관 · 개인정보 처리방침</strong
-            ><small>서비스 이용 정책을 확인해요</small></span
+            ></span
           >
           <AppIcon name="chevron" :size="17" />
         </button>

@@ -2,7 +2,7 @@ import { request } from './apiAdapter'
 
 const ADMIN_FAQ_PATH = '/admin/faq'
 
-export function getAdminFaqPage({ page = 0, size = 20, categoryId, keyword } = {}) {
+export function getAdminFaqPage({ page = 0, size = 10, categoryId, keyword } = {}) {
   const params = new URLSearchParams({ page: String(page), size: String(size) })
 
   if (categoryId !== null && categoryId !== undefined && String(categoryId).trim()) {

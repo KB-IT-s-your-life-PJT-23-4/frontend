@@ -17,7 +17,6 @@
  * 공통 안내 박스(콜아웃)
  * 상품 탭 & 시나리오 비교
  * 증여 현황
- * AI 상담
  * 마이페이지
  * 모달 (바텀시트)
  * 반응형: 작은 모바일 화면(~390px)
@@ -801,11 +800,41 @@ textarea:focus-visible {
   box-shadow: var(--shadow-lg);
 }
 
+/* 밋밋했던 배경에 깊이를 더한다: 왼쪽 위는 흰 하이라이트, 오른쪽 아래는 브랜드
+   옐로 톤 글로우 — 아래에 겹쳐 얹는 브랜드 마크와 자연스럽게 어우러지도록 짝을 맞췄다. */
+.hero-card::before {
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  z-index: 0;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(255, 204, 0, 0.22), transparent 62%);
+  content: '';
+  pointer-events: none;
+}
+
 .hero-card::after {
   position: absolute;
   inset: 0;
   background: radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.14), transparent 55%);
   content: '';
+  pointer-events: none;
+}
+
+/* 서비스 로고 마크를 카드 오른쪽 아래에 크게, 아주 옅게 얹어 첫 화면에 브랜드
+   존재감을 준다. soft-light로 배경 그라데이션에 녹아들게 하고, overflow:hidden으로
+   카드 밖으로 살짝 잘려 나가게 해 기존 코인/오빗 장식과 톤을 맞췄다. */
+.hero-brand-mark {
+  position: absolute;
+  right: -38px;
+  bottom: -22px;
+  z-index: 1;
+  width: 210px;
+  height: auto;
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+  transform: rotate(-6deg);
   pointer-events: none;
 }
 
@@ -837,7 +866,8 @@ textarea:focus-visible {
 
 .hero-orbit {
   position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  z-index: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
 }
 
@@ -853,14 +883,193 @@ textarea:focus-visible {
   bottom: -105px;
   width: 220px;
   height: 220px;
+  border-color: rgba(255, 204, 0, 0.18);
+}
+
+/* hero-orbit-one과 정확히 같은 위치·크기의 래퍼를 두고 그 자체를 계속 회전시키면,
+   래퍼 상단 가운데에 찍은 점이 링 테두리를 따라 도는 것처럼 보인다. */
+.hero-orbit-orbiter {
+  position: absolute;
+  top: -90px;
+  right: -50px;
+  z-index: 0;
+  width: 270px;
+  height: 270px;
+  animation: hero-orbit-spin 16s linear infinite;
+}
+
+.hero-orbit-dot {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--kb-yellow);
+  box-shadow: 0 0 10px 2px rgba(255, 204, 0, 0.55);
+}
+
+@keyframes hero-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 브랜드 마크가 아주 천천히 떠 있는 듯 흔들려 화면이 조금 더 살아있어 보이게 한다. */
+.hero-brand-mark {
+  animation: hero-mark-float 9s ease-in-out infinite;
+}
+
+@keyframes hero-mark-float {
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-orbit-orbiter,
+  .hero-brand-mark {
+    animation: none;
+  }
+}
+
+.hero-cta-button {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px 18px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .hero-visual {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
+  position: relative;
+  flex: none;
   width: 150px;
   height: 110px;
+}
+
+/* 자녀 선택: 카드 위에 겹쳐 띄우니 붕 뜬 느낌이라 별로였다. 아래로 줄을 새로 만드는 것도
+   별로라고 해서, 제목 자리 자체가 트리거 버튼이고 누르면 같은 줄에서 제목 대신
+   아바타 목록이 옆으로 나타나도록 바꿨다 — 카드가 세로로 늘어나지 않는다. */
+.home-gift-summary-family-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-gift-summary-family-chevron {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.home-gift-summary-family-chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.home-family-picker-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  gap: 8px;
+  padding: 0 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+/* 트리거 ↔ 아바타 줄 전환은 같은 자리에서 살짝 페이드로 바뀐다. */
+.family-picker-swap-enter-active,
+.family-picker-swap-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.family-picker-swap-enter-from,
+.family-picker-swap-leave-to {
+  opacity: 0;
+}
+
+.home-family-picker-row::-webkit-scrollbar {
+  display: none;
+}
+
+.home-family-picker-avatar {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: #dceafb;
+  color: #3c678d;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(225, 231, 239, 0.8);
+}
+
+.home-family-picker-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-family-picker-avatar.mint {
+  background: #dff2ec;
+  color: #317b69;
+}
+
+.home-family-picker-avatar.active {
+  border-color: var(--kb-yellow);
+  box-shadow: 0 0 0 2px var(--kb-yellow);
+}
+
+.home-family-picker-avatar.is-add {
+  background: var(--blue-soft);
+  color: var(--blue-strong);
+  box-shadow: none;
+}
+
+/* 제목 옆에 놓이는 작은 버전: 본문 텍스트 높이에 맞춰 줄여 트리거 버튼이 안 커 보이게 한다. */
+.home-family-picker-avatar.is-mini {
+  width: 34px;
+  height: 34px;
+  border-width: 1.5px;
+  font-size: 10px;
 }
 
 .hero-coin {
@@ -1010,6 +1219,178 @@ textarea:focus-visible {
   width: 100%;
   box-sizing: border-box;
   white-space: nowrap;
+}
+
+.home-gift-summary-card {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border-radius: var(--radius-md);
+}
+
+.home-gift-summary-body {
+  display: grid;
+  gap: 18px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-gift-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* 트리거(아바타+텍스트)와 펼쳐진 아바타 줄의 높이를 고정해, 접고 펼 때 아래 요소들이
+     밀리지 않게 한다. is-mini 아바타(34px) + border(1.5px×2) 기준. */
+  height: 37px;
+  gap: 12px;
+}
+
+.home-gift-summary-head strong {
+  font-size: 16px;
+  letter-spacing: -0.03em;
+}
+
+.home-gift-summary-link {
+  display: inline-flex;
+  justify-self: end;
+  align-items: center;
+  gap: 3px;
+  color: var(--blue-strong);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* 등록된 수증자가 없을 때 증여 현황 카드 자리를 대신하는 등록 유도 카드. */
+.home-family-empty-card {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 30px 22px;
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.home-family-empty-icon {
+  display: grid;
+  width: 45px;
+  height: 45px;
+  margin-bottom: 4px;
+  place-items: center;
+  border-radius: 15px;
+  background: var(--blue-soft);
+  color: var(--blue-strong);
+}
+
+.home-family-empty-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.home-family-empty-copy strong {
+  font-size: 15px;
+  letter-spacing: -0.03em;
+}
+
+.home-family-empty-copy span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.home-family-empty-button {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.home-gift-summary-ring {
+  position: relative;
+  display: grid;
+  width: 148px;
+  height: 148px;
+  margin: 0 auto;
+  place-items: center;
+}
+
+.home-gift-summary-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.home-gift-summary-ring-track {
+  fill: none;
+  stroke: var(--blue-soft);
+  stroke-width: 11;
+}
+
+.home-gift-summary-ring-progress {
+  fill: none;
+  stroke: var(--blue-strong);
+  stroke-width: 11;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+.home-gift-summary-ring-center {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.home-gift-summary-ring-center strong {
+  color: var(--blue-strong);
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+
+.home-gift-summary-ring-center span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.home-gift-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.home-gift-summary-stats > div {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 12px 6px;
+  border-radius: 14px;
+  background: var(--surface-alt);
+}
+
+.home-gift-summary-stats svg {
+  color: var(--blue-strong);
+}
+
+.home-gift-summary-stats strong {
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+
+.home-gift-summary-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 26px 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.home-gift-summary-stats span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .section-block {
@@ -1604,12 +1985,12 @@ textarea:focus-visible {
 .home-guide-step-card {
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
   min-width: 0;
-  min-height: 82px;
-  padding: 15px 16px;
+  min-height: 78px;
+  padding: 14px 16px;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   border-radius: 17px;
   color: inherit;
   text-decoration: none;
@@ -1650,6 +2031,13 @@ textarea:focus-visible {
   word-break: keep-all;
 }
 
+.home-guide-step-copy strong {
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .home-guide-step-copy > span,
 .home-guide-optional-copy > span {
   color: var(--muted);
@@ -1665,6 +2053,7 @@ textarea:focus-visible {
   width: 28px;
   height: 28px;
   flex: none;
+  justify-self: center;
   place-items: center;
   color: #7e8b98;
 }
@@ -3858,7 +4247,6 @@ textarea:focus-visible {
   }
 
   .hero-visual {
-    right: 8px;
     opacity: 0.8;
   }
 
@@ -5645,21 +6033,23 @@ textarea:focus-visible {
     display: none;
   }
   .home-guide-step-card {
-    grid-template-columns: minmax(0, 1fr) auto;
-    min-height: 148px;
-    padding: 18px;
-    align-content: start;
+    display: block;
+    min-height: 132px;
+    padding: 55px 14px 18px;
   }
   .home-guide-step-number {
-    grid-column: 1;
+    position: absolute;
+    top: 18px;
+    left: 18px;
   }
   .home-guide-step-copy {
-    grid-column: 1 / -1;
+    min-height: 59px;
+    align-content: center;
   }
   .home-guide-step-card > .home-guide-step-arrow {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
+    position: absolute;
+    top: 22px;
+    right: 14px;
   }
 }
 .stock-guide,

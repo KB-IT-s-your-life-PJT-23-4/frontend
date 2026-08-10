@@ -37,6 +37,16 @@ function loginErrorMessage(error) {
   return error.message || '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
 }
 
+function getPostLoginPath() {
+  const redirect = route.query.redirect
+  return typeof redirect === 'string' &&
+    /^\/(?:my(?:\/|[?#]|$)|chat(?:[?#]|$)|admin\/(?:dashboard|users|faq|reports?|auth|authorization)(?:[?#]|$))/.test(
+      redirect,
+    )
+    ? redirect
+    : '/'
+}
+
 async function submitLogin() {
   if (isSubmitting.value) return
 

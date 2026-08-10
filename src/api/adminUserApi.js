@@ -1,6 +1,6 @@
 import { request } from './apiAdapter'
 
-export function getAdminUsers({ userId, email, name, page = 0, size = 20 } = {}) {
+export function getAdminUsers({ userId, email, name, page = 0, size = 10 } = {}) {
   const params = new URLSearchParams({ page: String(page), size: String(size) })
 
   if (userId !== null && userId !== undefined && String(userId).trim()) {
