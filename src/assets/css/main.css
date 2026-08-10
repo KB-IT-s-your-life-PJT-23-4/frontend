@@ -791,7 +791,6 @@ textarea:focus-visible {
 
 .hero-card {
   position: relative;
-  min-height: 238px;
   padding: 28px 26px;
   overflow: hidden;
   border-radius: var(--radius-lg);
@@ -4242,7 +4241,6 @@ textarea:focus-visible {
   }
 
   .hero-card {
-    min-height: 225px;
     padding: 23px 20px;
   }
 
@@ -4272,10 +4270,6 @@ textarea:focus-visible {
   .page-content {
     padding-right: 26px;
     padding-left: 26px;
-  }
-
-  .hero-card {
-    min-height: 265px;
   }
 
   .hero-copy p {

@@ -49,6 +49,7 @@ const selectedProducts = reactive({})
 const preferentialSelections = reactive({})
 const detailLoading = reactive({})
 const detailErrors = reactive({})
+const isHistoryResult = computed(() => route.query.from === 'history')
 
 const family = computed(
   () =>
@@ -314,6 +315,11 @@ async function loadSimulation(simulationId) {
 }
 
 async function resetSimulation() {
+  if (isHistoryResult.value) {
+    await router.replace({ name: 'my', hash: '#simulation-history' })
+    return
+  }
+
   result.value = null
   clearProductSelections()
   await router.replace({ name: 'simulation' })
@@ -468,7 +474,8 @@ onMounted(async () => {
     <div v-else class="page-content simulation-result-content">
       <section class="result-hero">
         <button class="back-text-button" type="button" @click="resetSimulation">
-          <AppIcon name="back" :size="17" /> 조건 다시 입력
+          <AppIcon name="back" :size="17" />
+          {{ isHistoryResult ? '시뮬레이션 목록 보기' : '조건 다시 입력' }}
         </button>
         <h2>
           {{ family.name }} 님께<br />{{ formatCompactWon(result.requestedAmount) }}을 증여한다면

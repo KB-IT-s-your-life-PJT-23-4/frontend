@@ -201,7 +201,7 @@ async function submitWithdrawal() {
       <section class="mypage-section">
         <div class="section-heading-row">
           <div>
-            <span class="section-kicker">FAMILY</span>
+            <!-- <span class="section-kicker">FAMILY</span> -->
             <h2>가족 관계망</h2>
           </div>
           <button class="text-link" type="button" @click="showAddFamily = true">
@@ -247,8 +247,7 @@ async function submitWithdrawal() {
         </button>
         <button type="button" @click="openProfileEdit">
           <span class="menu-icon"><AppIcon name="user" :size="20" /></span>
-          <span
-            ><strong>회원 정보 수정</strong></span>
+          <span><strong>회원 정보 수정</strong></span>
           <AppIcon name="chevron" :size="17" />
         </button>
         <button
@@ -256,18 +255,15 @@ async function submitWithdrawal() {
           @click="store.showToast('약관 화면은 실제 서비스 연동 시 제공돼요.', 'info')"
         >
           <span class="menu-icon"><AppIcon name="document" :size="20" /></span>
-          <span
-            ><strong>이용약관 · 개인정보 처리방침</strong
-            ></span
-          >
+          <span><strong>이용약관 · 개인정보 처리방침</strong></span>
           <AppIcon name="chevron" :size="17" />
         </button>
       </section>
 
-      <section class="mypage-section history-section">
+      <section id="simulation-history" class="mypage-section history-section">
         <div class="section-heading-row">
           <div>
-            <span class="section-kicker">RECENT</span>
+            <!-- <span class="section-kicker">RECENT</span> -->
             <h2>시뮬레이션 이력</h2>
           </div>
           <span>{{ familySimulations.length }}건</span>
@@ -322,7 +318,7 @@ async function submitWithdrawal() {
               class="soft-button full"
               :to="{
                 name: 'simulation',
-                query: item.source === 'server' ? { simulationId: item.id } : {},
+                query: item.source === 'server' ? { simulationId: item.id, from: 'history' } : {},
               }"
             >
               {{ item.source === 'server' ? '결과 다시 보기' : '새 조건으로 비교하기' }}
