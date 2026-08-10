@@ -58,7 +58,7 @@ const donutStyle = computed(() => {
   <section class="portfolio-donut-card">
     <div class="portfolio-card-heading">
       <div>
-        <h2>{{ years }}년을 위한 운용 비중</h2>
+        <h2>{{ years }}년을 위한 운용 비중 제안</h2>
         <p>투자 성향별 상품 운용 비중과 예상 금액을 비교해 보세요.</p>
       </div>
     </div>
