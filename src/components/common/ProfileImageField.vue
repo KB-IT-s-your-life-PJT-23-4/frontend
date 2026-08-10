@@ -9,6 +9,7 @@ const props = defineProps({
   displayName: { type: String, default: '사용자' },
   initialLength: { type: Number, default: 1 },
   maxBytes: { type: Number, required: true },
+  showLabel: { type: Boolean, default: true },
   disabled: Boolean,
 })
 
@@ -80,8 +81,12 @@ onBeforeUnmount(revokePreview)
 </script>
 
 <template>
-  <section class="profile-image-field" aria-labelledby="profile-image-label">
-    <span id="profile-image-label" class="profile-image-label">프로필 사진</span>
+  <section
+    class="profile-image-field"
+    :aria-labelledby="showLabel ? 'profile-image-label' : undefined"
+    :aria-label="showLabel ? undefined : '프로필 사진'"
+  >
+    <span v-if="showLabel" id="profile-image-label" class="profile-image-label">프로필 사진</span>
     <button
       class="profile-image-picker"
       type="button"
