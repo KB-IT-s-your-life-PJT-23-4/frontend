@@ -230,9 +230,9 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', closeFamilyPic
         </div>
         <p v-if="errorMessage" class="field-error">{{ errorMessage }}</p>
         <div class="amount-quick-buttons">
-          <button type="button" @click="$emit('add-amount', 10000000)">+1백만원</button>
-          <button type="button" @click="$emit('add-amount', 30000000)">+5백만원</button>
-          <button type="button" @click="$emit('add-amount', 50000000)">+1천만원</button>
+          <button type="button" @click="$emit('add-amount', 1000000)">+1백만원</button>
+          <button type="button" @click="$emit('add-amount', 5000000)">+5백만원</button>
+          <button type="button" @click="$emit('add-amount', 10000000)">+1천만원</button>
         </div>
         <p class="peer-average-insight">
           <span class="peer-average-icon"><AppIcon name="chart" :size="14" /></span>
@@ -347,7 +347,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', closeFamilyPic
             <span class="tax-option-check"><i /></span>
             <span class="tax-option-title">
               <strong>받는 분이 납부</strong>
-              <span class="tax-option-badge">일반적인 방식</span>
+              <span class="tax-option-context">납세의무자 기준</span>
             </span>
             <small>증여받은 금액에서 예상 세금을 납부하고,<br />남은 금액을 운용해요.</small>
           </button>
@@ -382,11 +382,6 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', closeFamilyPic
           </p>
           <p v-else>현재 입력 금액은 남은 공제 한도 이내예요.</p>
         </div>
-
-        <p class="tax-calculation-guide">
-          정확한 예상 세금과 주는 분의 총 준비 금액은 일시·분할 증여 일정을 비교한 뒤 결과에서
-          안내해드려요.
-        </p>
       </section>
 
       <button class="primary-button full tall" type="submit" :disabled="loading">

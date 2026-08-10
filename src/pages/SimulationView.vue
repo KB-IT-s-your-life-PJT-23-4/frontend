@@ -527,7 +527,7 @@ async function savePlan() {
     showSaveModal.value = false
     await store.syncStatus({ suppressSimulationAccessNotice: false })
     store.showToast('증여 시뮬레이션을 최종 저장했어요.')
-    await router.push('/my')
+    await router.push('/status')
   } catch (error) {
     if (error.code === 'SIMULATION_VERSION_CONFLICT') {
       await loadSimulation(result.value.simulationId)

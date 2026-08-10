@@ -401,7 +401,6 @@ onMounted(() => loadStatus())
             <h2>
               <template v-if="familySimulation.expectedFutureValue">
                 {{ formatCompactWon(familySimulation.amount) }}을
-                {{ formatCompactWon(familySimulation.expectedFutureValue) }}으로<br />
                 {{ planProgressCopy(familySimulation) }}
               </template>
               <template v-else>
@@ -429,8 +428,7 @@ onMounted(() => loadStatus())
               }}
             </button>
             <p class="register-gift-note">
-              저장한 시뮬레이션이에요. 증여를 진행하면 아래 진행 중인 증여로 옮겨가고, 거기서 서류를
-              준비한 뒤 확정할 수 있어요.
+              증여를 진행하면 '진행 중인 증여'에서 서류 준비와 완료 처리를 이어갈 수 있어요.
             </p>
           </div>
         </section>
@@ -638,7 +636,6 @@ onMounted(() => loadStatus())
                       @click="togglePlan(documentPanelKey(plan.id))"
                     >
                       <div>
-                        <span class="section-kicker">CHECKLIST</span>
                         <strong>
                           <template v-if="group.split">{{ plan.sequenceNo }}회차 </template>
                           필수 증빙 서류
@@ -760,10 +757,13 @@ onMounted(() => loadStatus())
       <section class="expert-card">
         <span class="expert-avatar"><AppIcon name="chat" :size="28" /></span>
         <div>
-          <h2>증여 신고가 어려우신가요?</h2>
-          <p>AI 상담으로 상황을 정리하고 전문가 상담을 준비해 보세요.</p>
+          <h2>증여가 어려우신가요?</h2>
+          <p>
+            AI 상담을 통해 관련 법령과 기본 절차를 확인하고, 나의 상황에 맞는 증여 계획을
+            세워보세요.
+          </p>
         </div>
-        <RouterLink class="primary-button" to="/chat">전문가 상담 준비</RouterLink>
+        <RouterLink class="primary-button" to="/chat">AI 상담하기</RouterLink>
       </section>
     </div>
 
