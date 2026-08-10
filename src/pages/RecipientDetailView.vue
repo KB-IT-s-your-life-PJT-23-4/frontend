@@ -200,7 +200,12 @@ watch(
     <AppHeader />
 
     <main class="page-content recipient-detail-content">
-      <PageHeading title="수증자 상세 정보" />
+      <PageHeading
+        title="수증자 상세 정보"
+        description="가족 정보와 최근 10년 증여 현황을 한눈에 확인하세요."
+        back
+        @back="router.push({ name: 'my' })"
+      />
 
       <section v-if="loading" class="recipient-state-card" role="status" aria-live="polite">
         <span class="recipient-loading-spinner" aria-hidden="true" />

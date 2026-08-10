@@ -49,6 +49,26 @@ const selectedProducts = reactive({})
 const preferentialSelections = reactive({})
 const detailLoading = reactive({})
 const detailErrors = reactive({})
+const SIMULATION_VARIANT_CACHE_TTL_MS = 10 * 60 * 1000
+const SIMULATION_VARIANT_CACHE_MAX_SIZE = 8
+const simulationVariantCache = new Map()
+const isHistoryResult = computed(() => route.query.from === 'history')
+const simulationExecutedAt = computed(() => {
+  if (!isHistoryResult.value) return ''
+
+  const timestamp = result.value?.createdAt ?? result.value?.raw?.createdAt
+  if (!timestamp) return ''
+
+  const parsed = new Date(timestamp)
+  if (!Number.isFinite(parsed.getTime())) return ''
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(parsed)
+})
 
 const family = computed(
   () =>
@@ -227,7 +247,72 @@ function updateGiftDate(value) {
   giftDateError.value = ''
 }
 
-function applySimulationResponse(response) {
+function simulationVariantKey({
+  familyId,
+  requestedAmount,
+  investmentPeriodMonths,
+  giftDate: scheduledGiftDate,
+  taxPaymentMethod,
+}) {
+  return [
+    Number(familyId),
+    Number(requestedAmount),
+    Number(investmentPeriodMonths),
+    scheduledGiftDate,
+    taxPaymentMethod,
+  ].join(':')
+}
+
+function currentSimulationVariantKey() {
+  return simulationVariantKey({
+    familyId: selectedFamilyId.value,
+    requestedAmount: amount.value,
+    investmentPeriodMonths: investmentYears.value * 12,
+    giftDate: giftDate.value,
+    taxPaymentMethod: donorPaysTax.value ? 'DONOR_PAYS' : 'RECIPIENT_PAYS',
+  })
+}
+
+function responseSimulationVariantKey(response) {
+  if (!response?.family?.familyId || !response?.input) return null
+  return simulationVariantKey({
+    familyId: response.family.familyId,
+    requestedAmount: response.input.requestedAmount,
+    investmentPeriodMonths: response.input.investmentPeriodMonths,
+    giftDate: response.input.giftDate ?? response.input.asOfDate,
+    taxPaymentMethod: response.input.taxPaymentMethod,
+  })
+}
+
+function rememberSimulationVariant(response, keyOverride = null) {
+  const key = keyOverride ?? responseSimulationVariantKey(response)
+  if (!key) return
+
+  simulationVariantCache.delete(key)
+  simulationVariantCache.set(key, {
+    response,
+    expiresAt: Date.now() + SIMULATION_VARIANT_CACHE_TTL_MS,
+  })
+  while (simulationVariantCache.size > SIMULATION_VARIANT_CACHE_MAX_SIZE) {
+    simulationVariantCache.delete(simulationVariantCache.keys().next().value)
+  }
+}
+
+function cachedSimulationVariant(key) {
+  const cached = simulationVariantCache.get(key)
+  if (!cached) return null
+  if (cached.expiresAt <= Date.now()) {
+    simulationVariantCache.delete(key)
+    return null
+  }
+
+  simulationVariantCache.delete(key)
+  simulationVariantCache.set(key, cached)
+  return cached.response
+}
+
+function applySimulationResponse(response, { cacheKey = null } = {}) {
+  rememberSimulationVariant(response, cacheKey)
   result.value = normalizeSimulationResponse(response)
   if (response.input) {
     setAmount(response.input.requestedAmount)
@@ -246,6 +331,47 @@ function applySimulationResponse(response) {
   if (response.family?.familyId) {
     selectedFamilyId.value = Number(response.family.familyId)
     store.selectFamily(response.family.familyId)
+  }
+}
+
+async function executeSimulation({ scrollToTop = true } = {}) {
+  const cacheKey = currentSimulationVariantKey()
+  const cachedResponse = cachedSimulationVariant(cacheKey)
+  if (cachedResponse) {
+    applySimulationResponse(cachedResponse, { cacheKey })
+    await router.replace({
+      name: 'simulation',
+      query: result.value?.simulationId ? { simulationId: result.value.simulationId } : {},
+    })
+    if (scrollToTop) window.scrollTo({ top: 0, behavior: 'smooth' })
+    return true
+  }
+
+  loading.value = true
+  try {
+    store.selectFamily(selectedFamilyId.value)
+    const response = await api.runSimulation({
+      family: family.value,
+      amount: amount.value,
+      years: investmentYears.value,
+      giftDate: giftDate.value,
+      donorPaysTax: donorPaysTax.value,
+    })
+    applySimulationResponse(response, { cacheKey })
+    // POST /api/gs로 생성된 DRAFT를 마이페이지 이력에 즉시 반영한다.
+    // 응답을 로컬에서 임의 조립하지 않고 GET /api/gs의 최신 목록을 다시 사용한다.
+    await store.syncStatus({ suppressSimulationAccessNotice: false })
+    await router.replace({
+      name: 'simulation',
+      query: result.value?.simulationId ? { simulationId: result.value.simulationId } : {},
+    })
+    if (scrollToTop) window.scrollTo({ top: 0, behavior: 'smooth' })
+    return true
+  } catch (error) {
+    errorMessage.value = error.message
+    return false
+  } finally {
+    loading.value = false
   }
 }
 
@@ -273,30 +399,7 @@ async function runSimulation() {
     return
   }
 
-  loading.value = true
-  try {
-    store.selectFamily(selectedFamilyId.value)
-    const response = await api.runSimulation({
-      family: family.value,
-      amount: amount.value,
-      years: investmentYears.value,
-      giftDate: giftDate.value,
-      donorPaysTax: donorPaysTax.value,
-    })
-    applySimulationResponse(response)
-    // POST /api/gs로 생성된 DRAFT를 마이페이지 이력에 즉시 반영한다.
-    // 응답을 로컬에서 임의 조립하지 않고 GET /api/gs의 최신 목록을 다시 사용한다.
-    await store.syncStatus({ suppressSimulationAccessNotice: false })
-    await router.replace({
-      name: 'simulation',
-      query: result.value?.simulationId ? { simulationId: result.value.simulationId } : {},
-    })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  } catch (error) {
-    errorMessage.value = error.message
-  } finally {
-    loading.value = false
-  }
+  await executeSimulation()
 }
 
 async function loadSimulation(simulationId) {
@@ -314,10 +417,30 @@ async function loadSimulation(simulationId) {
 }
 
 async function resetSimulation() {
+  if (isHistoryResult.value) {
+    await router.replace({ name: 'my', hash: '#simulation-history' })
+    return
+  }
+
   result.value = null
   clearProductSelections()
   await router.replace({ name: 'simulation' })
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+async function changeTaxPaymentMethod() {
+  if (isHistoryResult.value || loading.value) return
+
+  const previousMethod = donorPaysTax.value
+  const previousProfile = selectedPortfolioType.value
+  donorPaysTax.value = !previousMethod
+  const changed = await executeSimulation({ scrollToTop: false })
+  if (!changed) {
+    donorPaysTax.value = previousMethod
+    store.showToast(errorMessage.value || '납부 방식을 변경하지 못했습니다.', 'info')
+  } else if (result.value?.recommendedByProfile?.[previousProfile]) {
+    selectedPortfolioType.value = previousProfile
+  }
 }
 
 function selectProduct(type, product) {
@@ -468,13 +591,18 @@ onMounted(async () => {
     <div v-else class="page-content simulation-result-content">
       <section class="result-hero">
         <button class="back-text-button" type="button" @click="resetSimulation">
-          <AppIcon name="back" :size="17" /> 조건 다시 입력
+          <AppIcon name="back" :size="17" />
+          {{ isHistoryResult ? '시뮬레이션 목록 보기' : '조건 다시 입력' }}
         </button>
         <h2>
           {{ family.name }} 님께<br />{{ formatCompactWon(result.requestedAmount) }}을 증여한다면
         </h2>
         <p>증여 시점과 {{ result.years }}년의 운용 흐름을 함께 계산했어요.</p>
         <div class="result-condition-chips">
+          <span v-if="isHistoryResult && simulationExecutedAt">
+            <AppIcon name="clock" :size="15" />
+            {{ simulationExecutedAt }} 실행
+          </span>
           <span>
             <AppIcon name="calendar" :size="15" />
             {{ result.giftDate }} 증여 예정
@@ -484,6 +612,18 @@ onMounted(async () => {
             <AppIcon name="wallet" :size="15" />
             {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
           </span>
+          <button
+            v-if="!isHistoryResult"
+            class="result-condition-edit"
+            type="button"
+            :disabled="loading"
+            @click="changeTaxPaymentMethod"
+          >
+            <span v-if="loading" class="button-spinner" />
+            <template v-else>
+              {{ result.donorPaysTax ? '받는 분 납부로 변경' : '주는 분 준비로 변경' }}
+            </template>
+          </button>
         </div>
       </section>
 

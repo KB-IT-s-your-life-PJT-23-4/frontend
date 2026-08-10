@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import DateField from '../common/DateField.vue'
 import { formatCompactWon } from '../../utils/finance'
@@ -66,7 +66,18 @@ const peerAverageGiftAmount = computed(() => {
   return age < 19 ? 18000000 : age < 30 ? 30000000 : 42000000
 })
 
-defineEmits([
+const enteredAmount = computed(
+  () => Number(String(props.amountText ?? '').replace(/[^\d]/g, '')) || 0,
+)
+const exceedsRemainingDeduction = computed(
+  () => enteredAmount.value > 0 && enteredAmount.value > props.remaining,
+)
+const deductionExcessAmount = computed(() => Math.max(0, enteredAmount.value - props.remaining))
+
+const showFamilyPicker = ref(false)
+const recipientPickerRoot = ref(null)
+
+const emit = defineEmits([
   'update:selectedFamilyId',
   'update:investmentYears',
   'update:giftDate',
@@ -75,6 +86,27 @@ defineEmits([
   'add-amount',
   'submit',
 ])
+
+function familyRemainingLabel(item) {
+  const value = item.remainingDeductionIfPlanned ?? item.remainingDeduction
+  return Number.isFinite(Number(value))
+    ? `남은 공제 ${formatCompactWon(Number(value))}`
+    : '공제 한도 확인'
+}
+
+function selectFamily(familyId) {
+  emit('update:selectedFamilyId', Number(familyId))
+  showFamilyPicker.value = false
+}
+
+function closeFamilyPickerOnOutsideClick(event) {
+  if (showFamilyPicker.value && !recipientPickerRoot.value?.contains(event.target)) {
+    showFamilyPicker.value = false
+  }
+}
+
+onMounted(() => document.addEventListener('pointerdown', closeFamilyPickerOnOutsideClick))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', closeFamilyPickerOnOutsideClick))
 </script>
 
 <template>
@@ -92,27 +124,73 @@ defineEmits([
           </div>
         </div>
 
-        <label class="recipient-picker" for="family-select">
-          <span class="recipient-avatar">{{ family.name.slice(-2) }}</span>
-          <span class="recipient-copy">
-            <strong>{{ family.name }}</strong>
-            <small>{{ family.relation }}</small>
-          </span>
-          <span class="recipient-change">
-            변경
-            <AppIcon name="chevron" :size="15" />
-          </span>
-          <select
+        <div
+          ref="recipientPickerRoot"
+          class="recipient-picker-control"
+          @keydown.esc="showFamilyPicker = false"
+        >
+          <button
             id="family-select"
-            :value="selectedFamilyId"
+            class="recipient-picker"
+            type="button"
+            aria-haspopup="listbox"
+            aria-controls="family-select-options"
+            :aria-expanded="showFamilyPicker"
             aria-label="수증자 변경"
-            @change="$emit('update:selectedFamilyId', Number($event.target.value))"
+            @click="showFamilyPicker = !showFamilyPicker"
           >
-            <option v-for="item in families" :key="item.id" :value="item.id">
-              {{ item.name }} ({{ item.relation }})
-            </option>
-          </select>
-        </label>
+            <span class="recipient-avatar">{{ family.name.slice(-2) }}</span>
+            <span class="recipient-copy">
+              <strong>{{ family.name }}</strong>
+              <small class="recipient-meta">
+                <span>{{ family.relation }}</span>
+                <span
+                  v-if="family.giftedAmount > 0 && family.resetDate"
+                  class="renewal-date-inline"
+                >
+                  <i aria-hidden="true">·</i>
+                  공제 갱신 {{ family.resetDate }}
+                </span>
+              </small>
+            </span>
+            <span class="recipient-change" :class="{ open: showFamilyPicker }">
+              변경
+              <AppIcon name="chevron" :size="15" />
+            </span>
+          </button>
+
+          <div
+            v-if="showFamilyPicker"
+            id="family-select-options"
+            class="recipient-picker-dropdown"
+            role="listbox"
+            aria-label="수증자 선택"
+          >
+            <button
+              v-for="item in families"
+              :key="item.id"
+              class="recipient-picker-option"
+              :class="{ selected: Number(item.id) === Number(selectedFamilyId) }"
+              type="button"
+              role="option"
+              :aria-selected="Number(item.id) === Number(selectedFamilyId)"
+              @click="selectFamily(item.id)"
+            >
+              <span class="recipient-option-avatar">{{ item.name.slice(-2) }}</span>
+              <span class="recipient-option-copy">
+                <strong>{{ item.name }}</strong>
+                <small>
+                  <span>{{ item.relation }}</span>
+                  <i aria-hidden="true">·</i>
+                  <span>{{ familyRemainingLabel(item) }}</span>
+                </small>
+              </span>
+              <span class="recipient-option-check" aria-hidden="true">
+                <AppIcon name="check" :size="15" />
+              </span>
+            </button>
+          </div>
+        </div>
 
         <div class="recipient-deduction-summary">
           <div class="recipient-history-row">
@@ -249,11 +327,12 @@ defineEmits([
         </div>
       </section>
 
-      <section class="simulation-input-step tax-payer-step">
+      <section id="tax-payment-method" class="simulation-input-step tax-payer-step">
         <div class="input-step-heading">
           <span class="step-number">5</span>
           <div>
             <h3>증여세는 누가 준비할까요?</h3>
+            <p>선택한 방식에 따라 운용 원금과 주는 분의 총 준비 금액이 달라져요.</p>
           </div>
         </div>
 
@@ -266,8 +345,11 @@ defineEmits([
             @click="$emit('update:donorPaysTax', false)"
           >
             <span class="tax-option-check"><i /></span>
-            <strong>받는 분이 납부</strong>
-            <small>증여 금액에서 예상 세금을 준비해요.</small>
+            <span class="tax-option-title">
+              <strong>받는 분이 납부</strong>
+              <span class="tax-option-badge">일반적인 방식</span>
+            </span>
+            <small>증여받은 금액에서 예상 세금을 납부하고,<br />남은 금액을 운용해요.</small>
           </button>
           <button
             type="button"
@@ -277,24 +359,35 @@ defineEmits([
             @click="$emit('update:donorPaysTax', true)"
           >
             <span class="tax-option-check"><i /></span>
-            <strong>주는 분이 함께<br class="tax-option-mobile-break" />준비</strong>
-            <small>대납 세금도 추가 증여로 보아 계산해요.</small>
+            <span class="tax-option-title">
+              <strong>주는 분이 함께 준비</strong>
+            </span>
+            <small>
+              증여 금액은 그대로 운용할 수 있지만,<br />
+              대신 납부한 세금까지 반영돼 총 준비 금액이 늘어날 수 있어요.
+            </small>
           </button>
         </div>
-      </section>
 
-      <aside class="info-callout">
-        <AppIcon name="info" :size="20" />
-        <p v-if="family.giftedAmount > 0">
-          {{ family.name }} 님은 현재 <strong>{{ formatCompactWon(remaining) }}</strong
-          >까지 비과세 한도를 활용할 수 있어요. 한도 갱신 예정일은 {{ family.resetDate }}입니다.
+        <div
+          class="tax-deduction-notice"
+          :class="exceedsRemainingDeduction ? 'caution' : 'safe'"
+          role="status"
+        >
+          <AppIcon :name="exceedsRemainingDeduction ? 'info' : 'check'" :size="17" />
+          <p v-if="!enteredAmount">증여 금액을 입력하면 남은 공제 한도와 비교해드려요.</p>
+          <p v-else-if="exceedsRemainingDeduction">
+            남은 공제 한도를 <strong>{{ formatCompactWon(deductionExcessAmount) }}</strong>
+            초과해 예상 세금이 발생할 수 있어요.
+          </p>
+          <p v-else>현재 입력 금액은 남은 공제 한도 이내예요.</p>
+        </div>
+
+        <p class="tax-calculation-guide">
+          정확한 예상 세금과 주는 분의 총 준비 금액은 일시·분할 증여 일정을 비교한 뒤 결과에서
+          안내해드려요.
         </p>
-        <p v-else>
-          최근 10년간 증여 이력이 없어
-          <strong>{{ formatCompactWon(remaining) }}</strong
-          >의 공제 한도를 모두 활용할 수 있어요.
-        </p>
-      </aside>
+      </section>
 
       <button class="primary-button full tall" type="submit" :disabled="loading">
         <span v-if="loading" class="button-spinner" />

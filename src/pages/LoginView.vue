@@ -73,16 +73,13 @@ async function submitLogin() {
     <AppHeader />
 
     <div class="page-content auth-content">
-      <PageHeading title="로그인" />
+      <PageHeading
+        title="로그인"
+        heading-id="login-heading"
+        description="미리줌으로 스마트한 증여 계획을 이어가세요."
+      />
 
       <section class="auth-card" aria-labelledby="login-heading">
-        <div class="auth-intro">
-          <div>
-            <h2 id="login-heading">다시 만나 반가워요</h2>
-            <p>미리줌으로 스마트한 증여 계획을 이어가세요.</p>
-          </div>
-        </div>
-
         <form class="auth-form" novalidate @submit.prevent="submitLogin">
           <div class="auth-field">
             <label for="login-email">이메일</label>

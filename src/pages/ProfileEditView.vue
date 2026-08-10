@@ -105,7 +105,12 @@ onMounted(loadProfile)
     <AppHeader />
 
     <main class="page-content profile-view-content profile-edit-content">
-      <PageHeading title="회원 정보 수정" />
+      <PageHeading
+        title="회원 정보 수정"
+        description="기본 정보를 최신 상태로 관리해 주세요."
+        back
+        @back="router.push({ name: 'profile-detail' })"
+      />
 
       <section v-if="loading" class="profile-state-card" role="status" aria-live="polite">
         <span class="profile-loading-spinner" aria-hidden="true" />
@@ -121,16 +126,12 @@ onMounted(loadProfile)
       </section>
 
       <section v-else class="profile-edit-card" aria-labelledby="profile-edit-heading">
-        <header class="profile-edit-header">
-          <h2 id="profile-edit-heading">기본 정보를 수정해주세요</h2>
-          <p>이름, 생년월일과 연락처만 변경할 수 있어요.</p>
-        </header>
-
         <form class="profile-edit-form" novalidate @submit.prevent="submitProfile">
           <ProfileImageField
             :image-url="currentImage"
             :display-name="form.name"
             :max-bytes="imageMaxBytes"
+            :show-label="false"
             :disabled="isSubmitting"
             @update:file="selectedImage = $event"
             @update:remove="removeImage = $event"

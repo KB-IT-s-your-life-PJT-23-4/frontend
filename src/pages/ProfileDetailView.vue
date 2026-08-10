@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import PageHeading from '../components/layout/PageHeading.vue'
@@ -8,6 +9,7 @@ import { resolveProfileImageUrl } from '../utils/profileImage'
 import '../assets/css/profile-view.css'
 
 const authStore = useAuthStore()
+const router = useRouter()
 const profile = ref(null)
 const loading = ref(true)
 const loadError = ref('')
@@ -56,7 +58,12 @@ onMounted(loadProfile)
     <AppHeader />
 
     <main class="page-content profile-view-content">
-      <PageHeading title="내 상세 정보" />
+      <PageHeading
+        title="내 상세 정보"
+        description="가입된 회원 정보와 계정 정보를 확인할 수 있어요."
+        back
+        @back="router.push({ name: 'my' })"
+      />
 
       <section v-if="loading" class="profile-state-card" role="status" aria-live="polite">
         <span class="profile-loading-spinner" aria-hidden="true" />
@@ -87,7 +94,6 @@ onMounted(loadProfile)
         <article class="profile-information-card" aria-labelledby="profile-name-heading">
           <header class="profile-information-header">
             <h2 id="profile-name-heading">{{ profileName }}님</h2>
-            <p>가입된 회원 정보를 확인할 수 있어요.</p>
           </header>
 
           <section class="profile-information-section" aria-labelledby="profile-basic-heading">

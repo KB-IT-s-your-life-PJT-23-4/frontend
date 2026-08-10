@@ -46,6 +46,10 @@
   font-weight: 500;
 }
 
+.history-section {
+  scroll-margin-top: 76px;
+}
+
 .history-family-switcher {
   width: 100%;
   max-width: 100%;
@@ -155,6 +159,107 @@
   color: #8a96a4;
   font-size: 10px;
   line-height: 1.55;
+}
+
+.simulation-history-loading {
+  display: grid;
+  min-height: 150px;
+  place-items: center;
+  border: 1px solid #e4ebf2;
+  border-radius: 17px;
+  color: #718092;
+  background: #f8fafc;
+  font-size: 12px;
+}
+
+.simulation-history-list {
+  transition: opacity 0.16s ease;
+}
+
+.simulation-history-list.is-page-loading {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.simulation-history-pagination {
+  display: grid;
+  margin-top: 15px;
+  grid-template-columns: minmax(76px, 1fr) auto minmax(76px, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.simulation-history-pagination button {
+  display: inline-flex;
+  min-height: 38px;
+  padding: 8px 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid #dde6ee;
+  border-radius: 12px;
+  color: #526d84;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.simulation-history-pagination button:disabled {
+  color: #a8b2bd;
+  background: #f4f6f8;
+  cursor: default;
+}
+
+.simulation-history-pagination .pagination-arrow.previous {
+  transform: scaleX(-1);
+}
+
+.simulation-history-pagination > span {
+  min-width: 54px;
+  color: #8793a0;
+  font-size: 11px;
+  text-align: center;
+}
+
+.simulation-history-pagination > span strong {
+  color: #3f617e;
+  font-size: 13px;
+}
+
+.history-scroll-top-button {
+  display: flex;
+  width: fit-content;
+  min-height: 34px;
+  margin: 13px auto 0;
+  padding: 7px 11px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 10px;
+  color: #718395;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.16s ease,
+    background-color 0.16s ease;
+}
+
+.history-scroll-top-button svg {
+  transform: rotate(-90deg);
+}
+
+.history-scroll-top-button:hover {
+  color: #456984;
+  background: #eef3f7;
+}
+
+.history-scroll-top-button:focus-visible {
+  outline: 2px solid rgba(79, 125, 165, 0.42);
+  outline-offset: 2px;
 }
 
 .withdrawal-text-button {

@@ -137,7 +137,7 @@ function getPositionClass(item) {
 
     <div class="timeline-key-metrics">
       <div>
-        <span>예상 세금</span>
+        <span>신고 공제 반영 예상 세금</span>
         <strong>{{ formatCompactWon(scenario.estimatedPayableTax) }}</strong>
       </div>
       <div v-if="result.donorPaysTax">

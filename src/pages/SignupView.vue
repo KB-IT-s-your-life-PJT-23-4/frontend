@@ -164,15 +164,13 @@ async function submitSignup() {
     <AppHeader />
 
     <div class="page-content auth-content">
-      <PageHeading title="회원가입" heading-id="signup-heading" />
+      <PageHeading
+        title="회원가입"
+        heading-id="signup-heading"
+        description="가족의 증여 계획을 안전하게 시작해 보세요."
+      />
 
       <section class="auth-card" aria-labelledby="signup-heading">
-        <div class="auth-intro compact">
-          <div>
-            <p>가족의 증여 계획을 안전하게 시작해보세요.</p>
-          </div>
-        </div>
-
         <form class="auth-form" novalidate @submit.prevent="submitSignup">
           <div class="auth-field">
             <label for="signup-name">이름</label>
