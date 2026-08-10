@@ -167,6 +167,28 @@
   line-height: 1.5;
 }
 
+.recipient-copy .recipient-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 5px;
+  line-height: 1.45;
+}
+
+.renewal-date-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #64809a;
+  white-space: normal;
+}
+
+.renewal-date-inline i {
+  color: #a5b0ba;
+  font-style: normal;
+}
+
 .tax-payer-step {
   scroll-margin-top: 96px;
 }

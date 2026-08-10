@@ -104,7 +104,13 @@ defineEmits([
           <span class="recipient-avatar">{{ family.name.slice(-2) }}</span>
           <span class="recipient-copy">
             <strong>{{ family.name }}</strong>
-            <small>{{ family.relation }}</small>
+            <small class="recipient-meta">
+              <span>{{ family.relation }}</span>
+              <span v-if="family.giftedAmount > 0 && family.resetDate" class="renewal-date-inline">
+                <i aria-hidden="true">·</i>
+                공제 갱신 {{ family.resetDate }}
+              </span>
+            </small>
           </span>
           <span class="recipient-change">
             변경
@@ -279,7 +285,7 @@ defineEmits([
               <strong>받는 분이 납부</strong>
               <span class="tax-option-badge">일반적인 방식</span>
             </span>
-            <small>증여받은 금액에서 예상 세금을 납부하고, 남은 금액을 운용해요.</small>
+            <small>증여받은 금액에서 예상 세금을 납부하고,<br />남은 금액을 운용해요.</small>
           </button>
           <button
             type="button"
@@ -293,8 +299,8 @@ defineEmits([
               <strong>주는 분이 함께 준비</strong>
             </span>
             <small>
-              증여 금액은 그대로 운용할 수 있지만, 대신 납부한 세금까지 반영돼 총 준비 금액이 늘어날
-              수 있어요.
+              증여 금액은 그대로 운용할 수 있지만,<br />
+              대신 납부한 세금까지 반영돼 총 준비 금액이 늘어날 수 있어요.
             </small>
           </button>
         </div>
@@ -318,19 +324,6 @@ defineEmits([
           안내해드려요.
         </p>
       </section>
-
-      <aside class="info-callout">
-        <AppIcon name="info" :size="20" />
-        <p v-if="family.giftedAmount > 0">
-          {{ family.name }} 님은 현재 <strong>{{ formatCompactWon(remaining) }}</strong
-          >까지 비과세 한도를 활용할 수 있어요. 한도 갱신 예정일은 {{ family.resetDate }}입니다.
-        </p>
-        <p v-else>
-          최근 10년간 증여 이력이 없어
-          <strong>{{ formatCompactWon(remaining) }}</strong
-          >의 공제 한도를 모두 활용할 수 있어요.
-        </p>
-      </aside>
 
       <button class="primary-button full tall" type="submit" :disabled="loading">
         <span v-if="loading" class="button-spinner" />
