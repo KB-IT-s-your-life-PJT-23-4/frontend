@@ -636,7 +636,6 @@ onMounted(() => loadStatus())
                       @click="togglePlan(documentPanelKey(plan.id))"
                     >
                       <div>
-                        <span class="section-kicker">CHECKLIST</span>
                         <strong>
                           <template v-if="group.split">{{ plan.sequenceNo }}회차 </template>
                           필수 증빙 서류
