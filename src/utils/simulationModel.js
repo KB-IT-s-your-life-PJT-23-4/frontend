@@ -24,6 +24,24 @@ function formatDate(value) {
   return value ? String(value).replaceAll('-', '.') : null
 }
 
+function normalizeEtfVolatility(volatility) {
+  if (!volatility) return null
+
+  return {
+    available: Boolean(volatility.available),
+    annualizedVolatilityPercent:
+      volatility.annualizedVolatilityPercent == null
+        ? null
+        : number(volatility.annualizedVolatilityPercent),
+    volatilityLevel: volatility.volatilityLevel ?? 'UNAVAILABLE',
+    priceObservationCount: number(volatility.priceObservationCount),
+    startDate: formatDate(volatility.startDate),
+    endDate: formatDate(volatility.endDate),
+    calculationBasis: volatility.calculationBasis ?? null,
+    notice: volatility.notice ?? '',
+  }
+}
+
 function allocationRatios(allocation, principal) {
   const total = Math.max(0, number(principal))
   const amounts = {
@@ -93,7 +111,8 @@ function mapProduct(product, selectedProductById = new Map()) {
     selectedPreferentialConditions: product.selectedPreferentialConditions?.length
       ? product.selectedPreferentialConditions
       : (savedSelection?.selectedPreferentialConditions ?? []),
-    riskLevel: type === 'ETF' ? 3 : 1,
+    riskLevel: type === 'ETF' ? (ETF_RISK_LEVEL[product.riskLevel] ?? 3) : 1,
+    volatility: type === 'ETF' ? normalizeEtfVolatility(product.volatility) : null,
     detailLoaded: false,
   }
 }
@@ -258,6 +277,7 @@ export function mergeProductDetail(product, response) {
       ratio: number(holding.weightPercent),
     })),
     riskLevel: ETF_RISK_LEVEL[details.riskLevel] ?? product.riskLevel,
+    volatility: normalizeEtfVolatility(details.volatility) ?? product.volatility ?? null,
     reinvestmentPolicy: details.reinvestmentPolicy ?? product.reinvestmentPolicy ?? null,
     calculationPolicy: details.calculationPolicy ?? null,
     detailLoaded: true,
