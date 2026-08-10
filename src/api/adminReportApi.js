@@ -8,7 +8,7 @@ export const adminReportCapabilities = Object.freeze({
   blockUser: false,
 })
 
-export function getAdminReportPage({ page = 0, size = 20, status, reportType } = {}) {
+export function getAdminReportPage({ page = 0, size = 10, status, reportType } = {}) {
   const params = new URLSearchParams({ page: String(page), size: String(size) })
   if (status?.trim()) params.set('status', status.trim())
   if (reportType?.trim()) params.set('reportType', reportType.trim())
