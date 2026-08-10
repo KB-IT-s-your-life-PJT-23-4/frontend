@@ -455,7 +455,7 @@ async function submitWithdrawal() {
               :disabled="historyLoading || !historyPagination.hasPrevious"
               @click="goToHistoryPage(historyPage - 1)"
             >
-              <AppIcon name="back" :size="14" /> 이전
+              <AppIcon class="pagination-arrow previous" name="arrow" :size="14" /> 이전
             </button>
             <span aria-live="polite">
               <template v-if="historyLoading">불러오는 중</template>
