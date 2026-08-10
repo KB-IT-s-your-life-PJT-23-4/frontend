@@ -1,13 +1,26 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deleteAdminUser, getAdminUser, getAdminUsers } from '../api/adminUserApi'
+import {
+  blockAdminUser,
+  deleteAdminUser,
+  getAdminUser,
+  getAdminUsers,
+  unblockAdminUser,
+} from '../api/adminUserApi'
 import AdminLayout from '../components/admin/AdminLayout.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
+import { useAuthStore } from '../stores/authStore'
+import {
+  canManageUserBlock,
+  defaultBlockedUntilValue,
+  normalizeBlockedUntil,
+} from '../utils/adminUserBlock'
 import '../assets/css/admin-dashboard.css'
 import '../assets/css/admin-user.css'
 
 const PAGE_SIZE = 20
+const authStore = useAuthStore()
 const numberFormatter = new Intl.NumberFormat('ko-KR')
 const dateTimeFormatter = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
@@ -33,6 +46,10 @@ const deleteTarget = ref(null)
 const deletingUser = ref(false)
 const deleteError = ref('')
 const feedbackMessage = ref('')
+const accountAction = ref(null)
+const blockedUntilInput = ref('')
+const accountActionError = ref('')
+const isChangingAccountStatus = ref(false)
 
 const totalElements = computed(() => pagination.value?.totalElements ?? 0)
 const currentPage = computed(() => pagination.value?.page ?? 0)
@@ -47,6 +64,7 @@ const pageButtons = computed(() => {
 const hasSearchCondition = computed(() =>
   Object.values(appliedSearch).some((value) => String(value).trim()),
 )
+const canManageAccountStatus = computed(() => canManageUserBlock(authStore.user?.role))
 
 function formatNumber(value) {
   return numberFormatter.format(value ?? 0)
@@ -165,6 +183,58 @@ async function confirmDeleteUser() {
     deleteError.value = error.message || '회원을 삭제하지 못했습니다.'
   } finally {
     deletingUser.value = false
+  }
+}
+
+function openAccountAction(type) {
+  if (
+    !selectedUser.value ||
+    !canManageAccountStatus.value ||
+    String(selectedUser.value.role).toUpperCase() !== 'USER'
+  ) {
+    return
+  }
+
+  accountAction.value = { type, user: selectedUser.value }
+  blockedUntilInput.value = type === 'block' ? defaultBlockedUntilValue() : ''
+  accountActionError.value = ''
+}
+
+function closeAccountAction() {
+  if (isChangingAccountStatus.value) return
+  accountAction.value = null
+  blockedUntilInput.value = ''
+  accountActionError.value = ''
+}
+
+async function confirmAccountAction() {
+  if (!accountAction.value || isChangingAccountStatus.value) return
+
+  const { type, user } = accountAction.value
+  const blockedUntil = type === 'block' ? normalizeBlockedUntil(blockedUntilInput.value) : null
+  if (type === 'block' && !blockedUntil) {
+    accountActionError.value = '현재 시각보다 이후인 차단 만료 시각을 입력해주세요.'
+    return
+  }
+
+  isChangingAccountStatus.value = true
+  accountActionError.value = ''
+  feedbackMessage.value = ''
+  try {
+    if (type === 'block') await blockAdminUser(user.userId, blockedUntil)
+    else await unblockAdminUser(user.userId)
+
+    accountAction.value = null
+    feedbackMessage.value =
+      type === 'block'
+        ? `회원 #${user.userId}을(를) 차단했습니다.`
+        : `회원 #${user.userId}의 차단을 해제했습니다.`
+    await loadUsers(currentPage.value)
+    await selectUser(user.userId)
+  } catch (error) {
+    accountActionError.value = error.message || '회원 계정 상태를 변경하지 못했습니다.'
+  } finally {
+    isChangingAccountStatus.value = false
   }
 }
 
@@ -447,6 +517,35 @@ onMounted(() => loadUsers())
             <p v-if="!selectedUser.accountStatusAvailable">
               현재 API에서 정지·탈퇴 상태를 제공하지 않습니다.
             </p>
+            <p v-else-if="selectedUser.accountStatus === 'BLOCKED'">
+              차단 만료: {{ formatDateTime(selectedUser.blockedUntil) }}
+            </p>
+          </div>
+
+          <div
+            v-if="
+              canManageAccountStatus &&
+              selectedUser.accountStatusAvailable &&
+              String(selectedUser.role).toUpperCase() === 'USER'
+            "
+            class="admin-user-account-actions"
+          >
+            <button
+              v-if="selectedUser.accountStatus === 'ACTIVE'"
+              type="button"
+              class="admin-user-block-button"
+              @click="openAccountAction('block')"
+            >
+              <AppIcon name="shield" :size="16" /> 회원 차단
+            </button>
+            <button
+              v-else-if="selectedUser.accountStatus === 'BLOCKED'"
+              type="button"
+              class="admin-user-unblock-button"
+              @click="openAccountAction('unblock')"
+            >
+              <AppIcon name="refresh" :size="16" /> 차단 해제
+            </button>
           </div>
 
           <button
@@ -489,6 +588,57 @@ onMounted(() => loadUsers())
           @click="confirmDeleteUser"
         >
           {{ deletingUser ? '삭제 중...' : '삭제하기' }}
+        </button>
+      </template>
+    </ModalSheet>
+    <ModalSheet
+      :show="Boolean(accountAction)"
+      :title="accountAction?.type === 'block' ? '회원 차단' : '회원 차단 해제'"
+      :description="
+        accountAction?.type === 'block'
+          ? '차단 기간 동안 증여 시뮬레이션과 AI 상담 이용이 제한됩니다.'
+          : '해제 즉시 증여 시뮬레이션과 AI 상담을 다시 이용할 수 있습니다.'
+      "
+      :danger="accountAction?.type === 'block'"
+      @close="closeAccountAction"
+    >
+      <template #icon><AppIcon name="shield" :size="25" /></template>
+      <div v-if="accountAction" class="admin-user-account-form">
+        <p>
+          대상: #{{ accountAction.user.userId }} {{ accountAction.user.name }} ({{
+            accountAction.user.email
+          }})
+        </p>
+        <label v-if="accountAction.type === 'block'">
+          <span>차단 만료 시각</span>
+          <input v-model="blockedUntilInput" type="datetime-local" required />
+        </label>
+        <p v-if="accountActionError" class="admin-user-delete-error" role="alert">
+          {{ accountActionError }}
+        </p>
+      </div>
+      <template #actions>
+        <button
+          class="secondary-button"
+          type="button"
+          :disabled="isChangingAccountStatus"
+          @click="closeAccountAction"
+        >
+          취소
+        </button>
+        <button
+          :class="accountAction?.type === 'block' ? 'danger-button' : 'primary-button'"
+          type="button"
+          :disabled="isChangingAccountStatus"
+          @click="confirmAccountAction"
+        >
+          {{
+            isChangingAccountStatus
+              ? '처리 중...'
+              : accountAction?.type === 'block'
+                ? '차단하기'
+                : '해제하기'
+          }}
         </button>
       </template>
     </ModalSheet>

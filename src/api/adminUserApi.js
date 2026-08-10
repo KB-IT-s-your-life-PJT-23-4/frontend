@@ -19,3 +19,14 @@ export function getAdminUser(userId) {
 export function deleteAdminUser(userId) {
   return request(`/admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' })
 }
+
+export function blockAdminUser(userId, blockedUntil) {
+  return request(`/admin/users/${encodeURIComponent(userId)}/block`, {
+    method: 'PATCH',
+    body: JSON.stringify({ blockedUntil }),
+  })
+}
+
+export function unblockAdminUser(userId) {
+  return request(`/admin/users/${encodeURIComponent(userId)}/unblock`, { method: 'PATCH' })
+}

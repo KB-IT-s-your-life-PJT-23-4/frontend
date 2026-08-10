@@ -17,6 +17,7 @@ import {
   calculateEstimatedPayableTax,
   PRODUCT_TYPE_META,
 } from '../utils/finance'
+import { isBlockedAccessApiError } from '../utils/accountAccess'
 
 // 데모 상태와 서버 연동 상태를 섞으면 목데이터 familyId가 DB 값과 충돌하므로 저장 키를 분리한다.
 const STORAGE_KEY = api.isMock ? 'mirizoom-demo-state-v1' : 'mirizoom-status-state-v1'
@@ -415,7 +416,7 @@ async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
         suppressBlockedAccess: suppressSimulationAccessNotice,
       })
     } catch (error) {
-      if (!suppressSimulationAccessNotice || error.status !== 403) throw error
+      if (!suppressSimulationAccessNotice || !isBlockedAccessApiError(error, '/gs')) throw error
       return { items: [], pagination: null }
     }
   }

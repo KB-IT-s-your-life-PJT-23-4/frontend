@@ -43,3 +43,11 @@ export function shouldShowBlockedAccessForResponse({
   if (suppressed || status !== 403 || !isRestrictedFeatureApiPath(path)) return false
   return errorCode === BLOCKED_ACCESS_API_ERROR
 }
+
+export function isBlockedAccessApiError(error, path) {
+  return shouldShowBlockedAccessForResponse({
+    status: error?.status,
+    path,
+    errorCode: error?.code,
+  })
+}

@@ -3,6 +3,7 @@ import test from 'node:test'
 import { showBlockedAccess, useAccountAccessStore } from '../stores/accountAccessStore.js'
 import {
   isAccountBlocked,
+  isBlockedAccessApiError,
   isRestrictedFeatureApiPath,
   shouldShowBlockedAccessForResponse,
 } from './accountAccess.js'
@@ -71,4 +72,13 @@ test('차단 안내가 이미 열려 있으면 중복으로 표시하지 않는�
   assert.equal(store.state.visible, true)
 
   store.closeBlockedAccess()
+})
+
+test('백그라운드 동기화도 실제 계정 차단 오류만 구분한다', () => {
+  assert.equal(
+    isBlockedAccessApiError({ status: 403, code: '해당 기능에 접근할 권한이 없습니다' }, '/gs'),
+    true,
+  )
+  assert.equal(isBlockedAccessApiError({ status: 403, code: 'FAMILY_ACCESS_DENIED' }, '/gs'), false)
+  assert.equal(isBlockedAccessApiError({ status: 500, code: 'DATABASE_ERROR' }, '/gs'), false)
 })
