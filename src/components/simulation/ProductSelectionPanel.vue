@@ -111,6 +111,41 @@ function getRateLabel(product) {
   return `연 ${product.minRate}% ~ ${product.maxRate}%`
 }
 
+function volatilityClass(product) {
+  if (!product.volatility?.available) return 'volatility-unavailable'
+
+  const riskLevel = Number(product.riskLevel)
+  if (riskLevel >= 5) return 'volatility-high'
+  if (riskLevel >= 3) return 'volatility-medium'
+  return 'volatility-low'
+}
+
+function volatilityValue(product) {
+  if (!product.volatility?.available) return '데이터 부족'
+  return `${Number(product.volatility.annualizedVolatilityPercent).toFixed(2)}%`
+}
+
+function volatilityHeading(product) {
+  if (!product.volatility?.available) return '변동성을 계산할 가격 이력이 부족해요'
+  return `최근 종가 기준 연환산 변동성 ${Number(
+    product.volatility.annualizedVolatilityPercent,
+  ).toFixed(2)}%`
+}
+
+function riskNotice(product) {
+  if (product.volatility?.notice) return product.volatility.notice
+  if (product.riskLevel >= 5) {
+    return '매우 높은 위험등급으로 단기간에도 큰 폭의 손실이 발생할 수 있어요.'
+  }
+  if (product.riskLevel >= 4) {
+    return '높은 위험등급으로 가격 변동이 크고 투자 기간 중 손실이 발생할 수 있어요.'
+  }
+  if (product.riskLevel === 3) {
+    return '중간 위험등급으로 가격 변동과 원금 손실 가능성을 함께 고려해 주세요.'
+  }
+  return '비교적 낮은 위험등급이지만 시장 상황에 따라 원금 손실이 발생할 수 있어요.'
+}
+
 function getHoldingSegments(topHoldings = []) {
   const assetColorIndexes = {}
   const holdings = topHoldings.slice(0, 10).map((holding, index) => {
@@ -237,8 +272,17 @@ function updateCondition(product, conditionCode, checked) {
                 <strong>{{ product.name }}</strong>
                 <span>{{ getRateLabel(product) }}</span>
               </span>
-              <span class="product-risk-level" :class="`risk-${product.riskLevel}`">
-                위험도 {{ product.riskLevel }}단계
+              <span class="product-risk-summary">
+                <span class="product-risk-level" :class="`risk-${product.riskLevel}`">
+                  위험도 {{ product.riskLevel }}단계
+                </span>
+                <span
+                  v-if="product.type === 'ETF'"
+                  class="product-volatility-text"
+                >
+                  <span>연 변동성</span>
+                  <strong>{{ volatilityValue(product) }}</strong>
+                </span>
               </span>
             </label>
 
@@ -283,6 +327,19 @@ function updateCondition(product, conditionCode, checked) {
                 <div class="product-tracking-index">
                   <span>추종 지수</span>
                   <strong>{{ product.trackingIndex }}</strong>
+                </div>
+                <div class="product-volatility-guide" :class="volatilityClass(product)" role="note">
+                  <span class="product-volatility-icon" aria-hidden="true">
+                    <AppIcon name="info" :size="15" />
+                  </span>
+                  <div class="product-volatility-copy">
+                    <strong>{{ volatilityHeading(product) }}</strong>
+                    <p>{{ riskNotice(product) }}</p>
+                    <small v-if="product.volatility?.available">
+                      {{ product.volatility.startDate }}~{{ product.volatility.endDate }} · 종가
+                      {{ product.volatility.priceObservationCount }}건 기준
+                    </small>
+                  </div>
                 </div>
                 <div v-if="product.topHoldings?.length" class="product-holdings">
                   <div class="product-holdings-heading">
