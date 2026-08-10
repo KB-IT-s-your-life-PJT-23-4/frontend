@@ -758,10 +758,13 @@ onMounted(() => loadStatus())
       <section class="expert-card">
         <span class="expert-avatar"><AppIcon name="chat" :size="28" /></span>
         <div>
-          <h2>증여 신고가 어려우신가요?</h2>
-          <p>AI 상담으로 상황을 정리하고 전문가 상담을 준비해 보세요.</p>
+          <h2>증여가 어려우신가요?</h2>
+          <p>
+            AI 상담을 통해 관련 법령과 기본 절차를 확인하고, 나의 상황에 맞는 증여 계획을
+            세워보세요.
+          </p>
         </div>
-        <RouterLink class="primary-button" to="/chat">전문가 상담 준비</RouterLink>
+        <RouterLink class="primary-button" to="/chat">AI 상담하기</RouterLink>
       </section>
     </div>
 
