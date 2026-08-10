@@ -17,7 +17,6 @@ import {
   calculateEstimatedPayableTax,
   PRODUCT_TYPE_META,
 } from '../utils/finance'
-import { isBlockedAccessApiError } from '../utils/accountAccess'
 
 // 데모 상태와 서버 연동 상태를 섞으면 목데이터 familyId가 DB 값과 충돌하므로 저장 키를 분리한다.
 const STORAGE_KEY = api.isMock ? 'mirizoom-demo-state-v1' : 'mirizoom-status-state-v1'
@@ -409,17 +408,13 @@ async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
 
   const generation = statusGeneration
 
-  const listSimulationHistory = async (params) => {
-    try {
-      return await api.listSimulations({
-        ...params,
-        suppressBlockedAccess: suppressSimulationAccessNotice,
-      })
-    } catch (error) {
-      if (!suppressSimulationAccessNotice || !isBlockedAccessApiError(error, '/gs')) throw error
-      return { items: [], pagination: null }
-    }
-  }
+  // GET /api/gs는 일반 화면에서 기존 이력을 표시하기 위한 읽기 API다.
+  // 조회 실패를 빈 이력으로 바꾸지 않아 실제 데이터가 없는 상태와 오류를 구분한다.
+  const listSimulationHistory = (params) =>
+    api.listSimulations({
+      ...params,
+      suppressBlockedAccess: suppressSimulationAccessNotice,
+    })
 
   const [recipients, gifts, deductions, simulationHistory, reminders] = await Promise.all([
     api.listFamilies(),
