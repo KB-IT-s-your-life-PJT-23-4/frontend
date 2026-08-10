@@ -34,6 +34,39 @@ function normalizeAssistantAnswer(answer, fallback) {
     .trim()
 }
 
+function normalizeReferenceUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return ''
+
+  try {
+    const url = new URL(value)
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : ''
+  } catch {
+    return ''
+  }
+}
+
+function normalizeConsultReferences(references) {
+  if (!Array.isArray(references)) return []
+
+  return references
+    .map((reference) => {
+      const legacyCitation = [
+        [reference?.law_name ?? reference?.lawName, reference?.article_no ?? reference?.articleNo]
+          .filter(Boolean)
+          .join(' '),
+        reference?.title,
+      ]
+        .filter(Boolean)
+        .join('\n')
+
+      return {
+        citation: reference?.citation ?? legacyCitation,
+        url: normalizeReferenceUrl(reference?.url),
+      }
+    })
+    .filter((reference) => reference.citation)
+}
+
 // =============================== 초기 답장 포맷
 const input = ref('')
 const messages = ref([
@@ -392,6 +425,7 @@ function appendConsultResponse(response, originalQuestion) {
       id: Date.now() + 1,
       role: 'assistant',
       text: normalizeAssistantAnswer(response.answer, '해당 질문에는 답변해 드릴 수 없습니다.'),
+      references: normalizeConsultReferences(response.references),
       error: true,
       createdAt: getCurrentTimeFormat(),
     })
@@ -407,6 +441,7 @@ function appendConsultResponse(response, originalQuestion) {
     id: Date.now() + 1,
     role: 'assistant',
     text: normalizeAssistantAnswer(response.answer, '답변을 생성하지 못했습니다.'),
+    references: normalizeConsultReferences(response.references),
     actions: true,
     showBranchButton: true,
     showTaxOfficeButton: true,
@@ -452,7 +487,25 @@ function messageParagraphs(text) {
               class="chat-bubble"
               :class="{ error: message.error }"
             >
-              <p>{{ paragraph }}</p>
+              <p>
+                {{ paragraph }}
+                <template v-if="index === messageParagraphs(message.text).length - 1">
+                  <a
+                    v-for="(reference, referenceIndex) in message.references?.filter(
+                      (item) => item.url,
+                    ) ?? []"
+                    :key="referenceIndex"
+                    class="reference-inline-link"
+                    :href="reference.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :aria-label="`${reference.citation} 바로가기`"
+                    :title="`${reference.citation} 바로가기`"
+                  >
+                    <AppIcon name="external" :size="14" />
+                  </a>
+                </template>
+              </p>
 
               <template v-if="index === messageParagraphs(message.text).length - 1">
                 <div v-if="message.clarification" class="clarification-control">
@@ -526,14 +579,6 @@ function messageParagraphs(text) {
                   >
                     {{ message.clarification.error }}
                   </small>
-                </div>
-                <div v-if="message.references?.length" class="reference-block">
-                  <AppIcon name="document" :size="17" />
-                  <span>
-                    {{ message.references[0].lawName }}
-                    {{ message.references[0].articleNo }}<br />
-                    {{ message.references[0].title }}
-                  </span>
                 </div>
                 <div v-if="message.actions" class="chat-actions">
                   <a

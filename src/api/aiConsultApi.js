@@ -24,7 +24,11 @@ function ensureAiConsultApiConfigured() {
  *     question: string,
  *     reason: string
  *   }>,
- *   facts: Record<string, unknown>
+ *   facts: Record<string, unknown>,
+ *   references: Array<{
+ *     citation: string,
+ *     url: string
+ *   }>
  * }>}
  */
 
