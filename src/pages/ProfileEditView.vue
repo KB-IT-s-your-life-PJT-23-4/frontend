@@ -105,7 +105,12 @@ onMounted(loadProfile)
     <AppHeader />
 
     <main class="page-content profile-view-content profile-edit-content">
-      <PageHeading title="회원 정보 수정" />
+      <PageHeading
+        title="회원 정보 수정"
+        description="프로필 사진과 기본 정보를 최신 상태로 관리해 주세요."
+        back
+        @back="router.push({ name: 'profile-detail' })"
+      />
 
       <section v-if="loading" class="profile-state-card" role="status" aria-live="polite">
         <span class="profile-loading-spinner" aria-hidden="true" />

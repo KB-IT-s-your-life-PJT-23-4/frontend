@@ -135,7 +135,14 @@ watch(
     <AppHeader />
 
     <main class="page-content profile-view-content profile-edit-content">
-      <PageHeading title="수증자 정보 수정" />
+      <PageHeading
+        title="수증자 정보 수정"
+        description="수증자의 사진과 기본 정보를 정확하게 관리해 주세요."
+        back
+        @back="
+          router.push({ name: 'recipient-detail', params: { familyId: route.params.familyId } })
+        "
+      />
 
       <section v-if="loading" class="profile-state-card" role="status" aria-live="polite">
         <span class="profile-loading-spinner" aria-hidden="true" />

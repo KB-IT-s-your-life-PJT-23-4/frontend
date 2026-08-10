@@ -8,9 +8,51 @@
   margin: 0;
   color: #172231;
   font-size: clamp(28px, 7vw, 38px);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.06em;
+}
+
+.page-heading--detailed {
+  grid-template-columns: minmax(0, 1fr);
+  margin-inline: 0;
+  gap: 0;
+}
+
+.page-heading-back {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 32px;
+  margin: 0 0 14px;
+  padding: 2px 4px 2px 0;
+  align-items: center;
+  gap: 3px;
+  border: 0;
+  background: transparent;
+  color: #617589;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.page-heading-back:focus-visible {
+  outline: 3px solid rgba(57, 105, 151, 0.2);
+  outline-offset: 2px;
+}
+
+.page-heading--detailed h1 {
+  font-size: clamp(27px, 6vw, 34px);
+  letter-spacing: -0.055em;
+}
+
+.page-heading-description {
+  max-width: 520px;
+  margin: 9px 0 0;
+  color: #748292;
+  font-size: 12px;
+  line-height: 1.65;
+  word-break: keep-all;
 }
 
 .profile-view-content > .page-heading,
@@ -22,10 +64,18 @@
   .page-heading h1 {
     font-size: 28px;
   }
+
+  .page-heading--detailed h1 {
+    font-size: 27px;
+  }
 }
 
 @media (min-width: 1024px) {
   .page-heading h1 {
     font-size: 38px;
+  }
+
+  .page-heading--detailed h1 {
+    font-size: 34px;
   }
 }
