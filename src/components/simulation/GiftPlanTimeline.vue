@@ -17,9 +17,154 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  portfolioProfile: {
+    type: String,
+    default: 'BALANCED',
+  },
 })
 
 const scenario = computed(() => props.recommendedScenario)
+const portfolioProfileLabel = computed(
+  () =>
+    ({
+      CONSERVATIVE: '안정형',
+      BALANCED: '균형형',
+      AGGRESSIVE: '성장형',
+    })[props.portfolioProfile] ?? props.portfolioProfile,
+)
+const resultYearsLabel = computed(() => `${props.result.years}년`)
+const donorPaysTax = computed(() => {
+  const paymentMethod = props.result.raw?.input?.taxPaymentMethod
+  if (paymentMethod) return paymentMethod === 'DONOR_PAYS'
+  return Boolean(props.result.donorPaysTax)
+})
+const immediateScenario = computed(() =>
+  props.result.results?.find((item) => item.scenarioType === 'IMMEDIATE'),
+)
+const splitScenario = computed(() =>
+  props.result.results?.find((item) => item.scenarioType === 'TAX_OPTIMIZED'),
+)
+const comparisonScenarios = computed(() =>
+  [immediateScenario.value, splitScenario.value].filter(Boolean),
+)
+const canCompareTaxes = computed(() => comparisonScenarios.value.length === 2)
+
+function scenarioComparisonLabel(item) {
+  return item?.scenarioType === 'IMMEDIATE' ? '지금 전액 증여' : '공제 활용 분할 증여'
+}
+
+function isRecommended(item) {
+  return item?.resultId === scenario.value.resultId || item?.scenarioType === scenario.value.scenarioType
+}
+
+const alternativeScenario = computed(() =>
+  comparisonScenarios.value.find((item) => !isRecommended(item)),
+)
+const preparationLabel = computed(() =>
+  donorPaysTax.value ? '주는 분 총 준비 금액' : '받는 분이 납부할 세금',
+)
+
+function preparationAmount(item) {
+  return Number(donorPaysTax.value ? item?.totalDonorOutflow : item?.estimatedPayableTax)
+}
+
+function preparationDetail(item) {
+  if (donorPaysTax.value) {
+    return `증여액과 예상 세금 ${formatCompactWon(item?.estimatedPayableTax ?? 0)} 포함`
+  }
+  return `증여받은 분이 예상 세금 ${formatCompactWon(item?.estimatedPayableTax ?? 0)} 납부`
+}
+
+function scenarioFutureValue(item) {
+  const matchingPortfolio = item?.portfolios?.find(
+    (portfolio) => portfolio.portfolioType === props.portfolioProfile,
+  )
+  const value = matchingPortfolio?.expectedFutureValue ?? item?.estimatedFutureValue
+  if (value == null) return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function comparisonAmount(value) {
+  return value == null ? '계산 정보 없음' : formatCompactWon(value)
+}
+
+function remainingUninvestedPrincipal(item) {
+  return Math.max(
+    0,
+    Number(item?.postTaxAmount ?? 0) - Number(item?.investmentPrincipal ?? 0),
+  )
+}
+
+function scenarioEndTotalValue(item) {
+  const investedFutureValue = scenarioFutureValue(item)
+  if (investedFutureValue == null) return null
+  return investedFutureValue + remainingUninvestedPrincipal(item)
+}
+
+function endTotalValueDetail(item) {
+  const investedFutureValue = scenarioFutureValue(item)
+  const remainingPrincipal = remainingUninvestedPrincipal(item)
+  if (investedFutureValue == null) return '운용 결과를 계산할 수 없어요'
+  if (remainingPrincipal > 0) {
+    return `운용 결과 ${formatCompactWon(
+      investedFutureValue,
+    )} + 아직 증여하지 않은 원금 ${formatCompactWon(remainingPrincipal)}`
+  }
+  return `${portfolioProfileLabel.value} 투자 성향의 운용 결과`
+}
+
+const recommendedPreparationDifference = computed(
+  () =>
+    preparationAmount(alternativeScenario.value) - preparationAmount(scenario.value),
+)
+const recommendedFutureValueDifference = computed(() => {
+  const recommendedValue = scenarioEndTotalValue(scenario.value)
+  const alternativeValue = scenarioEndTotalValue(alternativeScenario.value)
+  if (recommendedValue == null || alternativeValue == null) return null
+  return recommendedValue - alternativeValue
+})
+const comparisonReason = computed(() => {
+  const recommendedLabel = scenarioComparisonLabel(scenario.value)
+  const alternativeLabel = scenarioComparisonLabel(alternativeScenario.value)
+  const preparationDifference = recommendedPreparationDifference.value
+  const futureValueDifference = recommendedFutureValueDifference.value
+
+  if (futureValueDifference == null) {
+    if (preparationDifference > 0) {
+      return `${recommendedLabel}은 ${preparationLabel.value}이 ${alternativeLabel}보다 ${formatCompactWon(
+        preparationDifference,
+      )} 적어 유리해요.`
+    }
+    return `${taxPayerLabel.value} 조건과 증여 일정을 함께 반영해 ${recommendedLabel}을 추천해요.`
+  }
+
+  if (futureValueDifference > 0 && preparationDifference > 0) {
+    return `${recommendedLabel}은 준비 금액을 ${formatCompactWon(
+      preparationDifference,
+    )} 줄이고, ${resultYearsLabel.value} 후 예상 총 금액은 ${formatCompactWon(
+      futureValueDifference,
+    )} 더 많아 유리해요.`
+  }
+  if (futureValueDifference > 0 && preparationDifference < 0) {
+    return `${recommendedLabel}은 준비 금액이 ${formatCompactWon(
+      Math.abs(preparationDifference),
+    )} 더 들지만, ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
+      futureValueDifference,
+    )} 더 많아 최종 결과가 유리해요.`
+  }
+  if (futureValueDifference > 0) {
+    return `준비 금액은 같지만, ${recommendedLabel}의 ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
+      futureValueDifference,
+    )} 더 많아 유리해요.`
+  }
+  if (futureValueDifference === 0 && preparationDifference > 0) {
+    return `${resultYearsLabel.value} 후 예상 총 금액은 같지만, ${recommendedLabel}의 준비 금액이 ${formatCompactWon(
+      preparationDifference,
+    )} 적어 유리해요.`
+  }
+  return `${taxPayerLabel.value} 조건과 증여 시점, ${resultYearsLabel.value} 후 예상 총 금액을 함께 반영해 ${recommendedLabel}을 추천해요.`
+})
 
 function parseDate(value) {
   const parsed = new Date(`${String(value).replaceAll('.', '-')}T00:00:00`)
@@ -107,7 +252,6 @@ function getPositionClass(item) {
     <header class="timeline-card-heading">
       <div>
         <div class="timeline-heading-meta">
-          <span class="section-kicker">추천 증여 플랜</span>
           <span class="timeline-count">
             기간 내 {{ visibleSchedule.length }}회 증여
             <template v-if="reinvestmentSchedule.length">
@@ -128,20 +272,57 @@ function getPositionClass(item) {
               ? scenario.description
               : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
           }}
-          <br />
-          {{ formatCompactWon(result.requestedAmount) }}을 {{ result.years }}년 운용하는 조건으로
-          계산했어요.
+          
         </p>
       </div>
     </header>
 
-    <div class="timeline-key-metrics">
-      <div>
+    <section
+      v-if="canCompareTaxes"
+      class="tax-strategy-comparison"
+      aria-labelledby="tax-comparison-title"
+    >
+      <div class="tax-comparison-heading">
+        <small>{{ taxPayerLabel }}</small>
+      </div>
+
+      <div class="tax-comparison-options">
+        <template v-for="(item, index) in comparisonScenarios" :key="item.resultId">
+          <article class="tax-comparison-option" :class="{ 'is-recommended': isRecommended(item) }">
+            <header>
+              <span>{{ scenarioComparisonLabel(item) }}</span>
+              <em v-if="isRecommended(item)">추천</em>
+            </header>
+            <div class="tax-comparison-metrics">
+              <div>
+                <small>{{ preparationLabel }}</small>
+                <strong>{{ formatCompactWon(preparationAmount(item)) }}</strong>
+                <span>{{ preparationDetail(item) }}</span>
+              </div>
+              <div>
+                <small>{{ resultYearsLabel }} 후 예상 총 금액</small>
+                <strong>{{ comparisonAmount(scenarioEndTotalValue(item)) }}</strong>
+                <span>{{ endTotalValueDetail(item) }}</span>
+              </div>
+            </div>
+          </article>
+          <span v-if="index === 0" class="tax-comparison-versus" aria-hidden="true">VS</span>
+        </template>
+      </div>
+
+      <div class="tax-comparison-conclusion">
+        <span><AppIcon name="check" :size="13" /></span>
+        <p>{{ comparisonReason }}</p>
+      </div>
+    </section>
+
+    <div v-if="!canCompareTaxes || donorPaysTax" class="timeline-key-metrics">
+      <div v-if="!canCompareTaxes">
         <span>신고 공제 반영 예상 세금</span>
         <strong>{{ formatCompactWon(scenario.estimatedPayableTax) }}</strong>
       </div>
-      <div v-if="result.donorPaysTax">
-        <span>주는 분의 총 준비 금액</span>
+      <div v-if="donorPaysTax">
+        <span>추천안 기준 주는 분의 총 준비 금액</span>
         <strong>{{ formatCompactWon(scenario.totalDonorOutflow) }}</strong>
       </div>
     </div>
