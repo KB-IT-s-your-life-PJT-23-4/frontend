@@ -1,4 +1,5 @@
 .gift-plan-timeline-card {
+  min-width: 0;
   margin-bottom: 18px;
   padding: 21px;
   border: 1px solid #e8edf2;
@@ -20,7 +21,7 @@
 }
 
 .timeline-card-heading h2 {
-  margin: 10px 0 0;
+  margin: 5px 0 0;
   font-size: 19px;
   line-height: 1.35;
   letter-spacing: -0.045em;
@@ -35,6 +36,7 @@
 
 .timeline-heading-meta {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -50,14 +52,6 @@
   font-size: 9px;
   font-weight: 500;
   white-space: nowrap;
-}
-
-.tax-strategy-comparison {
-  margin-top: 16px;
-  padding: 14px;
-  border: 1px solid #dfe8f0;
-  border-radius: 18px;
-  background: #f7fafc;
 }
 
 .tax-comparison-heading {
@@ -91,26 +85,27 @@
 .tax-comparison-options {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
-  margin-top: 11px;
-  align-items: center;
+  margin-top: 13px;
+  align-items: stretch;
+  gap: 14px;
 }
 
 .tax-comparison-option {
   display: grid;
   min-width: 0;
-  min-height: 164px;
-  padding: 11px 12px;
-  align-content: center;
-  gap: 4px;
-  border: 1px solid #e1e8ee;
-  border-radius: 14px;
+  padding: 18px;
+  align-content: start;
+  border: 1px solid #dfe7ee;
+  border-radius: 22px;
   background: #fff;
+  box-shadow: 0 8px 24px rgba(42, 65, 86, 0.055);
 }
 
 .tax-comparison-option.is-recommended {
-  border-color: #8baec9;
-  background: #f5faff;
-  box-shadow: 0 5px 14px rgba(63, 103, 136, 0.1);
+  border: 2px solid #4c789c;
+  padding: 17px;
+  background: #eef6fd;
+  box-shadow: 0 8px 24px rgba(52, 92, 125, 0.1);
 }
 
 .tax-comparison-option header {
@@ -122,8 +117,7 @@
 }
 
 .tax-comparison-option header span {
-  color: #5f7181;
-  font-size: 9px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.35;
 }
@@ -162,6 +156,7 @@
 }
 
 .tax-comparison-metrics strong {
+  overflow-wrap: anywhere;
   color: #2f506b;
   font-size: 14px;
   line-height: 1.25;
@@ -202,13 +197,10 @@
 
 .tax-comparison-conclusion > span {
   display: grid;
-  width: 19px;
-  height: 19px;
   flex: none;
   place-items: center;
   border-radius: 50%;
-  color: #fff;
-  background: #5d8db3;
+  color: var(--blue);
 }
 
 .tax-comparison-conclusion p {
@@ -483,27 +475,45 @@
   transform: translate(0, 0);
 }
 
+@media (max-width: 600px) {
+  .tax-comparison-options {
+    grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .tax-comparison-versus {
+    justify-self: center;
+  }
+}
+
 @media (max-width: 430px) {
   .gift-plan-timeline-card {
     padding: 18px;
   }
 
   .timeline-card-heading {
-    align-items: center;
+    align-items: flex-start;
+  }
+
+  .timeline-heading-meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
   }
 
   .timeline-card-heading h2 {
     font-size: clamp(14px, 4.5vw, 18px);
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .timeline-count {
+    max-width: 187px;
     padding: 5px 8px;
     font-size: 8px;
-  }
-
-  .tax-strategy-comparison {
-    padding: 12px;
+    line-height: 1.4;
+    text-align: right;
+    white-space: normal;
   }
 
   .tax-comparison-heading strong {
@@ -515,12 +525,16 @@
   }
 
   .tax-comparison-option {
-    min-height: 156px;
-    padding: 10px;
+    min-height: 0;
+  }
+
+  .tax-comparison-option header {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .tax-comparison-option header span {
-    font-size: 8px;
+    font-size: 12px;
   }
 
   .tax-comparison-metrics strong {
@@ -587,6 +601,7 @@
 
   .timeline-point-copy {
     position: static;
+    min-width: 0;
     width: auto;
     gap: 2px;
     transform: none;
@@ -652,6 +667,7 @@
   .reinvestment-timeline-copy {
     position: static;
     display: grid;
+    min-width: 0;
     width: auto;
     max-width: none;
     padding: 0;
@@ -673,7 +689,29 @@
 
   .reinvestment-timeline-copy b {
     margin-top: 2px;
+    overflow-wrap: anywhere;
     font-size: 10px;
     white-space: normal;
+  }
+
+  .timeline-outside-note {
+    min-width: 0;
+  }
+
+  .timeline-outside-note p {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 350px) {
+  .timeline-heading-meta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .timeline-count {
+    max-width: 100%;
+    justify-self: start;
+    text-align: left;
   }
 }

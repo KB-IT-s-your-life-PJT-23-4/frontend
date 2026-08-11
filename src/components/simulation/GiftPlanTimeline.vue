@@ -54,7 +54,9 @@ function scenarioComparisonLabel(item) {
 }
 
 function isRecommended(item) {
-  return item?.resultId === scenario.value.resultId || item?.scenarioType === scenario.value.scenarioType
+  return (
+    item?.resultId === scenario.value.resultId || item?.scenarioType === scenario.value.scenarioType
+  )
 }
 
 const alternativeScenario = computed(() =>
@@ -90,10 +92,7 @@ function comparisonAmount(value) {
 }
 
 function remainingUninvestedPrincipal(item) {
-  return Math.max(
-    0,
-    Number(item?.postTaxAmount ?? 0) - Number(item?.investmentPrincipal ?? 0),
-  )
+  return Math.max(0, Number(item?.postTaxAmount ?? 0) - Number(item?.investmentPrincipal ?? 0))
 }
 
 function scenarioEndTotalValue(item) {
@@ -115,8 +114,7 @@ function endTotalValueDetail(item) {
 }
 
 const recommendedPreparationDifference = computed(
-  () =>
-    preparationAmount(alternativeScenario.value) - preparationAmount(scenario.value),
+  () => preparationAmount(alternativeScenario.value) - preparationAmount(scenario.value),
 )
 const recommendedFutureValueDifference = computed(() => {
   const recommendedValue = scenarioEndTotalValue(scenario.value)
@@ -147,7 +145,7 @@ const comparisonReason = computed(() => {
     )} 더 많아 유리해요.`
   }
   if (futureValueDifference > 0 && preparationDifference < 0) {
-    return `${recommendedLabel}은 준비 금액이 ${formatCompactWon(
+    return `${recommendedLabel}는 준비 금액이 ${formatCompactWon(
       Math.abs(preparationDifference),
     )} 더 들지만, ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
       futureValueDifference,
@@ -252,6 +250,13 @@ function getPositionClass(item) {
     <header class="timeline-card-heading">
       <div>
         <div class="timeline-heading-meta">
+          <h2 id="gift-strategy-title">
+            {{
+              result.exceedsDeduction
+                ? `${scenario.scenarioName}가 더 유리해요`
+                : '공제 한도 안에서 바로 증여할 수 있어요'
+            }}
+          </h2>
           <span class="timeline-count">
             기간 내 {{ visibleSchedule.length }}회 증여
             <template v-if="reinvestmentSchedule.length">
@@ -259,20 +264,13 @@ function getPositionClass(item) {
             </template>
           </span>
         </div>
-        <h2 id="gift-strategy-title">
-          {{
-            result.exceedsDeduction
-              ? `${scenario.scenarioName}가 더 유리해요`
-              : '공제 한도 안에서 바로 증여할 수 있어요'
-          }}
-        </h2>
+
         <p>
           {{
             result.exceedsDeduction
               ? scenario.description
               : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
           }}
-          
         </p>
       </div>
     </header>
@@ -315,17 +313,6 @@ function getPositionClass(item) {
         <p>{{ comparisonReason }}</p>
       </div>
     </section>
-
-    <div v-if="!canCompareTaxes || donorPaysTax" class="timeline-key-metrics">
-      <div v-if="!canCompareTaxes">
-        <span>신고 공제 반영 예상 세금</span>
-        <strong>{{ formatCompactWon(scenario.estimatedPayableTax) }}</strong>
-      </div>
-      <div v-if="donorPaysTax">
-        <span>추천안 기준 주는 분의 총 준비 금액</span>
-        <strong>{{ formatCompactWon(scenario.totalDonorOutflow) }}</strong>
-      </div>
-    </div>
 
     <section class="selected-timeline-section" aria-label="추천 전략의 증여 일정">
       <div

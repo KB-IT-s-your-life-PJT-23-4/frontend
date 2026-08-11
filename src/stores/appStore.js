@@ -661,6 +661,31 @@ function checkedDocumentCount(planId) {
   return (state.documentChecks[planId] ?? []).length
 }
 
+/**
+ * 증여세 신고서 이미지를 서버로 보내 이 증여 건과 대조한다.
+ *
+ * 대조 결과는 저장하지 않는다. 화면에 잠깐 보여줄 값이라 state 에 넣으면 localStorage 에까지
+ * 남는다. 자동 체크는 켜기만 하고 끄지 않는다 — 이미 손으로 체크해 둔 것을 다른 회차 신고서를
+ * 잘못 올렸다는 이유로 되돌리면, 사용자가 한 판단을 기계가 뒤집는 셈이 된다.
+ */
+async function verifyGiftFiling(planId, file) {
+  if (api.isMock) {
+    showToast('데모 모드에서는 신고서 확인을 쓸 수 없어요.', 'info')
+    return null
+  }
+
+  const result = await api.verifyGiftFiling(planId, file)
+
+  if (result?.matched) {
+    if (!isDocumentChecked(planId, 'tax')) toggleDocument(planId, 'tax')
+    showToast('신고서가 등록된 증여 내용과 일치해요. 증여세 신고서를 체크했어요.')
+  } else {
+    showToast('신고서와 등록된 증여 내용이 달라요. 확인해 주세요.', 'info')
+  }
+
+  return result
+}
+
 function toggleSetting(setting) {
   state.settings[setting] = !state.settings[setting]
 }
@@ -820,6 +845,7 @@ export function useAppStore() {
     toggleDocument,
     isDocumentChecked,
     checkedDocumentCount,
+    verifyGiftFiling,
     toggleSetting,
     markNotificationsRead,
     deleteSimulation,
