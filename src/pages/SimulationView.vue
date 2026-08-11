@@ -597,7 +597,6 @@ onMounted(async () => {
         <h2>
           {{ family.name }} 님께<br />{{ formatCompactWon(result.requestedAmount) }}을 증여한다면
         </h2>
-        <p>증여 시점과 {{ result.years }}년의 운용 흐름을 함께 계산했어요.</p>
         <div class="result-condition-chips">
           <span v-if="isHistoryResult && simulationExecutedAt">
             <AppIcon name="clock" :size="15" />
@@ -608,20 +607,26 @@ onMounted(async () => {
             {{ result.giftDate }} 증여 예정
           </span>
           <span><AppIcon name="clock" :size="15" /> {{ result.years }}년 운용</span>
-          <span>
+          <span v-if="isHistoryResult">
             <AppIcon name="wallet" :size="15" />
             {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
           </span>
           <button
-            v-if="!isHistoryResult"
+            v-else
             class="result-condition-edit"
             type="button"
             :disabled="loading"
+            :aria-label="
+              result.donorPaysTax
+                ? '받는 분이 세금을 납부하는 방식으로 변경'
+                : '주는 분이 세금까지 준비하는 방식으로 변경'
+            "
             @click="changeTaxPaymentMethod"
           >
+            <AppIcon name="wallet" :size="15" />
             <span v-if="loading" class="button-spinner" />
             <template v-else>
-              {{ result.donorPaysTax ? '받는 분 납부로 변경' : '주는 분 준비로 변경' }}
+              {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
             </template>
           </button>
         </div>
@@ -631,6 +636,7 @@ onMounted(async () => {
         :result="result"
         :recommended-scenario="recommendedScenario"
         :selected-products="selectedProducts"
+        :portfolio-profile="selectedPortfolioType"
       />
 
       <PortfolioDonutCard

@@ -4872,7 +4872,7 @@ textarea:focus-visible {
   margin-top: 15px;
 }
 
-.result-condition-chips span {
+.result-condition-chips > span {
   display: inline-flex;
   padding: 7px 10px;
   align-items: center;
@@ -4888,6 +4888,7 @@ textarea:focus-visible {
   display: inline-flex;
   padding: 7px 10px;
   align-items: center;
+  gap: 5px;
   border: 1px solid #cbdbe8;
   border-radius: 999px;
   color: #486b88;
