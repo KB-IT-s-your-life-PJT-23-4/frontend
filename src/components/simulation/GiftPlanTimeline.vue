@@ -38,6 +38,9 @@ const donorPaysTax = computed(() => {
   if (paymentMethod) return paymentMethod === 'DONOR_PAYS'
   return Boolean(props.result.donorPaysTax)
 })
+const taxPayerLabel = computed(() =>
+  donorPaysTax.value ? '주는 분이 세금 준비' : '받는 분이 세금 납부',
+)
 const immediateScenario = computed(() =>
   props.result.results?.find((item) => item.scenarioType === 'IMMEDIATE'),
 )
