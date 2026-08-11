@@ -79,7 +79,7 @@ function defaultEditDraft() {
     trackingIndex: '',
     bondRatioPercent: '',
     riskLevel: 'MEDIUM',
-    annualReturn5yPercent: '',
+    annualReturn10yPercent: '',
     rateBaseDate: '',
     rateTiers: [],
     preferentialConditions: [],
@@ -239,7 +239,7 @@ function typeLabel(type) {
 
 function formatRate(product) {
   if (product.productType === 'ETF') {
-    return product.annualReturn5yPercent != null ? `연 ${product.annualReturn5yPercent}%` : '-'
+    return product.annualReturn10yPercent != null ? `연 ${product.annualReturn10yPercent}%` : '-'
   }
   if (product.minBaseRatePercent == null && product.maxRatePercent == null) return '-'
   return `${product.minBaseRatePercent ?? '-'}% ~ ${product.maxRatePercent ?? '-'}%`
@@ -325,7 +325,7 @@ function openEdit(product) {
     trackingIndex: product.trackingIndex ?? '',
     bondRatioPercent: product.bondRatioPercent ?? '',
     riskLevel: product.riskLevel ?? 'MEDIUM',
-    annualReturn5yPercent: product.annualReturn5yPercent ?? '',
+    annualReturn10yPercent: product.annualReturn10yPercent ?? '',
     rateBaseDate: product.rateTiers?.[0]?.baseDate ?? '',
     rateTiers: (product.rateTiers ?? []).map((tier) => ({ ...tier })),
     preferentialConditions: (product.preferentialConditions ?? []).map((condition) => ({
@@ -373,8 +373,8 @@ async function submitEdit() {
       payload.trackingIndex = draft.trackingIndex
       payload.bondRatioPercent = toNumberOrNull(draft.bondRatioPercent)
       payload.riskLevel = draft.riskLevel
-      if (draft.annualReturn5yPercent !== '') {
-        payload.annualReturn5yPercent = Number(draft.annualReturn5yPercent)
+      if (draft.annualReturn10yPercent !== '') {
+        payload.annualReturn10yPercent = Number(draft.annualReturn10yPercent)
       }
       payload.etfHoldings = toEtfHoldingsPayload(draft.etfHoldings)
     }
@@ -433,7 +433,7 @@ async function submitAddProduct() {
       payload.stockCode = draft.stockCode
       payload.etfCategory = draft.etfCategory
       payload.trackingIndex = draft.trackingIndex
-      payload.annualReturn5yPercent = toNumberOrNull(draft.annualReturn5yPercent)
+      payload.annualReturn10yPercent = toNumberOrNull(draft.annualReturn10yPercent)
       payload.bondRatioPercent = toNumberOrNull(draft.bondRatioPercent)
       payload.riskLevel = draft.riskLevel
       payload.etfHoldings = toEtfHoldingsPayload(draft.etfHoldings)
@@ -900,8 +900,8 @@ function selectVersion(id) {
             </select>
           </label>
           <label>
-            5년 연환산 수익률(%)
-            <input v-model="editDraft.annualReturn5yPercent" type="number" step="0.01" />
+            10년 연환산 수익률(%)
+            <input v-model="editDraft.annualReturn10yPercent" type="number" step="0.01" />
           </label>
 
           <div class="admin-products-rate-tiers">
@@ -1214,8 +1214,8 @@ function selectVersion(id) {
           </label>
           <label>추종지수<input v-model="newProductDraft.trackingIndex" type="text" /></label>
           <label
-            >5년 연환산 수익률(%)<input
-              v-model="newProductDraft.annualReturn5yPercent"
+            >10년 연환산 수익률(%)<input
+              v-model="newProductDraft.annualReturn10yPercent"
               type="number"
               step="0.01"
           /></label>
