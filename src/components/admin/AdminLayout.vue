@@ -1,7 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AppHeader from '../layout/AppHeader.vue'
-import AppIcon from '../layout/AppIcon.vue'
 import AdminSidebar from './AdminSidebar.vue'
 
 const isSidebarOpen = ref(false)
@@ -20,7 +19,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown))
 
 <template>
   <div class="admin-page-layout">
-    <AppHeader show-login />
+    <AppHeader show-login show-admin-menu @open-admin-menu="isSidebarOpen = true" />
     <div class="admin-shell">
       <AdminSidebar :is-open="isSidebarOpen" @close="closeSidebar" />
       <button
@@ -31,15 +30,6 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown))
         @click="closeSidebar"
       />
       <div class="admin-workspace">
-        <button
-          class="admin-mobile-menu-button"
-          type="button"
-          aria-label="관리자 메뉴 열기"
-          @click="isSidebarOpen = true"
-        >
-          <AppIcon name="menu" :size="20" />
-          관리자 메뉴
-        </button>
         <div class="admin-content">
           <slot />
         </div>

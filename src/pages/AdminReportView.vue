@@ -225,7 +225,6 @@ onMounted(() => loadReports(0))
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-report-title">
       <div>
-        <span class="admin-dashboard-heading__eyebrow">SAFETY REPORT MANAGEMENT</span>
         <h1 id="admin-report-title">신고 관리</h1>
         <p>AI 상담 안전 신고를 검토하고 처리 상태를 관리하세요.</p>
       </div>
@@ -248,7 +247,6 @@ onMounted(() => loadReports(0))
     <section class="admin-panel admin-report-filter" aria-labelledby="admin-report-filter-title">
       <div class="admin-panel__heading">
         <div>
-          <span>REPORT FILTER</span>
           <h2 id="admin-report-filter-title">신고 필터</h2>
         </div>
         <AppIcon name="shield" :size="21" />
@@ -283,7 +281,6 @@ onMounted(() => loadReports(0))
       <section class="admin-panel admin-report-list" aria-labelledby="admin-report-list-title">
         <div class="admin-panel__heading admin-report-list__heading">
           <div>
-            <span>SAFETY REPORTS</span>
             <h2 id="admin-report-list-title">신고 목록</h2>
           </div>
           <p v-if="pagination">
@@ -404,7 +401,6 @@ onMounted(() => loadReports(0))
       <aside class="admin-panel admin-report-detail" aria-labelledby="admin-report-detail-title">
         <div class="admin-panel__heading">
           <div>
-            <span>REPORT DETAIL</span>
             <h2 id="admin-report-detail-title">신고 상세</h2>
           </div>
           <AppIcon name="document" :size="21" />

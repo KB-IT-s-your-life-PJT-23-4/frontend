@@ -307,7 +307,6 @@ onMounted(initialize)
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-authorization-title">
       <div>
-        <span class="admin-dashboard-heading__eyebrow">AUTHORIZATION MANAGEMENT</span>
         <h1 id="admin-authorization-title">권한 관리</h1>
         <p>관리자 계정의 역할을 확인하고 운영 권한을 조정하세요.</p>
       </div>
@@ -366,7 +365,6 @@ onMounted(initialize)
       >
         <div class="admin-panel__heading admin-authorization-list__heading">
           <div>
-            <span>ADMINISTRATOR LIST</span>
             <h2 id="admin-authorization-list-title">관리자 목록</h2>
           </div>
           <p v-if="pagination">
@@ -485,7 +483,6 @@ onMounted(initialize)
       >
         <div class="admin-panel__heading">
           <div>
-            <span>ADMIN DETAIL</span>
             <h2 id="admin-authorization-detail-title">권한 상세</h2>
           </div>
           <AppIcon name="settings" :size="21" />

@@ -941,9 +941,9 @@ body.admin-route {
 
   .admin-mobile-menu-button {
     display: inline-flex;
-    min-height: 40px;
-    margin: 18px 24px 0;
-    padding: 0 13px;
+    min-height: 36px;
+    margin: 0;
+    padding: 0 10px;
     align-items: center;
     gap: 7px;
     border: 1px solid #dfe5eb;
@@ -984,11 +984,6 @@ body.admin-route {
     padding: 18px 16px 36px;
   }
 
-  .admin-mobile-menu-button {
-    margin-right: 16px;
-    margin-left: 16px;
-  }
-
   .admin-dashboard-heading {
     margin-bottom: 22px;
     gap: 20px;
@@ -1022,6 +1017,13 @@ body.admin-route {
 }
 
 @media (max-width: 390px) {
+  .admin-mobile-menu-button {
+    padding-right: 8px;
+    padding-left: 8px;
+    gap: 5px;
+    font-size: 9px;
+  }
+
   .admin-account__avatar {
     width: 34px;
     height: 34px;

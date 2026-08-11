@@ -464,7 +464,6 @@ function selectVersion(id) {
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-products-title">
       <div>
-        <span class="admin-dashboard-heading__eyebrow">PRODUCT MANAGEMENT</span>
         <h1 id="admin-products-title">상품 관리</h1>
         <p>버전별 상품 데이터를 확인하고 수정하세요.</p>
       </div>

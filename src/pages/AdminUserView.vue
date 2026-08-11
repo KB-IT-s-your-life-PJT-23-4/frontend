@@ -245,7 +245,6 @@ onMounted(() => loadUsers())
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-user-title">
       <div>
-        <span class="admin-dashboard-heading__eyebrow">MEMBER MANAGEMENT</span>
         <h1 id="admin-user-title">회원 관리</h1>
         <p>회원 기본 정보와 서비스 이용 현황을 검색하고 확인하세요.</p>
       </div>
@@ -258,7 +257,6 @@ onMounted(() => loadUsers())
     <section class="admin-user-search admin-panel" aria-labelledby="admin-user-search-title">
       <div class="admin-panel__heading">
         <div>
-          <span>SEARCH FILTER</span>
           <h2 id="admin-user-search-title">회원 검색</h2>
         </div>
         <AppIcon name="user" :size="21" />
@@ -307,7 +305,6 @@ onMounted(() => loadUsers())
       <section class="admin-user-list admin-panel" aria-labelledby="admin-user-list-title">
         <div class="admin-panel__heading admin-user-list__heading">
           <div>
-            <span>MEMBER LIST</span>
             <h2 id="admin-user-list-title">회원 목록</h2>
           </div>
           <p v-if="pagination">
@@ -436,7 +433,6 @@ onMounted(() => loadUsers())
       <aside class="admin-user-detail admin-panel" aria-labelledby="admin-user-detail-title">
         <div class="admin-panel__heading">
           <div>
-            <span>MEMBER DETAIL</span>
             <h2 id="admin-user-detail-title">회원 상세</h2>
           </div>
           <AppIcon name="document" :size="21" />

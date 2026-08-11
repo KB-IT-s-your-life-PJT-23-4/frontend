@@ -21,7 +21,6 @@ function formatCount(value) {
   <section class="admin-panel product-summary" aria-labelledby="product-summary-title">
     <div class="admin-panel__heading">
       <div>
-        <span>PRODUCT DATA</span>
         <h2 id="product-summary-title">최신 상품 데이터</h2>
       </div>
       <AppIcon name="wallet" :size="22" />

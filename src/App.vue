@@ -6,12 +6,16 @@ import BottomNav from './components/layout/BottomNav.vue'
 import ModalSheet from './components/layout/ModalSheet.vue'
 import { useAccountAccessStore } from './stores/accountAccessStore.js'
 import { useAppStore } from './stores/appStore.js'
+import { useAuthStore } from './stores/authStore.js'
+import { isAdminRole } from './utils/adminAccess.js'
 
 const store = useAppStore()
 const accountAccessStore = useAccountAccessStore()
+const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const isAdminLayout = computed(() => route.meta.layout === 'admin')
+const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.role))
 const showBottomNav = computed(() => !route.meta.hideBottomNav)
 
 watchEffect(() => {
@@ -48,6 +52,9 @@ async function confirmBlockedAccess() {
         <RouterLink to="/status"><AppIcon name="chart" :size="20" /> 증여 현황</RouterLink>
         <RouterLink to="/chat"><AppIcon name="chat" :size="20" /> AI 상담</RouterLink>
         <RouterLink to="/my"><AppIcon name="user" :size="20" /> 마이페이지</RouterLink>
+        <RouterLink v-if="isAdmin" to="/admin/dashboard">
+          <AppIcon name="shield" :size="20" /> 관리자 대시보드
+        </RouterLink>
       </nav>
       <div class="desktop-security">
         <AppIcon name="shield" :size="19" />
