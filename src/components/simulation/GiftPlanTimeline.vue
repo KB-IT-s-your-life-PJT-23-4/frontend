@@ -250,6 +250,13 @@ function getPositionClass(item) {
     <header class="timeline-card-heading">
       <div>
         <div class="timeline-heading-meta">
+          <h2 id="gift-strategy-title">
+            {{
+              result.exceedsDeduction
+                ? `${scenario.scenarioName}가 더 유리해요`
+                : '공제 한도 안에서 바로 증여할 수 있어요'
+            }}
+          </h2>
           <span class="timeline-count">
             기간 내 {{ visibleSchedule.length }}회 증여
             <template v-if="reinvestmentSchedule.length">
@@ -257,13 +264,7 @@ function getPositionClass(item) {
             </template>
           </span>
         </div>
-        <h2 id="gift-strategy-title">
-          {{
-            result.exceedsDeduction
-              ? `${scenario.scenarioName}가 더 유리해요`
-              : '공제 한도 안에서 바로 증여할 수 있어요'
-          }}
-        </h2>
+
         <p>
           {{
             result.exceedsDeduction
