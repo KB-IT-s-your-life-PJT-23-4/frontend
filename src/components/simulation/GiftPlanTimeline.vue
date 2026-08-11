@@ -290,10 +290,6 @@ function getPositionClass(item) {
       class="tax-strategy-comparison"
       aria-labelledby="tax-comparison-title"
     >
-      <div class="tax-comparison-heading">
-        <small>{{ taxPayerLabel }}</small>
-      </div>
-
       <div class="tax-comparison-options">
         <template v-for="(item, index) in comparisonScenarios" :key="item.resultId">
           <article class="tax-comparison-option" :class="{ 'is-recommended': isRecommended(item) }">
