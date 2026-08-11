@@ -893,6 +893,10 @@ body.admin-route {
 }
 
 @media (max-width: 900px) {
+  .admin-content {
+    padding-top: 74px;
+  }
+
   .admin-shell {
     display: block;
   }
@@ -961,7 +965,7 @@ body.admin-route {
   }
 
   .admin-content {
-    padding: 18px 16px 36px;
+    padding: 58px 16px 36px;
   }
 
   .admin-dashboard-heading {

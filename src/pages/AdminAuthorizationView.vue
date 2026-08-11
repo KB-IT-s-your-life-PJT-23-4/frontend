@@ -307,7 +307,7 @@ onMounted(initialize)
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-authorization-title">
       <div>
-        <h1 id="admin-authorization-title" style="margin-top: 40px">권한 관리</h1>
+        <h1 id="admin-authorization-title">권한 관리</h1>
         <p>관리자 계정의 역할을 확인하고 운영 권한을 조정하세요.</p>
       </div>
       <div class="admin-authorization-heading-actions">

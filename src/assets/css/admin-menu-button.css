@@ -1,23 +1,29 @@
 .admin-fixed-menu-button {
-  position: fixed;
-  top: calc(64px + max(10px, env(safe-area-inset-top)) + 12px);
-  left: max(16px, env(safe-area-inset-left));
-  z-index: 70;
-  display: inline-flex;
-  min-height: 36px;
-  margin: 0;
-  padding: 0 10px;
-  align-items: center;
-  gap: 7px;
-  border: 1px solid #dfe5eb;
-  border-radius: 10px;
-  background: #fff;
-  color: #294e6c;
-  box-shadow: 0 4px 14px rgba(26, 54, 78, 0.12);
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .admin-fixed-menu-button {
+    position: fixed;
+    top: calc(64px + max(10px, env(safe-area-inset-top)) + 12px);
+    left: max(16px, env(safe-area-inset-left));
+    z-index: 70;
+    display: inline-flex;
+    min-height: 36px;
+    margin: 0;
+    padding: 0 10px;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #dfe5eb;
+    border-radius: 10px;
+    background: #fff;
+    color: #294e6c;
+    box-shadow: 0 4px 14px rgba(26, 54, 78, 0.12);
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
 }
 
 @media (max-width: 390px) {

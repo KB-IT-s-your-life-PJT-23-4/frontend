@@ -225,7 +225,7 @@ onMounted(() => loadReports(0))
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-report-title">
       <div>
-        <h1 id="admin-report-title" style="margin-top: 40px">신고 관리</h1>
+        <h1 id="admin-report-title">신고 관리</h1>
         <p>AI 상담 안전 신고를 검토하고 처리 상태를 관리하세요.</p>
       </div>
       <div class="admin-report-heading-summary">

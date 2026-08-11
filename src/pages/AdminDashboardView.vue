@@ -113,7 +113,7 @@ onMounted(() => loadDashboard())
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-dashboard-title">
       <div>
-        <h1 id="admin-dashboard-title" style="margin-top: 40px">서비스 운영 대시보드</h1>
+        <h1 id="admin-dashboard-title">서비스 운영 대시보드</h1>
         <p>미리줌 서비스의 핵심 지표와 시스템 상태를 한눈에 확인하세요.</p>
       </div>
       <div class="admin-dashboard-actions">

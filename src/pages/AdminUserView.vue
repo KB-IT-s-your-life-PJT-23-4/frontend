@@ -245,7 +245,7 @@ onMounted(() => loadUsers())
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-user-title">
       <div>
-        <h1 id="admin-user-title" style="margin-top: 40px">회원 관리</h1>
+        <h1 id="admin-user-title">회원 관리</h1>
         <p>회원 기본 정보와 서비스 이용 현황을 검색하고 확인하세요.</p>
       </div>
       <div class="admin-user-heading-summary">
