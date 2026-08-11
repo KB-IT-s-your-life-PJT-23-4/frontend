@@ -394,6 +394,20 @@ export const api = {
     })
   },
 
+  // POST /api/gm/gift/{giftId}/ocr — 증여세 신고서 이미지를 그 증여 건과 대조한다.
+  // { matched, read, mismatches } 로 돌아오고, matched 일 때만 신고서 체크를 자동으로 켠다.
+  // 신고서에는 주민등록번호가 있어 서버가 파일을 저장하지 않는다. 인식만 하고 버린다.
+  async verifyGiftFiling(giftId, file) {
+    if (!API_BASE) return null
+    const body = new FormData()
+    body.append('file', file)
+
+    return request(`${GIFT_PATH}/${giftId}/ocr`, {
+      method: 'POST',
+      body,
+    })
+  },
+
   // --- 리마인더 : ReminderController @RequestMapping("/api/rm") ---
 
   // GET /api/rm — 신고기한·공제갱신일을 targetDate 오름차순으로.

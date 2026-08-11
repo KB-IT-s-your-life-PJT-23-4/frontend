@@ -22,3 +22,62 @@
 .renewal-card .renewal-note {
   font-weight: 400;
 }
+
+/* 증여세 신고서 OCR 대조 */
+.filing-verify-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.filing-verify {
+  display: flex;
+  margin-top: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.filing-verify small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.filing-verify .document-sample-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.filing-verify-result {
+  width: 100%;
+  padding: 9px 11px;
+  border-left: 3px solid var(--danger);
+  border-radius: 8px;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.filing-verify-result.matched {
+  border-left-color: var(--success);
+}
+
+.filing-verify-result ul {
+  margin: 4px 0 0;
+  padding-left: 14px;
+}
+
+.filing-verify-result .filing-verify-warnings {
+  color: var(--muted);
+}
+
+.filing-verify-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 11px;
+}

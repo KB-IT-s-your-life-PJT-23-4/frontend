@@ -179,6 +179,55 @@ function planScheduleCopy(plan) {
   return '일정 미정'
 }
 
+/**
+ * 증여세 신고서 OCR 대조. 회차마다 따로 올리므로 상태도 회차(giftId)별로 담는다.
+ * 결과는 화면에서만 쓰고 저장하지 않는다.
+ */
+const filingInput = ref(null)
+const filingPlanId = ref(null)
+const filingState = reactive({})
+
+function openFilingPicker(planId) {
+  filingPlanId.value = planId
+  filingInput.value?.click()
+}
+
+async function verifyFiling(event) {
+  const file = event.target.files?.[0]
+  const planId = filingPlanId.value
+  // 같은 파일을 다시 고를 수 있어야 한다. 값이 남아 있으면 change 가 안 뜬다.
+  event.target.value = ''
+  if (!file || planId == null) return
+
+  filingState[planId] = { loading: true, result: null, error: '' }
+
+  try {
+    filingState[planId] = {
+      loading: false,
+      result: await store.verifyGiftFiling(planId, file),
+      error: '',
+    }
+  } catch (error) {
+    filingState[planId] = {
+      loading: false,
+      result: null,
+      error: error.message || '신고서를 확인하지 못했어요.',
+    }
+  }
+}
+
+function isFilingVerifying(planId) {
+  return Boolean(filingState[planId]?.loading)
+}
+
+function filingResult(planId) {
+  return filingState[planId]?.result ?? null
+}
+
+function filingError(planId) {
+  return filingState[planId]?.error ?? ''
+}
+
 function completedDocuments(planId) {
   return store.checkedDocumentCount(planId)
 }
@@ -732,6 +781,62 @@ onMounted(() => loadStatus())
                               <AppIcon :name="link.icon" :size="15" /> {{ link.label }}
                             </a>
                           </div>
+                          <!--
+                            작성한 신고서를 올리면 서버가 등록된 증여 내용과 대조해 일치할 때만
+                            체크를 켠다. 주민등록번호가 있는 서식이라 파일은 저장하지 않는다.
+                          -->
+                          <div v-if="document.id === 'tax'" class="filing-verify">
+                            <button
+                              class="document-sample-button"
+                              type="button"
+                              :disabled="isFilingVerifying(plan.id)"
+                              @click="openFilingPicker(plan.id)"
+                            >
+                              {{
+                                isFilingVerifying(plan.id)
+                                  ? '신고서 확인 중…'
+                                  : '작성한 신고서로 자동 확인'
+                              }}
+                            </button>
+                            <small>
+                              사진이나 PDF를 올리면 등록된 금액·증여일과 대조해요. 파일은 저장하지
+                              않아요.
+                            </small>
+                            <div
+                              v-if="filingResult(plan.id)"
+                              class="filing-verify-result"
+                              :class="{ matched: filingResult(plan.id).matched }"
+                            >
+                              <strong v-if="filingResult(plan.id).matched">
+                                등록된 증여 내용과 일치해요.
+                              </strong>
+                              <template v-else>
+                                <strong>내용이 달라요. 신고서를 확인해 주세요.</strong>
+                                <ul>
+                                  <li
+                                    v-for="mismatch in filingResult(plan.id).mismatches"
+                                    :key="mismatch"
+                                  >
+                                    {{ mismatch }}
+                                  </li>
+                                </ul>
+                              </template>
+                              <ul
+                                v-if="filingResult(plan.id).read?.warnings?.length"
+                                class="filing-verify-warnings"
+                              >
+                                <li
+                                  v-for="warning in filingResult(plan.id).read.warnings"
+                                  :key="warning"
+                                >
+                                  {{ warning }}
+                                </li>
+                              </ul>
+                            </div>
+                            <p v-else-if="filingError(plan.id)" class="filing-verify-error">
+                              {{ filingError(plan.id) }}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -750,6 +855,13 @@ onMounted(() => loadStatus())
             <p v-else-if="loading" class="empty-inline">진행 중인 증여를 불러오는 중이에요.</p>
             <p v-else-if="loadError" class="empty-inline">{{ loadError }}</p>
             <p v-else class="empty-inline">현재 진행 중인 증여가 없습니다.</p>
+            <input
+              ref="filingInput"
+              class="filing-verify-input"
+              type="file"
+              accept="image/jpeg,image/png,application/pdf"
+              @change="verifyFiling"
+            />
           </article>
         </section>
       </template>
