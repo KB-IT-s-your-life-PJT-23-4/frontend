@@ -302,7 +302,7 @@ function getPositionClass(item) {
               <em v-if="isRecommended(item)">추천</em>
             </header>
             <div class="tax-comparison-metrics">
-              <div v-if="hasPayableTax(item)">
+              <div>
                 <small>{{ preparationLabel }}</small>
                 <strong>{{ formatCompactWon(preparationAmount(item)) }}</strong>
                 <span>{{ preparationDetail(item) }}</span>
