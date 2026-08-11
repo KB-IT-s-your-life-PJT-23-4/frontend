@@ -3,6 +3,7 @@ import HomeView from '../pages/HomeView.vue'
 import SimulationView from '../pages/SimulationView.vue'
 import StatusView from '../pages/StatusView.vue'
 import ChatView from '../pages/ChatView.vue'
+import TicketView from '../pages/TicketView.vue'
 import MyPageView from '../pages/MyPageView.vue'
 import ProfileDetailView from '../pages/ProfileDetailView.vue'
 import ProfileEditView from '../pages/ProfileEditView.vue'
@@ -39,6 +40,12 @@ const router = createRouter({
       name: 'chat',
       component: ChatView,
       meta: { label: 'AI 상담', requiresAuth: true, requiresActiveAccount: true },
+    },
+    {
+      path: '/ticket',
+      name: 'ticket',
+      component: TicketView,
+      meta: { label: '번호표 뽑기', requiresAuth: true, requiresActiveAccount: true },
     },
     {
       path: '/my',
