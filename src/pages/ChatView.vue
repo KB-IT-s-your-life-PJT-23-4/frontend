@@ -1,10 +1,17 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
-import { startAiConsult, answerAiConsultClarification } from '@/api/aiConsultApi.js'
+import {
+  answerAiConsultClarification,
+  getAiConsultHistory,
+  startAiConsult,
+} from '@/api/aiConsultApi.js'
 import { listFaqCategories } from '@/api/faqApi.js'
+import { useAuthStore } from '@/stores/authStore.js'
+import { useConsultationStore } from '@/stores/consultationStore.js'
 import '../assets/css/chatView.css'
 
 // =============================== 데이터 포맷 설정
@@ -67,21 +74,193 @@ function normalizeConsultReferences(references) {
     .filter((reference) => reference.citation)
 }
 
-// =============================== 초기 답장 포맷
-const input = ref('')
-const messages = ref([
-  {
-    id: 1,
+function normalizeConsultResponseShape(response) {
+  return {
+    ...response,
+    conversationId: response?.conversationId ?? response?.conversation_id ?? null,
+    requiresCalculation: response?.requiresCalculation ?? response?.requires_calculation ?? false,
+    clarificationQuestions:
+      response?.clarificationQuestions ?? response?.clarification_questions ?? [],
+    references: response?.references ?? response?.sources ?? [],
+  }
+}
+
+function formatHistoryTime(value) {
+  if (!value) return getCurrentTimeFormat()
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return getCurrentTimeFormat()
+
+  return date.toLocaleTimeString('ko-KR', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
+function isPreviousGiftDependentQuestion(key, answers) {
+  const hasNoPreviousGift =
+    answers.has_previous_gifts === false || Number(answers.previous_gift_amount) === 0
+  return (
+    hasNoPreviousGift && ['previous_gift_date', 'previous_gift_same_donor'].includes(String(key))
+  )
+}
+
+function restoreConversationHistory(history) {
+  const restoredMessages = []
+  const turns = Array.isArray(history?.turns)
+    ? [...history.turns].sort((left, right) => Number(left.turnNo) - Number(right.turnNo))
+    : []
+  let pendingQuestions = []
+  let pendingResponse = null
+  let originalQuestion = ''
+
+  turns.forEach((turn) => {
+    if (turn?.status !== 'COMPLETED' || !turn.assistantResponse) return
+
+    const payload = turn.userPayload ?? {}
+    const response = normalizeConsultResponseShape(turn.assistantResponse)
+    const userTime = formatHistoryTime(turn.createdAt)
+    const assistantTime = formatHistoryTime(turn.completedAt ?? turn.createdAt)
+
+    if (turn.turnType === 'QUESTION') {
+      originalQuestion = String(payload.question ?? '').trim()
+      if (originalQuestion) {
+        restoredMessages.push({
+          id: `${turn.requestId}-user`,
+          role: 'user',
+          text: originalQuestion,
+          createdAt: userTime,
+        })
+      }
+    } else if (turn.turnType === 'CLARIFICATION') {
+      originalQuestion = String(payload.question ?? originalQuestion).trim()
+      const answers = payload.answers && typeof payload.answers === 'object' ? payload.answers : {}
+
+      pendingQuestions.forEach((question) => {
+        if (!hasAnswer(answers, question.key)) return
+        if (isPreviousGiftDependentQuestion(question.key, answers)) return
+
+        const normalizedQuestion = {
+          ...question,
+          data_type: question.data_type ?? question.dataType,
+        }
+        const answer = answers[question.key]
+        const clarificationMessage = createClarificationMessage(normalizedQuestion, {
+          answered: true,
+          selectedValue: answer,
+          createdAt: userTime,
+        })
+        clarificationMessage.id = `${turn.requestId}-${question.key}-question`
+        restoredMessages.push(clarificationMessage)
+        restoredMessages.push({
+          id: `${turn.requestId}-${question.key}-answer`,
+          role: 'user',
+          text: displayClarificationAnswer(clarificationMessage.clarification, answer),
+          createdAt: userTime,
+        })
+      })
+
+      pendingQuestions = []
+      pendingResponse = null
+    }
+
+    if (response.status === 'CLARIFICATION_REQUIRED') {
+      pendingQuestions = Array.isArray(response.clarificationQuestions)
+        ? response.clarificationQuestions
+        : []
+      pendingResponse = response
+      return
+    }
+
+    if (response.status === 'COMPLETED' || response.status === 'REJECTED') {
+      restoredMessages.push({
+        id: `${turn.requestId}-assistant`,
+        role: 'assistant',
+        text: normalizeAssistantAnswer(
+          response.answer,
+          response.status === 'REJECTED'
+            ? '해당 질문에는 답변해 드릴 수 없습니다.'
+            : '답변을 생성하지 못했습니다.',
+        ),
+        references: normalizeConsultReferences(response.references ?? response.sources),
+        error: response.status === 'REJECTED',
+        actions: response.status === 'COMPLETED',
+        showBranchButton: response.status === 'COMPLETED',
+        showTaxOfficeButton: response.status === 'COMPLETED',
+        createdAt: assistantTime,
+      })
+    }
+  })
+
+  let restoredPendingConsult = null
+  if (pendingResponse && pendingQuestions.length) {
+    restoredPendingConsult = {
+      ...pendingResponse,
+      conversationId: pendingResponse.conversationId ?? history?.conversationId,
+      originalQuestion,
+      answers: {},
+      questions: pendingQuestions,
+      questionKeys: pendingQuestions.map((question) => question.key),
+      currentQuestionIndex: 1,
+    }
+    restoredMessages.push(createClarificationMessage(pendingQuestions[0]))
+  }
+
+  if (!restoredMessages.length) restoredMessages.push(createGreetingMessage())
+
+  return { restoredMessages, restoredPendingConsult }
+}
+
+async function initializeConversationHistory() {
+  const userIdentity = authStore.user?.userId ?? authStore.user?.email
+  if (!userIdentity) {
+    consultationStore.replaceConversation([createGreetingMessage()])
+    return
+  }
+
+  if (consultationStore.restore(userIdentity)) return
+
+  loading.value = true
+  try {
+    const history = await getAiConsultHistory()
+    const { restoredMessages, restoredPendingConsult } = restoreConversationHistory(history)
+    consultationStore.replaceConversation(restoredMessages, restoredPendingConsult)
+  } catch (error) {
+    consultationStore.replaceConversation([
+      createGreetingMessage(),
+      {
+        id: Date.now() + Math.random(),
+        role: 'assistant',
+        text: error.message || '이전 상담 이력을 불러오지 못했습니다.',
+        error: true,
+        createdAt: getCurrentTimeFormat(),
+      },
+    ])
+  } finally {
+    loading.value = false
+  }
+}
+
+function createGreetingMessage(text = null) {
+  return {
+    id: Date.now() + Math.random(),
     role: 'assistant',
-    text: '반갑습니다! \n증여세와 절세 혜택에 대해 무엇이든 물어보세요. \n아래의 자주 묻는 질문들을 통해 상담을 시작하실 수도 있습니다.',
+    text:
+      text ??
+      '반갑습니다! \n증여세와 절세 혜택에 대해 무엇이든 물어보세요. \n아래의 자주 묻는 질문들을 통해 상담을 시작하실 수도 있습니다.',
     createdAt: getCurrentTimeFormat(),
-  },
-])
+  }
+}
+
+// =============================== 초기 답장 포맷
+const authStore = useAuthStore()
+const consultationStore = useConsultationStore()
+const { messages, pendingConsult } = storeToRefs(consultationStore)
+const input = ref('')
 const loading = ref(false)
 const showEndModal = ref(false)
 const showFaqSheet = ref(false)
 const conversation = ref(null)
-const pendingConsult = ref(null)
 
 // =============================== faq 데이터 로드
 const faqItems = ref([])
@@ -100,7 +279,10 @@ async function loadFaqs() {
   }
 }
 
-onMounted(loadFaqs)
+onMounted(async () => {
+  await Promise.all([loadFaqs(), initializeConversationHistory()])
+  await scrollToBottom(false)
+})
 
 // =============================== faq 포맷
 function pickFaq(prompt, answer, showBranch, showTaxOffice) {
@@ -108,11 +290,11 @@ function pickFaq(prompt, answer, showBranch, showTaxOffice) {
   sendMessage(prompt, answer, showBranch, showTaxOffice)
 }
 
-async function scrollToBottom() {
+async function scrollToBottom(smooth = true) {
   await nextTick()
   conversation.value?.scrollTo({
     top: conversation.value.scrollHeight,
-    behavior: 'smooth',
+    behavior: smooth ? 'smooth' : 'auto',
   })
 }
 
@@ -146,8 +328,11 @@ function clarificationMinimum(clarification) {
   return 1
 }
 
-function pushClarificationMessage(question) {
-  messages.value.push({
+function createClarificationMessage(
+  question,
+  { answered = false, selectedValue = null, autoAnswered = false, createdAt = null } = {},
+) {
+  return {
     id: Date.now() + Math.random(),
     role: 'assistant',
     text: question.question,
@@ -156,12 +341,17 @@ function pushClarificationMessage(question) {
       type: clarificationType(question),
       reason: question.reason,
       draftValue: '',
-      answered: false,
-      selectedValue: null,
+      answered,
+      selectedValue,
+      autoAnswered,
       error: '',
     },
-    createdAt: getCurrentTimeFormat(),
-  })
+    createdAt: createdAt ?? getCurrentTimeFormat(),
+  }
+}
+
+function pushClarificationMessage(question) {
+  messages.value.push(createClarificationMessage(question))
 }
 
 function displayClarificationAnswer(clarification, value) {
@@ -397,7 +587,8 @@ async function sendMessage(
   }
 }
 // =============================== 상담 유형별 응답
-function appendConsultResponse(response, originalQuestion) {
+function appendConsultResponse(rawResponse, originalQuestion) {
+  const response = normalizeConsultResponseShape(rawResponse)
   if (response.status === 'CLARIFICATION_REQUIRED') {
     const clarifications = response.clarificationQuestions ?? []
     if (clarifications.length === 0) {
@@ -451,16 +642,10 @@ function appendConsultResponse(response, originalQuestion) {
 
 // =============================== 상담 초기화 포맷
 function clearConversation() {
-  pendingConsult.value = null
   input.value = ''
-  messages.value = [
-    {
-      id: Date.now(),
-      role: 'assistant',
-      text: '새 상담을 시작할게요. 어떤 점이 궁금하신가요?',
-      createdAt: getCurrentTimeFormat(),
-    },
-  ]
+  consultationStore.clearConversation([
+    createGreetingMessage('새 상담을 시작할게요. 어떤 점이 궁금하신가요?'),
+  ])
   showEndModal.value = false
 }
 // =============================== 답변 uiux
@@ -732,7 +917,7 @@ function messageParagraphs(text) {
     <ModalSheet
       :show="showEndModal"
       title="상담을 종료하시겠어요?"
-      description="대화 내용은 별도로 저장되지 않으며 새 상담을 시작하면 초기화됩니다."
+      description="이 브라우저에 저장된 현재 대화 화면을 초기화합니다."
       @close="showEndModal = false"
     >
       <template #actions>

@@ -65,6 +65,29 @@ export async function startAiConsult(question) {
 }
 
 /**
+ * 현재 사용자의 AI 상담 대화 이력
+ *
+ * @returns {Promise<{
+ *   conversationId: string | null,
+ *   status: string | null,
+ *   turns: Array<{
+ *     requestId: string,
+ *     turnNo: number,
+ *     turnType: 'QUESTION' | 'CLARIFICATION',
+ *     status: string,
+ *     userPayload: Record<string, unknown>,
+ *     assistantResponse: object | null,
+ *     createdAt: string,
+ *     completedAt: string | null
+ *   }>
+ * }>}
+ */
+export async function getAiConsultHistory() {
+  ensureAiConsultApiConfigured()
+  return request('/ai/consult/history')
+}
+
+/**
  * AI가 요구한 추가 질문 답변
  *
  * @param {{

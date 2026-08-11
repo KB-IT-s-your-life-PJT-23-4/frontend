@@ -4,6 +4,7 @@ import { api, restoreAuthSession } from '../api/apiAdapter'
 import { login as requestLogin, logout as requestLogout } from '../api/authApi'
 import { deleteMyAccount, getMyProfile, updateMyProfile } from '../api/userApi'
 import { useAppStore } from './appStore'
+import { useConsultationStore } from './consultationStore.js'
 import {
   clearAuthSession as clearStoredAuthSession,
   getTokenExpiration,
@@ -81,6 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       clearAuth()
     } finally {
+      useConsultationStore().clearUserState()
       await useAppStore().clearUserState()
     }
   }
@@ -91,6 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
       throw new Error('로그인 응답이 올바르지 않습니다.')
     }
 
+    useConsultationStore().clearUserState()
     await useAppStore().clearUserState()
     setAuthSession(session)
     return session
