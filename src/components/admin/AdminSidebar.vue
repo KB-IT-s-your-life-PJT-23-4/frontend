@@ -23,11 +23,10 @@ const menuItems = [
 <template>
   <aside class="admin-sidebar" :class="{ 'is-open': isOpen }" aria-label="관리자 메뉴">
     <div class="admin-sidebar__top">
-      <RouterLink class="admin-brand" to="/admin/dashboard" @click="emit('close')">
+      <RouterLink class="admin-brand" to="/" @click="emit('close')">
         <img src="/src/assets/brand-symbol.png" alt="" />
         <span>
           <strong>미리줌</strong>
-          <small>ADMIN CONSOLE</small>
         </span>
       </RouterLink>
       <button
@@ -41,7 +40,6 @@ const menuItems = [
     </div>
 
     <nav class="admin-sidebar__nav" aria-label="관리자 주요 메뉴">
-      <p>MANAGEMENT</p>
       <template v-for="item in menuItems" :key="item.label">
         <RouterLink
           v-if="item.available"

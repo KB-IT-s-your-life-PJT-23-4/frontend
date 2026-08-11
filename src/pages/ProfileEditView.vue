@@ -109,7 +109,7 @@ onMounted(loadProfile)
         title="회원 정보 수정"
         description="기본 정보를 최신 상태로 관리해 주세요."
         back
-        @back="router.push({ name: 'profile-detail' })"
+        @back="router.push({ name: 'my' })"
       />
 
       <section v-if="loading" class="profile-state-card" role="status" aria-live="polite">

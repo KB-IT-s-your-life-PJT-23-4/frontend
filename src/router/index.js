@@ -22,6 +22,7 @@ import { restoreAuthSession } from '../api/apiAdapter'
 import { showBlockedAccess } from '../stores/accountAccessStore'
 import { useAuthStore } from '../stores/authStore'
 import { isAccountBlocked } from '../utils/accountAccess'
+import { isAdminRole } from '../utils/adminAccess.js'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -201,8 +202,7 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin) {
     const role = String(authStore.user?.role ?? '').toUpperCase()
-    const adminRoles = ['ROOT', 'MIDDLE', 'DEFAULT']
-    if (!adminRoles.includes(role)) return { name: 'home' }
+    if (!isAdminRole(role)) return { name: 'home' }
 
     const allowedRoles = (to.meta.requiresRole ?? []).map((allowedRole) =>
       String(allowedRole).toUpperCase(),

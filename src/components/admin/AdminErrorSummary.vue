@@ -20,7 +20,6 @@ const items = [
   <section class="admin-panel error-summary" aria-labelledby="error-summary-title">
     <div class="admin-panel__heading">
       <div>
-        <span>SERVICE ERRORS</span>
         <h2 id="error-summary-title">오류 발생 현황</h2>
       </div>
       <AppIcon name="info" :size="21" />

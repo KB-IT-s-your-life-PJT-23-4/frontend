@@ -113,7 +113,6 @@ onMounted(() => loadDashboard())
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-dashboard-title">
       <div>
-        <span class="admin-dashboard-heading__eyebrow">OVERVIEW</span>
         <h1 id="admin-dashboard-title">서비스 운영 대시보드</h1>
         <p>미리줌 서비스의 핵심 지표와 시스템 상태를 한눈에 확인하세요.</p>
       </div>
@@ -191,7 +190,6 @@ onMounted(() => loadDashboard())
         <section class="admin-panel fastapi-status" aria-labelledby="fastapi-status-title">
           <div class="admin-panel__heading">
             <div>
-              <span>SYSTEM HEALTH</span>
               <h2 id="fastapi-status-title">FastAPI 상태</h2>
             </div>
             <AdminStatusBadge :status="fastApiStatus.status" :label="fastApiStatus.label" />
@@ -221,7 +219,6 @@ onMounted(() => loadDashboard())
         <section class="admin-panel simulation-summary" aria-labelledby="simulation-summary-title">
           <div class="admin-panel__heading">
             <div>
-              <span>SIMULATION</span>
               <h2 id="simulation-summary-title">시뮬레이션 현황</h2>
             </div>
             <AppIcon name="calculator" :size="22" />

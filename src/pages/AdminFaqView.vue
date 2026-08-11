@@ -339,7 +339,6 @@ onMounted(initialize)
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-faq-title">
       <div>
-        <span class="admin-dashboard-heading__eyebrow">FAQ MANAGEMENT</span>
         <h1 id="admin-faq-title">FAQ 관리</h1>
         <p>FAQ 질문과 AI 상담용 프롬프트, 답변 콘텐츠를 관리하세요.</p>
       </div>
@@ -362,7 +361,6 @@ onMounted(initialize)
     <section class="admin-panel admin-faq-filter" aria-labelledby="admin-faq-filter-title">
       <div class="admin-panel__heading">
         <div>
-          <span>CONTENT FILTER</span>
           <h2 id="admin-faq-filter-title">FAQ 검색</h2>
         </div>
         <AppIcon name="chat" :size="21" />
@@ -398,7 +396,6 @@ onMounted(initialize)
       <section class="admin-panel admin-faq-list" aria-labelledby="admin-faq-list-title">
         <div class="admin-panel__heading admin-faq-list__heading">
           <div>
-            <span>FAQ CONTENT</span>
             <h2 id="admin-faq-list-title">FAQ 목록</h2>
           </div>
           <p v-if="pagination">
@@ -515,7 +512,6 @@ onMounted(initialize)
       <aside class="admin-panel admin-faq-categories" aria-labelledby="admin-faq-category-title">
         <div class="admin-panel__heading">
           <div>
-            <span>FAQ CATEGORY</span>
             <h2 id="admin-faq-category-title">카테고리 관리</h2>
           </div>
           <AppIcon name="settings" :size="21" />

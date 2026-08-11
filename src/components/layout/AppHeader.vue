@@ -1,7 +1,10 @@
 <script setup>
+import { computed } from 'vue'
 import AppIcon from './AppIcon.vue'
 import { useAppStore } from '../../stores/appStore.js'
 import { useAuthStore } from '../../stores/authStore.js'
+import { isAdminRole } from '../../utils/adminAccess.js'
+import '../../assets/css/app-header.css'
 
 defineProps({
   showLogin: { type: Boolean, default: false },
@@ -9,16 +12,25 @@ defineProps({
 
 const store = useAppStore()
 const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.role))
 </script>
 
 <template>
   <header class="app-header">
     <div class="brand-lockup" aria-label="미리줌 바로가기">
-      <RouterLink to="/" aria-label="미리줌 홈">
+      <RouterLink class="brand-home-link" to="/" aria-label="미리줌 홈">
         <img src="/src/assets/brand-symbol.png" alt="" class="brand-avatar" />
+        <span>미리줌</span>
       </RouterLink>
-      <RouterLink to="/admin/dashboard" aria-label="관리자 대시보드로 이동" title="관리자 대시보드">
-        미리줌
+      <RouterLink
+        v-if="isAdmin"
+        class="mobile-admin-dashboard-link"
+        to="/admin/dashboard"
+        aria-label="관리자 대시보드로 이동"
+        title="관리자 대시보드"
+      >
+        <AppIcon name="shield" :size="16" />
+        <span>관리자</span>
       </RouterLink>
     </div>
 

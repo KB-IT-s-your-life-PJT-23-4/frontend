@@ -23,7 +23,6 @@ function formatDate(value) {
   <section class="admin-panel signup-trend" aria-labelledby="signup-trend-title">
     <div class="admin-panel__heading">
       <div>
-        <span>USER GROWTH</span>
         <h2 id="signup-trend-title">최근 7일 가입 추이</h2>
       </div>
       <span class="admin-panel__caption">일별 신규 가입자</span>
