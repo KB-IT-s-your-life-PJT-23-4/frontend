@@ -584,7 +584,7 @@ function messageParagraphs(text) {
                   <a
                     v-if="message.showBranchButton"
                     class="primary-button compact"
-                    href="https://map.naver.com/p/search/근처 국민은행"
+                    href="/ticket"
                     target="_blank"
                     rel="noreferrer"
                   >

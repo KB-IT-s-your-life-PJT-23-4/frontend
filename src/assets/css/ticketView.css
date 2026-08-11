@@ -1,0 +1,270 @@
+.ticket-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.ticket-content {
+  flex: 1;
+  padding: 20px 16px 32px;
+}
+
+.ticket-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.ticket-subtitle {
+  color: var(--text-muted, #6b7280);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.ticket-state {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted, #6b7280);
+  font-size: 14px;
+}
+
+.ticket-state.error {
+  color: var(--danger, #d64545);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ticket-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 56px 16px;
+}
+
+.ticket-loading-badge {
+  position: relative;
+  display: grid;
+  width: 60px;
+  height: 60px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue-soft, #eaf2ff);
+  color: var(--blue-strong, #2c608b);
+}
+
+.ticket-loading-ping {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--kb-yellow, #ffcc00);
+  border-radius: 50%;
+  animation: ticket-ping 2s cubic-bezier(0.2, 0.7, 0.4, 1) infinite;
+}
+
+.ticket-loading-ping-delay {
+  animation-delay: 1s;
+}
+
+@keyframes ticket-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.ticket-loading-text {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  color: var(--navy, #173e61);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ticket-loading-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.ticket-loading-dots i {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.35;
+  animation: ticket-dot-bounce 1.2s ease-in-out infinite;
+}
+
+.ticket-loading-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.ticket-loading-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes ticket-dot-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket-loading-ping,
+  .ticket-loading-dots i {
+    animation: none;
+  }
+}
+
+.branch-section {
+  margin-bottom: 28px;
+}
+
+.branch-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.branch-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+}
+
+.branch-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--surface, #fff);
+}
+
+.branch-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.branch-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.branch-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+.branch-name-button {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.branch-name-button:hover,
+.branch-name-button:focus-visible {
+  text-decoration-color: currentColor;
+}
+.branch-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--blue-soft, #eaf2ff);
+  color: var(--blue-strong, #2c608b);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.branch-address {
+  font-size: 13px;
+  color: var(--text-muted, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-distance {
+  font-size: 12px;
+  color: var(--primary, #2563eb);
+  font-weight: 600;
+}
+
+.branch-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.branch-waiting {
+  font-size: 12px;
+  color: var(--text-muted, #6b7280);
+}
+
+.branch-waiting.muted {
+  color: var(--text-muted, #9ca3af);
+}
+
+.branch-unavailable {
+  font-size: 12px;
+  color: var(--text-muted, #9ca3af);
+  white-space: nowrap;
+}
+
+.service-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ticket-error {
+  display: block;
+  margin-top: 12px;
+  color: var(--danger, #d64545);
+}
+
+.issued-ticket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.issued-ticket-number {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
