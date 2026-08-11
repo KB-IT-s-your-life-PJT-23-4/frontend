@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AppHeader from '../layout/AppHeader.vue'
+import AdminMenuButton from './AdminMenuButton.vue'
 import AdminSidebar from './AdminSidebar.vue'
 
 const isSidebarOpen = ref(false)
@@ -19,7 +20,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown))
 
 <template>
   <div class="admin-page-layout">
-    <AppHeader show-login show-admin-menu @open-admin-menu="isSidebarOpen = true" />
+    <AppHeader show-login />
+    <AdminMenuButton @open="isSidebarOpen = true" />
     <div class="admin-shell">
       <AdminSidebar :is-open="isSidebarOpen" @close="closeSidebar" />
       <button

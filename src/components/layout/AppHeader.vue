@@ -8,10 +8,7 @@ import '../../assets/css/app-header.css'
 
 defineProps({
   showLogin: { type: Boolean, default: false },
-  showAdminMenu: { type: Boolean, default: false },
 })
-
-defineEmits(['open-admin-menu'])
 
 const store = useAppStore()
 const authStore = useAuthStore()
@@ -50,16 +47,6 @@ const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.
           {{ store.unreadCount.value }}
         </span>
       </RouterLink>
-      <button
-        v-if="showAdminMenu && isAdmin"
-        class="admin-mobile-menu-button"
-        type="button"
-        aria-label="관리자 메뉴 열기"
-        @click="$emit('open-admin-menu')"
-      >
-        <AppIcon name="menu" :size="18" />
-        관리자 메뉴
-      </button>
       <RouterLink v-if="showLogin && !authStore.isLogin" class="header-login-link" to="/login">
         로그인
       </RouterLink>

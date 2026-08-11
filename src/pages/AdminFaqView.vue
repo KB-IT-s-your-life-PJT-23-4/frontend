@@ -339,7 +339,7 @@ onMounted(initialize)
   <AdminLayout>
     <section class="admin-dashboard-heading" aria-labelledby="admin-faq-title">
       <div>
-        <h1 id="admin-faq-title">FAQ 관리</h1>
+        <h1 id="admin-faq-title" style="margin-top: 40px">FAQ 관리</h1>
         <p>FAQ 질문과 AI 상담용 프롬프트, 답변 콘텐츠를 관리하세요.</p>
       </div>
       <div class="admin-faq-heading-actions">

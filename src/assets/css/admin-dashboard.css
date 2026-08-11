@@ -156,10 +156,6 @@ body.admin-route {
   min-width: 0;
 }
 
-.admin-mobile-menu-button {
-  display: none;
-}
-
 .admin-header {
   position: sticky;
   top: 0;
@@ -939,22 +935,6 @@ body.admin-route {
     margin-right: auto;
   }
 
-  .admin-mobile-menu-button {
-    display: inline-flex;
-    min-height: 36px;
-    margin: 0;
-    padding: 0 10px;
-    align-items: center;
-    gap: 7px;
-    border: 1px solid #dfe5eb;
-    border-radius: 10px;
-    background: #fff;
-    color: #294e6c;
-    font-size: 10px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
   .admin-dashboard-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -1017,13 +997,6 @@ body.admin-route {
 }
 
 @media (max-width: 390px) {
-  .admin-mobile-menu-button {
-    padding-right: 8px;
-    padding-left: 8px;
-    gap: 5px;
-    font-size: 9px;
-  }
-
   .admin-account__avatar {
     width: 34px;
     height: 34px;
