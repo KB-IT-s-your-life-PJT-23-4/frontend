@@ -314,17 +314,6 @@ function getPositionClass(item) {
       </div>
     </section>
 
-    <div v-if="!canCompareTaxes || donorPaysTax" class="timeline-key-metrics">
-      <div v-if="!canCompareTaxes">
-        <span>신고 공제 반영 예상 세금</span>
-        <strong>{{ formatCompactWon(scenario.estimatedPayableTax) }}</strong>
-      </div>
-      <div v-if="donorPaysTax">
-        <span>추천안 기준 주는 분의 총 준비 금액</span>
-        <strong>{{ formatCompactWon(scenario.totalDonorOutflow) }}</strong>
-      </div>
-    </div>
-
     <section class="selected-timeline-section" aria-label="추천 전략의 증여 일정">
       <div
         class="gift-timeline"
