@@ -54,7 +54,9 @@ function scenarioComparisonLabel(item) {
 }
 
 function isRecommended(item) {
-  return item?.resultId === scenario.value.resultId || item?.scenarioType === scenario.value.scenarioType
+  return (
+    item?.resultId === scenario.value.resultId || item?.scenarioType === scenario.value.scenarioType
+  )
 }
 
 const alternativeScenario = computed(() =>
@@ -90,10 +92,7 @@ function comparisonAmount(value) {
 }
 
 function remainingUninvestedPrincipal(item) {
-  return Math.max(
-    0,
-    Number(item?.postTaxAmount ?? 0) - Number(item?.investmentPrincipal ?? 0),
-  )
+  return Math.max(0, Number(item?.postTaxAmount ?? 0) - Number(item?.investmentPrincipal ?? 0))
 }
 
 function scenarioEndTotalValue(item) {
@@ -115,8 +114,7 @@ function endTotalValueDetail(item) {
 }
 
 const recommendedPreparationDifference = computed(
-  () =>
-    preparationAmount(alternativeScenario.value) - preparationAmount(scenario.value),
+  () => preparationAmount(alternativeScenario.value) - preparationAmount(scenario.value),
 )
 const recommendedFutureValueDifference = computed(() => {
   const recommendedValue = scenarioEndTotalValue(scenario.value)
@@ -147,7 +145,7 @@ const comparisonReason = computed(() => {
     )} 더 많아 유리해요.`
   }
   if (futureValueDifference > 0 && preparationDifference < 0) {
-    return `${recommendedLabel}은 준비 금액이 ${formatCompactWon(
+    return `${recommendedLabel}는 준비 금액이 ${formatCompactWon(
       Math.abs(preparationDifference),
     )} 더 들지만, ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
       futureValueDifference,
@@ -272,7 +270,6 @@ function getPositionClass(item) {
               ? scenario.description
               : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
           }}
-          
         </p>
       </div>
     </header>

@@ -597,6 +597,7 @@ onMounted(async () => {
         <h2>
           {{ family.name }} 님께<br />{{ formatCompactWon(result.requestedAmount) }}을 증여한다면
         </h2>
+        <p>증여 시점과 {{ result.years }}년의 운용 흐름을 함께 계산했어요.</p>
         <div class="result-condition-chips">
           <span v-if="isHistoryResult && simulationExecutedAt">
             <AppIcon name="clock" :size="15" />

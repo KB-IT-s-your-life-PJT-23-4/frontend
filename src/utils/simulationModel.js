@@ -7,7 +7,7 @@ import {
 const SCENARIO_COPY = {
   IMMEDIATE: {
     name: '지금 바로 전액 증여',
-    description: '',
+    description: '예상 증여세를 반영한 금액을 지금부터 운용해요.',
   },
   TAX_OPTIMIZED: {
     name: '공제 한도부터 차근차근',
