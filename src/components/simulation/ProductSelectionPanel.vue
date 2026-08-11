@@ -107,7 +107,7 @@ function toggleDetails(product) {
 }
 
 function getRateLabel(product) {
-  if (product.type === 'ETF') return `최근 5년 연평균 수익률 ${product.rate}%`
+  if (product.type === 'ETF') return `최근 10년 연환산 수익률 ${product.rate}%`
   return `연 ${product.minRate}% ~ ${product.maxRate}%`
 }
 
@@ -452,7 +452,7 @@ function updateCondition(product, conditionCode, checked) {
     </div>
 
     <p class="product-data-notice">
-      ETF의 연평균 수익률은 최근 5년 수익률을 기준으로 계산했어요.<br />
+      ETF의 연환산 수익률은 최근 10년 수익률을 기준으로 계산했어요.<br />
       상품명과 수익률은 시뮬레이션 실행 당시의 데이터이며, 실제 가입 전 최신 상품 설명서를 확인해
       주세요.
     </p>
