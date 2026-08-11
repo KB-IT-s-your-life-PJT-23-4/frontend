@@ -47,11 +47,11 @@ const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.
           {{ store.unreadCount.value }}
         </span>
       </RouterLink>
-      <RouterLink v-if="showLogin && !authStore.isLogin" class="header-login-link" to="/login">
-        로그인
-      </RouterLink>
-      <RouterLink v-else-if="showLogin" class="header-login-link" to="/my">
+      <RouterLink v-if="authStore.isLogin" class="header-login-link" to="/my">
         {{ authStore.user?.name ? `${authStore.user.name}님` : '마이페이지' }}
+      </RouterLink>
+      <RouterLink v-else-if="showLogin" class="header-login-link" to="/login">
+        로그인
       </RouterLink>
     </div>
   </header>
