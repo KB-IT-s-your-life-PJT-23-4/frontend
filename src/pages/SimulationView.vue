@@ -52,7 +52,9 @@ const detailErrors = reactive({})
 const SIMULATION_VARIANT_CACHE_TTL_MS = 10 * 60 * 1000
 const SIMULATION_VARIANT_CACHE_MAX_SIZE = 8
 const simulationVariantCache = new Map()
-const isHistoryResult = computed(() => route.query.from === 'history')
+const isHistoryResult = computed(
+  () => route.name === 'simulation-history-detail' || route.query.from === 'history',
+)
 const simulationExecutedAt = computed(() => {
   if (!isHistoryResult.value) return ''
 
@@ -207,6 +209,24 @@ const selectedProductSummary = computed(() =>
 function clearProductSelections() {
   Object.keys(selectedProducts).forEach((key) => delete selectedProducts[key])
   Object.keys(preferentialSelections).forEach((key) => delete preferentialSelections[key])
+}
+
+function resetForNewSimulationRoute() {
+  result.value = null
+  loading.value = false
+  loadingHistory.value = false
+  errorMessage.value = ''
+  giftDateError.value = ''
+  selectedFamilyId.value = store.state.selectedFamilyId
+  amountText.value = ''
+  investmentYears.value = 10
+  giftDate.value = todayDate
+  donorPaysTax.value = false
+  selectedPortfolioType.value = 'BALANCED'
+  showSaveModal.value = false
+  clearProductSelections()
+  Object.keys(detailLoading).forEach((key) => delete detailLoading[key])
+  Object.keys(detailErrors).forEach((key) => delete detailErrors[key])
 }
 
 function initializeSelectedProducts() {
@@ -416,6 +436,27 @@ async function loadSimulation(simulationId) {
   }
 }
 
+watch(
+  () => [route.name, route.params.simulationId, route.query.simulationId, route.query.from],
+  async ([nextRouteName, nextHistoryId, nextQueryId, nextSource]) => {
+    if (nextRouteName === 'simulation-history-detail' || nextSource === 'history') {
+      const simulationId = Number(nextHistoryId ?? nextQueryId)
+      if (
+        Number.isFinite(simulationId) &&
+        simulationId > 0 &&
+        Number(result.value?.simulationId) !== simulationId
+      ) {
+        await loadSimulation(simulationId)
+      }
+      return
+    }
+
+    if (nextRouteName === 'simulation' && nextQueryId == null) {
+      resetForNewSimulationRoute()
+    }
+  },
+)
+
 async function resetSimulation() {
   if (isHistoryResult.value) {
     await router.replace({ name: 'my', hash: '#simulation-history' })
@@ -547,7 +588,7 @@ onMounted(async () => {
     }
 
     selectedFamilyId.value = store.state.selectedFamilyId
-    const simulationId = Number(route.query.simulationId)
+    const simulationId = Number(route.params.simulationId ?? route.query.simulationId)
     if (Number.isFinite(simulationId) && simulationId > 0) await loadSimulation(simulationId)
   } catch (error) {
     errorMessage.value = error.message

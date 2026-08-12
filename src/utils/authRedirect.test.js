@@ -5,6 +5,7 @@ import { resolvePostLoginPath } from './authRedirect.js'
 test('증여 시뮬레이션과 AI 상담 로그인 redirect를 유지한다', () => {
   assert.equal(resolvePostLoginPath('/simulation'), '/simulation')
   assert.equal(resolvePostLoginPath('/simulation?simulationId=15'), '/simulation?simulationId=15')
+  assert.equal(resolvePostLoginPath('/my/simulationHistory/15'), '/my/simulationHistory/15')
   assert.equal(resolvePostLoginPath('/chat'), '/chat')
 })
 

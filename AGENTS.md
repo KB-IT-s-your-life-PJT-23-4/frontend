@@ -54,6 +54,7 @@
 - When a page or component needs new or changed styling, create a separate CSS file for that page or component and import it where needed.
 - Keep page-specific and component-specific styles out of `main.css`.
 - Name new CSS files after the related page or component so their ownership is clear.
+- When a mobile breakpoint changes an element from positioned or animated content to normal document flow, explicitly override desktop `hover`, `focus`, and `focus-within` transforms with sufficient selector specificity.
 
 ## Dependency Policy
 
@@ -93,6 +94,7 @@
 ## Code Review Rules
 
 - Check that route changes do not break existing URLs or navigation.
+- When multiple routes reuse the same Vue component, handle route-name and route-parameter changes explicitly; do not rely on `onMounted` to reset or reload route-specific state.
 - When adding a control or behavior to an existing UI, preserve its established visual structure and styling unless the user explicitly requests a redesign.
 - When every simulation scenario has no payable tax, replace the comparison UI with a single immediate-gift investment outcome; when a taxable comparison remains, keep the same metric rows in both options even if one option has zero tax.
 - For destructive admin actions, verify whether the backend performs a role/status transition or deletes the underlying account, keep button and confirmation copy aligned with that exact behavior, and disclose cascading data deletion when applicable.
