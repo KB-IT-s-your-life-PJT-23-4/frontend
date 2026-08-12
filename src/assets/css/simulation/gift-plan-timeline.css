@@ -497,22 +497,12 @@
   transform: translate(0, 4px);
 }
 
-.gift-timeline-reinvestment.is-near-start:hover .reinvestment-timeline-copy,
-.gift-timeline-reinvestment.is-near-start:focus-within .reinvestment-timeline-copy {
-  transform: translate(0, 0);
-}
-
 .gift-timeline-point.is-near-end .timeline-point-copy,
 .gift-timeline-reinvestment.is-near-end .reinvestment-timeline-copy {
   right: -2px;
   left: auto;
   text-align: right;
   transform: translate(0, 4px);
-}
-
-.gift-timeline-reinvestment.is-near-end:hover .reinvestment-timeline-copy,
-.gift-timeline-reinvestment.is-near-end:focus-within .reinvestment-timeline-copy {
-  transform: translate(0, 0);
 }
 
 @media (max-width: 600px) {
@@ -726,6 +716,14 @@
     opacity: 1;
     background: transparent;
     box-shadow: none;
+    transform: none;
+  }
+
+  .gift-timeline-reinvestment.is-near-start .reinvestment-timeline-copy,
+  .gift-timeline-reinvestment.is-near-end .reinvestment-timeline-copy {
+    right: auto;
+    left: auto;
+    text-align: left;
     transform: none;
   }
 

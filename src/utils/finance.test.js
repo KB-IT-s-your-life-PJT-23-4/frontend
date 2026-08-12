@@ -104,6 +104,36 @@ describe('증여 계산', () => {
     ).toBe(110550730)
   })
 
+  it('재가입 계약별 가입기간 금리를 각각 적용한다', () => {
+    expect(
+      calculateProductFutureValue(
+        {
+          type: 'DEPOSIT',
+          rate: 3.5,
+          minimumContractMonths: 12,
+          maximumContractMonths: 36,
+          contractRateSchedule: [
+            {
+              trancheSequenceNo: 1,
+              contractSequenceNo: 1,
+              contractMonths: 36,
+              appliedRatePercent: 3.5,
+            },
+            {
+              trancheSequenceNo: 1,
+              contractSequenceNo: 2,
+              contractMonths: 24,
+              appliedRatePercent: 3.0,
+            },
+          ],
+        },
+        100000000,
+        60,
+        1,
+      ),
+    ).toBe(117130000)
+  })
+
   it('투자 성향별 포트폴리오 비중의 합은 100%이다', () => {
     Object.values(getPortfolioAllocations(10)).forEach((allocation) => {
       expect(Object.values(allocation).reduce((sum, ratio) => sum + ratio, 0)).toBe(100)
