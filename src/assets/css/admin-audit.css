@@ -1,0 +1,558 @@
+.admin-audit-heading-summary {
+  display: grid;
+  min-width: 175px;
+  padding: 10px 14px;
+  gap: 2px;
+  border: 1px solid #dfe5eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admin-audit-heading-summary span,
+.admin-audit-heading-summary small {
+  color: #7d8a97;
+  font-size: 8px;
+}
+
+.admin-audit-heading-summary strong {
+  color: #1d3549;
+  font-size: 15px;
+}
+
+.admin-audit-tabs {
+  display: flex;
+  margin-bottom: 14px;
+  padding: 5px;
+  gap: 5px;
+  border: 1px solid #e0e6eb;
+  border-radius: 13px;
+  background: #f1f4f7;
+}
+
+.admin-audit-tabs button {
+  position: relative;
+  display: inline-flex;
+  min-height: 42px;
+  padding: 0 15px;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #71808d;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-audit-tabs button.is-active {
+  background: #fff;
+  color: #244965;
+  box-shadow: 0 3px 10px rgba(31, 56, 77, 0.08);
+}
+
+.admin-audit-tabs button > i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a7b0b8;
+}
+
+.admin-audit-tabs button > i.is-connected {
+  background: #43a66b;
+  box-shadow: 0 0 0 3px rgba(67, 166, 107, 0.12);
+}
+
+.admin-audit-tabs button > i.is-error {
+  background: #c75959;
+}
+
+.admin-audit-filter {
+  margin-bottom: 14px;
+}
+
+.admin-audit-filter__form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  margin-top: 17px;
+  align-items: end;
+  gap: 10px;
+}
+
+.admin-audit-filter__form label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.admin-audit-filter__form label > span {
+  color: #637382;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.admin-audit-filter__form input {
+  width: 100%;
+  height: 39px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 1px solid #dfe5eb;
+  border-radius: 9px;
+  outline: none;
+  background: #fafbfc;
+  color: #263b4d;
+  font: inherit;
+  font-size: 10px;
+}
+
+.admin-audit-filter__form input:focus {
+  border-color: #6e96b5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(69, 114, 150, 0.12);
+}
+
+.admin-audit-filter__actions {
+  display: flex;
+  grid-column: span 2;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.admin-audit-filter__actions button,
+.admin-access-log__heading button {
+  min-height: 39px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-audit-filter__actions .is-primary,
+.admin-access-log__heading .is-primary {
+  background: #173e61;
+  color: #fff;
+}
+
+.admin-audit-filter__actions .is-secondary,
+.admin-access-log__heading .is-secondary {
+  border: 1px solid #dfe5eb;
+  background: #fff;
+  color: #607080;
+}
+
+.admin-audit-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(285px, 335px);
+  align-items: start;
+  gap: 14px;
+}
+
+.admin-audit-list,
+.admin-access-log {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-audit-list__heading {
+  align-items: flex-end;
+}
+
+.admin-audit-list__heading > p {
+  margin: 0;
+  color: #7b8996;
+  font-size: 9px;
+}
+
+.admin-audit-state {
+  display: grid;
+  min-height: 250px;
+  padding: 25px;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  color: #71808e;
+  text-align: center;
+}
+
+.admin-audit-state strong {
+  color: #334d63;
+  font-size: 12px;
+}
+
+.admin-audit-state p {
+  margin: 0;
+  font-size: 9px;
+}
+
+.admin-audit-state > button {
+  padding: 7px 11px;
+  border: 1px solid #d8e0e7;
+  border-radius: 8px;
+  background: #fff;
+  color: #3d617f;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.admin-audit-state.is-error {
+  color: #aa5353;
+}
+
+.admin-audit-table-wrap,
+.admin-access-table-wrap {
+  margin: 17px -21px 0;
+  overflow-x: auto;
+  border-top: 1px solid #edf0f3;
+}
+
+.admin-audit-table,
+.admin-access-table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+}
+
+.admin-access-table {
+  min-width: 960px;
+}
+
+.admin-audit-table th,
+.admin-audit-table td,
+.admin-access-table th,
+.admin-access-table td {
+  padding: 12px 9px;
+  border-bottom: 1px solid #edf0f3;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-audit-table th,
+.admin-access-table th {
+  color: #7a8895;
+  background: #fafbfc;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.admin-audit-table td,
+.admin-access-table td {
+  color: #526575;
+  font-size: 9px;
+}
+
+.admin-audit-table tbody tr.is-selected {
+  background: #f2f7fb;
+}
+
+.admin-audit-table td > strong,
+.admin-audit-table td > small,
+.admin-access-table td > strong,
+.admin-access-table td > small,
+.admin-access-table td > span {
+  display: block;
+}
+
+.admin-audit-table td > small,
+.admin-access-table td > small {
+  margin-top: 3px;
+  color: #8b98a3;
+  font-size: 8px;
+}
+
+.admin-audit-table code,
+.admin-access-table code {
+  color: #325e80;
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-access-table td:nth-child(3) span {
+  max-width: 265px;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-table td:last-child button {
+  display: inline-flex;
+  padding: 6px 8px;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid #dbe3ea;
+  border-radius: 7px;
+  background: #fff;
+  color: #466983;
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.admin-audit-result {
+  display: inline-flex !important;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #edf1f4;
+  color: #687887;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.admin-audit-result.is-success {
+  background: #eaf7ef;
+  color: #367954;
+}
+
+.admin-audit-result.is-failure,
+.admin-audit-result.is-error {
+  background: #fff0f0;
+  color: #a74d4d;
+}
+
+.admin-audit-pagination {
+  display: flex;
+  padding-top: 15px;
+  justify-content: center;
+  gap: 5px;
+}
+
+.admin-audit-pagination button {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #607181;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.admin-audit-pagination button.is-active {
+  border-color: #173e61;
+  background: #173e61;
+  color: #fff;
+}
+
+.admin-audit-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.admin-audit-detail {
+  position: sticky;
+  top: 82px;
+}
+
+.admin-audit-detail__empty {
+  display: grid;
+  min-height: 280px;
+  place-content: center;
+  justify-items: center;
+  gap: 7px;
+  color: #82909c;
+  text-align: center;
+}
+
+.admin-audit-detail__empty strong {
+  color: #3f5669;
+  font-size: 11px;
+}
+
+.admin-audit-detail__empty p {
+  max-width: 215px;
+  margin: 0;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.admin-audit-detail__body {
+  margin-top: 17px;
+}
+
+.admin-audit-detail__body h3 {
+  margin: 10px 0 15px;
+  color: #2e4b61;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.admin-audit-detail__body dl {
+  display: grid;
+  margin: 0;
+  gap: 8px;
+}
+
+.admin-audit-detail__body dl > div {
+  display: flex;
+  padding-bottom: 8px;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #edf0f3;
+}
+
+.admin-audit-detail__body dt {
+  color: #8a96a0;
+  font-size: 8px;
+}
+
+.admin-audit-detail__body dd {
+  margin: 0;
+  color: #40596d;
+  font-size: 9px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-detail__body > section {
+  margin-top: 14px;
+}
+
+.admin-audit-detail__body > section > span {
+  color: #738392;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.admin-audit-detail__body pre {
+  max-height: 260px;
+  margin: 7px 0 0;
+  padding: 11px;
+  overflow: auto;
+  border-radius: 9px;
+  background: #152536;
+  color: #d9e7f1;
+  font-size: 8px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-access-log__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-access-log__heading h2 {
+  margin: 0;
+  color: #263d50;
+  font-size: 14px;
+}
+
+.admin-access-log__heading p {
+  display: flex;
+  margin: 6px 0 0;
+  align-items: center;
+  gap: 6px;
+  color: #738392;
+  font-size: 9px;
+}
+
+.admin-access-log__heading p > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9ba6af;
+}
+
+.admin-access-log__heading p.is-connected > i {
+  background: #43a66b;
+  animation: admin-access-pulse 1.8s infinite;
+}
+
+.admin-access-log__heading p.is-error > i {
+  background: #c75959;
+}
+
+.admin-access-log__heading > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-access-log__heading > div:last-child > span {
+  margin-right: 4px;
+  color: #7a8995;
+  font-size: 9px;
+}
+
+.admin-access-log__notice {
+  display: flex;
+  margin: 13px 0 0;
+  align-items: center;
+  gap: 6px;
+  color: #81909c;
+  font-size: 8px;
+}
+
+@keyframes admin-access-pulse {
+  50% {
+    box-shadow: 0 0 0 4px rgba(67, 166, 107, 0.14);
+  }
+}
+
+@media (max-width: 1100px) {
+  .admin-audit-filter__form {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+  }
+
+  .admin-audit-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-audit-detail {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-audit-tabs,
+  .admin-access-log__heading,
+  .admin-access-log__heading > div:last-child {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-audit-tabs button {
+    justify-content: flex-start;
+  }
+
+  .admin-audit-filter__form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-audit-filter__actions {
+    grid-column: 1 / -1;
+  }
+
+  .admin-access-log__heading > div:last-child > span {
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-audit-heading-summary {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-audit-filter__form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-audit-filter__actions {
+    grid-column: auto;
+  }
+
+  .admin-audit-filter__actions button,
+  .admin-access-log__heading button {
+    flex: 1;
+  }
+}

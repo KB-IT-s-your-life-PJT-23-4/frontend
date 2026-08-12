@@ -19,6 +19,7 @@ import AdminProductsView from '../pages/AdminProductsView.vue'
 import AdminFaqView from '../pages/AdminFaqView.vue'
 import AdminReportView from '../pages/AdminReportView.vue'
 import AdminAuthorizationView from '../pages/AdminAuthorizationView.vue'
+import AdminAuditView from '../pages/AdminAuditView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { showBlockedAccess } from '../stores/accountAccessStore'
 import { useAuthStore } from '../stores/authStore'
@@ -182,6 +183,19 @@ const router = createRouter({
         label: '권한 관리',
         requiresAuth: true,
         requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/audit',
+      name: 'admin-audit',
+      component: AdminAuditView,
+      meta: {
+        label: '감사 로그',
+        requiresAuth: true,
+        requiresAdmin: true,
+        requiresRole: ['ROOT'],
         layout: 'admin',
         hideBottomNav: true,
       },

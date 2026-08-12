@@ -16,7 +16,7 @@ const menuItems = [
   { label: 'FAQ 관리', icon: 'chat', to: '/admin/faq', available: true },
   { label: '배치 작업 관리', icon: 'refresh' },
   { label: '권한 관리', icon: 'settings', to: '/admin/authorization', available: true },
-  { label: '감사 로그', icon: 'clock' },
+  { label: '감사 로그', icon: 'clock', to: '/admin/audit', available: true },
 ]
 </script>
 
