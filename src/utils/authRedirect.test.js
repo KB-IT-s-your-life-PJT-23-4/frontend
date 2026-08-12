@@ -18,6 +18,7 @@ test('현재 관리자 라우트의 로그인 redirect를 유지한다', () => {
   assert.equal(resolvePostLoginPath('/admin/reports'), '/admin/reports')
   assert.equal(resolvePostLoginPath('/admin/auth'), '/admin/auth')
   assert.equal(resolvePostLoginPath('/admin/authorization'), '/admin/authorization')
+  assert.equal(resolvePostLoginPath('/admin/audit'), '/admin/audit')
 })
 
 test('허용하지 않은 외부 또는 임의 경로는 홈으로 보낸다', () => {
