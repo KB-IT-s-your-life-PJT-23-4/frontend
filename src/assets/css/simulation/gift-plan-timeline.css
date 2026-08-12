@@ -144,6 +144,20 @@
   line-height: 1.4;
 }
 
+.small-taxable-base-note {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: #54728b;
+  background: #f3f7fa;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.tax-comparison-option.is-recommended .small-taxable-base-note {
+  background: rgba(255, 255, 255, 0.72);
+}
+
 .tax-comparison-versus {
   display: grid;
   width: 24px;
