@@ -108,6 +108,16 @@ function mapProduct(product, selectedProductById = new Map()) {
       renewalDate: formatDate(item.renewalDate),
       completedContractMonths: number(item.completedContractMonths),
     })),
+    contractRateSchedule: (product.contractRateSchedule ?? []).map((item) => ({
+      trancheSequenceNo: number(item.trancheSequenceNo),
+      contractSequenceNo: number(item.contractSequenceNo),
+      contractStartDate: formatDate(item.contractStartDate),
+      contractEndDate: formatDate(item.contractEndDate),
+      contractMonths: number(item.contractMonths),
+      baseRatePercent: number(item.baseRatePercent),
+      maximumRatePercent: number(item.maximumRatePercent),
+      appliedRatePercent: number(item.appliedRatePercent),
+    })),
     selectedPreferentialConditions: product.selectedPreferentialConditions?.length
       ? product.selectedPreferentialConditions
       : (savedSelection?.selectedPreferentialConditions ?? []),

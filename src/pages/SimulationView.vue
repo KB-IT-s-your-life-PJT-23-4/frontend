@@ -147,18 +147,30 @@ const calculationProducts = computed(() =>
 
       const selectedCodes = preferentialSelections[product.simulationProductId] ?? []
       const conditions = [
-        ...(product.preferentialConditions ?? []),
-        ...(product.selectedPreferentialConditions ?? []),
+        ...new Map(
+          [
+            ...(product.preferentialConditions ?? []),
+            ...(product.selectedPreferentialConditions ?? []),
+          ].map((condition) => [condition.conditionCode, condition]),
+        ).values(),
       ]
       const additionalRate = conditions
         .filter((condition) => selectedCodes.includes(condition.conditionCode))
         .reduce((sum, condition) => sum + Number(condition.additionalRatePercent ?? 0), 0)
+      const contractRateSchedule = (product.contractRateSchedule ?? []).map((contract) => ({
+        ...contract,
+        appliedRatePercent: Math.min(
+          Number(contract.maximumRatePercent ?? Number.POSITIVE_INFINITY),
+          Number(contract.baseRatePercent ?? 0) + additionalRate,
+        ),
+      }))
 
       return [
         type,
         {
           ...product,
           rate: Number(product.minRate ?? product.rate ?? 0) + additionalRate,
+          contractRateSchedule,
         },
       ]
     }),
