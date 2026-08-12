@@ -412,10 +412,14 @@ async function submitWithdrawal() {
               </p>
               <RouterLink
                 class="soft-button full"
-                :to="{
-                  name: 'simulation',
-                  query: item.source === 'server' ? { simulationId: item.id, from: 'history' } : {},
-                }"
+                :to="
+                  item.source === 'server'
+                    ? {
+                        name: 'simulation-history-detail',
+                        params: { simulationId: item.id },
+                      }
+                    : { name: 'simulation' }
+                "
               >
                 {{ item.source === 'server' ? '결과 다시 보기' : '새 조건으로 비교하기' }}
               </RouterLink>

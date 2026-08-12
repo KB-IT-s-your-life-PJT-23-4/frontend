@@ -55,6 +55,16 @@ const router = createRouter({
       meta: { label: '마이', requiresAuth: true },
     },
     {
+      path: '/my/simulationHistory/:simulationId',
+      name: 'simulation-history-detail',
+      component: SimulationView,
+      meta: {
+        label: '시뮬레이션 이력 결과',
+        requiresAuth: true,
+        requiresActiveAccount: true,
+      },
+    },
+    {
       path: '/my/profile',
       name: 'profile-detail',
       component: ProfileDetailView,

@@ -715,6 +715,15 @@
     transform: none;
   }
 
+  .gift-timeline-reinvestment:hover .reinvestment-timeline-copy,
+  .gift-timeline-reinvestment:focus-within .reinvestment-timeline-copy,
+  .gift-timeline-reinvestment.is-near-start:hover .reinvestment-timeline-copy,
+  .gift-timeline-reinvestment.is-near-start:focus-within .reinvestment-timeline-copy,
+  .gift-timeline-reinvestment.is-near-end:hover .reinvestment-timeline-copy,
+  .gift-timeline-reinvestment.is-near-end:focus-within .reinvestment-timeline-copy {
+    transform: none;
+  }
+
   .reinvestment-timeline-copy strong {
     font-size: 11px;
   }
