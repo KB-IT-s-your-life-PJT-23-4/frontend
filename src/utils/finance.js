@@ -5,6 +5,7 @@ const TAX_BRACKETS = [
   { ceiling: 3000000000, rate: 0.4, deduction: 160000000 },
   { ceiling: Infinity, rate: 0.5, deduction: 460000000 },
 ]
+const MINIMUM_TAXABLE_BASE = 500000
 
 export const PRODUCT_TYPE_META = {
   DEPOSIT: { label: '예금', color: '#4f7fa8' },
@@ -40,11 +41,7 @@ export function annualizeTotalReturn(totalReturnRatePercent, investmentPeriodMon
   const totalReturnRate = Number(totalReturnRatePercent)
   const periodMonths = Number(investmentPeriodMonths)
 
-  if (
-    !Number.isFinite(totalReturnRate) ||
-    !Number.isFinite(periodMonths) ||
-    periodMonths <= 0
-  ) {
+  if (!Number.isFinite(totalReturnRate) || !Number.isFinite(periodMonths) || periodMonths <= 0) {
     return 0
   }
 

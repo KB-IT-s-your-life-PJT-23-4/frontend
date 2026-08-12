@@ -30,6 +30,14 @@ describe('증여 계산', () => {
     expect(calculateGiftTax(70000000)).toBe(7000000)
   })
 
+  it('과세표준이 50만원 미만이면 증여세를 부과하지 않는다', () => {
+    expect(calculateGiftTax(499999)).toBe(0)
+  })
+
+  it('과세표준이 정확히 50만원이면 누진세율을 적용한다', () => {
+    expect(calculateGiftTax(500000)).toBe(50000)
+  })
+
   it('공제 한도 우선 시나리오는 현재 증여액과 이연액을 나눈다', () => {
     const result = calculateSimulation({ amount: 80000000, family, products })
     const optimized = result.results[1]
