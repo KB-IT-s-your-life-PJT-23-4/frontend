@@ -723,7 +723,7 @@ onMounted(async () => {
       <aside v-if="recommendedScenario && result.exceedsDeduction" class="filing-credit-callout">
         <span class="filing-credit-icon"><AppIcon name="document" :size="21" /></span>
         <div>
-          <span class="section-kicker">신고세액공제 3%</span>
+          <!-- <span class="section-kicker">신고세액공제 3%</span> -->
           <h2>기한 내 신고 시 세액공제 3%를 반영한 결과예요.</h2>
           <p>
             증여받은 날이 속하는 달의 말일부터 3개월 이내 홈택스·정부24 또는 주소지 관할 세무서에
