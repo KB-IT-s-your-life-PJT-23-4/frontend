@@ -265,13 +265,14 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
 
   if (!donorPaysTax) {
     const taxableAmount = Math.max(0, baseGiftAmount - deduction)
-    const giftTax = calculateGiftTax(taxableAmount)
-    const filingTaxCredit = calculateFilingTaxCredit(giftTax)
+    const calculatedGiftTax = calculateGiftTax(taxableAmount)
+    const filingTaxCredit = calculateFilingTaxCredit(calculatedGiftTax)
+    const giftTax = calculateEstimatedPayableTax(calculatedGiftTax)
     return {
       taxableAmount,
       giftTax,
       filingTaxCredit,
-      estimatedPayableTax: calculateEstimatedPayableTax(giftTax),
+      estimatedPayableTax: giftTax,
     }
   }
 
@@ -281,9 +282,10 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
 
   for (let index = 0; index < 30; index += 1) {
     const taxableAmount = Math.max(0, baseGiftAmount + estimatedPayableTax - deduction)
-    giftTax = calculateGiftTax(taxableAmount)
-    filingTaxCredit = calculateFilingTaxCredit(giftTax)
-    const nextPayableTax = calculateEstimatedPayableTax(giftTax)
+    const calculatedGiftTax = calculateGiftTax(taxableAmount)
+    filingTaxCredit = calculateFilingTaxCredit(calculatedGiftTax)
+    giftTax = calculateEstimatedPayableTax(calculatedGiftTax)
+    const nextPayableTax = giftTax
     if (Math.abs(nextPayableTax - estimatedPayableTax) <= 1) {
       estimatedPayableTax = nextPayableTax
       break

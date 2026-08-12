@@ -1,8 +1,4 @@
-import {
-  calculateEstimatedPayableTax,
-  calculateFilingTaxCredit,
-  PRODUCT_TYPE_META,
-} from './finance'
+import { PRODUCT_TYPE_META } from './finance'
 
 const SCENARIO_COPY = {
   IMMEDIATE: {
@@ -162,8 +158,7 @@ function mapResult(result, investmentEndDate, selectedProductById) {
     deductionAmount: number(result.deductionAmount),
     taxableAmount: number(result.taxableAmount),
     giftTax,
-    filingTaxCredit: calculateFilingTaxCredit(giftTax),
-    estimatedPayableTax: calculateEstimatedPayableTax(giftTax),
+    estimatedPayableTax: giftTax,
     postTaxAmount: number(result.postTaxAmount),
     investmentPrincipal: number(result.investmentPrincipal),
     totalDonorOutflow: number(result.donorRequiredAmount),

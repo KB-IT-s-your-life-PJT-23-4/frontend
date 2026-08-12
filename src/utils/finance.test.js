@@ -30,6 +30,15 @@ describe('증여 계산', () => {
     expect(calculateGiftTax(70000000)).toBe(7000000)
   })
 
+  it('신고세액공제 3%를 반영한 세액만 운용 원금에서 차감한다', () => {
+    const result = calculateSimulation({ amount: 100000000, family, products })
+    const immediate = result.results[0]
+
+    expect(immediate.giftTax).toBe(6790000)
+    expect(immediate.estimatedPayableTax).toBe(6790000)
+    expect(immediate.investmentPrincipal).toBe(93210000)
+  })
+
   it('과세표준이 50만원 미만이면 증여세를 부과하지 않는다', () => {
     expect(calculateGiftTax(499999)).toBe(0)
   })
