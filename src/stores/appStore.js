@@ -12,11 +12,7 @@ import {
   toDotDate,
   toIsoDate,
 } from '../utils/deduction'
-import {
-  annualizeTotalReturn,
-  calculateEstimatedPayableTax,
-  PRODUCT_TYPE_META,
-} from '../utils/finance'
+import { annualizeTotalReturn, PRODUCT_TYPE_META } from '../utils/finance'
 
 // 데모 상태와 서버 연동 상태를 섞으면 목데이터 familyId가 DB 값과 충돌하므로 저장 키를 분리한다.
 const STORAGE_KEY = api.isMock ? 'mirizoom-demo-state-v1' : 'mirizoom-status-state-v1'
@@ -390,8 +386,8 @@ function serverSimulationToState(item) {
     familyId: Number(item.family?.familyId),
     date,
     amount: Number(item.inputSummary?.requestedAmount ?? 0),
-    // API의 estimatedGiftTax는 신고세액공제 전 산출세액이다.
-    tax: estimatedGiftTax == null ? null : calculateEstimatedPayableTax(Number(estimatedGiftTax)),
+    // API의 estimatedGiftTax는 신고세액공제 3%를 반영한 최종 납부 예상 세액이다.
+    tax: estimatedGiftTax == null ? null : Number(estimatedGiftTax),
     status: item.status,
     minimumReturnRate: Number(item.expectedReturnRange?.minimum?.expectedReturnRatePercent ?? 0),
     maximumReturnRate: Number(item.expectedReturnRange?.maximum?.expectedReturnRatePercent ?? 0),
