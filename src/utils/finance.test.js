@@ -30,6 +30,23 @@ describe('증여 계산', () => {
     expect(calculateGiftTax(70000000)).toBe(7000000)
   })
 
+  it('신고세액공제 3%를 반영한 세액만 운용 원금에서 차감한다', () => {
+    const result = calculateSimulation({ amount: 100000000, family, products })
+    const immediate = result.results[0]
+
+    expect(immediate.giftTax).toBe(6790000)
+    expect(immediate.estimatedPayableTax).toBe(6790000)
+    expect(immediate.investmentPrincipal).toBe(93210000)
+  })
+
+  it('과세표준이 50만원 미만이면 증여세를 부과하지 않는다', () => {
+    expect(calculateGiftTax(499999)).toBe(0)
+  })
+
+  it('과세표준이 정확히 50만원이면 누진세율을 적용한다', () => {
+    expect(calculateGiftTax(500000)).toBe(50000)
+  })
+
   it('공제 한도 우선 시나리오는 현재 증여액과 이연액을 나눈다', () => {
     const result = calculateSimulation({ amount: 80000000, family, products })
     const optimized = result.results[1]
@@ -94,6 +111,36 @@ describe('증여 계산', () => {
         1,
       ),
     ).toBe(110550730)
+  })
+
+  it('재가입 계약별 가입기간 금리를 각각 적용한다', () => {
+    expect(
+      calculateProductFutureValue(
+        {
+          type: 'DEPOSIT',
+          rate: 3.5,
+          minimumContractMonths: 12,
+          maximumContractMonths: 36,
+          contractRateSchedule: [
+            {
+              trancheSequenceNo: 1,
+              contractSequenceNo: 1,
+              contractMonths: 36,
+              appliedRatePercent: 3.5,
+            },
+            {
+              trancheSequenceNo: 1,
+              contractSequenceNo: 2,
+              contractMonths: 24,
+              appliedRatePercent: 3.0,
+            },
+          ],
+        },
+        100000000,
+        60,
+        1,
+      ),
+    ).toBe(117130000)
   })
 
   it('투자 성향별 포트폴리오 비중의 합은 100%이다', () => {

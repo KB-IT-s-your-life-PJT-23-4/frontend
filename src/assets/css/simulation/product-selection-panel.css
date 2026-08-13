@@ -203,6 +203,36 @@
   background: #f6f8fa;
 }
 
+.selectable-product-details > .product-contract-rate-schedule {
+  align-items: flex-start;
+}
+
+.product-contract-rate-schedule ol {
+  display: grid;
+  min-width: min(100%, 220px);
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.product-contract-rate-schedule li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.selectable-product-details .product-contract-rate-schedule li span {
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+}
+
+.selectable-product-details .product-contract-rate-schedule li strong {
+  color: var(--color-primary);
+  font-size: 0.84rem;
+}
+
 .selectable-product-details .product-condition-list > span {
   padding: 0 1px 3px;
 }

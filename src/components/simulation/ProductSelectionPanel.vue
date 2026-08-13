@@ -195,6 +195,25 @@ function updateCondition(product, conditionCode, checked) {
     : current.filter((code) => code !== conditionCode)
   emit('update-conditions', product.simulationProductId, next)
 }
+
+function contractAppliedRate(product, contract) {
+  const selectedCodes = props.preferentialSelections[product.simulationProductId] ?? []
+  const conditions = [
+    ...new Map(
+      [
+        ...(product.preferentialConditions ?? []),
+        ...(product.selectedPreferentialConditions ?? []),
+      ].map((condition) => [condition.conditionCode, condition]),
+    ).values(),
+  ]
+  const additionalRate = conditions
+    .filter((condition) => selectedCodes.includes(condition.conditionCode))
+    .reduce((sum, condition) => sum + Number(condition.additionalRatePercent ?? 0), 0)
+  return Math.min(
+    Number(contract.maximumRatePercent ?? Number.POSITIVE_INFINITY),
+    Number(contract.baseRatePercent ?? 0) + additionalRate,
+  )
+}
 </script>
 
 <template>
@@ -406,6 +425,23 @@ function updateCondition(product, conditionCode, checked) {
                 <div v-if="product.reinvestmentSchedule?.length">
                   <span>재운용 방식</span>
                   <strong>만기 원리금 재가입 · {{ product.reinvestmentSchedule.length }}회</strong>
+                </div>
+                <div
+                  v-if="product.contractRateSchedule?.length"
+                  class="product-contract-rate-schedule"
+                >
+                  <span>계약별 적용 금리</span>
+                  <ol>
+                    <li
+                      v-for="contract in product.contractRateSchedule"
+                      :key="`${contract.trancheSequenceNo}-${contract.contractSequenceNo}`"
+                    >
+                      <span>
+                        {{ contract.contractSequenceNo }}차 · {{ contract.contractMonths }}개월
+                      </span>
+                      <strong>{{ contractAppliedRate(product, contract) }}%</strong>
+                    </li>
+                  </ol>
                 </div>
                 <div v-if="product.preferentialConditions?.length" class="product-condition-list">
                   <span>우대 금리 조건</span>

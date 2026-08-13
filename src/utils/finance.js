@@ -5,6 +5,7 @@ const TAX_BRACKETS = [
   { ceiling: 3000000000, rate: 0.4, deduction: 160000000 },
   { ceiling: Infinity, rate: 0.5, deduction: 460000000 },
 ]
+const MINIMUM_TAXABLE_BASE = 500000
 
 export const PRODUCT_TYPE_META = {
   DEPOSIT: { label: '예금', color: '#4f7fa8' },
@@ -40,11 +41,7 @@ export function annualizeTotalReturn(totalReturnRatePercent, investmentPeriodMon
   const totalReturnRate = Number(totalReturnRatePercent)
   const periodMonths = Number(investmentPeriodMonths)
 
-  if (
-    !Number.isFinite(totalReturnRate) ||
-    !Number.isFinite(periodMonths) ||
-    periodMonths <= 0
-  ) {
+  if (!Number.isFinite(totalReturnRate) || !Number.isFinite(periodMonths) || periodMonths <= 0) {
     return 0
   }
 
@@ -106,6 +103,17 @@ export function calculateEtfFutureValue(principal, annualReturnRate, months) {
 
 function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
   const totalMonths = Math.max(0, Math.round(Number(months) || 0))
+  const contractRatePeriods = (product?.contractRateSchedule ?? [])
+    .filter(
+      (item) =>
+        trancheSequenceNo == null || Number(item.trancheSequenceNo) === Number(trancheSequenceNo),
+    )
+    .sort((a, b) => Number(a.contractSequenceNo) - Number(b.contractSequenceNo))
+    .map((item) => Math.max(0, Number(item.contractMonths) || 0))
+    .filter((period) => period > 0)
+
+  if (contractRatePeriods.length) return contractRatePeriods
+
   const scheduledPeriods = (product?.reinvestmentSchedule ?? [])
     .filter(
       (item) =>
@@ -136,15 +144,25 @@ function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
   const contractCount = Math.ceil(totalMonths / maximumMonths)
   if (contractCount > Math.floor(totalMonths / minimumMonths)) return []
 
-  const baseMonths = Math.floor(totalMonths / contractCount)
-  const remainder = totalMonths % contractCount
-  if (baseMonths < minimumMonths || baseMonths + (remainder > 0 ? 1 : 0) > maximumMonths) {
-    return []
-  }
-  return Array.from(
-    { length: contractCount },
-    (_, index) => baseMonths + (index < remainder ? 1 : 0),
-  )
+  let remainingMonths = totalMonths
+  return Array.from({ length: contractCount }, (_, index) => {
+    const remainingContracts = contractCount - index - 1
+    const contractMonths = Math.min(
+      maximumMonths,
+      remainingMonths - remainingContracts * minimumMonths,
+    )
+    remainingMonths -= contractMonths
+    return contractMonths
+  })
+}
+
+function contractRates(product, trancheSequenceNo) {
+  return (product?.contractRateSchedule ?? [])
+    .filter(
+      (item) =>
+        trancheSequenceNo == null || Number(item.trancheSequenceNo) === Number(trancheSequenceNo),
+    )
+    .sort((a, b) => Number(a.contractSequenceNo) - Number(b.contractSequenceNo))
 }
 
 export function calculateProductFutureValue(product, principal, months, trancheSequenceNo = null) {
@@ -155,21 +173,28 @@ export function calculateProductFutureValue(product, principal, months, trancheS
 
   if (method === PRODUCT_CALCULATION_METHOD.DEPOSIT) {
     const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
+    const scheduledRates = contractRates(product, trancheSequenceNo)
     if (!periods.length) return 0
     return periods.reduce(
-      (maturityValue, period) => calculateDepositFutureValue(maturityValue, annualRate, period),
+      (maturityValue, period, index) =>
+        calculateDepositFutureValue(
+          maturityValue,
+          Number(scheduledRates[index]?.appliedRatePercent ?? annualRate),
+          period,
+        ),
       principal,
     )
   }
 
   if (method === PRODUCT_CALCULATION_METHOD.SAVINGS) {
     const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
+    const scheduledRates = contractRates(product, trancheSequenceNo)
     if (!periods.length) return 0
     return periods.reduce(
-      (maturityValue, period) =>
+      (maturityValue, period, index) =>
         calculateSavingsFutureValue(
           maturityValue,
-          annualRate,
+          Number(scheduledRates[index]?.appliedRatePercent ?? annualRate),
           period,
           product?.paymentTiming ?? 'END_OF_MONTH',
         ),
@@ -240,13 +265,14 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
 
   if (!donorPaysTax) {
     const taxableAmount = Math.max(0, baseGiftAmount - deduction)
-    const giftTax = calculateGiftTax(taxableAmount)
-    const filingTaxCredit = calculateFilingTaxCredit(giftTax)
+    const calculatedGiftTax = calculateGiftTax(taxableAmount)
+    const filingTaxCredit = calculateFilingTaxCredit(calculatedGiftTax)
+    const giftTax = calculateEstimatedPayableTax(calculatedGiftTax)
     return {
       taxableAmount,
       giftTax,
       filingTaxCredit,
-      estimatedPayableTax: calculateEstimatedPayableTax(giftTax),
+      estimatedPayableTax: giftTax,
     }
   }
 
@@ -256,9 +282,10 @@ function calculateTaxStage(giftAmount, deductionAmount, donorPaysTax) {
 
   for (let index = 0; index < 30; index += 1) {
     const taxableAmount = Math.max(0, baseGiftAmount + estimatedPayableTax - deduction)
-    giftTax = calculateGiftTax(taxableAmount)
-    filingTaxCredit = calculateFilingTaxCredit(giftTax)
-    const nextPayableTax = calculateEstimatedPayableTax(giftTax)
+    const calculatedGiftTax = calculateGiftTax(taxableAmount)
+    filingTaxCredit = calculateFilingTaxCredit(calculatedGiftTax)
+    giftTax = calculateEstimatedPayableTax(calculatedGiftTax)
+    const nextPayableTax = giftTax
     if (Math.abs(nextPayableTax - estimatedPayableTax) <= 1) {
       estimatedPayableTax = nextPayableTax
       break

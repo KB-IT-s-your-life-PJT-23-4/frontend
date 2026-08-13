@@ -1,8 +1,4 @@
-import {
-  calculateEstimatedPayableTax,
-  calculateFilingTaxCredit,
-  PRODUCT_TYPE_META,
-} from './finance'
+import { PRODUCT_TYPE_META } from './finance'
 
 const SCENARIO_COPY = {
   IMMEDIATE: {
@@ -108,6 +104,16 @@ function mapProduct(product, selectedProductById = new Map()) {
       renewalDate: formatDate(item.renewalDate),
       completedContractMonths: number(item.completedContractMonths),
     })),
+    contractRateSchedule: (product.contractRateSchedule ?? []).map((item) => ({
+      trancheSequenceNo: number(item.trancheSequenceNo),
+      contractSequenceNo: number(item.contractSequenceNo),
+      contractStartDate: formatDate(item.contractStartDate),
+      contractEndDate: formatDate(item.contractEndDate),
+      contractMonths: number(item.contractMonths),
+      baseRatePercent: number(item.baseRatePercent),
+      maximumRatePercent: number(item.maximumRatePercent),
+      appliedRatePercent: number(item.appliedRatePercent),
+    })),
     selectedPreferentialConditions: product.selectedPreferentialConditions?.length
       ? product.selectedPreferentialConditions
       : (savedSelection?.selectedPreferentialConditions ?? []),
@@ -152,8 +158,7 @@ function mapResult(result, investmentEndDate, selectedProductById) {
     deductionAmount: number(result.deductionAmount),
     taxableAmount: number(result.taxableAmount),
     giftTax,
-    filingTaxCredit: calculateFilingTaxCredit(giftTax),
-    estimatedPayableTax: calculateEstimatedPayableTax(giftTax),
+    estimatedPayableTax: giftTax,
     postTaxAmount: number(result.postTaxAmount),
     investmentPrincipal: number(result.investmentPrincipal),
     totalDonorOutflow: number(result.donorRequiredAmount),

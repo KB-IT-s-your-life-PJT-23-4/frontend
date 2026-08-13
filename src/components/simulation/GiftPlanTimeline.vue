@@ -51,6 +51,21 @@ const comparisonScenarios = computed(() =>
   [immediateScenario.value, splitScenario.value].filter(Boolean),
 )
 const canCompareTaxes = computed(() => comparisonScenarios.value.length === 2)
+const taxFreeScenario = computed(() => immediateScenario.value ?? scenario.value)
+
+function isSmallTaxableBaseExempt(item) {
+  const taxableAmount = Number(item?.taxableAmount ?? 0)
+  const giftTax = Number(item?.giftTax ?? 0)
+  return taxableAmount > 0 && taxableAmount < 500000 && giftTax === 0
+}
+
+const smallTaxableBaseExemption = computed(() => isSmallTaxableBaseExempt(taxFreeScenario.value))
+
+function hasPayableTax(item) {
+  return Number(item?.estimatedPayableTax ?? 0) > 0
+}
+
+const hasAnyPayableTax = computed(() => comparisonScenarios.value.some(hasPayableTax))
 
 function scenarioComparisonLabel(item) {
   return item?.scenarioType === 'IMMEDIATE' ? '지금 전액 증여' : '공제 활용 분할 증여'
@@ -279,14 +294,10 @@ function getPositionClass(item) {
     </header>
 
     <section
-      v-if="canCompareTaxes"
+      v-if="canCompareTaxes && hasAnyPayableTax"
       class="tax-strategy-comparison"
       aria-labelledby="tax-comparison-title"
     >
-      <div class="tax-comparison-heading">
-        <small>{{ taxPayerLabel }}</small>
-      </div>
-
       <div class="tax-comparison-options">
         <template v-for="(item, index) in comparisonScenarios" :key="item.resultId">
           <article class="tax-comparison-option" :class="{ 'is-recommended': isRecommended(item) }">
@@ -306,6 +317,10 @@ function getPositionClass(item) {
                 <span>{{ endTotalValueDetail(item) }}</span>
               </div>
             </div>
+            <p v-if="isSmallTaxableBaseExempt(item)" class="small-taxable-base-note">
+              과세표준 {{ formatCompactWon(item.taxableAmount) }}은 50만 원 미만으로 증여세가
+              부과되지 않아요.
+            </p>
           </article>
           <span v-if="index === 0" class="tax-comparison-versus" aria-hidden="true">VS</span>
         </template>
@@ -314,6 +329,35 @@ function getPositionClass(item) {
       <div class="tax-comparison-conclusion">
         <span><AppIcon name="check" :size="13" /></span>
         <p>{{ comparisonReason }}</p>
+      </div>
+    </section>
+
+    <section
+      v-else-if="!hasAnyPayableTax && taxFreeScenario"
+      class="tax-free-investment-summary"
+      aria-label="면세 증여 상품 운용 예상 결과"
+    >
+      <span class="tax-free-investment-icon"><AppIcon name="chart" :size="21" /></span>
+      <div>
+        <small>
+          {{
+            smallTaxableBaseExemption
+              ? '과세표준 50만 원 미만으로 예상 세금 0원'
+              : '세금 없이 바로 증여해 운용하면'
+          }}
+        </small>
+        <strong>
+          {{ resultYearsLabel }} 후
+          <em>{{ comparisonAmount(scenarioEndTotalValue(taxFreeScenario)) }}</em>
+        </strong>
+        <p v-if="smallTaxableBaseExemption">
+          공제 후 과세표준이 {{ formatCompactWon(taxFreeScenario.taxableAmount) }}으로 50만 원
+          미만이어서 증여세가 부과되지 않아요.
+        </p>
+        <p v-else>
+          공제 한도 안에서 전액을 바로 증여해 {{ portfolioProfileLabel }} 상품으로 운용한 예상
+          결과예요.
+        </p>
       </div>
     </section>
 

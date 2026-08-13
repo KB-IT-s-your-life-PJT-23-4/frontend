@@ -57,6 +57,16 @@ const router = createRouter({
       meta: { label: '마이', requiresAuth: true },
     },
     {
+      path: '/my/simulationHistory/:simulationId',
+      name: 'simulation-history-detail',
+      component: SimulationView,
+      meta: {
+        label: '시뮬레이션 이력 결과',
+        requiresAuth: true,
+        requiresActiveAccount: true,
+      },
+    },
+    {
       path: '/my/profile',
       name: 'profile-detail',
       component: ProfileDetailView,
@@ -199,6 +209,19 @@ const router = createRouter({
         label: '권한 관리',
         requiresAuth: true,
         requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/audit',
+      name: 'admin-audit',
+      component: AdminAuditView,
+      meta: {
+        label: '감사 로그',
+        requiresAuth: true,
+        requiresAdmin: true,
+        requiresRole: ['ROOT'],
         layout: 'admin',
         hideBottomNav: true,
       },
