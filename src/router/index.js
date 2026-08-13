@@ -19,6 +19,8 @@ import AdminProductsView from '../pages/AdminProductsView.vue'
 import AdminFaqView from '../pages/AdminFaqView.vue'
 import AdminReportView from '../pages/AdminReportView.vue'
 import AdminAuthorizationView from '../pages/AdminAuthorizationView.vue'
+import AdminNotificationView from '../pages/AdminNotificationView.vue'
+import AdminBatchView from '../pages/AdminBatchView.vue'
 import { restoreAuthSession } from '../api/apiAdapter'
 import { showBlockedAccess } from '../stores/accountAccessStore'
 import { useAuthStore } from '../stores/authStore'
@@ -157,6 +159,31 @@ const router = createRouter({
       component: AdminReportView,
       meta: {
         label: '신고 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/notifications',
+      alias: '/admin/notification',
+      name: 'admin-notifications',
+      component: AdminNotificationView,
+      meta: {
+        label: '알림',
+        requiresAuth: true,
+        requiresAdmin: true,
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/batch',
+      name: 'admin-batch',
+      component: AdminBatchView,
+      meta: {
+        label: '배치 작업 관리',
         requiresAuth: true,
         requiresAdmin: true,
         layout: 'admin',
