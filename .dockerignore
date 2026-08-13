@@ -1,0 +1,10 @@
+node_modules
+dist
+.env.local
+.env.example
+.github
+.husky
+.vscode
+.idea
+*.md
+.gits
