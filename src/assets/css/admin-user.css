@@ -32,7 +32,7 @@
 
 .admin-user-search__form {
   display: grid;
-  grid-template-columns: minmax(120px, 0.65fr) repeat(2, minmax(180px, 1fr)) auto;
+  grid-template-columns: minmax(120px, 0.65fr) minmax(240px, 1.35fr) auto;
   margin-top: 19px;
   align-items: end;
   gap: 11px;
