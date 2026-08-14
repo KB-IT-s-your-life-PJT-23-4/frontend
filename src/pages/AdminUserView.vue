@@ -31,8 +31,8 @@ const dateTimeFormatter = new Intl.DateTimeFormat('ko-KR', {
   hour12: false,
 })
 
-const searchForm = reactive({ userId: '', email: '', name: '' })
-const appliedSearch = reactive({ userId: '', email: '', name: '' })
+const searchForm = reactive({ userId: '', email: '' })
+const appliedSearch = reactive({ userId: '', email: '' })
 const users = ref([])
 const pagination = ref(null)
 const listState = ref('loading')
@@ -121,14 +121,13 @@ async function submitSearch() {
   Object.assign(appliedSearch, {
     userId: String(searchForm.userId).trim(),
     email: searchForm.email.trim(),
-    name: searchForm.name.trim(),
   })
   await loadUsers(0)
 }
 
 async function resetSearch() {
-  Object.assign(searchForm, { userId: '', email: '', name: '' })
-  Object.assign(appliedSearch, { userId: '', email: '', name: '' })
+  Object.assign(searchForm, { userId: '', email: '' })
+  Object.assign(appliedSearch, { userId: '', email: '' })
   searchError.value = ''
   await loadUsers(0)
 }
@@ -276,11 +275,7 @@ onMounted(() => loadUsers())
         </label>
         <label>
           <span>이메일</span>
-          <input v-model="searchForm.email" type="search" placeholder="이메일 일부 또는 전체" />
-        </label>
-        <label>
-          <span>이름</span>
-          <input v-model="searchForm.name" type="search" placeholder="이름 일부 또는 전체" />
+          <input v-model="searchForm.email" type="search" placeholder="정확한 이메일 전체 주소" />
         </label>
         <div class="admin-user-search__actions">
           <button class="admin-user-button is-secondary" type="button" @click="resetSearch">

@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import DateField from '../components/common/DateField.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
@@ -310,13 +311,11 @@ function clarificationInputType(type) {
 
 function clarificationUnit(clarification) {
   if (clarification.type !== 'integer') return ''
-  if (clarification.key === 'recipient_age') return '세'
   if (clarification.key.includes('amount')) return '원'
   return ''
 }
 
 function clarificationPlaceholder(clarification) {
-  if (clarification.key === 'recipient_age') return '예: 30'
   if (clarification.key.includes('amount')) return '예: 50000000'
   if (clarification.type === 'date') return '날짜를 선택해 주세요'
   return '답변을 입력해 주세요'
@@ -725,9 +724,17 @@ function messageParagraphs(text) {
                   <form
                     v-else-if="!message.clarification.answered"
                     class="clarification-input-form"
+                    :class="{ 'is-date': message.clarification.type === 'date' }"
                     @submit.prevent="submitClarification(message, message.clarification.draftValue)"
                   >
-                    <div class="clarification-input-wrap">
+                    <DateField
+                      v-if="message.clarification.type === 'date'"
+                      v-model="message.clarification.draftValue"
+                      :placeholder="clarificationPlaceholder(message.clarification)"
+                      :aria-label="message.text"
+                      @click="scrollToBottom()"
+                    />
+                    <div v-else class="clarification-input-wrap">
                       <input
                         v-model="message.clarification.draftValue"
                         :type="clarificationInputType(message.clarification.type)"

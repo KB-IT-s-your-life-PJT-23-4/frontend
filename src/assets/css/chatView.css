@@ -118,6 +118,28 @@
   cursor: default;
 }
 
+.clarification-input-form.is-date {
+  align-items: start;
+}
+
+.clarification-input-form.is-date .date-field-trigger {
+  height: 44px;
+  padding: 0 12px;
+  border-color: #dce4ed;
+  border-radius: 13px;
+  background: #f8fafc;
+  color: #263747;
+  font-size: 12px;
+}
+
+.clarification-input-form.is-date .date-field-placeholder {
+  color: #a0aab5;
+}
+
+.clarification-input-form.is-date .date-field-panel {
+  min-width: 250px;
+}
+
 .clarification-answer-summary {
   padding: 10px 12px;
   border-radius: 12px;
