@@ -440,6 +440,48 @@ onMounted(() => loadStatus())
       </section>
 
       <template v-else>
+        <section class="deduction-card">
+          <div class="deduction-card-heading">
+            <div>
+              <span>
+                10년 주기 증여공제 한도
+                <template v-if="family.relation">
+                  · {{ family.relation }}{{ family.isMinor ? '(미성년)' : '' }}
+                </template>
+              </span>
+              <h2>{{ formatCompactWon(family.giftedAmount) }} 증여했어요</h2>
+            </div>
+            <strong>{{ progress }}%</strong>
+          </div>
+          <div class="progress-track large">
+            <span :style="{ width: `${progress}%` }" />
+          </div>
+          <div class="overview-labels">
+            <span>현재까지 {{ formatWon(family.giftedAmount) }}</span>
+            <span>한도 {{ formatWon(family.deductionLimit) }}</span>
+          </div>
+          <p>
+            <AppIcon name="info" :size="16" /> 추가 {{ formatCompactWon(remaining) }}까지 공제 한도
+            안에서 증여할 수 있어요.
+          </p>
+        </section>
+
+        <section class="renewal-card">
+          <div class="renewal-icon"><AppIcon name="clock" :size="24" /></div>
+          <div>
+            <span>한도 갱신까지</span>
+            <h2 v-if="hasRenewalSchedule">{{ family.resetLabel }} 남았어요</h2>
+            <h2 v-else>아직 갱신 일정이 없어요</h2>
+            <!--
+              날짜만으로는 "그래서 얼마가 생기나"가 안 보인다.
+              늘어나는 여력이 0이면(초과분을 메우는 데 다 쓰이는 경우) 문구를 띄우지 않는다.
+            -->
+            <p v-if="family.renewalAmount" class="renewal-note">
+              {{ hasRenewalSchedule ? family.resetDate : '증여 이력 없음' }}부터
+              {{ formatCompactWon(family.renewalAmount) }}까지 세금없이 증여할 수 있어요
+            </p>
+          </div>
+        </section>
         <section v-if="familySimulation" class="active-plan-card">
           <div class="active-plan-visual">
             <div class="plan-orbit" />
@@ -490,49 +532,6 @@ onMounted(() => loadStatus())
             우리 가족에게 맞는 계획을 만들어 보세요.
           </p>
           <RouterLink class="primary-button" to="/simulation">시뮬레이션 시작하기</RouterLink>
-        </section>
-
-        <section class="deduction-card">
-          <div class="deduction-card-heading">
-            <div>
-              <span>
-                10년 주기 증여공제 한도
-                <template v-if="family.relation">
-                  · {{ family.relation }}{{ family.isMinor ? '(미성년)' : '' }}
-                </template>
-              </span>
-              <h2>{{ formatCompactWon(family.giftedAmount) }} 증여했어요</h2>
-            </div>
-            <strong>{{ progress }}%</strong>
-          </div>
-          <div class="progress-track large">
-            <span :style="{ width: `${progress}%` }" />
-          </div>
-          <div class="overview-labels">
-            <span>현재까지 {{ formatWon(family.giftedAmount) }}</span>
-            <span>한도 {{ formatWon(family.deductionLimit) }}</span>
-          </div>
-          <p>
-            <AppIcon name="info" :size="16" /> 추가 {{ formatCompactWon(remaining) }}까지 공제 한도
-            안에서 증여할 수 있어요.
-          </p>
-        </section>
-
-        <section class="renewal-card">
-          <div class="renewal-icon"><AppIcon name="clock" :size="24" /></div>
-          <div>
-            <span>한도 갱신까지</span>
-            <h2 v-if="hasRenewalSchedule">{{ family.resetLabel }} 남았어요</h2>
-            <h2 v-else>아직 갱신 일정이 없어요</h2>
-            <!--
-              날짜만으로는 "그래서 얼마가 생기나"가 안 보인다.
-              늘어나는 여력이 0이면(초과분을 메우는 데 다 쓰이는 경우) 문구를 띄우지 않는다.
-            -->
-            <p v-if="family.renewalAmount" class="renewal-note">
-              {{ hasRenewalSchedule ? family.resetDate : '증여 이력 없음' }}부터
-              {{ formatCompactWon(family.renewalAmount) }}까지 세금없이 증여할 수 있어요
-            </p>
-          </div>
         </section>
 
         <section class="status-section">
