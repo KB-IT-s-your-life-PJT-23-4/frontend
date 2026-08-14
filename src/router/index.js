@@ -26,6 +26,7 @@ import { showBlockedAccess } from '../stores/accountAccessStore'
 import { useAuthStore } from '../stores/authStore'
 import { isAccountBlocked } from '../utils/accountAccess'
 import { isAdminRole } from '../utils/adminAccess.js'
+import AdminAuditView from '../pages/AdminAuditView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
