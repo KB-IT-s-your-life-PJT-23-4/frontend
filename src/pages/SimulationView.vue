@@ -122,7 +122,8 @@ const allocationProfiles = computed(() => {
     schedule: recommendedScenario.value?.giftSchedule,
     years,
     startDate: result.value?.raw?.input?.giftDate ?? result.value?.raw?.input?.asOfDate,
-    endDate: result.value?.raw?.input?.investmentEndDate,
+    endDate:
+      result.value?.raw?.input?.evaluationDate ?? result.value?.raw?.input?.investmentEndDate,
   })
   return {
     CONSERVATIVE: mockProfiles.STABLE,
@@ -201,7 +202,7 @@ const recommendedFutureValue = computed(() => {
     selectedProducts: calculationProducts.value,
     years: result.value.years,
     startDate: result.value.raw?.input?.giftDate ?? result.value.raw?.input?.asOfDate,
-    endDate: result.value.raw?.input?.investmentEndDate,
+    endDate: result.value.raw?.input?.evaluationDate ?? result.value.raw?.input?.investmentEndDate,
   })
 })
 const weightedPortfolioRate = computed(() =>
@@ -660,6 +661,10 @@ onMounted(async () => {
             {{ result.giftDate }} 증여 예정
           </span>
           <span><AppIcon name="clock" :size="15" /> {{ result.years }}년 운용</span>
+          <span v-if="result.evaluationDate && result.evaluationDate !== result.endDate">
+            <AppIcon name="calendar" :size="15" />
+            {{ result.evaluationDate }} 평가 기준
+          </span>
           <span v-if="isHistoryResult">
             <AppIcon name="wallet" :size="15" />
             {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}

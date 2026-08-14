@@ -233,6 +233,34 @@
   font-size: 0.84rem;
 }
 
+.selectable-product-details > .product-cash-holding-notice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  padding: 12px 14px;
+  border: 1px solid #dbe5ee;
+  border-radius: 12px;
+  background: #f7fafc;
+}
+
+.selectable-product-details .product-cash-holding-notice > span {
+  color: #52677a;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.selectable-product-details .product-cash-holding-notice > strong {
+  color: #315c7d;
+  font-size: 12px;
+}
+
+.selectable-product-details .product-cash-holding-notice > small {
+  grid-column: 1 / -1;
+  color: #66788a;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
 .selectable-product-details .product-condition-list > span {
   padding: 0 1px 3px;
 }

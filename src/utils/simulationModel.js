@@ -2,11 +2,11 @@ import { PRODUCT_TYPE_META } from './finance'
 
 const SCENARIO_COPY = {
   IMMEDIATE: {
-    name: '지금 바로 전액 증여',
+    name: '지금 전액 증여',
     description: '예상 증여세를 반영한 금액을 지금부터 운용해요.',
   },
   TAX_OPTIMIZED: {
-    name: '공제 한도부터 차근차근',
+    name: '공제 한도 우선 증여',
     description: '현재 공제 한도를 먼저 활용하고 갱신 후 남은 금액을 증여해요.',
   },
 }
@@ -114,6 +114,14 @@ function mapProduct(product, selectedProductById = new Map()) {
       maximumRatePercent: number(item.maximumRatePercent),
       appliedRatePercent: number(item.appliedRatePercent),
     })),
+    cashHoldingSchedule: (product.cashHoldingSchedule ?? []).map((item) => ({
+      trancheSequenceNo: number(item.trancheSequenceNo),
+      holdingStartDate: formatDate(item.holdingStartDate),
+      holdingEndDate: formatDate(item.holdingEndDate),
+      holdingMonths: number(item.holdingMonths),
+      holdingAmount: number(item.holdingAmount),
+      reason: item.reason,
+    })),
     selectedPreferentialConditions: product.selectedPreferentialConditions?.length
       ? product.selectedPreferentialConditions
       : (savedSelection?.selectedPreferentialConditions ?? []),
@@ -216,6 +224,7 @@ export function normalizeSimulationResponse(response) {
     remainingDeductionAmount: number(response.giftHistorySummary?.remainingDeductionAmount),
     deductionResetDate: formatDate(response.giftHistorySummary?.deductionRenewalDate),
     endDate: formatDate(response.input.investmentEndDate),
+    evaluationDate: formatDate(response.input.evaluationDate ?? response.input.investmentEndDate),
     exceedsDeduction:
       number(response.input.requestedAmount) >
       number(response.giftHistorySummary?.remainingDeductionAmount),
