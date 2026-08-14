@@ -441,29 +441,36 @@ onMounted(() => loadStatus())
 
       <template v-else>
         <section class="deduction-card">
-          <div class="deduction-card-heading">
-            <div>
+          <div class="deduction-visual">
+            <div class="plan-orbit" />
+            <span class="plan-coin">₩</span>
+            <span class="plan-document"><AppIcon name="document" :size="26" /></span>
+            <div class="deduction-visual-copy">
               <span>
                 10년 주기 증여공제 한도
                 <template v-if="family.relation">
                   · {{ family.relation }}{{ family.isMinor ? '(미성년)' : '' }}
                 </template>
               </span>
-              <h2>{{ formatCompactWon(family.giftedAmount) }} 증여했어요</h2>
+              <div class="deduction-visual-amount">
+                <h2>{{ formatCompactWon(family.giftedAmount) }} 증여했어요</h2>
+                <strong>{{ progress }}%</strong>
+              </div>
             </div>
-            <strong>{{ progress }}%</strong>
           </div>
-          <div class="progress-track large">
-            <span :style="{ width: `${progress}%` }" />
+          <div class="deduction-card-body">
+            <div class="progress-track large">
+              <span :style="{ width: `${progress}%` }" />
+            </div>
+            <div class="overview-labels">
+              <span>현재까지 {{ formatWon(family.giftedAmount) }}</span>
+              <span>한도 {{ formatWon(family.deductionLimit) }}</span>
+            </div>
+            <p>
+              <AppIcon name="info" :size="16" /> 추가 {{ formatCompactWon(remaining) }}까지 공제
+              한도 안에서 증여할 수 있어요.
+            </p>
           </div>
-          <div class="overview-labels">
-            <span>현재까지 {{ formatWon(family.giftedAmount) }}</span>
-            <span>한도 {{ formatWon(family.deductionLimit) }}</span>
-          </div>
-          <p>
-            <AppIcon name="info" :size="16" /> 추가 {{ formatCompactWon(remaining) }}까지 공제 한도
-            안에서 증여할 수 있어요.
-          </p>
         </section>
 
         <section class="renewal-card">
@@ -483,11 +490,6 @@ onMounted(() => loadStatus())
           </div>
         </section>
         <section v-if="familySimulation" class="active-plan-card">
-          <div class="active-plan-visual">
-            <div class="plan-orbit" />
-            <span class="plan-coin">₩</span>
-            <span class="plan-document"><AppIcon name="document" :size="31" /></span>
-          </div>
           <div class="plan-card-copy">
             <h2>
               <template v-if="familySimulation.expectedFutureValue">
