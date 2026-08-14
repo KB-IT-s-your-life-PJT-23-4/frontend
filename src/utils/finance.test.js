@@ -143,6 +143,42 @@ describe('증여 계산', () => {
     ).toBe(117130000)
   })
 
+  it('고정 12개월 상품은 37개월 중 36개월만 운용하고 잔여 1개월에는 수익을 붙이지 않는다', () => {
+    expect(
+      calculateProductFutureValue(
+        {
+          type: 'DEPOSIT',
+          rate: 3.4,
+          minimumContractMonths: 12,
+          maximumContractMonths: 12,
+        },
+        100000000,
+        37,
+        1,
+      ),
+    ).toBe(110550730)
+  })
+
+  it('최소 가입기간보다 짧은 예적금 회차는 0원이 아닌 원금으로 반영한다', () => {
+    expect(
+      calculateProductFutureValue(
+        {
+          type: 'DEPOSIT',
+          rate: 3.4,
+          minimumContractMonths: 12,
+          maximumContractMonths: 36,
+        },
+        30000000,
+        11,
+        2,
+      ),
+    ).toBe(30000000)
+  })
+
+  it('ETF는 11개월의 짧은 운용기간에도 복리 수익을 계산한다', () => {
+    expect(calculateEtfFutureValue(30000000, 6, 11)).toBeGreaterThan(30000000)
+  })
+
   it('투자 성향별 포트폴리오 비중의 합은 100%이다', () => {
     Object.values(getPortfolioAllocations(10)).forEach((allocation) => {
       expect(Object.values(allocation).reduce((sum, ratio) => sum + ratio, 0)).toBe(100)

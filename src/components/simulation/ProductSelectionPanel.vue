@@ -1,7 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watchEffect } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
-import { PRODUCT_TYPE_META } from '../../utils/finance'
+import { formatCompactWon, PRODUCT_TYPE_META } from '../../utils/finance'
 import '../../assets/css/simulation/product-selection-panel.css'
 
 const props = defineProps({
@@ -442,6 +442,25 @@ function contractAppliedRate(product, contract) {
                       <strong>{{ contractAppliedRate(product, contract) }}%</strong>
                     </li>
                   </ol>
+                </div>
+                <div
+                  v-if="product.cashHoldingSchedule?.length"
+                  class="product-cash-holding-notice"
+                >
+                  <span>운용 대기 금액</span>
+                  <strong>
+                    {{
+                      formatCompactWon(
+                        product.cashHoldingSchedule.reduce(
+                          (sum, item) => sum + Number(item.holdingAmount ?? 0),
+                          0,
+                        ),
+                      )
+                    }}
+                  </strong>
+                  <small>
+                    운용 종료일까지 남은 기간이 최소 가입기간보다 짧아 원금 상태로 반영해요.
+                  </small>
                 </div>
                 <div v-if="product.preferentialConditions?.length" class="product-condition-list">
                   <span>우대 금리 조건</span>

@@ -126,7 +126,14 @@ function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
   if (scheduledPeriods.length) {
     const completedMonths = scheduledPeriods.reduce((sum, period) => sum + period, 0)
     const finalPeriod = totalMonths - completedMonths
-    return finalPeriod > 0 ? [...scheduledPeriods, finalPeriod] : scheduledPeriods
+    const minimumMonths = Number(product?.minimumContractMonths)
+    const maximumMonths = Number(product?.maximumContractMonths)
+    const finalPeriodIsInvestable = finalPeriod > 0
+      && Number.isInteger(minimumMonths)
+      && Number.isInteger(maximumMonths)
+      && finalPeriod >= minimumMonths
+      && finalPeriod <= maximumMonths
+    return finalPeriodIsInvestable ? [...scheduledPeriods, finalPeriod] : scheduledPeriods
   }
 
   const minimumMonths = Number(product?.minimumContractMonths)
@@ -141,19 +148,22 @@ function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
     return [totalMonths]
   }
 
-  const contractCount = Math.ceil(totalMonths / maximumMonths)
-  if (contractCount > Math.floor(totalMonths / minimumMonths)) return []
+  for (let coveredMonths = totalMonths; coveredMonths >= minimumMonths; coveredMonths -= 1) {
+    const contractCount = Math.ceil(coveredMonths / maximumMonths)
+    if (contractCount > Math.floor(coveredMonths / minimumMonths)) continue
 
-  let remainingMonths = totalMonths
-  return Array.from({ length: contractCount }, (_, index) => {
-    const remainingContracts = contractCount - index - 1
-    const contractMonths = Math.min(
-      maximumMonths,
-      remainingMonths - remainingContracts * minimumMonths,
-    )
-    remainingMonths -= contractMonths
-    return contractMonths
-  })
+    let remainingMonths = coveredMonths
+    return Array.from({ length: contractCount }, (_, index) => {
+      const remainingContracts = contractCount - index - 1
+      const contractMonths = Math.min(
+        maximumMonths,
+        remainingMonths - remainingContracts * minimumMonths,
+      )
+      remainingMonths -= contractMonths
+      return contractMonths
+    })
+  }
+  return []
 }
 
 function contractRates(product, trancheSequenceNo) {
@@ -174,7 +184,7 @@ export function calculateProductFutureValue(product, principal, months, trancheS
   if (method === PRODUCT_CALCULATION_METHOD.DEPOSIT) {
     const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
     const scheduledRates = contractRates(product, trancheSequenceNo)
-    if (!periods.length) return 0
+    if (!periods.length) return principal
     return periods.reduce(
       (maturityValue, period, index) =>
         calculateDepositFutureValue(
@@ -189,7 +199,7 @@ export function calculateProductFutureValue(product, principal, months, trancheS
   if (method === PRODUCT_CALCULATION_METHOD.SAVINGS) {
     const periods = buildReinvestmentPeriods(product, months, trancheSequenceNo)
     const scheduledRates = contractRates(product, trancheSequenceNo)
-    if (!periods.length) return 0
+    if (!periods.length) return principal
     return periods.reduce(
       (maturityValue, period, index) =>
         calculateSavingsFutureValue(
