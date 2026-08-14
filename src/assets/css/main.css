@@ -3152,21 +3152,74 @@ textarea:focus-visible {
 }
 
 .deduction-card {
-  padding: 20px;
+  overflow: hidden;
+  padding: 0;
   border-radius: var(--radius-md);
 }
 
-.deduction-card-heading h2 {
-  margin-top: 5px;
+.deduction-visual {
+  position: relative;
+  display: flex;
+  min-height: 126px;
+  align-items: flex-end;
+  overflow: hidden;
+  background: linear-gradient(155deg, var(--blue) 0%, var(--blue-strong) 55%, #2e638e 100%);
+}
+
+.deduction-visual .plan-coin {
+  top: 14px;
+  right: 68px;
+  width: 46px;
+  height: 46px;
+  font-size: 19px;
+}
+
+.deduction-visual .plan-document {
+  top: 20px;
+  right: 18px;
+  width: 50px;
+  height: 39px;
+}
+
+.deduction-visual-copy {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  padding: 16px 18px 15px;
+}
+
+.deduction-visual-copy > span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+}
+
+.deduction-visual-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.deduction-visual-amount h2 {
+  margin: 0;
+  color: #fff;
   font-size: 21px;
+  letter-spacing: -0.05em;
 }
 
-.deduction-card-heading > strong {
-  color: var(--blue-strong);
-  font-size: 23px;
+.deduction-visual-amount strong {
+  color: var(--kb-yellow);
+  font-size: 19px;
 }
 
-.deduction-card > p {
+.deduction-card-body {
+  padding: 16px 20px 18px;
+}
+
+.deduction-card-body .progress-track.large {
+  margin-top: 0;
+}
+
+.deduction-card-body > p {
   display: flex;
   margin: 13px 0 0;
   align-items: center;
