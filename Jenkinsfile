@@ -10,6 +10,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'wosyh18/mirizoom-frontend'
+        REPOSITORY_URL = 'https://github.com/KB-IT-s-your-life-PJT-23-4/frontend.git'
+        VITE_API_BASE_URL = '/api'
     }
 
     stages {
@@ -30,9 +32,10 @@ pipeline {
                     test -f package.json
                     test -f package-lock.json
 
-                    echo "Repository: ${GIT_URL}"
-                    echo "Commit: ${GIT_COMMIT}"
+                    echo "Repository: ${REPOSITORY_URL}"
+                    echo "Commit: $(git rev-parse HEAD)"
                     echo "Image: ${IMAGE_NAME}:${BUILD_NUMBER}"
+                    echo "API base URL: ${VITE_API_BASE_URL}"
                 '''
             }
         }
@@ -50,9 +53,15 @@ pipeline {
                     sh '''
                         set -eu
 
+                        if [ -z "${VITE_KAKAO_JS_KEY}" ]
+                        then
+                            echo "mirizoom-kakao-js-key Credential 값이 비어 있습니다."
+                            exit 1
+                        fi
+
                         docker build \
                             --pull \
-                            --build-arg VITE_API_BASE_URL=/api \
+                            --build-arg VITE_API_BASE_URL="${VITE_API_BASE_URL}" \
                             --build-arg VITE_KAKAO_JS_KEY="${VITE_KAKAO_JS_KEY}" \
                             --tag "${IMAGE_NAME}:${BUILD_NUMBER}" \
                             --tag "${IMAGE_NAME}:latest" \
@@ -100,6 +109,13 @@ pipeline {
         }
 
         always {
+            sh '''
+                docker image rm \
+                    "${IMAGE_NAME}:${BUILD_NUMBER}" \
+                    "${IMAGE_NAME}:latest" \
+                    >/dev/null 2>&1 || true
+            '''
+
             deleteDir()
         }
     }
