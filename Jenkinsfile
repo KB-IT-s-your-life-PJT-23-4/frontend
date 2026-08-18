@@ -97,6 +97,15 @@ pipeline {
                 }
             }
         }
+        
+        stage('Trigger Deploy') {
+            steps {
+                build job: 'deploy', parameters: [
+                    string(name: 'DEPLOY_SERVICE', value: 'frontend'),
+                    string(name: 'DEPLOY_IMAGE_TAG', value: "${IMAGE_NAME}:${BUILD_NUMBER}")
+                ]
+            }
+        }
     }
 
     post {
