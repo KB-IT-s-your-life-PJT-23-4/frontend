@@ -217,6 +217,16 @@ function planScheduleCopy(plan) {
   return '일정 미정'
 }
 
+function simulationPeriodCopy(plan) {
+  const giftDate = plan.plannedGiftDate
+  const operationEndDate = plan.operationEndDate ?? plan.giftDate
+
+  if (giftDate && operationEndDate) return `${giftDate}~${operationEndDate} 예정`
+  if (giftDate) return `${giftDate} 증여 예정`
+  if (operationEndDate) return `${operationEndDate} 운용 마무리 예정`
+  return '일정 미정'
+}
+
 /**
  * 증여세 신고서 OCR 대조. 회차마다 따로 올리므로 상태도 회차(giftId)별로 담는다.
  * 결과는 화면에서만 쓰고 저장하지 않는다.
@@ -543,7 +553,7 @@ onMounted(() => loadStatus())
               <span v-if="familySimulation.rate">
                 예상 수익률 연 {{ familySimulation.rate }}%
               </span>
-              <span>{{ familySimulation.giftDate }} 예정</span>
+              <span>{{ simulationPeriodCopy(familySimulation) }}</span>
             </div>
             <SavedSimulationTimeline
               :plan="familySimulation"
@@ -554,22 +564,24 @@ onMounted(() => loadStatus())
               @toggle="toggleSavedSimulationTimeline(familySimulation)"
               @retry="loadSavedSimulationTimeline(familySimulation, { force: true })"
             />
-            <button
-              class="primary-button full register-simulation-button"
-              type="button"
-              :disabled="registeringPlanId === familySimulation.id"
-              @click="registerPlan(familySimulation)"
-            >
-              <AppIcon name="check" :size="16" />
-              {{
-                registeringPlanId === familySimulation.id
-                  ? '등록 중...'
-                  : '이 시뮬레이션으로 증여 진행하기'
-              }}
-            </button>
-            <p class="register-gift-note">
-              증여를 진행하면 '진행 중인 증여'에서 서류 준비와 완료 처리를 이어갈 수 있어요.
-            </p>
+            <template v-if="!familySimulation.registeredAsGift">
+              <button
+                class="primary-button full register-simulation-button"
+                type="button"
+                :disabled="registeringPlanId === familySimulation.id"
+                @click="registerPlan(familySimulation)"
+              >
+                <AppIcon name="check" :size="16" />
+                {{
+                  registeringPlanId === familySimulation.id
+                    ? '등록 중...'
+                    : '이 시뮬레이션으로 증여 진행하기'
+                }}
+              </button>
+              <p class="register-gift-note">
+                증여를 진행하면 '진행 중인 증여'에서 서류 준비와 완료 처리를 이어갈 수 있어요.
+              </p>
+            </template>
           </div>
         </section>
 

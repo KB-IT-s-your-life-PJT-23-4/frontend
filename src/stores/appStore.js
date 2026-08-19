@@ -318,6 +318,8 @@ function savedSimulationToPlan(item) {
     currentAmount: requestedAmount,
     expectedFutureValue: Number(item.selection?.expectedFutureValue ?? requestedAmount),
     plannedGiftDate: toDotDate(item.inputSummary?.giftDate),
+    operationEndDate: toDotDate(item.inputSummary?.investmentEndDate),
+    // 기존 화면 호환용 필드. 의미는 증여일이 아니라 상품 운용 마무리일이다.
     giftDate: toDotDate(item.inputSummary?.investmentEndDate),
     productName: productNames.join(' · ') || fallbackProductNames.join(' · ') || '저장된 증여 계획',
     productType: selectedProducts[0]?.productType ?? selectedProductTypes[0] ?? null,
@@ -466,7 +468,16 @@ async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
   )
   const savedSimulationPlans = savedSimulationHistories
     .flatMap((history) => (history?.items ?? []).map(savedSimulationToPlan))
-    .filter((plan) => plan.simulResultId == null || !registeredResultIds.has(plan.simulResultId))
+    .map((plan) => ({
+      ...plan,
+      registeredAsGift:
+        plan.simulResultId != null && registeredResultIds.has(Number(plan.simulResultId)),
+    }))
+    // 운용 마무리일까지는 증여 등록 여부와 관계없이 저장한 계획 카드를 유지한다.
+    .filter((plan) => {
+      const operationEndDate = toIsoDate(plan.operationEndDate)
+      return !operationEndDate || operationEndDate >= toIsoDate(new Date())
+    })
   state.simulationPlans = savedSimulationPlans
   state.plans = gifts.filter((gift) => gift.status === GIFT_STATUS.PLANNED).map(plannedGiftToPlan)
   state.giftHistory = gifts
@@ -600,7 +611,13 @@ async function clearUserState() {
  */
 async function registerSimulationAsGift(planId) {
   const plan = state.simulationPlans.find((item) => item.id === planId)
-  if (!plan || api.isMock) return
+  if (!plan) return
+
+  if (api.isMock) {
+    plan.registeredAsGift = true
+    showToast('증여로 등록되었어요.')
+    return
+  }
 
   const created = await api.registerGiftFromSimulation({
     simulationId: Number(plan.simulationId),
