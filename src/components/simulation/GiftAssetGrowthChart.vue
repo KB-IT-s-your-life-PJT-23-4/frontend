@@ -251,6 +251,29 @@ const series = computed(() =>
     ]),
   ),
 )
+const comparisonAreaPath = computed(() => {
+  const recommendedPoints = chartDates.value.map((date) => ({
+    date,
+    value: scenarioValueAt(props.recommendedScenario, date),
+  }))
+  const alternativePoints = chartDates.value.map((date) => ({
+    date,
+    value: scenarioValueAt(alternativeScenario.value, date),
+  }))
+  if (!recommendedPoints.length || !alternativePoints.length) return ''
+
+  const forward = recommendedPoints
+    .map(
+      (point, index) =>
+        `${index === 0 ? 'M' : 'L'} ${xPosition(point.date)} ${yPosition(point.value)}`,
+    )
+    .join(' ')
+  const backward = [...alternativePoints]
+    .reverse()
+    .map((point) => `L ${xPosition(point.date)} ${yPosition(point.value)}`)
+    .join(' ')
+  return `${forward} ${backward} Z`
+})
 const yTicks = computed(() =>
   Array.from({ length: 3 }, (_, index) => {
     const ratio = index / 2
@@ -309,6 +332,22 @@ const chartEvents = computed(() => {
 })
 const recommendedFinalValue = computed(() => series.value.recommended.points.at(-1)?.value ?? 0)
 const alternativeFinalValue = computed(() => series.value.alternative.points.at(-1)?.value ?? 0)
+const finalValueDifference = computed(() =>
+  Math.max(0, recommendedFinalValue.value - alternativeFinalValue.value),
+)
+const finalValueDifferenceRate = computed(() =>
+  alternativeFinalValue.value > 0
+    ? (finalValueDifference.value / alternativeFinalValue.value) * 100
+    : 0,
+)
+const recommendedEndPoint = computed(() => ({
+  x: xPosition(finishDate.value),
+  y: yPosition(recommendedFinalValue.value),
+}))
+const alternativeEndPoint = computed(() => ({
+  x: xPosition(finishDate.value),
+  y: yPosition(alternativeFinalValue.value),
+}))
 const outsideSchedule = computed(() =>
   (props.recommendedScenario.giftSchedule ?? []).filter((item) => !item.withinPeriod),
 )
@@ -397,9 +436,36 @@ function eventPositionStyle(event) {
               </text>
             </g>
           </g>
+          <path class="gift-growth-comparison-area" :d="comparisonAreaPath" />
           <path class="gift-growth-line is-alternative" :d="series.alternative.path" />
           <path class="gift-growth-line is-principal" :d="series.principal.path" />
           <path class="gift-growth-line is-recommended" :d="series.recommended.path" />
+          <line
+            v-if="finalValueDifference > 0"
+            class="gift-growth-final-gap"
+            :x1="recommendedEndPoint.x"
+            :x2="alternativeEndPoint.x"
+            :y1="recommendedEndPoint.y"
+            :y2="alternativeEndPoint.y"
+          />
+          <circle
+            class="gift-growth-endpoint is-alternative"
+            :cx="alternativeEndPoint.x"
+            :cy="alternativeEndPoint.y"
+            r="4"
+          />
+          <circle
+            class="gift-growth-endpoint-halo"
+            :cx="recommendedEndPoint.x"
+            :cy="recommendedEndPoint.y"
+            r="9"
+          />
+          <circle
+            class="gift-growth-endpoint is-recommended"
+            :cx="recommendedEndPoint.x"
+            :cy="recommendedEndPoint.y"
+            r="5"
+          />
         </svg>
 
         <button
@@ -423,8 +489,13 @@ function eventPositionStyle(event) {
 
     <div class="gift-growth-chart-summary">
       <div class="is-recommended">
-        <span>추천 · {{ scenarioLabel(recommendedScenario) }}</span>
-        <strong>{{ formatCompactWon(recommendedFinalValue) }}</strong>
+        <span>{{ scenarioLabel(recommendedScenario) }}</span>
+        <div>
+          <strong>{{ formatCompactWon(recommendedFinalValue) }}</strong>
+          <small v-if="finalValueDifference > 0">
+            +{{ formatCompactWon(finalValueDifference) }}
+          </small>
+        </div>
       </div>
       <div>
         <span>{{ scenarioLabel(alternativeScenario) }}</span>

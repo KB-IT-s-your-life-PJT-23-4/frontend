@@ -26,13 +26,6 @@
   line-height: 1.5;
 }
 
-.gift-growth-chart-heading > strong {
-  flex: 0 0 auto;
-  color: #173f68;
-  font-size: 1.18rem;
-  font-variant-numeric: tabular-nums;
-}
-
 .gift-growth-chart-legend {
   display: flex;
   flex-wrap: wrap;
@@ -62,6 +55,10 @@
 
 .gift-growth-chart-legend .is-principal::before {
   background: #244d73;
+}
+
+.gift-growth-chart-legend .is-alternative::before {
+  background: repeating-linear-gradient(90deg, #aab5c2 0 6px, transparent 6px 9px);
 }
 
 .gift-growth-event-legend {
@@ -139,18 +136,50 @@
   stroke-width: 3;
 }
 
+.gift-growth-comparison-area {
+  fill: rgb(244 180 0 / 9%);
+  stroke: none;
+}
+
 .gift-growth-line.is-recommended {
   stroke: #f4b400;
+  stroke-width: 4;
+  filter: drop-shadow(0 2px 3px rgb(244 180 0 / 20%));
 }
 
 .gift-growth-line.is-principal {
   stroke: #244d73;
-  stroke-width: 2.5;
+  stroke-width: 2.25;
 }
 
 .gift-growth-line.is-alternative {
   stroke: #aab5c2;
-  stroke-width: 2.5;
+  stroke-dasharray: 7 6;
+  stroke-width: 2.25;
+}
+
+.gift-growth-final-gap {
+  stroke: #dca300;
+  stroke-dasharray: 3 3;
+  stroke-width: 1.5;
+}
+
+.gift-growth-endpoint {
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.gift-growth-endpoint.is-recommended {
+  fill: #f4b400;
+}
+
+.gift-growth-endpoint.is-alternative {
+  fill: #aab5c2;
+}
+
+.gift-growth-endpoint-halo {
+  fill: rgb(244 180 0 / 17%);
+  stroke: none;
 }
 
 .gift-growth-event-marker {
@@ -307,6 +336,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+.gift-growth-chart-summary > div > div {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.gift-growth-chart-summary small {
+  color: #a37b05;
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
 .gift-growth-outside-note {
   margin: 9px 0 0;
   padding: 9px 11px;
@@ -327,8 +368,10 @@
     gap: 8px;
   }
 
-  .gift-growth-chart-heading > strong {
-    font-size: 1.08rem;
+  .gift-growth-chart-outcome {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
   }
 
   .gift-growth-chart-summary {
