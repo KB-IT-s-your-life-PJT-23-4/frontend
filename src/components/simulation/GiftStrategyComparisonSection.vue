@@ -133,48 +133,6 @@ const recommendedFutureValueDifference = computed(() => {
   if (recommendedValue == null || alternativeValue == null) return null
   return recommendedValue - alternativeValue
 })
-const comparisonReason = computed(() => {
-  const recommendedLabel = scenarioComparisonLabel(scenario.value)
-  const alternativeLabel = scenarioComparisonLabel(alternativeScenario.value)
-  const preparationDifference = recommendedPreparationDifference.value
-  const futureValueDifference = recommendedFutureValueDifference.value
-
-  if (futureValueDifference == null) {
-    if (preparationDifference > 0) {
-      return `${recommendedLabel}는 ${preparationLabel.value}이 ${alternativeLabel}보다 ${formatCompactWon(
-        preparationDifference,
-      )} 적어 유리해요.`
-    }
-    return `세금 납부 조건과 증여 일정을 함께 반영해 ${recommendedLabel}를 추천해요.`
-  }
-
-  if (futureValueDifference > 0 && preparationDifference > 0) {
-    return `${recommendedLabel}는 준비 금액을 ${formatCompactWon(
-      preparationDifference,
-    )} 줄이고, ${resultYearsLabel.value} 후 예상 총 금액은 ${formatCompactWon(
-      futureValueDifference,
-    )} 더 많아 유리해요.`
-  }
-  if (futureValueDifference > 0 && preparationDifference < 0) {
-    return `${recommendedLabel}는 준비 금액이 ${formatCompactWon(
-      Math.abs(preparationDifference),
-    )} 더 들지만, ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
-      futureValueDifference,
-    )} 더 많아 최종 결과가 유리해요.`
-  }
-  if (futureValueDifference > 0) {
-    return `준비 금액은 같지만, ${recommendedLabel}의 ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
-      futureValueDifference,
-    )} 더 많아 유리해요.`
-  }
-  if (futureValueDifference === 0 && preparationDifference > 0) {
-    return `${resultYearsLabel.value} 후 예상 총 금액은 같지만, ${recommendedLabel}의 준비 금액이 ${formatCompactWon(
-      preparationDifference,
-    )} 적어 유리해요.`
-  }
-  return `세금 납부 조건과 증여 시점, ${resultYearsLabel.value} 후 예상 총 금액을 함께 반영해 ${recommendedLabel}를 추천해요.`
-})
-
 const visibleSchedule = computed(() =>
   scenario.value.giftSchedule.filter((item) => item.withinPeriod),
 )
@@ -267,11 +225,6 @@ const reinvestmentSchedule = computed(() => {
             </p>
           </article>
         </template>
-      </div>
-
-      <div class="tax-comparison-conclusion">
-        <span><AppIcon name="check" :size="13" /></span>
-        <p>{{ comparisonReason }}</p>
       </div>
     </section>
 
