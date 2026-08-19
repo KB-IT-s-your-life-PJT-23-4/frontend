@@ -354,9 +354,7 @@ function eventPositionStyle(event) {
     <header class="gift-growth-chart-heading">
       <div>
         <h3 id="gift-growth-chart-title">증여 후 자산은 이렇게 변화할 것으로 예상돼요</h3>
-        <p>증여 일정과 현재 선택한 상품의 수익률을 반영한 예상 흐름이에요.</p>
       </div>
-      <strong>{{ formatCompactWon(recommendedFinalValue) }}</strong>
     </header>
 
     <div class="gift-growth-chart-legend" aria-label="그래프 범례">
@@ -434,10 +432,6 @@ function eventPositionStyle(event) {
       </div>
     </div>
 
-    <p class="gift-growth-chart-note">
-      선 사이의 값은 회차별 증여일과 상품별 적용 금리를 기준으로 계산한 예상치이며, 실제 수익은 시장
-      상황과 상품 조건에 따라 달라질 수 있어요.
-    </p>
     <p v-if="outsideSchedule.length" class="gift-growth-outside-note">
       {{ outsideSchedule[0].date }} 예정인 {{ formatCompactWon(outsideSchedule[0].amount) }} 증여는
       운용 기간 이후라 그래프의 예상 금액에 포함하지 않았어요.
