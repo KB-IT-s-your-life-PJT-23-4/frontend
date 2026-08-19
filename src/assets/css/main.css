@@ -3163,7 +3163,7 @@ textarea:focus-visible {
   min-height: 126px;
   align-items: flex-end;
   overflow: hidden;
-  background: linear-gradient(155deg, var(--blue) 0%, var(--blue-strong) 55%, #2e638e 100%);
+  background: linear-gradient(155deg, #0f2f4c 0%, #1c4a72 0%, #2e638e 100%);
 }
 
 .deduction-visual .plan-coin {
