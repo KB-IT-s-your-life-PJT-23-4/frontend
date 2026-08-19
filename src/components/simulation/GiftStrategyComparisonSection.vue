@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
 import GiftAssetGrowthChart from './GiftAssetGrowthChart.vue'
-import { formatCompactWon } from '../../utils/finance'
-import '../../assets/css/simulation/gift-plan-timeline.css'
+import { formatCompactWon } from '../../utils/finance.js'
+import '../../assets/css/simulation/gift-strategy-comparison-section.css'
 
 const props = defineProps({
   result: {
