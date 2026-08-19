@@ -405,8 +405,8 @@ function eventPositionStyle(event) {
 <template>
   <section class="gift-growth-chart-card">
     <div class="gift-growth-chart-legend" aria-label="그래프 범례">
-      <span class="is-recommended">추천 플랜</span>
-      <span class="is-alternative">비추천 플랜</span>
+      <span class="is-recommended">추천 전략</span>
+      <span class="is-alternative">비교 전략</span>
       <span class="is-principal">누적 운용 원금</span>
     </div>
 

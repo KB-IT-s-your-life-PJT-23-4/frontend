@@ -84,9 +84,20 @@ const alternativeScenario = computed(() =>
 const preparationLabel = computed(() =>
   donorPaysTax.value ? '주는 분 총 준비 금액' : '받는 분이 납부할 세금',
 )
+const taxAmountLabel = computed(() =>
+  donorPaysTax.value ? '주는 분이 납부할 세금' : '받는 분이 납부할 세금',
+)
 
 function preparationAmount(item) {
   return Number(donorPaysTax.value ? item?.totalDonorOutflow : item?.estimatedPayableTax)
+}
+
+function estimatedTaxAmount(item) {
+  return Number(item?.estimatedPayableTax ?? 0)
+}
+
+function donorRequiredAmount(item) {
+  return Number(item?.totalDonorOutflow ?? 0)
 }
 
 function scenarioFutureValue(item) {
@@ -236,13 +247,18 @@ const reinvestmentSchedule = computed(() => {
               <em v-if="isRecommended(item)">추천</em>
             </header>
             <div class="tax-comparison-metrics">
-              <div>
-                <small>{{ preparationLabel }}</small>
-                <strong>{{ formatCompactWon(preparationAmount(item)) }}</strong>
-              </div>
-              <div>
+              <div class="is-primary">
                 <small>{{ resultYearsLabel }} 후 예상 총 금액</small>
                 <strong>{{ comparisonAmount(scenarioEndTotalValue(item)) }}</strong>
+              </div>
+              <div>
+                <small>{{ taxAmountLabel }}</small>
+                <strong>{{ formatCompactWon(estimatedTaxAmount(item)) }}</strong>
+                <span>신고세액공제 3% 반영</span>
+              </div>
+              <div v-if="donorPaysTax">
+                <small>주는 분 총 준비 금액</small>
+                <strong>{{ formatCompactWon(donorRequiredAmount(item)) }}</strong>
               </div>
             </div>
             <p v-if="isSmallTaxableBaseExempt(item)" class="small-taxable-base-note">
@@ -250,7 +266,6 @@ const reinvestmentSchedule = computed(() => {
               부과되지 않아요.
             </p>
           </article>
-          <span v-if="index === 0" class="tax-comparison-versus" aria-hidden="true">VS</span>
         </template>
       </div>
 
