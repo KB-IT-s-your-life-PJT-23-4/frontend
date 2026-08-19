@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { PRODUCT_TYPE_META, formatCompactWon } from '../../utils/finance'
 import '../../assets/css/portfolio-donut-card.css'
 
@@ -45,17 +45,28 @@ const portfolioProfiles = [
   { type: 'BALANCED', label: '균형형', color: '#e4a800' },
   { type: 'AGGRESSIVE', label: '성장형', color: '#ef7b77' },
 ]
+const allocationTypes = ['DEPOSIT', 'SAVINGS', 'ETF']
 const editing = ref(false)
 const baseProfile = ref('BALANCED')
 const draftAllocation = reactive({ DEPOSIT: 0, SAVINGS: 0, ETF: 0 })
+const allocationBar = ref(null)
+let activeBoundary = null
 
 const allocation = computed(() => {
   const profiles = props.allocationProfiles ?? {}
   return profiles[props.activeProfile] ?? profiles.BALANCED ?? Object.values(profiles)[0] ?? {}
 })
 
+const visibleAllocation = computed(() => (editing.value ? draftAllocation : allocation.value))
+const selectedProfileType = computed(() =>
+  editing.value
+    ? baseProfile.value
+    : props.activeProfile === 'CUSTOM'
+      ? baseProfile.value
+      : props.activeProfile,
+)
 const allocationItems = computed(() =>
-  Object.entries(allocation.value)
+  Object.entries(visibleAllocation.value)
     .filter(([, ratio]) => ratio > 0)
     .map(([type, ratio]) => ({
       type,
@@ -65,31 +76,43 @@ const allocationItems = computed(() =>
 )
 
 const donutStyle = computed(() => {
-  const depositRatio = allocation.value.DEPOSIT ?? 0
-  const savingsRatio = allocation.value.SAVINGS ?? 0
+  const depositRatio = visibleAllocation.value.DEPOSIT ?? 0
+  const savingsRatio = visibleAllocation.value.SAVINGS ?? 0
   return {
     '--deposit-stop': `${depositRatio}%`,
     '--savings-stop': `${depositRatio + savingsRatio}%`,
   }
 })
-const draftTotal = computed(
-  () => draftAllocation.DEPOSIT + draftAllocation.SAVINGS + draftAllocation.ETF,
+const safeAssetBoundary = computed(() => draftAllocation.DEPOSIT + draftAllocation.SAVINGS)
+const draftAllocationLabel = computed(() =>
+  allocationTypes
+    .map((type) => `${PRODUCT_TYPE_META[type]?.label} ${draftAllocation[type]}%`)
+    .join(', '),
 )
-const draftTotalState = computed(() => {
-  if (draftTotal.value === 100) return '총 비율 100%'
-  if (draftTotal.value < 100) return `남은 비율 ${100 - draftTotal.value}%`
-  return `${draftTotal.value - 100}% 초과`
-})
+
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value))
+}
+
+function snapRatio(value) {
+  return clamp(Math.round(Number(value || 0) / 5) * 5, 0, 100)
+}
+
+function setDraftAllocation(depositRatio, savingsRatio) {
+  const deposit = clamp(snapRatio(depositRatio), 0, 100)
+  const savings = clamp(snapRatio(savingsRatio), 0, 100 - deposit)
+  draftAllocation.DEPOSIT = deposit
+  draftAllocation.SAVINGS = savings
+  draftAllocation.ETF = 100 - deposit - savings
+}
 
 function copyAllocation(source = allocation.value) {
-  draftAllocation.DEPOSIT = Number(source?.DEPOSIT ?? 0)
-  draftAllocation.SAVINGS = Number(source?.SAVINGS ?? 0)
-  draftAllocation.ETF = Number(source?.ETF ?? 0)
+  setDraftAllocation(source?.DEPOSIT, source?.SAVINGS)
 }
 
 function selectProfile(profile) {
-  editing.value = false
   baseProfile.value = profile
+  if (editing.value) return
   emit('update:activeProfile', profile)
 }
 
@@ -105,11 +128,94 @@ function cancelCustomizing() {
 }
 
 function applyCustom() {
-  if (draftTotal.value !== 100 || props.customizing) return
+  if (props.customizing) return
   emit('apply-custom', {
     basePortfolioType: baseProfile.value,
     allocation: { ...draftAllocation },
   })
+}
+
+function donorOrder(type) {
+  if (type === 'DEPOSIT') return ['SAVINGS', 'ETF']
+  if (type === 'SAVINGS') return ['ETF', 'DEPOSIT']
+  return ['SAVINGS', 'DEPOSIT']
+}
+
+function receiverOrder(type) {
+  if (type === 'DEPOSIT') return ['SAVINGS', 'ETF']
+  if (type === 'SAVINGS') return ['ETF', 'DEPOSIT']
+  return ['SAVINGS', 'DEPOSIT']
+}
+
+function canAdjustRatio(type, delta) {
+  if (delta > 0) {
+    return (
+      draftAllocation[type] <= 95 && donorOrder(type).some((other) => draftAllocation[other] >= 5)
+    )
+  }
+  return draftAllocation[type] >= 5
+}
+
+function adjustRatio(type, delta) {
+  if (!canAdjustRatio(type, delta)) return
+  const otherTypes = delta > 0 ? donorOrder(type) : receiverOrder(type)
+  const other = otherTypes.find((candidate) =>
+    delta > 0 ? draftAllocation[candidate] >= 5 : candidate !== type,
+  )
+  if (!other) return
+  draftAllocation[type] += delta
+  draftAllocation[other] -= delta
+}
+
+function updateBoundary(boundary, clientX) {
+  const rect = allocationBar.value?.getBoundingClientRect()
+  if (!rect?.width) return
+  const ratio = snapRatio(((clientX - rect.left) / rect.width) * 100)
+  if (boundary === 'deposit') {
+    const nextDeposit = clamp(ratio, 0, safeAssetBoundary.value)
+    setDraftAllocation(nextDeposit, safeAssetBoundary.value - nextDeposit)
+    return
+  }
+  const nextSafeBoundary = clamp(ratio, draftAllocation.DEPOSIT, 100)
+  setDraftAllocation(draftAllocation.DEPOSIT, nextSafeBoundary - draftAllocation.DEPOSIT)
+}
+
+function moveBoundary(event) {
+  if (!activeBoundary) return
+  updateBoundary(activeBoundary, event.clientX)
+}
+
+function stopBoundaryDrag() {
+  activeBoundary = null
+  window.removeEventListener('pointermove', moveBoundary)
+  window.removeEventListener('pointerup', stopBoundaryDrag)
+  window.removeEventListener('pointercancel', stopBoundaryDrag)
+}
+
+function startBoundaryDrag(boundary, event) {
+  activeBoundary = boundary
+  event.preventDefault()
+  updateBoundary(boundary, event.clientX)
+  window.addEventListener('pointermove', moveBoundary)
+  window.addEventListener('pointerup', stopBoundaryDrag)
+  window.addEventListener('pointercancel', stopBoundaryDrag)
+}
+
+function handleBoundaryKey(boundary, event) {
+  const direction = ['ArrowRight', 'ArrowUp'].includes(event.key)
+    ? 5
+    : ['ArrowLeft', 'ArrowDown'].includes(event.key)
+      ? -5
+      : 0
+  if (!direction) return
+  event.preventDefault()
+  if (boundary === 'deposit') {
+    const nextDeposit = clamp(draftAllocation.DEPOSIT + direction, 0, safeAssetBoundary.value)
+    setDraftAllocation(nextDeposit, safeAssetBoundary.value - nextDeposit)
+    return
+  }
+  const nextSafeBoundary = clamp(safeAssetBoundary.value + direction, draftAllocation.DEPOSIT, 100)
+  setDraftAllocation(draftAllocation.DEPOSIT, nextSafeBoundary - draftAllocation.DEPOSIT)
 }
 
 watch(
@@ -130,6 +236,8 @@ watch(
     }
   },
 )
+
+onBeforeUnmount(stopBoundaryDrag)
 </script>
 
 <template>
@@ -152,27 +260,21 @@ watch(
     <div class="product-category-tabs portfolio-profile-tabs" role="tablist" aria-label="투자 성향">
       <button
         v-for="profile in portfolioProfiles"
-        :id="`portfolio-tab-${profile.type}`"
         :key="profile.type"
         type="button"
-        role="tab"
-        :aria-selected="activeProfile === profile.type"
-        :aria-controls="`portfolio-panel-${profile.type}`"
-        :class="{ active: activeProfile === profile.type }"
+        :aria-pressed="selectedProfileType === profile.type"
+        :class="{ active: selectedProfileType === profile.type }"
         :style="{ '--product-tab-color': profile.color }"
         @click="selectProfile(profile.type)"
       >
         <span>{{ profile.label }}</span>
       </button>
-      <span v-if="activeProfile === 'CUSTOM'" class="portfolio-custom-badge">직접 조정</span>
+      <span v-if="activeProfile === 'CUSTOM' && !editing" class="portfolio-custom-badge">
+        직접 조정
+      </span>
     </div>
 
-    <div
-      :id="`portfolio-panel-${activeProfile}`"
-      class="portfolio-donut-layout"
-      role="tabpanel"
-      :aria-labelledby="`portfolio-tab-${activeProfile}`"
-    >
+    <div class="portfolio-donut-layout" role="region" aria-label="상품 운용 비율과 예상 금액">
       <div class="portfolio-donut-visual">
         <div
           class="portfolio-donut"
@@ -205,22 +307,85 @@ watch(
     <div v-if="editing" class="portfolio-custom-editor">
       <div class="portfolio-custom-editor-heading">
         <div>
-          <strong>상품 비율 직접 조정</strong>
-          <p>각 비율은 5% 단위로 조정하고 합계를 100%로 맞춰주세요.</p>
+          <strong>상품 운용 비율</strong>
+          <p>조절점을 움직이거나 버튼을 눌러 5% 단위로 조정할 수 있어요.</p>
         </div>
-        <span :class="{ invalid: draftTotal !== 100 }">{{ draftTotalState }}</span>
+      </div>
+
+      <div ref="allocationBar" class="portfolio-allocation-bar" :aria-label="draftAllocationLabel">
+        <div
+          v-for="type in allocationTypes"
+          :key="type"
+          class="portfolio-allocation-segment"
+          :class="`is-${type.toLowerCase()}`"
+          :style="{
+            width: `${draftAllocation[type]}%`,
+            background: PRODUCT_TYPE_META[type]?.color,
+          }"
+        >
+          <span v-if="draftAllocation[type] >= 15">
+            {{ PRODUCT_TYPE_META[type]?.label }} {{ draftAllocation[type] }}%
+          </span>
+        </div>
+        <button
+          type="button"
+          class="portfolio-boundary-handle"
+          :style="{ left: `${draftAllocation.DEPOSIT}%` }"
+          role="slider"
+          aria-label="예금과 적금 비율 경계"
+          aria-valuemin="0"
+          :aria-valuemax="safeAssetBoundary"
+          :aria-valuenow="draftAllocation.DEPOSIT"
+          @pointerdown="startBoundaryDrag('deposit', $event)"
+          @keydown="handleBoundaryKey('deposit', $event)"
+        />
+        <button
+          type="button"
+          class="portfolio-boundary-handle"
+          :style="{ left: `${safeAssetBoundary}%` }"
+          role="slider"
+          aria-label="적금과 ETF 비율 경계"
+          :aria-valuemin="draftAllocation.DEPOSIT"
+          aria-valuemax="100"
+          :aria-valuenow="safeAssetBoundary"
+          @pointerdown="startBoundaryDrag('safe', $event)"
+          @keydown="handleBoundaryKey('safe', $event)"
+        />
       </div>
 
       <div class="portfolio-ratio-controls">
-        <label v-for="type in ['DEPOSIT', 'SAVINGS', 'ETF']" :key="type">
-          <span>
+        <div v-for="type in allocationTypes" :key="type" class="portfolio-ratio-row">
+          <span class="portfolio-ratio-name">
             <i :style="{ background: PRODUCT_TYPE_META[type]?.color }" />
             {{ PRODUCT_TYPE_META[type]?.label }}
           </span>
-          <input v-model.number="draftAllocation[type]" type="range" min="0" max="100" step="5" />
-          <output>{{ draftAllocation[type] }}%</output>
-        </label>
+          <div class="portfolio-ratio-stepper">
+            <button
+              type="button"
+              :aria-label="`${PRODUCT_TYPE_META[type]?.label} 비율 5% 줄이기`"
+              :disabled="!canAdjustRatio(type, -5)"
+              @click="adjustRatio(type, -5)"
+            >
+              −
+            </button>
+            <output :aria-label="`${PRODUCT_TYPE_META[type]?.label} 비율`">
+              {{ draftAllocation[type] }}%
+            </output>
+            <button
+              type="button"
+              :aria-label="`${PRODUCT_TYPE_META[type]?.label} 비율 5% 늘리기`"
+              :disabled="!canAdjustRatio(type, 5)"
+              @click="adjustRatio(type, 5)"
+            >
+              +
+            </button>
+          </div>
+        </div>
       </div>
+
+      <p class="portfolio-custom-guidance">
+        비율을 바꾸어도 상품 선택 기준은 유지되며, 적용 후 예상 금액을 다시 계산해요.
+      </p>
 
       <p v-if="savingsMaximumRatio < 100" class="portfolio-savings-limit">
         적금은 현재 운용 기간과 월 납입 한도 기준으로 최대 약
@@ -237,7 +402,7 @@ watch(
         <button
           type="button"
           class="portfolio-custom-apply"
-          :disabled="draftTotal !== 100 || customizing"
+          :disabled="customizing"
           @click="applyCustom"
         >
           {{ customizing ? '계산 중...' : '이 비율 적용하기' }}
