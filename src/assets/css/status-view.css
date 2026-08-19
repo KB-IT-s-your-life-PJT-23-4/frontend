@@ -137,7 +137,8 @@
   right: auto;
   left: -2px;
   text-align: left;
-  
+}
+
 /* 저장한 시뮬레이션의 증여·상품 운용 예정 일정 */
 .saved-plan-timeline {
   width: 100%;
