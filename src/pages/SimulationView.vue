@@ -43,6 +43,9 @@ const loadingInitialData = ref(!api.isMock)
 const errorMessage = ref('')
 const giftDateError = ref('')
 const selectedPortfolioType = ref('BALANCED')
+const customizingPortfolio = ref(false)
+const customizationError = ref('')
+const savingsMaximumRatio = ref(100)
 const showSaveModal = ref(false)
 const saving = ref(false)
 const selectedProducts = reactive({})
@@ -236,6 +239,9 @@ function resetForNewSimulationRoute() {
   giftDate.value = todayDate
   donorPaysTax.value = false
   selectedPortfolioType.value = 'BALANCED'
+  customizingPortfolio.value = false
+  customizationError.value = ''
+  savingsMaximumRatio.value = 100
   showSaveModal.value = false
   clearProductSelections()
   Object.keys(detailLoading).forEach((key) => delete detailLoading[key])
@@ -508,6 +514,91 @@ function updatePreferentialConditions(simulationProductId, conditionCodes) {
   preferentialSelections[simulationProductId] = conditionCodes
 }
 
+function applyMockCustomPortfolio(basePortfolioType, allocation) {
+  const source = result.value?.recommendedByProfile?.[basePortfolioType]
+  if (!source?.scenario || !source?.portfolio) return false
+
+  const principal = Number(source.scenario.investmentPrincipal ?? 0)
+  const products = source.portfolio.products
+    .filter((product) => Number(allocation[product.type] ?? 0) > 0)
+    .map((product) => {
+      const allocatedAmount = Math.round((principal * Number(allocation[product.type])) / 100)
+      const multiplier = product.allocatedAmount
+        ? Number(product.expectedFutureValue ?? product.allocatedAmount) / product.allocatedAmount
+        : 1
+      return {
+        ...product,
+        allocatedAmount,
+        allocationRatio: Number(allocation[product.type]),
+        expectedFutureValue: Math.round(allocatedAmount * multiplier),
+      }
+    })
+  const bestByType = Object.values(
+    products.reduce((best, product) => {
+      if (
+        !best[product.type] ||
+        best[product.type].expectedFutureValue < product.expectedFutureValue
+      ) {
+        best[product.type] = product
+      }
+      return best
+    }, {}),
+  )
+  const portfolio = {
+    ...source.portfolio,
+    portfolioId: `custom-${result.value.simulationId}`,
+    portfolioType: 'CUSTOM',
+    allocation: { ...allocation },
+    expectedFutureValue: bestByType.reduce(
+      (sum, product) => sum + Number(product.expectedFutureValue ?? 0),
+      0,
+    ),
+    products,
+  }
+  result.value = {
+    ...result.value,
+    version: Number(result.value.version ?? 0) + 1,
+    recommendedByProfile: {
+      ...result.value.recommendedByProfile,
+      CUSTOM: { scenario: source.scenario, portfolio },
+    },
+  }
+  return true
+}
+
+async function applyCustomPortfolio({ basePortfolioType, allocation }) {
+  const source = result.value?.recommendedByProfile?.[basePortfolioType]
+  if (!result.value?.simulationId || !source?.scenario) return
+
+  customizingPortfolio.value = true
+  customizationError.value = ''
+  try {
+    const response = await api.customizeSimulationPortfolio(result.value.simulationId, {
+      version: result.value.version,
+      resultId: source.scenario.resultId,
+      basePortfolioType,
+      allocation: {
+        depositRatio: allocation.DEPOSIT,
+        savingsRatio: allocation.SAVINGS,
+        etfRatio: allocation.ETF,
+      },
+    })
+    if (response?.simulation) {
+      applySimulationResponse(response.simulation)
+      savingsMaximumRatio.value = Number(response.savingsMaximumRatio ?? 100)
+    } else if (!applyMockCustomPortfolio(basePortfolioType, allocation)) {
+      throw new Error('커스텀 포트폴리오를 적용하지 못했습니다.')
+    }
+    selectedPortfolioType.value = 'CUSTOM'
+    store.showToast('직접 조정한 상품 비율을 적용했습니다.', 'success')
+  } catch (error) {
+    customizationError.value = error.message
+    store.showToast(error.message, 'info')
+  } finally {
+    customizingPortfolio.value = false
+  }
+}
+
 async function loadProductDetail(product) {
   if (!result.value?.simulationId || product.detailLoaded || detailLoading[product.id]) return
 
@@ -703,6 +794,11 @@ onMounted(async () => {
         :allocation-profiles="allocationProfiles"
         :expected-future-value="recommendedFutureValue"
         :years="result.years"
+        :customizing="customizingPortfolio"
+        :customization-error="customizationError"
+        :savings-maximum-ratio="savingsMaximumRatio"
+        :customizable="result.status === 'DRAFT'"
+        @apply-custom="applyCustomPortfolio"
       />
 
       <ProductSelectionPanel
