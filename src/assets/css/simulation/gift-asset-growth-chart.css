@@ -270,4 +270,7 @@
     box-sizing: border-box;
     text-align: left;
   }
+  .gift-growth-chart-legend {
+    font-size: 0.63rem;
+  }
 }
