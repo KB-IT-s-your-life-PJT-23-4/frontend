@@ -242,19 +242,11 @@ onBeforeUnmount(stopBoundaryDrag)
 
 <template>
   <section class="portfolio-donut-card">
-    <div class="portfolio-card-heading portfolio-card-heading-customizable">
+    <div class="portfolio-card-heading">
       <div>
         <h2>{{ years }}년을 위한 운용 비중 제안</h2>
         <p>투자 성향별 추천 비율을 확인하거나 원하는 비율로 직접 조정해 보세요.</p>
       </div>
-      <button
-        v-if="customizable && !editing"
-        type="button"
-        class="portfolio-customize-button"
-        @click="beginCustomizing"
-      >
-        비율 직접 조정
-      </button>
     </div>
 
     <div class="product-category-tabs portfolio-profile-tabs" role="tablist" aria-label="투자 성향">
@@ -301,6 +293,14 @@ onBeforeUnmount(stopBoundaryDrag)
           <span>{{ item.label }}</span>
           <strong>{{ item.ratio }}%</strong>
         </div>
+        <button
+          v-if="customizable && !editing"
+          type="button"
+          class="portfolio-customize-button"
+          @click="beginCustomizing"
+        >
+          {{ activeProfile === 'CUSTOM' ? '비율 다시 조정' : '비율 직접 조정' }}
+        </button>
       </div>
     </div>
 
