@@ -89,13 +89,6 @@ function preparationAmount(item) {
   return Number(donorPaysTax.value ? item?.totalDonorOutflow : item?.estimatedPayableTax)
 }
 
-function preparationDetail(item) {
-  if (donorPaysTax.value) {
-    return `증여액과 예상 세금 ${formatCompactWon(item?.estimatedPayableTax ?? 0)} 포함`
-  }
-  return `증여받은 분이 예상 세금 ${formatCompactWon(item?.estimatedPayableTax ?? 0)} 납부`
-}
-
 function scenarioFutureValue(item) {
   const matchingPortfolio = item?.portfolios?.find(
     (portfolio) => portfolio.portfolioType === props.portfolioProfile,
@@ -118,18 +111,6 @@ function scenarioEndTotalValue(item) {
   const investedFutureValue = scenarioFutureValue(item)
   if (investedFutureValue == null) return null
   return investedFutureValue + remainingUninvestedPrincipal(item)
-}
-
-function endTotalValueDetail(item) {
-  const investedFutureValue = scenarioFutureValue(item)
-  const remainingPrincipal = remainingUninvestedPrincipal(item)
-  if (investedFutureValue == null) return '운용 결과를 계산할 수 없어요'
-  if (remainingPrincipal > 0) {
-    return `운용 결과 ${formatCompactWon(
-      investedFutureValue,
-    )} + 아직 증여하지 않은 원금 ${formatCompactWon(remainingPrincipal)}`
-  }
-  return `${portfolioProfileLabel.value} 투자 성향의 운용 결과`
 }
 
 const recommendedPreparationDifference = computed(
@@ -258,12 +239,10 @@ const reinvestmentSchedule = computed(() => {
               <div>
                 <small>{{ preparationLabel }}</small>
                 <strong>{{ formatCompactWon(preparationAmount(item)) }}</strong>
-                <span>{{ preparationDetail(item) }}</span>
               </div>
               <div>
                 <small>{{ resultYearsLabel }} 후 예상 총 금액</small>
                 <strong>{{ comparisonAmount(scenarioEndTotalValue(item)) }}</strong>
-                <span>{{ endTotalValueDetail(item) }}</span>
               </div>
             </div>
             <p v-if="isSmallTaxableBaseExempt(item)" class="small-taxable-base-note">

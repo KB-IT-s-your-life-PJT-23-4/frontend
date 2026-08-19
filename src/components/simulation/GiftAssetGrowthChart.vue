@@ -403,22 +403,11 @@ function eventPositionStyle(event) {
 </script>
 
 <template>
-  <section class="gift-growth-chart-card" aria-labelledby="gift-growth-chart-title">
-    <header class="gift-growth-chart-heading">
-      <div>
-        <h3 id="gift-growth-chart-title">증여 후 자산은 이렇게 변화할 것으로 예상돼요</h3>
-      </div>
-    </header>
-
+  <section class="gift-growth-chart-card">
     <div class="gift-growth-chart-legend" aria-label="그래프 범례">
       <span class="is-recommended">추천 플랜</span>
-      <span class="is-principal">누적 운용 원금</span>
       <span class="is-alternative">비추천 플랜</span>
-    </div>
-
-    <div class="gift-growth-event-legend" aria-label="일정 표시 범례">
-      <span class="is-gift">분할 증여일</span>
-      <span class="is-reinvestment">상품 재가입일</span>
+      <span class="is-principal">누적 운용 원금</span>
     </div>
 
     <div class="gift-growth-chart-scroll">
@@ -497,22 +486,6 @@ function eventPositionStyle(event) {
             <b>{{ event.detail }}</b>
           </span>
         </button>
-      </div>
-    </div>
-
-    <div class="gift-growth-chart-summary">
-      <div class="is-recommended">
-        <span>{{ scenarioLabel(recommendedScenario) }}</span>
-        <div>
-          <strong>{{ formatCompactWon(recommendedFinalValue) }}</strong>
-          <small v-if="finalValueDifference > 0">
-            +{{ formatCompactWon(finalValueDifference) }}
-          </small>
-        </div>
-      </div>
-      <div>
-        <span>{{ scenarioLabel(alternativeScenario) }}</span>
-        <strong>{{ formatCompactWon(alternativeFinalValue) }}</strong>
       </div>
     </div>
 
