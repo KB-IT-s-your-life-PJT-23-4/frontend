@@ -185,7 +185,7 @@
 .admin-notification-state > svg {
   box-sizing: content-box;
   padding: 10px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #edf3f8;
   color: #396888;
 }
