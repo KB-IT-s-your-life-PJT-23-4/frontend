@@ -1,0 +1,192 @@
+.portfolio-card-heading-customizable {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.portfolio-customize-button {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border: 1px solid #cbd8e8;
+  border-radius: 10px;
+  background: #fff;
+  color: #24486d;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.portfolio-customize-button:hover,
+.portfolio-customize-button:focus-visible {
+  border-color: #6f91b3;
+  background: #f7faff;
+}
+
+.portfolio-custom-badge {
+  align-self: center;
+  margin-left: 8px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #edf4fb;
+  color: #315f89;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.portfolio-custom-editor {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid #dce5ef;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.portfolio-custom-editor-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.portfolio-custom-editor-heading strong {
+  color: #172f4b;
+  font-size: 1rem;
+}
+
+.portfolio-custom-editor-heading p {
+  margin: 5px 0 0;
+  color: #687b91;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.portfolio-custom-editor-heading > span {
+  flex: 0 0 auto;
+  color: #266a52;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.portfolio-custom-editor-heading > span.invalid {
+  color: #b05b3d;
+}
+
+.portfolio-ratio-controls {
+  display: grid;
+  gap: 14px;
+}
+
+.portfolio-ratio-controls label {
+  display: grid;
+  grid-template-columns: 92px minmax(100px, 1fr) 48px;
+  align-items: center;
+  gap: 12px;
+  color: #334f6d;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.portfolio-ratio-controls label > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.portfolio-ratio-controls label i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.portfolio-ratio-controls input[type='range'] {
+  width: 100%;
+  accent-color: #2f6797;
+  cursor: pointer;
+}
+
+.portfolio-ratio-controls output {
+  color: #173f68;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.portfolio-savings-limit,
+.portfolio-custom-error {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.portfolio-savings-limit {
+  color: #61758b;
+}
+
+.portfolio-custom-error {
+  color: #ad4d3b;
+}
+
+.portfolio-custom-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.portfolio-custom-actions button {
+  min-width: 96px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.portfolio-custom-cancel {
+  border: 1px solid #d5dee8;
+  background: #fff;
+  color: #52677d;
+}
+
+.portfolio-custom-apply {
+  border: 1px solid #224f78;
+  background: #224f78;
+  color: #fff;
+}
+
+.portfolio-custom-apply:disabled {
+  border-color: #b8c4cf;
+  background: #b8c4cf;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .portfolio-card-heading-customizable {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .portfolio-customize-button {
+    align-self: flex-start;
+  }
+
+  .portfolio-custom-editor {
+    padding: 16px;
+  }
+
+  .portfolio-custom-editor-heading {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .portfolio-ratio-controls label {
+    grid-template-columns: 78px minmax(80px, 1fr) 42px;
+    gap: 8px;
+  }
+
+  .portfolio-custom-actions button {
+    flex: 1;
+  }
+}

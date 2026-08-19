@@ -253,6 +253,14 @@ export const api = {
     return request(`/gs/${simulationId}/products/${kbProductVersionId}`)
   },
 
+  async customizeSimulationPortfolio(simulationId, payload) {
+    if (!API_BASE) return null
+    return request(`/gs/${simulationId}/portfolios/custom`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    })
+  },
+
   async saveSimulation(simulationId, payload) {
     if (!API_BASE) {
       await wait(350)

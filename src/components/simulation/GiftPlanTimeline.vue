@@ -148,7 +148,7 @@ const comparisonReason = computed(() => {
 
   if (futureValueDifference == null) {
     if (preparationDifference > 0) {
-      return `${recommendedLabel}은 ${preparationLabel.value}이 ${alternativeLabel}보다 ${formatCompactWon(
+      return `${recommendedLabel}는 ${preparationLabel.value}이 ${alternativeLabel}보다 ${formatCompactWon(
         preparationDifference,
       )} 적어 유리해요.`
     }
@@ -156,7 +156,7 @@ const comparisonReason = computed(() => {
   }
 
   if (futureValueDifference > 0 && preparationDifference > 0) {
-    return `${recommendedLabel}은 준비 금액을 ${formatCompactWon(
+    return `${recommendedLabel}는 준비 금액을 ${formatCompactWon(
       preparationDifference,
     )} 줄이고, ${resultYearsLabel.value} 후 예상 총 금액은 ${formatCompactWon(
       futureValueDifference,
