@@ -215,7 +215,7 @@
 .recipient-highlight-row {
   margin: 4px 0;
   padding: 14px 15px !important;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #eef3ff;
 }
 
@@ -247,7 +247,7 @@
   margin-top: 20px;
   min-height: 46px;
   border: 1px solid #cfdae6;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f6f9fc;
   color: #355e80;
   font-size: 13px;

@@ -852,7 +852,7 @@ body.admin-route {
   height: 48px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #edf3f8;
   color: #396888;
 }

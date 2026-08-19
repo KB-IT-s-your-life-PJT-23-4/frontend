@@ -542,7 +542,7 @@
   align-items: flex-start;
   gap: 10px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f4f7fc;
   text-align: left;
 }
