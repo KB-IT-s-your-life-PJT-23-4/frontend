@@ -273,4 +273,8 @@
   .gift-growth-chart-legend {
     font-size: 0.63rem;
   }
+  .gift-growth-grid text,
+  .gift-growth-x-axis text {
+    font-size: 1rem;
+  }
 }
