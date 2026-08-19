@@ -3671,7 +3671,6 @@ textarea:focus-visible {
   background: #e3e9f1;
   color: #3f4f61;
   font-size: 11px;
-  font-weight: 600;
   text-decoration: none;
 }
 
@@ -3716,7 +3715,6 @@ textarea:focus-visible {
   background: #fff;
   color: #8a6b00;
   font-size: 10px;
-  font-weight: 600;
   cursor: pointer;
 }
 

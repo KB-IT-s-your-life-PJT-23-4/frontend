@@ -9,7 +9,7 @@ import SavedSimulationTimeline from '../components/status/SavedSimulationTimelin
 import { useAppStore } from '../stores/appStore'
 import { deductionProgress, toIsoDate } from '../utils/deduction'
 import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
-import '../assets/css/simulation/gift-plan-timeline.css'
+import '../assets/css/simulation/gift-strategy-comparison-section.css'
 import { normalizeSimulationResponse } from '../utils/simulationModel'
 import '../assets/css/status-view.css'
 
@@ -82,8 +82,7 @@ async function loadSavedSimulationTimeline(plan, { force = false } = {}) {
     const response = await store.loadSimulationDetail(simulationId, { force })
     simulationTimelineDetails[simulationId] = normalizeSimulationResponse(response)
   } catch (error) {
-    simulationTimelineErrors[simulationId] =
-      error?.message || '저장한 일정을 불러오지 못했어요.'
+    simulationTimelineErrors[simulationId] = error?.message || '저장한 일정을 불러오지 못했어요.'
   } finally {
     simulationTimelineLoading[simulationId] = false
   }
@@ -731,7 +730,10 @@ onMounted(() => loadStatus())
                             class="timeline-dot"
                             :class="isTrancheDone(tranche) ? 'is-done' : 'is-upcoming'"
                           >
-                            <AppIcon :name="isTrancheDone(tranche) ? 'check' : 'wallet'" :size="14" />
+                            <AppIcon
+                              :name="isTrancheDone(tranche) ? 'check' : 'wallet'"
+                              :size="14"
+                            />
                           </span>
                           <div class="timeline-point-copy">
                             <strong>{{ tranche.sequenceNo }}회차</strong>

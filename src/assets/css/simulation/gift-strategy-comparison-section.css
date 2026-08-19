@@ -1,0 +1,344 @@
+.gift-plan-timeline-card {
+  min-width: 0;
+  margin-bottom: 18px;
+  padding: 21px;
+  border: 1px solid #e8edf2;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 8px 25px rgba(32, 52, 72, 0.055);
+}
+
+.timeline-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 13px;
+}
+
+.timeline-card-heading > div {
+  width: 100%;
+  min-width: 0;
+}
+
+.timeline-card-heading h2 {
+  margin: 5px 0 0;
+  font-size: 19px;
+  line-height: 1.35;
+  letter-spacing: -0.045em;
+}
+
+.timeline-card-heading p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.timeline-heading-meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.timeline-count {
+  margin-top: 0;
+  padding: 6px 9px;
+  flex: none;
+  border-radius: 999px;
+  color: #4f718e;
+  background: #eaf3fb;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tax-comparison-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: 13px;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.tax-comparison-option {
+  display: grid;
+  min-width: 0;
+  padding: 18px;
+  align-content: start;
+  border: 1px solid #dfe7ee;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(42, 65, 86, 0.055);
+}
+
+.tax-comparison-option.is-recommended {
+  border: 2px solid #4c789c;
+  padding: 17px;
+  background: #eef6fd;
+  box-shadow: 0 8px 24px rgba(52, 92, 125, 0.1);
+}
+
+.tax-comparison-option header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.tax-comparison-option header span {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.tax-comparison-option header em {
+  padding: 3px 5px;
+  flex: none;
+  border-radius: 999px;
+  color: #3f6f96;
+  background: #dfeef9;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.tax-comparison-metrics {
+  display: grid;
+  margin-top: 4px;
+  gap: 8px;
+}
+
+.tax-comparison-metrics > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.tax-comparison-metrics > div + div {
+  padding-top: 8px;
+  border-top: 1px solid #e7edf2;
+}
+
+.tax-comparison-metrics small {
+  color: #82919e;
+  font-size: 10px;
+}
+
+.tax-comparison-metrics strong {
+  overflow-wrap: anywhere;
+  color: #2f506b;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.tax-comparison-option.is-recommended .tax-comparison-metrics strong {
+  color: #2f6b99;
+}
+
+.tax-comparison-metrics span {
+  color: #9aa6b0;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.small-taxable-base-note {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: #54728b;
+  background: #f3f7fa;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.tax-comparison-option.is-recommended .small-taxable-base-note {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.tax-free-investment-summary {
+  display: flex;
+  margin-top: 16px;
+  padding: 18px;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid #dbe8f2;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #f4f9fd 0%, #eef6fb 100%);
+}
+
+.tax-free-investment-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  color: #49799f;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(57, 94, 125, 0.09);
+}
+
+.tax-free-investment-summary > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.tax-free-investment-summary small {
+  color: #6f8495;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.tax-free-investment-summary strong {
+  color: #304f68;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.tax-free-investment-summary strong em {
+  color: #2f709f;
+  font-size: 18px;
+  font-style: normal;
+}
+
+.tax-free-investment-summary p {
+  margin: 1px 0 0;
+  color: #82919e;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.timeline-key-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  margin-top: 16px;
+  padding-top: 14px;
+  gap: 0;
+  border-top: 1px solid #e7edf2;
+}
+
+.timeline-key-metrics > div {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.timeline-key-metrics > div + div {
+  padding-left: 22px;
+  border-left: 1px solid #e2e9ef;
+}
+
+.timeline-key-metrics span {
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.timeline-key-metrics strong {
+  color: #476c8d;
+  font-size: 15px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+@media (max-width: 430px) {
+  .gift-plan-timeline-card {
+    padding: 18px;
+  }
+
+  .timeline-card-heading {
+    align-items: flex-start;
+  }
+
+  .timeline-heading-meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .timeline-card-heading h2 {
+    font-size: clamp(14px, 4.5vw, 18px);
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .timeline-count {
+    max-width: 187px;
+    padding: 5px 8px;
+    font-size: 10px;
+    line-height: 1.4;
+    text-align: right;
+    white-space: normal;
+  }
+
+  .tax-comparison-option {
+    min-height: 0;
+  }
+
+  .tax-comparison-option header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .tax-comparison-option header span {
+    font-size: 12px;
+  }
+
+  .tax-comparison-metrics strong {
+    font-size: 13px;
+  }
+
+  .tax-comparison-metrics > div.is-primary strong {
+    font-size: 14px;
+  }
+
+  .tax-free-investment-summary {
+    padding: 15px;
+    align-items: flex-start;
+  }
+
+  .tax-free-investment-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .tax-free-investment-summary strong {
+    font-size: 12px;
+  }
+
+  .tax-free-investment-summary strong em {
+    font-size: 15px;
+  }
+
+  .timeline-key-metrics {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+
+  .timeline-key-metrics > div {
+    min-width: 0;
+  }
+
+  .timeline-key-metrics > div + div {
+    padding-left: 14px;
+  }
+}
+
+@media (max-width: 350px) {
+  .timeline-heading-meta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .timeline-count {
+    max-width: 100%;
+    justify-self: start;
+    text-align: left;
+  }
+}
