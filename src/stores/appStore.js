@@ -318,6 +318,8 @@ function savedSimulationToPlan(item) {
     currentAmount: requestedAmount,
     expectedFutureValue: Number(item.selection?.expectedFutureValue ?? requestedAmount),
     plannedGiftDate: toDotDate(item.inputSummary?.giftDate),
+    operationEndDate: toDotDate(item.inputSummary?.investmentEndDate),
+    // 기존 화면 호환용 필드. 의미는 증여일이 아니라 상품 운용 마무리일이다.
     giftDate: toDotDate(item.inputSummary?.investmentEndDate),
     productName: productNames.join(' · ') || fallbackProductNames.join(' · ') || '저장된 증여 계획',
     productType: selectedProducts[0]?.productType ?? selectedProductTypes[0] ?? null,
@@ -402,6 +404,7 @@ function serverSimulationToState(item) {
 let statusLoaded = false
 let pendingSync = null
 let statusGeneration = 0
+const simulationDetailCache = new Map()
 
 /**
  * DB에서 수증자 목록·증여 전체·공제 현황을 읽어 증여 현황 상태를 다시 만든다.
@@ -412,6 +415,7 @@ async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
   if (api.isMock) return
 
   const generation = statusGeneration
+  simulationDetailCache.clear()
 
   // GET /api/gs는 일반 화면에서 기존 이력을 표시하기 위한 읽기 API다.
   // 조회 실패를 빈 이력으로 바꾸지 않아 실제 데이터가 없는 상태와 오류를 구분한다.
@@ -464,7 +468,16 @@ async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
   )
   const savedSimulationPlans = savedSimulationHistories
     .flatMap((history) => (history?.items ?? []).map(savedSimulationToPlan))
-    .filter((plan) => plan.simulResultId == null || !registeredResultIds.has(plan.simulResultId))
+    .map((plan) => ({
+      ...plan,
+      registeredAsGift:
+        plan.simulResultId != null && registeredResultIds.has(Number(plan.simulResultId)),
+    }))
+    // 운용 마무리일까지는 증여 등록 여부와 관계없이 저장한 계획 카드를 유지한다.
+    .filter((plan) => {
+      const operationEndDate = toIsoDate(plan.operationEndDate)
+      return !operationEndDate || operationEndDate >= toIsoDate(new Date())
+    })
   state.simulationPlans = savedSimulationPlans
   state.plans = gifts.filter((gift) => gift.status === GIFT_STATUS.PLANNED).map(plannedGiftToPlan)
   state.giftHistory = gifts
@@ -479,6 +492,38 @@ async function syncStatus({ suppressSimulationAccessNotice = true } = {}) {
   }
 
   statusLoaded = true
+}
+
+/**
+ * 저장된 시뮬레이션의 상세 스냅샷을 필요할 때만 조회한다.
+ * 같은 화면에서 일정을 여러 번 열어도 동일한 요청을 반복하지 않으며,
+ * 진행 중인 요청도 공유해 빠른 연속 클릭으로 인한 중복 호출을 막는다.
+ */
+async function loadSimulationDetail(simulationId, { force = false } = {}) {
+  const normalizedId = Number(simulationId)
+  if (!Number.isFinite(normalizedId) || normalizedId <= 0) {
+    throw new Error('유효한 시뮬레이션 ID가 필요합니다.')
+  }
+
+  if (api.isMock) return null
+
+  if (!force && simulationDetailCache.has(normalizedId)) {
+    return simulationDetailCache.get(normalizedId)
+  }
+
+  const pending = api.getSimulation(normalizedId)
+  simulationDetailCache.set(normalizedId, pending)
+
+  try {
+    const detail = await pending
+    simulationDetailCache.set(normalizedId, detail)
+    return detail
+  } catch (error) {
+    if (simulationDetailCache.get(normalizedId) === pending) {
+      simulationDetailCache.delete(normalizedId)
+    }
+    throw error
+  }
 }
 
 async function loadSimulationHistoryPage({ familyId, page = 0, size = 10 } = {}) {
@@ -540,6 +585,7 @@ async function clearUserState() {
   statusGeneration += 1
   statusLoaded = false
   pendingSync = null
+  simulationDetailCache.clear()
 
   const nextState = defaultState()
   Object.keys(state).forEach((key) => {
@@ -565,7 +611,13 @@ async function clearUserState() {
  */
 async function registerSimulationAsGift(planId) {
   const plan = state.simulationPlans.find((item) => item.id === planId)
-  if (!plan || api.isMock) return
+  if (!plan) return
+
+  if (api.isMock) {
+    plan.registeredAsGift = true
+    showToast('증여로 등록되었어요.')
+    return
+  }
 
   const created = await api.registerGiftFromSimulation({
     simulationId: Number(plan.simulationId),
@@ -838,6 +890,7 @@ export function useAppStore() {
     syncStatus,
     ensureStatusLoaded,
     loadSimulationHistoryPage,
+    loadSimulationDetail,
     registerSimulationAsGift,
     confirmPlanGift,
     toggleDocument,

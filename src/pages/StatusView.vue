@@ -5,10 +5,12 @@ import DateField from '../components/common/DateField.vue'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import ModalSheet from '../components/layout/ModalSheet.vue'
+import SavedSimulationTimeline from '../components/status/SavedSimulationTimeline.vue'
 import { useAppStore } from '../stores/appStore'
 import { deductionProgress, toIsoDate } from '../utils/deduction'
 import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
 import '../assets/css/simulation/gift-plan-timeline.css'
+import { normalizeSimulationResponse } from '../utils/simulationModel'
 import '../assets/css/status-view.css'
 
 const store = useAppStore()
@@ -18,6 +20,10 @@ const planToDelete = ref(null)
 const giftToDelete = ref(null)
 const deletingGift = ref(false)
 const expandedPlanIds = ref([])
+const openSimulationTimelineId = ref(null)
+const simulationTimelineDetails = reactive({})
+const simulationTimelineLoading = reactive({})
+const simulationTimelineErrors = reactive({})
 
 // toISOString()은 UTC라 KST 오전 9시 이전에는 하루 전 날짜가 나온다. 로컬 날짜로 직접 만든다.
 function todayIso() {
@@ -63,6 +69,38 @@ const familySimulation = computed(
   () =>
     (store.state.simulationPlans ?? []).find((plan) => plan.familyId === family.value.id) ?? null,
 )
+
+async function loadSavedSimulationTimeline(plan, { force = false } = {}) {
+  const simulationId = Number(plan?.simulationId)
+  if (!simulationId || store.isMock) return
+  if (simulationTimelineDetails[simulationId] && !force) return
+
+  simulationTimelineLoading[simulationId] = true
+  simulationTimelineErrors[simulationId] = ''
+
+  try {
+    const response = await store.loadSimulationDetail(simulationId, { force })
+    simulationTimelineDetails[simulationId] = normalizeSimulationResponse(response)
+  } catch (error) {
+    simulationTimelineErrors[simulationId] =
+      error?.message || '저장한 일정을 불러오지 못했어요.'
+  } finally {
+    simulationTimelineLoading[simulationId] = false
+  }
+}
+
+async function toggleSavedSimulationTimeline(plan) {
+  const simulationId = Number(plan?.simulationId)
+  if (!simulationId) return
+
+  if (openSimulationTimelineId.value === simulationId) {
+    openSimulationTimelineId.value = null
+    return
+  }
+
+  openSimulationTimelineId.value = simulationId
+  await loadSavedSimulationTimeline(plan)
+}
 const history = computed(() =>
   store.state.giftHistory.filter((gift) => gift.familyId === family.value.id),
 )
@@ -185,6 +223,16 @@ function planScheduleCopy(plan) {
 
   if (!giftStarted && plan.plannedGiftDate) return `${plan.plannedGiftDate} 증여 예정`
   if (plan.giftDate) return `${plan.giftDate} 운용 종료 예정`
+  return '일정 미정'
+}
+
+function simulationPeriodCopy(plan) {
+  const giftDate = plan.plannedGiftDate
+  const operationEndDate = plan.operationEndDate ?? plan.giftDate
+
+  if (giftDate && operationEndDate) return `${giftDate}~${operationEndDate} 예정`
+  if (giftDate) return `${giftDate} 증여 예정`
+  if (operationEndDate) return `${operationEndDate} 운용 마무리 예정`
   return '일정 미정'
 }
 
@@ -514,24 +562,35 @@ onMounted(() => loadStatus())
               <span v-if="familySimulation.rate">
                 예상 수익률 연 {{ familySimulation.rate }}%
               </span>
-              <span>{{ familySimulation.giftDate }} 예정</span>
+              <span>{{ simulationPeriodCopy(familySimulation) }}</span>
             </div>
-            <button
-              class="primary-button full register-simulation-button"
-              type="button"
-              :disabled="registeringPlanId === familySimulation.id"
-              @click="registerPlan(familySimulation)"
-            >
-              <AppIcon name="check" :size="16" />
-              {{
-                registeringPlanId === familySimulation.id
-                  ? '등록 중...'
-                  : '이 시뮬레이션으로 증여 진행하기'
-              }}
-            </button>
-            <p class="register-gift-note">
-              증여를 진행하면 '진행 중인 증여'에서 서류 준비와 완료 처리를 이어갈 수 있어요.
-            </p>
+            <SavedSimulationTimeline
+              :plan="familySimulation"
+              :detail="simulationTimelineDetails[familySimulation.simulationId] ?? null"
+              :loading="Boolean(simulationTimelineLoading[familySimulation.simulationId])"
+              :error="simulationTimelineErrors[familySimulation.simulationId] ?? ''"
+              :open="openSimulationTimelineId === familySimulation.simulationId"
+              @toggle="toggleSavedSimulationTimeline(familySimulation)"
+              @retry="loadSavedSimulationTimeline(familySimulation, { force: true })"
+            />
+            <template v-if="!familySimulation.registeredAsGift">
+              <button
+                class="primary-button full register-simulation-button"
+                type="button"
+                :disabled="registeringPlanId === familySimulation.id"
+                @click="registerPlan(familySimulation)"
+              >
+                <AppIcon name="check" :size="16" />
+                {{
+                  registeringPlanId === familySimulation.id
+                    ? '등록 중...'
+                    : '이 시뮬레이션으로 증여 진행하기'
+                }}
+              </button>
+              <p class="register-gift-note">
+                증여를 진행하면 '진행 중인 증여'에서 서류 준비와 완료 처리를 이어갈 수 있어요.
+              </p>
+            </template>
           </div>
         </section>
 

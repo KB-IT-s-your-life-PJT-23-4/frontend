@@ -152,7 +152,7 @@ const comparisonReason = computed(() => {
         preparationDifference,
       )} 적어 유리해요.`
     }
-    return `${taxPayerLabel.value} 조건과 증여 일정을 함께 반영해 ${recommendedLabel}을 추천해요.`
+    return `세금 납부 조건과 증여 일정을 함께 반영해 ${recommendedLabel}를 추천해요.`
   }
 
   if (futureValueDifference > 0 && preparationDifference > 0) {
@@ -179,7 +179,7 @@ const comparisonReason = computed(() => {
       preparationDifference,
     )} 적어 유리해요.`
   }
-  return `${taxPayerLabel.value} 조건과 증여 시점, ${resultYearsLabel.value} 후 예상 총 금액을 함께 반영해 ${recommendedLabel}을 추천해요.`
+  return `세금 납부 조건과 증여 시점, ${resultYearsLabel.value} 후 예상 총 금액을 함께 반영해 ${recommendedLabel}를 추천해요.`
 })
 
 function parseDate(value) {
@@ -335,7 +335,7 @@ function getPositionClass(item) {
     <section
       v-else-if="!hasAnyPayableTax && taxFreeScenario"
       class="tax-free-investment-summary"
-      aria-label="면세 증여 상품 운용 예상 결과"
+      aria-label="증여세액공제 후 운용 예상 결과"
     >
       <span class="tax-free-investment-icon"><AppIcon name="chart" :size="21" /></span>
       <div>

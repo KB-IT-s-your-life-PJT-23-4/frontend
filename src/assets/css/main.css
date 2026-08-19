@@ -238,7 +238,7 @@ textarea:focus-visible {
   min-width: 82px;
   padding: 9px 15px;
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: #748192;
   font-size: 12px;
@@ -408,7 +408,7 @@ textarea:focus-visible {
   justify-content: center;
   gap: 8px;
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
@@ -549,7 +549,7 @@ textarea:focus-visible {
 .auth-card {
   padding: 30px;
   border: 1px solid rgba(216, 225, 236, 0.9);
-  border-radius: 26px;
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: var(--shadow-sm);
 }
@@ -619,7 +619,7 @@ textarea:focus-visible {
   height: 54px;
   padding: 0 16px;
   border: 1px solid #dfe5ed;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   outline: 0;
   background: #f4f6fa;
   color: var(--ink);
@@ -655,7 +655,7 @@ textarea:focus-visible {
   min-width: 92px;
   height: 54px;
   padding: 0 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 
@@ -1362,7 +1362,7 @@ textarea:focus-visible {
   justify-items: center;
   gap: 5px;
   padding: 12px 6px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: var(--surface-alt);
 }
 
@@ -1763,7 +1763,7 @@ textarea:focus-visible {
 .guide-disclaimer {
   margin: 0;
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #fff8df;
   color: #7a6739;
   font-size: 12px;
@@ -1805,7 +1805,7 @@ textarea:focus-visible {
   margin-top: 17px;
   padding: 15px;
   gap: 5px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f2f7fb;
 }
 .tax-summary strong {
@@ -1887,7 +1887,7 @@ textarea:focus-visible {
   display: grid;
   padding: 14px;
   gap: 5px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f5f8fb;
 }
 .rate-grid .emphasis {
@@ -2211,7 +2211,7 @@ textarea:focus-visible {
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-radius: 26px;
+  border-radius: var(--radius-lg);
   background: #fff;
   box-shadow: 0 8px 28px rgba(35, 55, 75, 0.07);
 }
@@ -2261,7 +2261,7 @@ textarea:focus-visible {
   padding: 12px 14px;
   align-items: center;
   gap: 12px;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   background: #f4f7fa;
   cursor: pointer;
   transition:
@@ -2355,7 +2355,7 @@ textarea:focus-visible {
   margin: 14px 0 0;
   padding: 12px 14px;
   justify-content: space-between;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   color: #607082;
   background: #eef5ff;
   font-size: 11px;
@@ -2396,7 +2396,7 @@ textarea:focus-visible {
 .modal-form textarea {
   width: 100%;
   border: 1px solid #e4e9f0;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f4f7fb;
   color: var(--ink);
 }
@@ -2911,7 +2911,7 @@ textarea:focus-visible {
   padding: 13px;
   align-content: space-between;
   gap: 9px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
 }
 
 .metric-grid strong {
@@ -2946,7 +2946,7 @@ textarea:focus-visible {
   align-items: flex-end;
   justify-content: center;
   gap: clamp(26px, 12vw, 70px);
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f5f7fb;
 }
 
@@ -3163,7 +3163,7 @@ textarea:focus-visible {
   min-height: 126px;
   align-items: flex-end;
   overflow: hidden;
-  background: linear-gradient(155deg, var(--blue) 0%, var(--blue-strong) 55%, #2e638e 100%);
+  background: linear-gradient(155deg, #0f2f4c 0%, #1c4a72 0%, #2e638e 100%);
 }
 
 .deduction-visual .plan-coin {
@@ -3246,7 +3246,7 @@ textarea:focus-visible {
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.38);
 }
 
@@ -3378,7 +3378,7 @@ textarea:focus-visible {
 }
 
 .ongoing-plan-item {
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f7f9fc;
 }
 
@@ -3394,7 +3394,7 @@ textarea:focus-visible {
   padding: 13px;
   gap: 9px;
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: none;
   text-align: left;
   cursor: pointer;
@@ -4064,7 +4064,7 @@ textarea:focus-visible {
   max-height: min(88vh, 760px);
   padding: 10px 20px calc(20px + env(safe-area-inset-bottom));
   overflow-y: auto;
-  border-radius: 26px;
+  border-radius: var(--radius-lg);
   background: #fff;
   box-shadow: 0 24px 80px rgba(13, 26, 42, 0.3);
 }
@@ -4498,7 +4498,7 @@ textarea:focus-visible {
     padding: 0 14px;
     align-items: center;
     gap: 11px;
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     color: rgba(255, 255, 255, 0.67);
     font-size: 13px;
     font-weight: 500;
@@ -4977,7 +4977,7 @@ textarea:focus-visible {
   min-width: 0;
   padding: 13px 14px;
   border: 1px solid #e5eaf0;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   color: inherit;
   background: #f9fafc;
   text-align: left;
@@ -5267,7 +5267,7 @@ textarea:focus-visible {
   padding: 12px 10px;
   gap: 9px;
   border: 1px solid #e7edf2;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f8fafc;
 }
 
@@ -6249,7 +6249,7 @@ textarea:focus-visible {
 .tax-example-card,
 .tax-table-card {
   padding: 23px;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
 }
 
 .tax-guide-hero {
@@ -6338,7 +6338,7 @@ textarea:focus-visible {
   display: grid;
   padding: 15px;
   gap: 5px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.68);
 }
 .deduction-limit-grid span,
@@ -6461,7 +6461,7 @@ textarea:focus-visible {
   justify-content: center;
   flex-wrap: wrap;
   gap: 7px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   background: #f2f7fc;
   color: #526174;
   font-size: 12px;
