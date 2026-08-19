@@ -81,3 +81,60 @@
   color: var(--danger);
   font-size: 11px;
 }
+
+/*
+  증여 설계 타임라인(gift-plan-timeline.css)을 재사용하되, 그쪽은 일정을 보여주기만 하는
+  장식용 라인이라 채움 길이가 항상 100%다. 여기서는 실제 진행률을 보여줘야 해서 폭을
+  --tranche-timeline-progress 로 덮어쓴다.
+
+  모바일에서는 세로 레이아웃으로 바뀌는데(.gift-timeline-track 이 height: auto 인 그리드),
+  퍼센트 높이는 부모 높이가 확정돼 있어야 계산되므로 auto 높이 부모에서는 그냥 무시된다.
+  그래서 모바일에서는 진행률 채움을 시도하지 않고, 원래 장식용 라인처럼 항상 꽉 채워 두고
+  회차 점 색(완료=초록 체크 / 예정=회색)만으로 진행 상황을 보여준다.
+*/
+.tranche-timeline .gift-timeline {
+  background: #eef4fa;
+}
+
+.tranche-progress-fill {
+  width: var(--tranche-timeline-progress, 0%);
+}
+
+@media (max-width: 430px) {
+  .tranche-progress-fill {
+    width: 3px;
+    height: auto;
+  }
+}
+
+/* 완료된 회차는 체크 표시와 함께 진한 색으로, 아직 오지 않은 회차는 옅게 표시해 둘을 구분한다. */
+.tranche-timeline .timeline-dot.is-done {
+  color: #fff;
+  background: #3f9e6d;
+  box-shadow:
+    0 0 0 3px rgba(63, 158, 109, 0.14),
+    0 3px 9px rgba(53, 88, 118, 0.22);
+}
+
+.tranche-timeline .timeline-dot.is-upcoming {
+  color: #7a8b9b;
+  background: #cdd8e2;
+  box-shadow:
+    0 0 0 3px rgba(125, 145, 165, 0.12),
+    0 3px 9px rgba(74, 96, 118, 0.14);
+}
+
+/*
+  마지막 회차(is-near-end)는 원래 카드가 트랙 밖으로 안 잘리게 점 왼쪽으로(오른쪽 정렬)
+  붙는데, 그러면 글자가 점에서 멀어져 동떨어져 보인다. 1회차(is-near-start)와 똑같이
+  점 오른쪽에 붙여 자라게 하고, 잘림은 트랙을 감싸는 카드의 클리핑을 풀어 대응한다.
+*/
+.tranche-timeline .gift-timeline {
+  overflow: visible;
+}
+
+.tranche-timeline .gift-timeline-point.is-near-end .timeline-point-copy {
+  right: auto;
+  left: -2px;
+  text-align: left;
+}

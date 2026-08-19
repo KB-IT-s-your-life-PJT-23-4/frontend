@@ -3432,63 +3432,6 @@ textarea:focus-visible {
   font-weight: 600;
 }
 
-/* 회차 마커 라벨이 양 끝에서 트랙 밖으로 반쯤 나가므로 좌우 여백을 넉넉히 둔다. */
-.tranche-track {
-  position: relative;
-  height: 6px;
-  margin: 24px 38px 56px;
-  border-radius: 999px;
-  background: #e8eef6;
-}
-
-.tranche-track-fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #7aa7d9, #4a7fb5);
-}
-
-.tranche-marker {
-  position: absolute;
-  top: 50%;
-  display: grid;
-  justify-items: center;
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-  text-align: center;
-}
-
-.tranche-marker::before {
-  content: '';
-  width: 11px;
-  height: 11px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: #b8c6d6;
-  box-shadow: 0 0 0 1px #cfdae7;
-}
-
-.tranche-marker.done::before {
-  background: #4a7fb5;
-  box-shadow: 0 0 0 1px #4a7fb5;
-}
-
-.tranche-marker em {
-  position: absolute;
-  top: 15px;
-  color: #426c90;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 600;
-}
-
-.tranche-marker small {
-  position: absolute;
-  top: 30px;
-  color: var(--muted);
-  font-size: 10px;
-}
-
 .ongoing-plan-actions {
   position: absolute;
   top: 11px;
