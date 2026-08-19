@@ -37,6 +37,8 @@ const SERVER_SOURCED_STATE = {
   simulations: [],
   // 서버가 조회 시점에 gift 에서 계산해 내려주는 리마인더 원본. 알림함 카드는 여기서 만든다.
   reminders: [],
+  // 계획 저장 · 증여 확정 시 클라이언트가 직접 쌓는 이벤트 알림. 목데이터 시드는 쓰지 않는다.
+  notifications: [],
   selectedFamilyId: null,
 }
 

@@ -4,6 +4,7 @@ import { formatCompactWon } from './finance'
 export const REMINDER_TYPE = {
   FILING_DEADLINE: 'FILING_DEADLINE',
   DEDUCTION_RENEWAL: 'DEDUCTION_RENEWAL',
+  PRODUCT_MATURITY: 'PRODUCT_MATURITY',
 }
 
 // 알림함은 급한 것부터 본다. 그룹 순서를 배열로 고정해 화면이 정렬에 신경 쓰지 않게 한다.
@@ -30,6 +31,10 @@ function group(daysRemaining) {
  */
 function tone(reminder) {
   if (reminder.type === REMINDER_TYPE.DEDUCTION_RENEWAL) {
+    return reminder.daysRemaining <= 0 ? 'success' : 'info'
+  }
+  // 만기도 갱신일처럼 마감이 아니라 처리할 여지가 생기는 날이라 경고로 몰지 않는다.
+  if (reminder.type === REMINDER_TYPE.PRODUCT_MATURITY) {
     return reminder.daysRemaining <= 0 ? 'success' : 'info'
   }
   // PLANNED 도 기한은 같은 값이라 경고 기준을 낮추지 않는다. 마감은 마감이다.
@@ -98,14 +103,49 @@ function renewalCopy(reminder) {
 }
 
 /**
+ * 만기가 도래하는 예금·적금 상품명을 문구에 넣을 형태로 합친다.
+ * 상품이 하나면 이름 그대로, 여러 개면 "OO 외 N개"로 줄인다.
+ */
+function productLabel(productNames) {
+  const names = productNames ?? []
+
+  if (names.length === 0) return '가입한 상품'
+  if (names.length === 1) return names[0]
+  return `${names[0]} 외 ${names.length - 1}개`
+}
+
+function maturityCopy(reminder) {
+  const name = reminder.familyName ?? '수증자'
+  const product = productLabel(reminder.productNames)
+
+  if (reminder.daysRemaining <= 0) {
+    return {
+      title: `${name} 님의 ${product} 만기가 됐어요`,
+      body: `${reminder.targetDate}에 만기가 도래했어요. 재예치할지 인출할지 정해 주세요.`,
+    }
+  }
+
+  return {
+    title: `${name} 님의 ${product} 만기가 ${dDayLabel(reminder.daysRemaining)} 남았어요`,
+    body: `${reminder.targetDate}에 만기가 도래해요. 미리 다음 계획을 정해 두면 여유 있게 대응할 수 있어요.`,
+  }
+}
+
+/**
  * 서버 리마인더 → 알림함 카드.
  *
  * 리마인더에는 고유 id 가 없어서(서버가 저장하지 않는다) `(giftId, type)`을 키로 쓴다.
  * 읽음 처리도 이 두 값을 그대로 돌려보낸다.
  */
+const COPY_BY_TYPE = {
+  [REMINDER_TYPE.FILING_DEADLINE]: { copy: filingCopy, badge: '신고기한' },
+  [REMINDER_TYPE.DEDUCTION_RENEWAL]: { copy: renewalCopy, badge: '공제 갱신' },
+  [REMINDER_TYPE.PRODUCT_MATURITY]: { copy: maturityCopy, badge: '상품 만기' },
+}
+
 export function toNotification(reminder) {
-  const filing = reminder.type === REMINDER_TYPE.FILING_DEADLINE
-  const copy = filing ? filingCopy(reminder) : renewalCopy(reminder)
+  const { copy: buildCopy, badge } = COPY_BY_TYPE[reminder.type]
+  const copy = buildCopy(reminder)
 
   return {
     id: `reminder:${reminder.giftId}:${reminder.type}`,
@@ -114,7 +154,7 @@ export function toNotification(reminder) {
     reminderType: reminder.type,
     group: group(reminder.daysRemaining),
     type: tone(reminder),
-    badge: filing ? '신고기한' : '공제 갱신',
+    badge,
     title: copy.title,
     body: copy.body,
     time: dDayLabel(reminder.daysRemaining),

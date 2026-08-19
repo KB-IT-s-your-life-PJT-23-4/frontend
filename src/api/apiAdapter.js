@@ -410,7 +410,7 @@ export const api = {
 
   // --- 리마인더 : ReminderController @RequestMapping("/api/rm") ---
 
-  // GET /api/rm — 신고기한·공제갱신일을 targetDate 오름차순으로.
+  // GET /api/rm — 신고기한·공제갱신일·상품 만기를 targetDate 오름차순으로.
   // 서버가 저장하지 않고 조회 시점에 gift 에서 계산하므로 항상 최신이다.
   // 언제 뜨고 언제 사라지는지(마일스톤)는 서버가 정하므로 클라이언트가 넘길 조건이 없다.
   async listReminders() {
