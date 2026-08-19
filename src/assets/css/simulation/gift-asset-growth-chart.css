@@ -1,10 +1,18 @@
+.gift-growth-chart-card {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e5ebf0;
+}
+
 .gift-growth-chart-legend {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px 18px;
-  margin: 18px 0 10px;
+  margin: 10px 0 0;
   color: #596d82;
   font-size: 0.73rem;
+  text-align: center;
 }
 
 .gift-growth-chart-legend span {
