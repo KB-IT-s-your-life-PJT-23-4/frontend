@@ -9,6 +9,7 @@ import SavedSimulationTimeline from '../components/status/SavedSimulationTimelin
 import { useAppStore } from '../stores/appStore'
 import { deductionProgress, toIsoDate } from '../utils/deduction'
 import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
+import '../assets/css/simulation/gift-plan-timeline.css'
 import { normalizeSimulationResponse } from '../utils/simulationModel'
 import '../assets/css/status-view.css'
 
@@ -177,6 +178,14 @@ function timelinePercent(group, value) {
 
 function groupProgress(group) {
   return timelinePercent(group, today)
+}
+
+// 카드 양 끝에 붙는 회차는 날짜 말풍선이 트랙 밖으로 잘려 나가므로 정렬 방향을 바꾼다.
+function trancheTimelinePositionClass(group, value) {
+  const position = timelinePercent(group, value)
+  if (position <= 10) return 'is-near-start'
+  if (position >= 90) return 'is-near-end'
+  return ''
 }
 
 function completedTrancheCount(group) {
@@ -695,10 +704,6 @@ onMounted(() => loadStatus())
                 </div>
 
                 <div v-show="isPlanExpanded(group.id)" :id="`plan-documents-${group.id}`">
-                  <!--
-                    시간축은 첫 회차 0%, 마지막 회차 100%다. 채워진 길이는 오늘 위치라
-                    회차 사이 기간이 길수록 천천히 찬다.
-                  -->
                   <div v-if="group.split" class="plan-document-panel tranche-timeline">
                     <div class="plan-document-heading">
                       <div>
@@ -709,21 +714,32 @@ onMounted(() => loadStatus())
                         {{ completedTrancheCount(group) }}/{{ group.tranches.length }}회차
                       </span>
                     </div>
-                    <div class="tranche-track">
-                      <span
-                        class="tranche-track-fill"
-                        :style="{ width: `${groupProgress(group)}%` }"
-                      />
-                      <span
-                        v-for="tranche in group.tranches"
-                        :key="`marker-${tranche.id}`"
-                        class="tranche-marker"
-                        :class="{ done: isTrancheDone(tranche) }"
-                        :style="{ left: `${timelinePercent(group, tranche.giftDate)}%` }"
-                      >
-                        <em>{{ tranche.sequenceNo }}회차</em>
-                        <small>{{ tranche.giftDate }}</small>
-                      </span>
+                    <div class="gift-timeline">
+                      <div class="gift-timeline-track">
+                        <span
+                          class="gift-timeline-fill tranche-progress-fill"
+                          :style="{ '--tranche-timeline-progress': `${groupProgress(group)}%` }"
+                        />
+                        <div
+                          v-for="tranche in group.tranches"
+                          :key="`marker-${tranche.id}`"
+                          class="gift-timeline-point"
+                          :class="trancheTimelinePositionClass(group, tranche.giftDate)"
+                          :style="{ left: `${timelinePercent(group, tranche.giftDate)}%` }"
+                        >
+                          <span
+                            class="timeline-dot"
+                            :class="isTrancheDone(tranche) ? 'is-done' : 'is-upcoming'"
+                          >
+                            <AppIcon :name="isTrancheDone(tranche) ? 'check' : 'wallet'" :size="14" />
+                          </span>
+                          <div class="timeline-point-copy">
+                            <strong>{{ tranche.sequenceNo }}회차</strong>
+                            <span>{{ tranche.giftDate }}</span>
+                            <b>{{ formatCompactWon(tranche.currentAmount || tranche.amount) }}</b>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
