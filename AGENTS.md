@@ -19,7 +19,7 @@
 - Start the development server with `npm run dev`.
 - Create a production build with `npm run build`.
 - Preview the production build with `npm run preview`.
-- Format source files with `npm run format`.
+- Format source files with `npm run format`. This rewrites all of `src/`, so it can reformat files unrelated to the current change; prefer `npx prettier --write <changed files>` and revert any unrelated reformatting before finishing.
 - The current `npm test` script does not run an actual test suite. Do not report it as test verification.
 
 ## Project Structure
@@ -55,6 +55,9 @@
 - Keep page-specific and component-specific styles out of `main.css`.
 - Name new CSS files after the related page or component so their ownership is clear.
 - When a mobile breakpoint changes an element from positioned or animated content to normal document flow, explicitly override desktop `hover`, `focus`, and `focus-within` transforms with sufficient selector specificity.
+- A full-bleed page (landing or marketing layout) must neutralize the app shell's desktop `body` padding and the `html`/`body` background from `main.css`; scope those overrides to a root class that the page adds on mount and removes on unmount so other routes keep the standard app frame.
+- Page CSS files are concatenated into one global stylesheet at build time, so a page-specific file must never style a shared layout class (for example `.landing-app-frame`) unscoped; gate such rules behind that page's own root class, otherwise every other route using the same layout inherits them.
+- When a scroll-driven scene positions decorative rails or captions against the viewport edges, verify at narrow widths that they do not land on top of the centered card or stage content, and reposition them at the breakpoint instead of relying on dimmed color for separation.
 
 ## Dependency Policy
 

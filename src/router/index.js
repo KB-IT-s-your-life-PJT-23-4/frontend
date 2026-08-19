@@ -1,4 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import LandingView from '../pages/LandingView.vue'
+import LandingWhaleView from '../pages/LandingWhaleView.vue'
+import LandingLegacyView from '../pages/LandingLegacyView.vue'
 import HomeView from '../pages/HomeView.vue'
 import SimulationView from '../pages/SimulationView.vue'
 import StatusView from '../pages/StatusView.vue'
@@ -31,7 +34,30 @@ import AdminAuditView from '@/pages/AdminAuditView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', name: 'home', component: HomeView, meta: { label: '홈' } },
+    {
+      path: '/',
+      name: 'home',
+      component: LandingWhaleView,
+      meta: { label: '홈', layout: 'landing', hideBottomNav: true },
+    },
+    {
+      path: '/landing/new',
+      name: 'landing-new',
+      component: LandingView,
+      meta: { label: '새 랜딩 페이지', layout: 'landing', hideBottomNav: true },
+    },
+    {
+      path: '/landing/legacy',
+      name: 'landing-legacy',
+      component: LandingLegacyView,
+      meta: { label: '초기 랜딩 페이지', layout: 'landing', hideBottomNav: true },
+    },
+    {
+      path: '/home',
+      name: 'home-dashboard',
+      component: HomeView,
+      meta: { label: '홈' },
+    },
     {
       path: '/simulation',
       name: 'simulation',
