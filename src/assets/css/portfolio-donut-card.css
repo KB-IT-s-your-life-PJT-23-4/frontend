@@ -63,7 +63,6 @@
   min-width: 0;
   color: #fff;
   font-size: 0.73rem;
-  font-weight: 700;
   white-space: nowrap;
   transition: width 180ms ease;
 }
@@ -121,7 +120,6 @@
   background: #fff;
   color: #334f6d;
   font-size: 0.82rem;
-  font-weight: 600;
 }
 
 .portfolio-ratio-name {
@@ -207,7 +205,6 @@
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 0.84rem;
-  font-weight: 600;
   cursor: pointer;
 }
 
