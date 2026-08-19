@@ -214,12 +214,24 @@ const rawSeries = computed(() => ({
   principal: principalSeries(),
   alternative: scenarioSeries(alternativeScenario.value),
 }))
-const maxValue = computed(() =>
-  Math.max(
-    1,
-    ...Object.values(rawSeries.value).flatMap((series) => series.map((point) => point.value)),
-  ),
-)
+const yDomain = computed(() => {
+  const values = Object.values(rawSeries.value).flatMap((series) =>
+    series.map((point) => Number(point.value ?? 0)),
+  )
+  const dataMinimum = Math.min(...values)
+  const dataMaximum = Math.max(1, ...values)
+
+  if (!Number.isFinite(dataMinimum) || dataMinimum <= 0) {
+    return { minimum: 0, maximum: dataMaximum * 1.04 }
+  }
+
+  const dataRange = Math.max(1, dataMaximum - dataMinimum)
+  const padding = Math.max(dataRange * 0.15, dataMaximum * 0.02)
+  return {
+    minimum: Math.max(0, dataMinimum - padding),
+    maximum: dataMaximum + padding,
+  }
+})
 const chartDuration = computed(() =>
   Math.max(1, finishDate.value.getTime() - startDate.value.getTime()),
 )
@@ -231,7 +243,9 @@ function xPosition(date) {
 }
 
 function yPosition(value) {
-  return CHART.top + plotHeight - (Number(value ?? 0) / maxValue.value) * plotHeight
+  const range = Math.max(1, yDomain.value.maximum - yDomain.value.minimum)
+  const ratio = (Number(value ?? 0) - yDomain.value.minimum) / range
+  return CHART.top + plotHeight - ratio * plotHeight
 }
 
 function pathFor(series) {
@@ -277,7 +291,7 @@ const comparisonAreaPath = computed(() => {
 const yTicks = computed(() =>
   Array.from({ length: 3 }, (_, index) => {
     const ratio = index / 2
-    const value = maxValue.value * (1 - ratio)
+    const value = yDomain.value.maximum - (yDomain.value.maximum - yDomain.value.minimum) * ratio
     return { value, y: CHART.top + plotHeight * ratio }
   }),
 )
@@ -397,9 +411,9 @@ function eventPositionStyle(event) {
     </header>
 
     <div class="gift-growth-chart-legend" aria-label="그래프 범례">
-      <span class="is-recommended">추천 플랜 예상 운용 자산</span>
+      <span class="is-recommended">추천 플랜</span>
       <span class="is-principal">누적 운용 원금</span>
-      <span class="is-alternative">비추천 플랜 예상 운용 자산</span>
+      <span class="is-alternative">비추천 플랜</span>
     </div>
 
     <div class="gift-growth-event-legend" aria-label="일정 표시 범례">
@@ -436,7 +450,6 @@ function eventPositionStyle(event) {
               </text>
             </g>
           </g>
-          <path class="gift-growth-comparison-area" :d="comparisonAreaPath" />
           <path class="gift-growth-line is-alternative" :d="series.alternative.path" />
           <path class="gift-growth-line is-principal" :d="series.principal.path" />
           <path class="gift-growth-line is-recommended" :d="series.recommended.path" />

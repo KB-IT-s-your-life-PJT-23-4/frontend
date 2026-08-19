@@ -82,13 +82,13 @@
   height: 10px;
   border: 2px solid #fff;
   border-radius: 50%;
-  background: #517b9f;
-  box-shadow: 0 0 0 2px rgb(81 123 159 / 10%);
+  background: #f4b400;
+  box-shadow: 0 0 0 2px rgb(244 180 0 / 13%);
 }
 
 .gift-growth-event-legend .is-reinvestment::before {
-  background: #dcecf3;
-  box-shadow: 0 0 0 2px rgb(76 120 152 / 12%);
+  background: #fffbef;
+  box-shadow: 0 0 0 2px rgb(244 180 0 / 8%);
 }
 
 .gift-growth-chart-scroll {
@@ -134,11 +134,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 3;
-}
-
-.gift-growth-comparison-area {
-  fill: rgb(244 180 0 / 9%);
-  stroke: none;
 }
 
 .gift-growth-line.is-recommended {
@@ -193,10 +188,10 @@
   border: 3px solid #fff;
   border-radius: 50%;
   color: #fff;
-  background: #517b9f;
+  background: #f4b400;
   box-shadow:
-    0 0 0 3px rgb(81 123 159 / 10%),
-    0 3px 9px rgb(53 88 118 / 22%);
+    0 0 0 3px rgb(244 180 0 / 13%),
+    0 3px 9px rgb(164 119 0 / 23%);
   transform: translate(-50%, -50%);
   cursor: help;
 }
@@ -205,11 +200,11 @@
   width: 19px;
   height: 19px;
   border-width: 2px;
-  color: #4c7898;
-  background: #dcecf3;
+  color: #edd58d;
+  background: #fffbef;
   box-shadow:
-    0 0 0 2px rgb(76 120 152 / 12%),
-    0 2px 6px rgb(53 88 118 / 18%);
+    0 0 0 3px rgb(244 180 0 / 8%),
+    0 3px 9px rgb(164 119 0 / 18%);
 }
 
 .gift-growth-event-marker:hover,
@@ -224,8 +219,15 @@
 .gift-growth-event-marker:focus-visible {
   box-shadow:
     0 0 0 3px #fff,
-    0 0 0 5px rgb(81 123 159 / 24%),
-    0 4px 10px rgb(53 88 118 / 25%);
+    0 0 0 5px rgb(244 180 0 / 25%),
+    0 4px 10px rgb(164 119 0 / 24%);
+}
+
+.gift-growth-event-marker.is-reinvestment:focus-visible {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px rgb(36 77 115 / 22%),
+    0 4px 10px rgb(36 77 115 / 22%);
 }
 
 .gift-growth-event-tooltip {
