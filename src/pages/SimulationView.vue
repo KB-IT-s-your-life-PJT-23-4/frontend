@@ -784,7 +784,7 @@ onMounted(async () => {
       <GiftPlanTimeline
         :result="result"
         :recommended-scenario="recommendedScenario"
-        :selected-products="selectedProducts"
+        :selected-products="calculationProducts"
         :portfolio-profile="selectedPortfolioType"
       />
 

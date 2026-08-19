@@ -103,6 +103,15 @@ export function calculateEtfFutureValue(principal, annualReturnRate, months) {
 
 function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
   const totalMonths = Math.max(0, Math.round(Number(months) || 0))
+  const fitPeriodsToMonths = (periods) => {
+    let remainingMonths = totalMonths
+    return periods.flatMap((period) => {
+      if (remainingMonths <= 0) return []
+      const appliedMonths = Math.min(period, remainingMonths)
+      remainingMonths -= appliedMonths
+      return appliedMonths > 0 ? [appliedMonths] : []
+    })
+  }
   const contractRatePeriods = (product?.contractRateSchedule ?? [])
     .filter(
       (item) =>
@@ -112,7 +121,7 @@ function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
     .map((item) => Math.max(0, Number(item.contractMonths) || 0))
     .filter((period) => period > 0)
 
-  if (contractRatePeriods.length) return contractRatePeriods
+  if (contractRatePeriods.length) return fitPeriodsToMonths(contractRatePeriods)
 
   const scheduledPeriods = (product?.reinvestmentSchedule ?? [])
     .filter(
@@ -125,14 +134,16 @@ function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
 
   if (scheduledPeriods.length) {
     const completedMonths = scheduledPeriods.reduce((sum, period) => sum + period, 0)
+    if (completedMonths >= totalMonths) return fitPeriodsToMonths(scheduledPeriods)
     const finalPeriod = totalMonths - completedMonths
     const minimumMonths = Number(product?.minimumContractMonths)
     const maximumMonths = Number(product?.maximumContractMonths)
-    const finalPeriodIsInvestable = finalPeriod > 0
-      && Number.isInteger(minimumMonths)
-      && Number.isInteger(maximumMonths)
-      && finalPeriod >= minimumMonths
-      && finalPeriod <= maximumMonths
+    const finalPeriodIsInvestable =
+      finalPeriod > 0 &&
+      Number.isInteger(minimumMonths) &&
+      Number.isInteger(maximumMonths) &&
+      finalPeriod >= minimumMonths &&
+      finalPeriod <= maximumMonths
     return finalPeriodIsInvestable ? [...scheduledPeriods, finalPeriod] : scheduledPeriods
   }
 
