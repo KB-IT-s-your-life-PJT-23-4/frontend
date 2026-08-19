@@ -15,18 +15,6 @@
   background: #f7faff;
 }
 
-.portfolio-custom-badge {
-  align-self: center;
-  margin-left: 8px;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: #edf4fb;
-  color: #315f89;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .portfolio-custom-editor {
   margin-top: 22px;
   padding: 20px;

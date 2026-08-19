@@ -261,9 +261,6 @@ onBeforeUnmount(stopBoundaryDrag)
       >
         <span>{{ profile.label }}</span>
       </button>
-      <span v-if="activeProfile === 'CUSTOM' && !editing" class="portfolio-custom-badge">
-        직접 조정
-      </span>
     </div>
 
     <div class="portfolio-donut-layout" role="region" aria-label="상품 운용 비율과 예상 금액">
