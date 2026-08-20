@@ -13,6 +13,7 @@ import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
+import LegalDocumentView from '../pages/LegalDocumentView.vue'
 import AdminDashboardView from '../pages/AdminDashboardView.vue'
 import AdminUserView from '../pages/AdminUserView.vue'
 import AdminProductsView from '../pages/AdminProductsView.vue'
@@ -113,6 +114,18 @@ const router = createRouter({
       name: 'signup',
       component: SignupView,
       meta: { label: '회원가입', hideBottomNav: true },
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: LegalDocumentView,
+      meta: { label: '이용약관', hideBottomNav: true },
+    },
+    {
+      path: '/privacy-policy',
+      name: 'privacy-policy',
+      component: LegalDocumentView,
+      meta: { label: '개인정보 처리방침', hideBottomNav: true },
     },
     {
       path: '/admin/dashboard',
