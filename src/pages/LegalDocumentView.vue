@@ -1,14 +1,22 @@
 <script setup>
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import PageHeading from '../components/layout/PageHeading.vue'
 import { useAuthStore } from '../stores/authStore.js'
+import { useSignupDraftStore } from '../stores/signupDraftStore.js'
 import '../assets/css/legal-document.css'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const signupDraftStore = useSignupDraftStore()
+
+const signupLegalRouteNames = new Set(['signup', 'terms', 'privacy-policy'])
+
+onBeforeRouteLeave((to) => {
+  if (!signupLegalRouteNames.has(to.name)) signupDraftStore.clearDraft()
+})
 
 const documents = {
   terms: {

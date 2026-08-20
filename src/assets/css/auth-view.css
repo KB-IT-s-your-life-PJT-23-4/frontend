@@ -9,6 +9,7 @@
 .auth-agreement a {
   color: var(--blue-strong);
   font-weight: 600;
+  text-decoration: underline;
   text-underline-offset: 3px;
 }
 
