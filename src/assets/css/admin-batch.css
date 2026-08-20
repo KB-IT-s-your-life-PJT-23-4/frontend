@@ -71,6 +71,10 @@
   gap: 12px;
 }
 
+.admin-batch-job__head > div {
+  min-width: 0;
+}
+
 .admin-batch-job__head > div > span {
   color: #8c98a4;
   font-size: 9px;
@@ -439,6 +443,51 @@
 
   .admin-batch-state {
     min-height: 200px;
+  }
+
+  .admin-batch-table-wrap {
+    overflow-x: visible;
+  }
+
+  .admin-batch-table,
+  .admin-batch-table tbody,
+  .admin-batch-table tr,
+  .admin-batch-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-batch-table thead {
+    display: none;
+  }
+
+  .admin-batch-table tr {
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 11px 13px;
+    border: 1px solid #eef1f4;
+    border-radius: 12px;
+  }
+
+  .admin-batch-table td,
+  .admin-batch-table td:first-child,
+  .admin-batch-table td:last-child {
+    display: flex;
+    padding: 7px 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: 0;
+    text-align: right;
+    white-space: normal;
+  }
+
+  .admin-batch-table td::before {
+    content: attr(data-label);
+    color: #8b97a2;
+    font-size: 9px;
+    font-weight: 700;
   }
 }
 

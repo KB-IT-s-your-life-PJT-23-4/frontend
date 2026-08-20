@@ -17,6 +17,7 @@ import LegalDocumentView from '../pages/LegalDocumentView.vue'
 import AdminDashboardView from '../pages/AdminDashboardView.vue'
 import AdminUserView from '../pages/AdminUserView.vue'
 import AdminProductsView from '../pages/AdminProductsView.vue'
+import AdminLawTaxView from '../pages/AdminLawTaxView.vue'
 import AdminFaqView from '../pages/AdminFaqView.vue'
 import AdminReportView from '../pages/AdminReportView.vue'
 import AdminAuthorizationView from '../pages/AdminAuthorizationView.vue'
@@ -157,6 +158,19 @@ const router = createRouter({
       component: AdminProductsView,
       meta: {
         label: '상품 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
+        requiresRole: ['ROOT', 'MIDDLE'],
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/lawtax',
+      name: 'admin-lawtax',
+      component: AdminLawTaxView,
+      meta: {
+        label: '세법 관리',
         requiresAuth: true,
         requiresAdmin: true,
         requiresRole: ['ROOT', 'MIDDLE'],

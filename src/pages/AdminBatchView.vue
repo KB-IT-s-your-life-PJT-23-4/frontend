@@ -347,28 +347,28 @@ onBeforeUnmount(() => {
                 <th scope="col">읽음</th>
                 <th scope="col">성공</th>
                 <th scope="col">실패</th>
-                <th scope="col"><span class="admin-batch-sr-only">작업</span></th>
+                <th scope="col"><span class="admin-batch-sr-only">관리</span></th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="execution in executions" :key="execution.jobExecutionId">
-                <td>
+                <td data-label="실행">
                   <strong>#{{ execution.jobExecutionId }}</strong>
                 </td>
-                <td>{{ execution.jobName }}</td>
-                <td>
+                <td data-label="작업">{{ execution.jobName }}</td>
+                <td data-label="상태">
                   <span class="admin-batch-status" :class="modifier(execution.status)">
                     {{ statusLabel(execution.status) }}
                   </span>
                 </td>
-                <td>{{ formatDateTime(execution.startTime ?? execution.createTime) }}</td>
-                <td>{{ formatDuration(execution) }}</td>
-                <td>{{ formatNumber(execution.readCount) }}</td>
-                <td>{{ formatNumber(execution.writeCount) }}</td>
-                <td :class="{ 'is-danger': execution.skipCount > 0 }">
+                <td data-label="시작">{{ formatDateTime(execution.startTime ?? execution.createTime) }}</td>
+                <td data-label="소요">{{ formatDuration(execution) }}</td>
+                <td data-label="읽음">{{ formatNumber(execution.readCount) }}</td>
+                <td data-label="성공">{{ formatNumber(execution.writeCount) }}</td>
+                <td data-label="실패" :class="{ 'is-danger': execution.skipCount > 0 }">
                   {{ formatNumber(execution.skipCount) }}
                 </td>
-                <td>
+                <td data-label="관리">
                   <button
                     v-if="isRestartable(execution)"
                     type="button"
