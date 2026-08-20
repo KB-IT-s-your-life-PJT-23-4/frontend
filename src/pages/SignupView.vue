@@ -290,7 +290,12 @@ async function submitSignup() {
           <div class="auth-agreement">
             <label>
               <input v-model="form.agreed" type="checkbox" @change="clearError('agreed')" />
-              <span><u>미리줌 이용약관</u> 및 <u>개인정보 처리방침</u>에 모두 동의합니다.</span>
+              <span>
+                <RouterLink :to="{ name: 'terms' }" @click.stop>미리줌 이용약관</RouterLink> 및
+                <RouterLink :to="{ name: 'privacy-policy' }" @click.stop
+                  >개인정보 처리방침</RouterLink
+                >에 모두 동의합니다.
+              </span>
             </label>
             <p v-if="errors.agreed" class="auth-message error">{{ errors.agreed }}</p>
           </div>

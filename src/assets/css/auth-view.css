@@ -5,3 +5,19 @@
 .auth-card .auth-intro h2 {
   margin-top: 0;
 }
+
+.auth-agreement a {
+  color: var(--blue-strong);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.auth-agreement a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.auth-agreement a:focus-visible {
+  border-radius: 3px;
+  outline: 3px solid rgba(44, 96, 139, 0.22);
+  outline-offset: 2px;
+}
