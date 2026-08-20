@@ -137,21 +137,18 @@ const features = [
     label: 'COMPARE',
     title: '선택지를 같은 기준으로.',
     text: '증여 시점과 운용 방법에 따른 장기 결과를 한 화면에서 비교합니다.',
-    icon: 'chart',
   },
   {
     index: '02',
     label: 'RECORD',
     title: '10년의 기록을 한곳에.',
     text: '잊기 쉬운 가족별 증여 내역과 계좌·상품 정보를 이어서 관리합니다.',
-    icon: 'calendar',
   },
   {
     index: '03',
-    label: 'ASK AI',
+    label: 'CONSULT',
     title: '모르는 내용은 쉽게.',
     text: '증여와 관련된 낯선 내용을 질문하고 이해하기 쉬운 답을 확인합니다.',
-    icon: 'sparkles',
   },
 ]
 
@@ -232,15 +229,16 @@ const faqs = [
         <div class="whale-hero-orbit orbit-one" />
         <div class="whale-hero-orbit orbit-two" />
         <div class="whale-shell whale-hero-inner">
-          <p class="whale-mono whale-hero-kicker">THE GIFT PLANNER FOR YOUR FAMILY</p>
-          <h1>
-            <span><i>미리 준비하는</i></span>
-            <span><i>다음 10년,</i></span>
-            <em><i>증여.</i></em>
-          </h1>
-          <div class="whale-hero-bottom">
-            <p>중요한 증여 결정을 비교하고,<br />가족의 긴 계획을 한곳에서 관리하세요.</p>
-            <a href="#story" class="whale-scroll-link">SCROLL TO EXPLORE <i>↓</i></a>
+          <div class="whale-hero-content">
+            <h1>
+              <span><i>미리 준비하는</i></span>
+              <span><i>다음 10년,</i></span>
+              <em><i>증여.</i></em>
+            </h1>
+            <div class="whale-hero-bottom">
+              <p>중요한 증여 결정을 비교하고,<br />가족의 긴 계획을 한곳에서 관리하세요.</p>
+              <!-- <a href="#story" class="whale-scroll-link">SCROLL TO EXPLORE <i>↓</i></a> -->
+            </div>
           </div>
         </div>
       </section>
@@ -332,7 +330,7 @@ const faqs = [
       <section id="features" class="whale-section whale-features">
         <div class="whale-shell">
           <div class="whale-heading is-light" data-reveal>
-            <p class="whale-mono">BUILT FOR CLARITY</p>
+            <!-- <p class="whale-mono">BUILT FOR CLARITY</p> -->
             <h2>계획부터 기록까지.<br />한 흐름으로.</h2>
           </div>
           <div class="whale-feature-grid">
@@ -346,7 +344,53 @@ const faqs = [
                 <span>{{ feature.index }}</span
                 ><small>{{ feature.label }}</small>
               </div>
-              <div class="whale-feature-icon"><AppIcon :name="feature.icon" :size="34" /></div>
+              <div class="whale-feature-preview" :class="`is-${feature.index}`" aria-hidden="true">
+                <template v-if="feature.index === '01'">
+                  <div class="whale-feature-preview-head">
+                    <span><AppIcon name="chart" :size="15" /> 시나리오 비교</span
+                    ><small>10년 후</small>
+                  </div>
+                  <div class="whale-feature-compare">
+                    <div>
+                      <span>지금 증여</span><i><b /></i><strong>1.48억</strong>
+                    </div>
+                    <div>
+                      <span>나누어 증여</span><i><b /></i><strong>1.39억</strong>
+                    </div>
+                  </div>
+                  <small class="whale-feature-delta">예상 차이 <strong>+860만원</strong></small>
+                </template>
+
+                <template v-else-if="feature.index === '02'">
+                  <div class="whale-feature-preview-head">
+                    <span><AppIcon name="calendar" :size="15" /> 가족 증여 일정</span
+                    ><small>김미래</small>
+                  </div>
+                  <div class="whale-feature-timeline">
+                    <div>
+                      <i /><span><small>2026.08</small><strong>첫 증여</strong></span>
+                    </div>
+                    <div>
+                      <i /><span><small>2031.08</small><strong>중간 점검</strong></span>
+                    </div>
+                    <div>
+                      <i /><span><small>2036.08</small><strong>공제 갱신</strong></span>
+                    </div>
+                  </div>
+                </template>
+
+                <template v-else>
+                  <div class="whale-feature-preview-head">
+                    <span><AppIcon name="chat" :size="15" /> 상담 요약</span><small>근거 2건</small>
+                  </div>
+                  <p class="whale-feature-question">이전 증여가 있다면<br />세금이 달라지나요?</p>
+                  <div class="whale-feature-source">
+                    <AppIcon name="document" :size="16" />
+                    <span><small>관련 법령</small><strong>상속세 및 증여세법 제53조</strong></span>
+                    <i>↗</i>
+                  </div>
+                </template>
+              </div>
               <h3>{{ feature.title }}</h3>
               <p>{{ feature.text }}</p>
               <small v-if="feature.index === '03'" class="whale-ai-note"
@@ -361,7 +405,7 @@ const faqs = [
       <section id="how" class="whale-section whale-how">
         <div class="whale-shell">
           <div class="whale-heading whale-how-heading" data-reveal>
-            <p class="whale-mono">THREE STEPS</p>
+            <!-- <p class="whale-mono">THREE STEPS</p> -->
             <h2>딱 세 단계면<br />충분해요.</h2>
             <p class="whale-how-sub">
               가족 정보만 알려주면 남은 계산은 미리줌이 차근차근 채워드려요.
@@ -393,15 +437,21 @@ const faqs = [
       <section class="whale-section whale-result">
         <div class="whale-shell whale-result-grid">
           <div class="whale-result-copy" data-reveal>
-            <p class="whale-mono">MORE THAN NUMBERS</p>
             <h2>숫자 다음의<br />선택까지.</h2>
-            <p>핵심 요약, 같은 기준의 비교, 예상 비용과 다음 행동을 함께 정리합니다.</p>
+            <!-- <p>핵심 요약, 같은 기준의 비교, 예상 비용과 다음 행동을 함께 정리합니다.</p> -->
           </div>
           <div class="whale-result-card" data-reveal>
-            <span class="whale-mono">RECOMMENDED PLAN</span>
+            <div class="whale-result-card-head">
+              <span><AppIcon name="check" :size="15" /> 추천 계획</span>
+              <small>입력 조건 기준</small>
+            </div>
             <h3>지금 증여하고<br />장기 운용하기</h3>
-            <div><span>10년 후 예상 자산</span><strong>1억 4,820만원</strong></div>
-            <div><span>비교안 대비 차이</span><strong>+ 860만원</strong></div>
+            <div class="whale-result-metric">
+              <span>10년 후 예상 자산</span><strong>1억 4,820만원</strong>
+            </div>
+            <div class="whale-result-metric">
+              <span>비교안 대비 차이</span><strong>+ 860만원</strong>
+            </div>
             <p>입력한 조건에 따른 예시이며 실제 결과는 개별 상황에 따라 달라질 수 있습니다.</p>
           </div>
         </div>
@@ -410,7 +460,7 @@ const faqs = [
       <section class="whale-section whale-trust">
         <div class="whale-shell">
           <div class="whale-heading" data-reveal>
-            <p class="whale-mono">BUILT ON TRUST</p>
+            <!-- <p class="whale-mono">BUILT ON TRUST</p> -->
             <h2>기준과 한계를<br />분명하게.</h2>
           </div>
           <div class="whale-trust-row">
@@ -455,7 +505,7 @@ const faqs = [
       <section class="whale-final">
         <div class="whale-final-ring" />
         <div class="whale-shell" data-reveal>
-          <p class="whale-mono">START YOUR FAMILY PLAN</p>
+          <!-- <p class="whale-mono">START YOUR FAMILY PLAN</p> -->
           <h2>미리 보면,<br />쉬워집니다.</h2>
           <p>우리 가족의 긴 계획을 오늘부터 시작하세요.</p>
           <RouterLink to="/simulation"

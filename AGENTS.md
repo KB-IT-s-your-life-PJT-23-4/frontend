@@ -58,6 +58,7 @@
 - A full-bleed page (landing or marketing layout) must neutralize the app shell's desktop `body` padding and the `html`/`body` background from `main.css`; scope those overrides to a root class that the page adds on mount and removes on unmount so other routes keep the standard app frame.
 - Page CSS files are concatenated into one global stylesheet at build time, so a page-specific file must never style a shared layout class (for example `.landing-app-frame`) unscoped; gate such rules behind that page's own root class, otherwise every other route using the same layout inherits them.
 - When a scroll-driven scene positions decorative rails or captions against the viewport edges, verify at narrow widths that they do not land on top of the centered card or stage content, and reposition them at the breakpoint instead of relying on dimmed color for separation.
+- For hero entrance animations with a requested final screen position, verify the final transform against that viewport region at both desktop and mobile breakpoints; do not treat a subtle relative offset as sufficient without checking the landing position.
 
 ## Dependency Policy
 
