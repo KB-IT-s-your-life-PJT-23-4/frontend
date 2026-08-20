@@ -1,0 +1,433 @@
+/* AdminLawTaxView.vue 전용 스타일. main.css 는 건드리지 않는다. */
+
+.admin-lawtax-button {
+  display: inline-flex;
+  padding: 8px 12px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.admin-lawtax-button:hover {
+  border-color: var(--blue-light);
+}
+
+.admin-lawtax-button.is-primary {
+  border-color: var(--blue-strong);
+  background: var(--blue-strong);
+  color: #fff;
+}
+
+.admin-lawtax-button.is-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.admin-lawtax-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-lawtax-feedback {
+  display: flex;
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.admin-lawtax-feedback button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.admin-lawtax-empty {
+  margin: 24px 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.admin-lawtax-versions {
+  display: grid;
+  margin-top: 16px;
+  gap: 14px;
+}
+
+.admin-lawtax-version__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-lawtax-version__head > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.admin-lawtax-version__head strong {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.admin-lawtax-version__head > div:first-child span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.admin-lawtax-version__badges {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-lawtax-badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.admin-lawtax-badge.is-active {
+  background: rgba(47, 154, 121, 0.12);
+  color: var(--success);
+}
+
+.admin-lawtax-badge.is-editable {
+  background: var(--blue-soft);
+  color: var(--blue-strong);
+}
+
+.admin-lawtax-version__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-lawtax-table-wrap {
+  display: grid;
+  margin-top: 14px;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  overflow-x: auto;
+}
+
+.admin-lawtax-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.admin-lawtax-table caption {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.admin-lawtax-table th,
+.admin-lawtax-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.admin-lawtax-table th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.admin-lawtax-form {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-lawtax-field {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.admin-lawtax-field input {
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.admin-lawtax-form-section {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-lawtax-form-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-lawtax-form-section__head strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.admin-lawtax-bracket-row {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) 30px;
+  align-items: center;
+}
+
+.admin-lawtax-limit-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+}
+
+.admin-lawtax-limit-row span {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.admin-lawtax-bracket-row input,
+.admin-lawtax-limit-row input {
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.admin-lawtax-row-remove {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--danger);
+  place-items: center;
+  cursor: pointer;
+}
+
+.admin-lawtax-row-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+  .admin-lawtax-bracket-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-lawtax-limit-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 현재 법령 조문 목록 */
+
+#admin-lawtax-article-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.admin-lawtax-article-filter {
+  margin-top: 24px;
+}
+
+.admin-lawtax-article-list {
+  margin-top: 14px;
+}
+
+.admin-lawtax-article-filter__form {
+  display: grid;
+  margin-top: 16px;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(240px, 1.5fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.admin-lawtax-article-filter__form label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-lawtax-article-filter__form input,
+.admin-lawtax-article-filter__form select {
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+.admin-lawtax-article-filter__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-lawtax-article-table-wrap {
+  margin-top: 14px;
+  overflow-x: auto;
+}
+
+.admin-lawtax-article-table {
+  min-width: 720px;
+}
+
+.admin-lawtax-pagination {
+  display: flex;
+  padding-top: 16px;
+  justify-content: center;
+  gap: 5px;
+}
+
+.admin-lawtax-pagination button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.admin-lawtax-pagination button.is-active {
+  border-color: var(--blue-strong);
+  background: var(--blue-strong);
+  color: #fff;
+}
+
+.admin-lawtax-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.admin-lawtax-article-detail dl {
+  display: grid;
+  margin: 0 0 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.admin-lawtax-article-detail dt {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.admin-lawtax-article-detail dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.admin-lawtax-article-detail__content {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.admin-lawtax-article-detail__revision {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+@media (max-width: 720px) {
+  .admin-lawtax-article-filter__form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-lawtax-article-filter__actions > button {
+    flex: 1;
+  }
+
+  .admin-lawtax-article-detail dl {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-lawtax-article-table-wrap {
+    overflow-x: visible;
+  }
+
+  .admin-lawtax-article-table,
+  .admin-lawtax-article-table tbody,
+  .admin-lawtax-article-table tr,
+  .admin-lawtax-article-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-lawtax-article-table thead {
+    display: none;
+  }
+
+  .admin-lawtax-article-table tr {
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+
+  .admin-lawtax-article-table td,
+  .admin-lawtax-article-table td:first-child,
+  .admin-lawtax-article-table td:last-child {
+    display: flex;
+    padding: 7px 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: 0;
+    text-align: right;
+  }
+
+  .admin-lawtax-article-table td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 600;
+  }
+}
