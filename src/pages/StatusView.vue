@@ -235,6 +235,17 @@ function simulationPeriodCopy(plan) {
   return '일정 미정'
 }
 
+function planProductNames(plan) {
+  if (Array.isArray(plan?.productNames) && plan.productNames.length) {
+    return plan.productNames.map((name) => String(name).trim()).filter(Boolean)
+  }
+
+  return String(plan?.productName ?? '')
+    .split(' · ')
+    .map((name) => name.trim())
+    .filter(Boolean)
+}
+
 /**
  * 증여세 신고서 OCR 대조. 회차마다 따로 올리므로 상태도 회차(giftId)별로 담는다.
  * 결과는 화면에서만 쓰고 저장하지 않는다.
@@ -556,7 +567,11 @@ onMounted(() => loadStatus())
                 {{ formatCompactWon(familySimulation.amount) }}을 준비하고 있어요
               </template>
             </h2>
-            <strong>{{ familySimulation.productName }}</strong>
+            <ul class="plan-card-product-list" aria-label="선택 상품">
+              <li v-for="productName in planProductNames(familySimulation)" :key="productName">
+                {{ productName }}
+              </li>
+            </ul>
             <div class="plan-card-meta">
               <span v-if="familySimulation.rate">
                 예상 수익률 연 {{ familySimulation.rate }}%
@@ -612,7 +627,7 @@ onMounted(() => loadStatus())
             <div class="status-card-title">
               <div>
                 <span class="status-section-icon history"><AppIcon name="clock" :size="19" /></span>
-                <strong>증여 이력</strong>
+                증여 이력
               </div>
               <span>{{ history.length }}건</span>
             </div>
@@ -647,7 +662,7 @@ onMounted(() => loadStatus())
                 <span class="status-section-icon planned"
                   ><AppIcon name="calendar" :size="19"
                 /></span>
-                <strong>진행 중인 증여</strong>
+                진행 중인 증여
               </div>
               <span>{{ familyPlanGroups.length }}건</span>
             </div>

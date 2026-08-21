@@ -84,6 +84,7 @@ const emit = defineEmits([
   'update:donorPaysTax',
   'amount-input',
   'add-amount',
+  'reset-amount',
   'submit',
 ])
 
@@ -214,6 +215,14 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', closeFamilyPic
           <span class="step-number">2</span>
           <div class="amount-heading-copy">
             <h3>얼마를 증여할까요?</h3>
+            <button
+              type="button"
+              class="amount-reset-button"
+              :disabled="!amountText && !errorMessage"
+              @click="$emit('reset-amount')"
+            >
+              초기화
+            </button>
           </div>
         </div>
 

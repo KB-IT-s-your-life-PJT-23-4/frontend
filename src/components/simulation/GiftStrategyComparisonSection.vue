@@ -22,7 +22,17 @@ const props = defineProps({
     type: String,
     default: 'BALANCED',
   },
+  canChangeTaxPayment: {
+    type: Boolean,
+    default: false,
+  },
+  changingTaxPayment: {
+    type: Boolean,
+    default: false,
+  },
 })
+
+const emit = defineEmits(['change-tax-payment'])
 
 const scenario = computed(() => props.recommendedScenario)
 const portfolioProfileLabel = computed(
@@ -41,6 +51,9 @@ const donorPaysTax = computed(() => {
 })
 const taxPayerLabel = computed(() =>
   donorPaysTax.value ? '주는 분이 세금 준비' : '받는 분이 세금 납부',
+)
+const taxPaymentChangeLabel = computed(() =>
+  donorPaysTax.value ? '받는 분 납부로 변경' : '주는 분 준비로 변경',
 )
 const immediateScenario = computed(() =>
   props.result.results?.find((item) => item.scenarioType === 'IMMEDIATE'),
@@ -189,6 +202,18 @@ const reinvestmentSchedule = computed(() => {
               : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
           }}
         </p>
+        <div v-if="canChangeTaxPayment" class="timeline-tax-payment-action">
+          <button
+            class="result-condition-edit"
+            type="button"
+            :disabled="changingTaxPayment"
+            :aria-label="`${taxPayerLabel}에서 ${taxPaymentChangeLabel}`"
+            @click="emit('change-tax-payment')"
+          >
+            <span v-if="changingTaxPayment" class="button-spinner" />
+            <template v-else>{{ taxPaymentChangeLabel }}</template>
+          </button>
+        </div>
       </div>
     </header>
 

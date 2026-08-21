@@ -244,6 +244,16 @@ export function formatCompactWon(value) {
   return `${amount.toLocaleString('ko-KR')}원`
 }
 
+/** 좁은 그래프 축에서 억 단위 금액이 레이아웃을 밀지 않도록 소수 표기로 압축한다. */
+export function formatChartAxisWon(value) {
+  const amount = Math.max(0, Math.round(Number(value) || 0))
+  if (amount < 100000000) return formatCompactWon(amount)
+
+  const eok = amount / 100000000
+  const maximumFractionDigits = eok >= 100 ? 0 : eok >= 10 ? 1 : 2
+  return `${eok.toLocaleString('ko-KR', { maximumFractionDigits })}억원`
+}
+
 export function normalizeAmount(value) {
   const parsed = Number(String(value ?? '').replace(/[^0-9]/g, ''))
   return Number.isFinite(parsed) ? parsed : 0

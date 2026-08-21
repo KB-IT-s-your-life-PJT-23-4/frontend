@@ -13,6 +13,7 @@ import {
 import { listFaqCategories } from '@/api/faqApi.js'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useConsultationStore } from '@/stores/consultationStore.js'
+import { shortenChatSeparators } from '@/utils/chatText.js'
 import '../assets/css/chatView.css'
 
 // =============================== 데이터 포맷 설정
@@ -32,14 +33,16 @@ function getCurrentTimeFormat() {
 function normalizeAssistantAnswer(answer, fallback) {
   const source = typeof answer === 'string' ? answer : fallback
 
-  return String(source ?? '')
-    .replace(/^\s{0,3}#{1,6}\s*/gm, '')
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/__(.*?)__/g, '$1')
-    .replace(/`([^`]*)`/g, '$1')
-    .replace(/^\s*[-*+]\s+/gm, '• ')
-    .replace(/^\s*\d+[.)]\s+/gm, '')
-    .trim()
+  return shortenChatSeparators(
+    String(source ?? '')
+      .replace(/^\s{0,3}#{1,6}\s*/gm, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/__(.*?)__/g, '$1')
+      .replace(/`([^`]*)`/g, '$1')
+      .replace(/^\s*[-*+]\s+/gm, '• ')
+      .replace(/^\s*\d+[.)]\s+/gm, '')
+      .trim(),
+  )
 }
 
 function normalizeReferenceUrl(value) {
@@ -552,7 +555,7 @@ async function sendMessage(
       messages.value.push({
         id: Date.now() + 1,
         role: 'assistant',
-        text: staticAnswer,
+        text: shortenChatSeparators(staticAnswer),
         actions: showBranch || showTaxOffice, // 둘 중 하나라도 true면 actions 블록을 활성화합니다.
         showBranchButton: showBranch,
         showTaxOfficeButton: showTaxOffice,
@@ -649,7 +652,9 @@ function clearConversation() {
 }
 // =============================== 답변 uiux
 function messageParagraphs(text) {
-  return text.split(/\n{2,}/).filter(Boolean)
+  return shortenChatSeparators(text)
+    .split(/\n{2,}/)
+    .filter(Boolean)
 }
 </script>
 

@@ -1,10 +1,10 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
-import { calculatePortfolioValue, formatCompactWon } from '../../utils/finance'
+import { calculatePortfolioValue, formatChartAxisWon, formatCompactWon } from '../../utils/finance'
 import '../../assets/css/simulation/gift-asset-growth-chart.css'
 
-const CHART = {
+const DESKTOP_CHART = {
   width: 760,
   height: 300,
   left: 76,
@@ -12,8 +12,35 @@ const CHART = {
   top: 24,
   bottom: 48,
 }
-const plotWidth = CHART.width - CHART.left - CHART.right
-const plotHeight = CHART.height - CHART.top - CHART.bottom
+
+const MOBILE_CHART = {
+  width: 420,
+  height: 300,
+  left: 88,
+  right: 28,
+  top: 24,
+  bottom: 52,
+}
+
+const mobileChartQuery = '(max-width: 640px)'
+const startsWithMobileChart =
+  typeof window !== 'undefined' && window.matchMedia(mobileChartQuery).matches
+const CHART = reactive({ ...(startsWithMobileChart ? MOBILE_CHART : DESKTOP_CHART) })
+const plotWidth = computed(() => CHART.width - CHART.left - CHART.right)
+const plotHeight = computed(() => CHART.height - CHART.top - CHART.bottom)
+let chartMediaQuery = null
+
+function syncChartSize(event) {
+  Object.assign(CHART, event.matches ? MOBILE_CHART : DESKTOP_CHART)
+}
+
+onMounted(() => {
+  chartMediaQuery = window.matchMedia(mobileChartQuery)
+  syncChartSize(chartMediaQuery)
+  chartMediaQuery.addEventListener('change', syncChartSize)
+})
+
+onBeforeUnmount(() => chartMediaQuery?.removeEventListener('change', syncChartSize))
 
 const props = defineProps({
   result: {
@@ -238,14 +265,15 @@ const chartDuration = computed(() =>
 
 function xPosition(date) {
   return (
-    CHART.left + ((date.getTime() - startDate.value.getTime()) / chartDuration.value) * plotWidth
+    CHART.left +
+    ((date.getTime() - startDate.value.getTime()) / chartDuration.value) * plotWidth.value
   )
 }
 
 function yPosition(value) {
   const range = Math.max(1, yDomain.value.maximum - yDomain.value.minimum)
   const ratio = (Number(value ?? 0) - yDomain.value.minimum) / range
-  return CHART.top + plotHeight - ratio * plotHeight
+  return CHART.top + plotHeight.value - ratio * plotHeight.value
 }
 
 function pathFor(series) {
@@ -292,7 +320,7 @@ const yTicks = computed(() =>
   Array.from({ length: 3 }, (_, index) => {
     const ratio = index / 2
     const value = yDomain.value.maximum - (yDomain.value.maximum - yDomain.value.minimum) * ratio
-    return { value, y: CHART.top + plotHeight * ratio }
+    return { value, y: CHART.top + plotHeight.value * ratio }
   }),
 )
 const xTicks = computed(() => {
@@ -386,11 +414,11 @@ function eventDateLabel(date) {
 }
 
 function eventPositionClass(event) {
-  const horizontalRatio = (xPosition(event.date) - CHART.left) / Math.max(1, plotWidth)
+  const horizontalRatio = (xPosition(event.date) - CHART.left) / Math.max(1, plotWidth.value)
   return {
     'is-near-start': horizontalRatio <= 0.12,
     'is-near-end': horizontalRatio >= 0.88,
-    'is-near-bottom': yPosition(event.value) >= CHART.top + plotHeight * 0.72,
+    'is-near-bottom': yPosition(event.value) >= CHART.top + plotHeight.value * 0.72,
   }
 }
 
@@ -405,7 +433,10 @@ function eventPositionStyle(event) {
 <template>
   <section class="gift-growth-chart-card">
     <div class="gift-growth-chart-scroll">
-      <div class="gift-growth-chart-stage">
+      <div
+        class="gift-growth-chart-stage"
+        :style="{ aspectRatio: `${CHART.width} / ${CHART.height}` }"
+      >
         <svg
           class="gift-growth-chart"
           :viewBox="`0 0 ${CHART.width} ${CHART.height}`"
@@ -416,7 +447,7 @@ function eventPositionStyle(event) {
             <g v-for="tick in yTicks" :key="tick.y">
               <line :x1="CHART.left" :x2="CHART.width - CHART.right" :y1="tick.y" :y2="tick.y" />
               <text :x="CHART.left - 12" :y="tick.y + 4" text-anchor="end">
-                {{ formatCompactWon(tick.value) }}
+                {{ formatChartAxisWon(tick.value) }}
               </text>
             </g>
           </g>

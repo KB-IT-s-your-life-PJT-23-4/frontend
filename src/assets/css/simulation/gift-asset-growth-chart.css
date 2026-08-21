@@ -265,16 +265,50 @@
 }
 
 @media (max-width: 640px) {
+  .gift-growth-chart-card {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .gift-growth-chart-stage {
+    aspect-ratio: 420 / 300;
+  }
+
   .gift-growth-chart-outcome {
     width: 100%;
     box-sizing: border-box;
     text-align: left;
   }
+
   .gift-growth-chart-legend {
-    font-size: 0.63rem;
+    gap: 9px 14px;
+    margin-top: 14px;
+    font-size: clamp(11px, 3.4vw, 13px);
+    font-weight: 500;
+    line-height: 1.4;
   }
+
+  .gift-growth-chart-legend span::before {
+    width: 19px;
+    height: 3px;
+  }
+
   .gift-growth-grid text,
   .gift-growth-x-axis text {
-    font-size: 1rem;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .gift-growth-grid line {
+    stroke-width: 1.4;
+  }
+
+  .gift-growth-line.is-recommended {
+    stroke-width: 4.5;
+  }
+
+  .gift-growth-line.is-principal,
+  .gift-growth-line.is-alternative {
+    stroke-width: 2.75;
   }
 }
