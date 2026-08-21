@@ -964,8 +964,7 @@ onMounted(() => loadStatus())
         <div>
           <h2>증여가 어려우신가요?</h2>
           <p>
-            AI 상담을 통해 관련 법령과 기본 절차를 확인하고, 나의 상황에 맞는 증여 계획을
-            세워보세요.
+            AI 상담을 통해 관련 법령과 기본 절차를 확인하고, 내 상황에 맞는 증여 계획을 세워보세요.
           </p>
         </div>
         <RouterLink class="primary-button" to="/chat">AI 상담하기</RouterLink>

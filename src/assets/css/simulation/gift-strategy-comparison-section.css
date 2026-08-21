@@ -35,9 +35,9 @@
 }
 
 .timeline-tax-payment-action {
-  display: flex;
-  margin-top: 9px;
-  justify-content: flex-end;
+  display: inline-flex;
+  margin: 0;
+  align-items: center;
 }
 
 .timeline-heading-meta {
