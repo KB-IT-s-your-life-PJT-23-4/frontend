@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRouter } from 'vue-router'
 import { checkEmailDuplicate, signup } from '../api/authApi'
 import AppHeader from '../components/layout/AppHeader.vue'
 import PageHeading from '../components/layout/PageHeading.vue'
 import { useAppStore } from '../stores/appStore'
+import { useSignupDraftStore } from '../stores/signupDraftStore.js'
 import {
   formatBirthDate,
   formatPhone,
@@ -18,28 +19,34 @@ import '../assets/css/auth-view.css'
 
 const router = useRouter()
 const store = useAppStore()
+const signupDraftStore = useSignupDraftStore()
+const savedDraft = signupDraftStore.consumeDraft()
 const form = reactive({
-  name: '',
-  email: '',
-  password: '',
-  passwordConfirm: '',
-  birthDate: '',
-  phone: '',
-  agreed: false,
+  name: savedDraft?.form.name ?? '',
+  email: savedDraft?.form.email ?? '',
+  password: savedDraft?.form.password ?? '',
+  passwordConfirm: savedDraft?.form.passwordConfirm ?? '',
+  birthDate: savedDraft?.form.birthDate ?? '',
+  phone: savedDraft?.form.phone ?? '',
+  agreed: savedDraft?.form.agreed ?? false,
 })
 const errors = reactive({
-  name: '',
-  email: '',
-  password: '',
-  passwordConfirm: '',
-  birthDate: '',
-  phone: '',
-  agreed: '',
+  name: savedDraft?.errors.name ?? '',
+  email: savedDraft?.errors.email ?? '',
+  password: savedDraft?.errors.password ?? '',
+  passwordConfirm: savedDraft?.errors.passwordConfirm ?? '',
+  birthDate: savedDraft?.errors.birthDate ?? '',
+  phone: savedDraft?.errors.phone ?? '',
+  agreed: savedDraft?.errors.agreed ?? '',
 })
-const serverError = ref('')
-const emailStatus = ref('idle')
-const checkedEmail = ref('')
+const serverError = ref(savedDraft?.serverError ?? '')
+const emailStatus = ref(savedDraft?.emailStatus ?? 'idle')
+const checkedEmail = ref(savedDraft?.checkedEmail ?? '')
 const isSubmitting = ref(false)
+
+onBeforeRouteLeave((to) => {
+  if (!['terms', 'privacy-policy'].includes(to.name)) signupDraftStore.clearDraft()
+})
 
 watch(
   () => form.email,
@@ -66,6 +73,18 @@ function onBirthDateInput(event) {
 function onPhoneInput(event) {
   form.phone = formatPhone(event.target.value)
   clearError('phone')
+}
+
+function saveDraftForLegalDocument() {
+  const savedEmailStatus = emailStatus.value === 'checking' ? 'idle' : emailStatus.value
+
+  signupDraftStore.saveDraft({
+    form: { ...form },
+    errors: { ...errors },
+    serverError: serverError.value,
+    emailStatus: savedEmailStatus,
+    checkedEmail: savedEmailStatus === 'idle' ? '' : checkedEmail.value,
+  })
 }
 
 async function checkEmail() {
@@ -290,7 +309,15 @@ async function submitSignup() {
           <div class="auth-agreement">
             <label>
               <input v-model="form.agreed" type="checkbox" @change="clearError('agreed')" />
-              <span><u>미리줌 이용약관</u> 및 <u>개인정보 처리방침</u>에 모두 동의합니다.</span>
+              <span>
+                <RouterLink :to="{ name: 'terms' }" @click.stop="saveDraftForLegalDocument"
+                  >미리줌 이용약관</RouterLink
+                >
+                및
+                <RouterLink :to="{ name: 'privacy-policy' }" @click.stop="saveDraftForLegalDocument"
+                  >개인정보 처리방침</RouterLink
+                >에 모두 동의합니다.
+              </span>
             </label>
             <p v-if="errors.agreed" class="auth-message error">{{ errors.agreed }}</p>
           </div>

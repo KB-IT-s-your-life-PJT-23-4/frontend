@@ -103,6 +103,15 @@ export function calculateEtfFutureValue(principal, annualReturnRate, months) {
 
 function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
   const totalMonths = Math.max(0, Math.round(Number(months) || 0))
+  const fitPeriodsToMonths = (periods) => {
+    let remainingMonths = totalMonths
+    return periods.flatMap((period) => {
+      if (remainingMonths <= 0) return []
+      const appliedMonths = Math.min(period, remainingMonths)
+      remainingMonths -= appliedMonths
+      return appliedMonths > 0 ? [appliedMonths] : []
+    })
+  }
   const contractRatePeriods = (product?.contractRateSchedule ?? [])
     .filter(
       (item) =>
@@ -112,7 +121,7 @@ function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
     .map((item) => Math.max(0, Number(item.contractMonths) || 0))
     .filter((period) => period > 0)
 
-  if (contractRatePeriods.length) return contractRatePeriods
+  if (contractRatePeriods.length) return fitPeriodsToMonths(contractRatePeriods)
 
   const scheduledPeriods = (product?.reinvestmentSchedule ?? [])
     .filter(
@@ -125,14 +134,16 @@ function buildReinvestmentPeriods(product, months, trancheSequenceNo) {
 
   if (scheduledPeriods.length) {
     const completedMonths = scheduledPeriods.reduce((sum, period) => sum + period, 0)
+    if (completedMonths >= totalMonths) return fitPeriodsToMonths(scheduledPeriods)
     const finalPeriod = totalMonths - completedMonths
     const minimumMonths = Number(product?.minimumContractMonths)
     const maximumMonths = Number(product?.maximumContractMonths)
-    const finalPeriodIsInvestable = finalPeriod > 0
-      && Number.isInteger(minimumMonths)
-      && Number.isInteger(maximumMonths)
-      && finalPeriod >= minimumMonths
-      && finalPeriod <= maximumMonths
+    const finalPeriodIsInvestable =
+      finalPeriod > 0 &&
+      Number.isInteger(minimumMonths) &&
+      Number.isInteger(maximumMonths) &&
+      finalPeriod >= minimumMonths &&
+      finalPeriod <= maximumMonths
     return finalPeriodIsInvestable ? [...scheduledPeriods, finalPeriod] : scheduledPeriods
   }
 
@@ -231,6 +242,16 @@ export function formatCompactWon(value) {
   }
   if (amount >= 10000) return `${Math.round(amount / 10000).toLocaleString('ko-KR')}만원`
   return `${amount.toLocaleString('ko-KR')}원`
+}
+
+/** 좁은 그래프 축에서 억 단위 금액이 레이아웃을 밀지 않도록 소수 표기로 압축한다. */
+export function formatChartAxisWon(value) {
+  const amount = Math.max(0, Math.round(Number(value) || 0))
+  if (amount < 100000000) return formatCompactWon(amount)
+
+  const eok = amount / 100000000
+  const maximumFractionDigits = eok >= 100 ? 0 : eok >= 10 ? 1 : 2
+  return `${eok.toLocaleString('ko-KR', { maximumFractionDigits })}억원`
 }
 
 export function normalizeAmount(value) {

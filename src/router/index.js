@@ -16,9 +16,11 @@ import NotificationsView from '../pages/NotificationsView.vue'
 import GuideDetailView from '../pages/GuideDetailView.vue'
 import LoginView from '../pages/LoginView.vue'
 import SignupView from '../pages/SignupView.vue'
+import LegalDocumentView from '../pages/LegalDocumentView.vue'
 import AdminDashboardView from '../pages/AdminDashboardView.vue'
 import AdminUserView from '../pages/AdminUserView.vue'
 import AdminProductsView from '../pages/AdminProductsView.vue'
+import AdminLawTaxView from '../pages/AdminLawTaxView.vue'
 import AdminFaqView from '../pages/AdminFaqView.vue'
 import AdminReportView from '../pages/AdminReportView.vue'
 import AdminAuthorizationView from '../pages/AdminAuthorizationView.vue'
@@ -141,6 +143,18 @@ const router = createRouter({
       meta: { label: '회원가입', hideBottomNav: true },
     },
     {
+      path: '/terms',
+      name: 'terms',
+      component: LegalDocumentView,
+      meta: { label: '이용약관', hideBottomNav: true },
+    },
+    {
+      path: '/privacy-policy',
+      name: 'privacy-policy',
+      component: LegalDocumentView,
+      meta: { label: '개인정보 처리방침', hideBottomNav: true },
+    },
+    {
       path: '/admin/dashboard',
       name: 'admin-dashboard',
       component: AdminDashboardView,
@@ -170,6 +184,19 @@ const router = createRouter({
       component: AdminProductsView,
       meta: {
         label: '상품 관리',
+        requiresAuth: true,
+        requiresAdmin: true,
+        requiresRole: ['ROOT', 'MIDDLE'],
+        layout: 'admin',
+        hideBottomNav: true,
+      },
+    },
+    {
+      path: '/admin/lawtax',
+      name: 'admin-lawtax',
+      component: AdminLawTaxView,
+      meta: {
+        label: '세법 관리',
         requiresAuth: true,
         requiresAdmin: true,
         requiresRole: ['ROOT', 'MIDDLE'],

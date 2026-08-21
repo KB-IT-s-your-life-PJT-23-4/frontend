@@ -1,0 +1,314 @@
+.gift-growth-chart-card {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e5ebf0;
+}
+
+.gift-growth-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  margin: 10px 0 0;
+  color: #596d82;
+  font-size: 0.73rem;
+  text-align: center;
+}
+
+.gift-growth-chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gift-growth-chart-legend span::before {
+  content: '';
+  width: 16px;
+  height: 3px;
+  border-radius: 999px;
+  background: #aab5c2;
+}
+
+.gift-growth-chart-legend .is-recommended::before {
+  background: #f4b400;
+}
+
+.gift-growth-chart-legend .is-principal::before {
+  background: #244d73;
+}
+
+.gift-growth-chart-legend .is-alternative::before {
+  background: repeating-linear-gradient(90deg, #aab5c2 0 6px, transparent 6px 9px);
+}
+
+.gift-growth-chart-scroll {
+  overflow: visible;
+  padding-bottom: 4px;
+}
+
+.gift-growth-chart-stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 760 / 300;
+}
+
+.gift-growth-chart {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gift-growth-grid line {
+  stroke: #e8edf2;
+  stroke-dasharray: 4 5;
+  stroke-width: 1;
+}
+
+.gift-growth-grid text,
+.gift-growth-x-axis text {
+  fill: #7d8d9d;
+  font-size: 11px;
+}
+
+.gift-growth-x-axis line {
+  stroke: #b9c5d0;
+  stroke-width: 1;
+}
+
+.gift-growth-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.gift-growth-line.is-recommended {
+  stroke: #f4b400;
+  stroke-width: 4;
+  filter: drop-shadow(0 2px 3px rgb(244 180 0 / 20%));
+}
+
+.gift-growth-line.is-principal {
+  stroke: #244d73;
+  stroke-width: 2.25;
+}
+
+.gift-growth-line.is-alternative {
+  stroke: #aab5c2;
+  stroke-dasharray: 7 6;
+  stroke-width: 2.25;
+}
+
+.gift-growth-final-gap {
+  stroke: #dca300;
+  stroke-dasharray: 3 3;
+  stroke-width: 1.5;
+}
+
+.gift-growth-endpoint {
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.gift-growth-endpoint.is-recommended {
+  fill: #f4b400;
+}
+
+.gift-growth-endpoint.is-alternative {
+  fill: #aab5c2;
+}
+
+.gift-growth-endpoint-halo {
+  fill: rgb(244 180 0 / 17%);
+  stroke: none;
+}
+
+.gift-growth-event-marker {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  padding: 0;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  background: #f4b400;
+  box-shadow:
+    0 0 0 3px rgb(244 180 0 / 13%),
+    0 3px 9px rgb(164 119 0 / 23%);
+  transform: translate(-50%, -50%);
+  cursor: help;
+}
+
+.gift-growth-event-marker.is-reinvestment {
+  width: 19px;
+  height: 19px;
+  border-width: 2px;
+  color: #edd58d;
+  background: #fffbef;
+  box-shadow:
+    0 0 0 3px rgb(244 180 0 / 8%),
+    0 3px 9px rgb(164 119 0 / 18%);
+}
+
+.gift-growth-event-marker:hover,
+.gift-growth-event-marker:focus-visible {
+  z-index: 6;
+}
+
+.gift-growth-event-marker:focus {
+  outline: none;
+}
+
+.gift-growth-event-marker:focus-visible {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px rgb(244 180 0 / 25%),
+    0 4px 10px rgb(164 119 0 / 24%);
+}
+
+.gift-growth-event-marker.is-reinvestment:focus-visible {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px rgb(36 77 115 / 22%),
+    0 4px 10px rgb(36 77 115 / 22%);
+}
+
+.gift-growth-event-tooltip {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  z-index: 7;
+  display: grid;
+  width: max-content;
+  min-width: 104px;
+  max-width: 168px;
+  padding: 8px 10px;
+  gap: 3px;
+  border: 1px solid #dbe5eb;
+  border-radius: 9px;
+  opacity: 0;
+  color: #4b5d6c;
+  background: #fff;
+  box-shadow: 0 7px 18px rgb(47 70 89 / 14%);
+  text-align: left;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  pointer-events: none;
+}
+
+.gift-growth-event-tooltip strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.gift-growth-event-tooltip span {
+  color: #74818d;
+  font-size: 9px;
+}
+
+.gift-growth-event-tooltip b {
+  overflow: hidden;
+  color: #477493;
+  font-size: 10px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gift-growth-event-marker:hover .gift-growth-event-tooltip,
+.gift-growth-event-marker:focus-visible .gift-growth-event-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.gift-growth-event-marker.is-near-start .gift-growth-event-tooltip {
+  left: -4px;
+  transform: translate(0, 4px);
+}
+
+.gift-growth-event-marker.is-near-end .gift-growth-event-tooltip {
+  right: -4px;
+  left: auto;
+  text-align: right;
+  transform: translate(0, 4px);
+}
+
+.gift-growth-event-marker.is-near-bottom .gift-growth-event-tooltip {
+  top: auto;
+  bottom: calc(100% + 9px);
+}
+
+.gift-growth-event-marker.is-near-start:hover .gift-growth-event-tooltip,
+.gift-growth-event-marker.is-near-start:focus-visible .gift-growth-event-tooltip,
+.gift-growth-event-marker.is-near-end:hover .gift-growth-event-tooltip,
+.gift-growth-event-marker.is-near-end:focus-visible .gift-growth-event-tooltip {
+  transform: translate(0, 0);
+}
+
+.gift-growth-outside-note {
+  margin: 9px 0 0;
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: #f3f6f9;
+  color: #60758a;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .gift-growth-chart-card {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .gift-growth-chart-stage {
+    aspect-ratio: 420 / 300;
+  }
+
+  .gift-growth-chart-outcome {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+  }
+
+  .gift-growth-chart-legend {
+    gap: 9px 14px;
+    margin-top: 14px;
+    font-size: clamp(11px, 3.4vw, 13px);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .gift-growth-chart-legend span::before {
+    width: 19px;
+    height: 3px;
+  }
+
+  .gift-growth-grid text,
+  .gift-growth-x-axis text {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .gift-growth-grid line {
+    stroke-width: 1.4;
+  }
+
+  .gift-growth-line.is-recommended {
+    stroke-width: 4.5;
+  }
+
+  .gift-growth-line.is-principal,
+  .gift-growth-line.is-alternative {
+    stroke-width: 2.75;
+  }
+}

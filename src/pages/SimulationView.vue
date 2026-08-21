@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import AppIcon from '../components/layout/AppIcon.vue'
-import GiftPlanTimeline from '../components/simulation/GiftPlanTimeline.vue'
+import GiftPlanTimeline from '../components/simulation/GiftStrategyComparisonSection.vue'
 import InvestmentGrowthChart from '../components/simulation/InvestmentGrowthChart.vue'
 import PortfolioDonutCard from '../components/simulation/PortfolioDonutCard.vue'
 import ProductSelectionPanel from '../components/simulation/ProductSelectionPanel.vue'
@@ -279,6 +279,11 @@ function setAmount(value) {
 
 function addAmount(value) {
   setAmount(amount.value + value)
+}
+
+function resetAmountInput() {
+  amountText.value = ''
+  errorMessage.value = ''
 }
 
 function updateGiftDate(value) {
@@ -727,6 +732,7 @@ onMounted(async () => {
       :donor-pays-tax="donorPaysTax"
       @amount-input="setAmount"
       @add-amount="addAmount"
+      @reset-amount="resetAmountInput"
       @update:investment-years="investmentYears = $event"
       @update:gift-date="updateGiftDate"
       @update:donor-pays-tax="donorPaysTax = $event"
@@ -756,36 +762,21 @@ onMounted(async () => {
             <AppIcon name="calendar" :size="15" />
             {{ result.evaluationDate }} 평가 기준
           </span>
-          <span v-if="isHistoryResult">
+          <span>
             <AppIcon name="wallet" :size="15" />
             {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
           </span>
-          <button
-            v-else
-            class="result-condition-edit"
-            type="button"
-            :disabled="loading"
-            :aria-label="
-              result.donorPaysTax
-                ? '받는 분이 세금을 납부하는 방식으로 변경'
-                : '주는 분이 세금까지 준비하는 방식으로 변경'
-            "
-            @click="changeTaxPaymentMethod"
-          >
-            <AppIcon name="wallet" :size="15" />
-            <span v-if="loading" class="button-spinner" />
-            <template v-else>
-              {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
-            </template>
-          </button>
         </div>
       </section>
 
       <GiftPlanTimeline
         :result="result"
         :recommended-scenario="recommendedScenario"
-        :selected-products="selectedProducts"
+        :selected-products="calculationProducts"
         :portfolio-profile="selectedPortfolioType"
+        :can-change-tax-payment="!isHistoryResult"
+        :changing-tax-payment="loading"
+        @change-tax-payment="changeTaxPaymentMethod"
       />
 
       <PortfolioDonutCard

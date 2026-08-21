@@ -45,6 +45,7 @@
 - When `0`, `false`, or an empty collection can be valid form data, check explicitly for `null`, `undefined`, or an empty string instead of using truthiness to enable submission controls.
 - When one clarification answer makes dependent questions inapplicable, normalize the related values consistently in both `facts` and `answers` using the backend contract's absence sentinel (for example, `"none"` for absent consultation dates), then skip those questions instead of requiring redundant user input; never fabricate a real date.
 - Treat AI `answer` values as display-safe plain text. Do not rely on rendering raw Markdown unless an explicitly sanitized Markdown renderer and contract are introduced together.
+- When normalizing decorative separators from API text, inspect the actual Unicode characters returned by the API and cover visually similar variants with a real response sample in tests.
 - Follow the formatting rules in `.prettierrc.json`.
 - Do not modify files unrelated to the requested change.
 
@@ -59,6 +60,7 @@
 - Page CSS files are concatenated into one global stylesheet at build time, so a page-specific file must never style a shared layout class (for example `.landing-app-frame`) unscoped; gate such rules behind that page's own root class, otherwise every other route using the same layout inherits them.
 - When a scroll-driven scene positions decorative rails or captions against the viewport edges, verify at narrow widths that they do not land on top of the centered card or stage content, and reposition them at the breakpoint instead of relying on dimmed color for separation.
 - For hero entrance animations with a requested final screen position, verify the final transform against that viewport region at both desktop and mobile breakpoints; do not treat a subtle relative offset as sufficient without checking the landing position.
+- When a control must remain beside a heading on mobile, explicitly override inherited responsive `flex-direction`, width, and gap rules with sufficient specificity and verify the same-row relationship at the smallest supported viewport.
 
 ## Dependency Policy
 
@@ -69,6 +71,8 @@
 ## Verification
 
 - Check syntax and import paths in every changed file.
+- When a PostCSS visitor mutates declarations, make the transformation idempotent or explicitly mark visited nodes, and verify the compiled CSS rather than relying only on a pure value-mapping test.
+- When chart geometry becomes reactive, audit every script-side computed ref access for `.value` and verify axes, endpoints, event markers, and legends at the smallest supported viewport using representative large values and maximum-length labels.
 - When a source module is imported by a standalone Node ESM test, include its explicit `.js` import extensions so the test does not rely on Vite resolution.
 - Apply the repository's formatting rules when needed.
 - Run `npm run build` after code changes.

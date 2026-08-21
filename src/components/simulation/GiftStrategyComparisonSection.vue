@@ -1,8 +1,9 @@
 <script setup>
 import { computed } from 'vue'
 import AppIcon from '../layout/AppIcon.vue'
-import { formatCompactWon } from '../../utils/finance'
-import '../../assets/css/simulation/gift-plan-timeline.css'
+import GiftAssetGrowthChart from './GiftAssetGrowthChart.vue'
+import { formatCompactWon } from '../../utils/finance.js'
+import '../../assets/css/simulation/gift-strategy-comparison-section.css'
 
 const props = defineProps({
   result: {
@@ -21,7 +22,17 @@ const props = defineProps({
     type: String,
     default: 'BALANCED',
   },
+  canChangeTaxPayment: {
+    type: Boolean,
+    default: false,
+  },
+  changingTaxPayment: {
+    type: Boolean,
+    default: false,
+  },
 })
+
+const emit = defineEmits(['change-tax-payment'])
 
 const scenario = computed(() => props.recommendedScenario)
 const portfolioProfileLabel = computed(
@@ -40,6 +51,9 @@ const donorPaysTax = computed(() => {
 })
 const taxPayerLabel = computed(() =>
   donorPaysTax.value ? '주는 분이 세금 준비' : '받는 분이 세금 납부',
+)
+const taxPaymentChangeLabel = computed(() =>
+  donorPaysTax.value ? '받는 분 납부로 변경' : '주는 분 준비로 변경',
 )
 const immediateScenario = computed(() =>
   props.result.results?.find((item) => item.scenarioType === 'IMMEDIATE'),
@@ -83,16 +97,20 @@ const alternativeScenario = computed(() =>
 const preparationLabel = computed(() =>
   donorPaysTax.value ? '주는 분 총 준비 금액' : '받는 분이 납부할 세금',
 )
+const taxAmountLabel = computed(() =>
+  donorPaysTax.value ? '주는 분이 납부할 세금' : '받는 분이 납부할 세금',
+)
 
 function preparationAmount(item) {
   return Number(donorPaysTax.value ? item?.totalDonorOutflow : item?.estimatedPayableTax)
 }
 
-function preparationDetail(item) {
-  if (donorPaysTax.value) {
-    return `증여액과 예상 세금 ${formatCompactWon(item?.estimatedPayableTax ?? 0)} 포함`
-  }
-  return `증여받은 분이 예상 세금 ${formatCompactWon(item?.estimatedPayableTax ?? 0)} 납부`
+function estimatedTaxAmount(item) {
+  return Number(item?.estimatedPayableTax ?? 0)
+}
+
+function donorRequiredAmount(item) {
+  return Number(item?.totalDonorOutflow ?? 0)
 }
 
 function scenarioFutureValue(item) {
@@ -119,18 +137,6 @@ function scenarioEndTotalValue(item) {
   return investedFutureValue + remainingUninvestedPrincipal(item)
 }
 
-function endTotalValueDetail(item) {
-  const investedFutureValue = scenarioFutureValue(item)
-  const remainingPrincipal = remainingUninvestedPrincipal(item)
-  if (investedFutureValue == null) return '운용 결과를 계산할 수 없어요'
-  if (remainingPrincipal > 0) {
-    return `운용 결과 ${formatCompactWon(
-      investedFutureValue,
-    )} + 아직 증여하지 않은 원금 ${formatCompactWon(remainingPrincipal)}`
-  }
-  return `${portfolioProfileLabel.value} 투자 성향의 운용 결과`
-}
-
 const recommendedPreparationDifference = computed(
   () => preparationAmount(alternativeScenario.value) - preparationAmount(scenario.value),
 )
@@ -140,60 +146,8 @@ const recommendedFutureValueDifference = computed(() => {
   if (recommendedValue == null || alternativeValue == null) return null
   return recommendedValue - alternativeValue
 })
-const comparisonReason = computed(() => {
-  const recommendedLabel = scenarioComparisonLabel(scenario.value)
-  const alternativeLabel = scenarioComparisonLabel(alternativeScenario.value)
-  const preparationDifference = recommendedPreparationDifference.value
-  const futureValueDifference = recommendedFutureValueDifference.value
-
-  if (futureValueDifference == null) {
-    if (preparationDifference > 0) {
-      return `${recommendedLabel}는 ${preparationLabel.value}이 ${alternativeLabel}보다 ${formatCompactWon(
-        preparationDifference,
-      )} 적어 유리해요.`
-    }
-    return `세금 납부 조건과 증여 일정을 함께 반영해 ${recommendedLabel}를 추천해요.`
-  }
-
-  if (futureValueDifference > 0 && preparationDifference > 0) {
-    return `${recommendedLabel}는 준비 금액을 ${formatCompactWon(
-      preparationDifference,
-    )} 줄이고, ${resultYearsLabel.value} 후 예상 총 금액은 ${formatCompactWon(
-      futureValueDifference,
-    )} 더 많아 유리해요.`
-  }
-  if (futureValueDifference > 0 && preparationDifference < 0) {
-    return `${recommendedLabel}는 준비 금액이 ${formatCompactWon(
-      Math.abs(preparationDifference),
-    )} 더 들지만, ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
-      futureValueDifference,
-    )} 더 많아 최종 결과가 유리해요.`
-  }
-  if (futureValueDifference > 0) {
-    return `준비 금액은 같지만, ${recommendedLabel}의 ${resultYearsLabel.value} 후 예상 총 금액이 ${formatCompactWon(
-      futureValueDifference,
-    )} 더 많아 유리해요.`
-  }
-  if (futureValueDifference === 0 && preparationDifference > 0) {
-    return `${resultYearsLabel.value} 후 예상 총 금액은 같지만, ${recommendedLabel}의 준비 금액이 ${formatCompactWon(
-      preparationDifference,
-    )} 적어 유리해요.`
-  }
-  return `세금 납부 조건과 증여 시점, ${resultYearsLabel.value} 후 예상 총 금액을 함께 반영해 ${recommendedLabel}를 추천해요.`
-})
-
-function parseDate(value) {
-  const parsed = new Date(`${String(value).replaceAll('.', '-')}T00:00:00`)
-  return Number.isFinite(parsed.getTime()) ? parsed : null
-}
-
-const startDate = computed(() => parseDate(scenario.value.giftSchedule[0]?.date) ?? new Date())
-const finishDate = computed(() => parseDate(props.result.endDate) ?? new Date())
 const visibleSchedule = computed(() =>
   scenario.value.giftSchedule.filter((item) => item.withinPeriod),
-)
-const outsideSchedule = computed(() =>
-  scenario.value.giftSchedule.filter((item) => !item.withinPeriod),
 )
 const reinvestmentSchedule = computed(() => {
   const grouped = new Map()
@@ -219,48 +173,6 @@ const reinvestmentSchedule = computed(() => {
     })
   return [...grouped.values()].sort((a, b) => String(a.date).localeCompare(String(b.date)))
 })
-const timelineEvents = computed(() =>
-  [
-    ...visibleSchedule.value.map((item) => ({
-      ...item,
-      kind: 'gift',
-      key: `gift-${item.order}-${item.date}`,
-    })),
-    ...reinvestmentSchedule.value.map((item) => ({
-      ...item,
-      kind: 'reinvestment',
-      key: `reinvestment-${item.date}`,
-    })),
-  ].sort((a, b) => {
-    const dateCompare = String(a.date).localeCompare(String(b.date))
-    if (dateCompare !== 0) return dateCompare
-    return a.kind === 'gift' ? -1 : 1
-  }),
-)
-const timelineMinWidth = computed(
-  () => `${Math.max(520, 160 + timelineEvents.value.length * 44)}px`,
-)
-
-function reinvestmentLabel(products) {
-  const names = [...new Set(products.map((product) => product.name))]
-  if (names.length <= 1) return `${names[0] ?? '선택 상품'}`
-  return `${names[0]} 외 ${names.length - 1}개 재가입`
-}
-
-function getPosition(item) {
-  const itemDate = parseDate(item.date)
-  if (!itemDate) return 0
-  const total = Math.max(1, finishDate.value.getTime() - startDate.value.getTime())
-  const elapsed = itemDate.getTime() - startDate.value.getTime()
-  return Math.min(100, Math.max(0, (elapsed / total) * 100))
-}
-
-function getPositionClass(item) {
-  const position = getPosition(item)
-  if (position <= 10) return 'is-near-start'
-  if (position >= 90) return 'is-near-end'
-  return ''
-}
 </script>
 
 <template>
@@ -290,6 +202,18 @@ function getPositionClass(item) {
               : '공제 한도 안에서 전액을 바로 증여하고 운용할 수 있어요.'
           }}
         </p>
+        <div v-if="canChangeTaxPayment" class="timeline-tax-payment-action">
+          <button
+            class="result-condition-edit"
+            type="button"
+            :disabled="changingTaxPayment"
+            :aria-label="`${taxPayerLabel}에서 ${taxPaymentChangeLabel}`"
+            @click="emit('change-tax-payment')"
+          >
+            <span v-if="changingTaxPayment" class="button-spinner" />
+            <template v-else>{{ taxPaymentChangeLabel }}</template>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -306,15 +230,18 @@ function getPositionClass(item) {
               <em v-if="isRecommended(item)">추천</em>
             </header>
             <div class="tax-comparison-metrics">
-              <div>
-                <small>{{ preparationLabel }}</small>
-                <strong>{{ formatCompactWon(preparationAmount(item)) }}</strong>
-                <span>{{ preparationDetail(item) }}</span>
-              </div>
-              <div>
+              <div class="is-primary">
                 <small>{{ resultYearsLabel }} 후 예상 총 금액</small>
                 <strong>{{ comparisonAmount(scenarioEndTotalValue(item)) }}</strong>
-                <span>{{ endTotalValueDetail(item) }}</span>
+              </div>
+              <div>
+                <small>{{ taxAmountLabel }}</small>
+                <strong>{{ formatCompactWon(estimatedTaxAmount(item)) }}</strong>
+                <span>신고세액공제 3% 반영</span>
+              </div>
+              <div v-if="donorPaysTax">
+                <small>주는 분 총 준비 금액</small>
+                <strong>{{ formatCompactWon(donorRequiredAmount(item)) }}</strong>
               </div>
             </div>
             <p v-if="isSmallTaxableBaseExempt(item)" class="small-taxable-base-note">
@@ -322,13 +249,7 @@ function getPositionClass(item) {
               부과되지 않아요.
             </p>
           </article>
-          <span v-if="index === 0" class="tax-comparison-versus" aria-hidden="true">VS</span>
         </template>
-      </div>
-
-      <div class="tax-comparison-conclusion">
-        <span><AppIcon name="check" :size="13" /></span>
-        <p>{{ comparisonReason }}</p>
       </div>
     </section>
 
@@ -361,73 +282,12 @@ function getPositionClass(item) {
       </div>
     </section>
 
-    <section class="selected-timeline-section" aria-label="추천 전략의 증여 일정">
-      <div
-        class="gift-timeline"
-        :class="{ 'has-reinvestment': reinvestmentSchedule.length }"
-        :style="{ '--timeline-min-width': timelineMinWidth }"
-        :aria-label="`${result.years}년 운용 기간 중 증여와 상품 재가입 일정`"
-      >
-        <div class="gift-timeline-track">
-          <span class="gift-timeline-fill" />
-          <template v-for="item in timelineEvents" :key="item.key">
-            <div
-              v-if="item.kind === 'gift'"
-              class="gift-timeline-point"
-              :class="getPositionClass(item)"
-              :style="{
-                '--timeline-position': `${getPosition(item)}%`,
-                left: `${getPosition(item)}%`,
-              }"
-            >
-              <span class="timeline-dot"><AppIcon name="wallet" :size="14" /></span>
-              <div class="timeline-point-copy">
-                <strong>{{ item.label }}</strong>
-                <span>{{ item.date }}</span>
-                <b>{{ formatCompactWon(item.amount) }}</b>
-              </div>
-            </div>
-            <div
-              v-else
-              class="gift-timeline-reinvestment"
-              :class="getPositionClass(item)"
-              :style="{
-                '--timeline-position': `${getPosition(item)}%`,
-                left: `${getPosition(item)}%`,
-              }"
-            >
-              <span
-                class="reinvestment-timeline-dot"
-                tabindex="0"
-                :aria-label="`${item.date}, ${reinvestmentLabel(item.products)}`"
-              >
-                <AppIcon name="refresh" :size="11" />
-              </span>
-              <div class="reinvestment-timeline-copy">
-                <strong>상품 재가입</strong>
-                <span>{{ item.date }}</span>
-                <b>{{ reinvestmentLabel(item.products) }}</b>
-              </div>
-            </div>
-          </template>
-          <div class="gift-timeline-end">
-            <span class="timeline-end-dot"><AppIcon name="calendar" :size="14" /></span>
-            <div>
-              <strong>운용 마무리</strong>
-              <span>{{ result.endDate }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <aside v-if="outsideSchedule.length" class="timeline-outside-note">
-        <AppIcon name="info" :size="17" />
-        <p>
-          {{ outsideSchedule[0].date }} 예정인
-          {{ formatCompactWon(outsideSchedule[0].amount) }} 증여는 설정한 운용 기간 이후라 예상
-          금액에 포함하지 않았어요.
-        </p>
-      </aside>
-    </section>
+    <GiftAssetGrowthChart
+      v-if="comparisonScenarios.length === 2"
+      :result="result"
+      :recommended-scenario="scenario"
+      :selected-products="selectedProducts"
+      :portfolio-profile="portfolioProfile"
+    />
   </section>
 </template>

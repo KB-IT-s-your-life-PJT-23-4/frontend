@@ -54,6 +54,10 @@ function openProfileEdit() {
   router.push({ name: 'profile-edit' })
 }
 
+function openTerms() {
+  router.push({ name: 'terms' })
+}
+
 function markFamilyImageFailed(familyId) {
   failedFamilyImages.value = new Set(failedFamilyImages.value).add(Number(familyId))
 }
@@ -334,10 +338,7 @@ async function submitWithdrawal() {
           <span><strong>회원 정보 수정</strong></span>
           <AppIcon name="chevron" :size="17" />
         </button>
-        <button
-          type="button"
-          @click="store.showToast('약관 화면은 실제 서비스 연동 시 제공돼요.', 'info')"
-        >
+        <button type="button" @click="openTerms">
           <span class="menu-icon"><AppIcon name="document" :size="20" /></span>
           <span><strong>이용약관 · 개인정보 처리방침</strong></span>
           <AppIcon name="chevron" :size="17" />

@@ -9,7 +9,7 @@ import SavedSimulationTimeline from '../components/status/SavedSimulationTimelin
 import { useAppStore } from '../stores/appStore'
 import { deductionProgress, toIsoDate } from '../utils/deduction'
 import { formatCompactWon, formatWon, normalizeAmount } from '../utils/finance'
-import '../assets/css/simulation/gift-plan-timeline.css'
+import '../assets/css/simulation/gift-strategy-comparison-section.css'
 import { normalizeSimulationResponse } from '../utils/simulationModel'
 import '../assets/css/status-view.css'
 
@@ -82,8 +82,7 @@ async function loadSavedSimulationTimeline(plan, { force = false } = {}) {
     const response = await store.loadSimulationDetail(simulationId, { force })
     simulationTimelineDetails[simulationId] = normalizeSimulationResponse(response)
   } catch (error) {
-    simulationTimelineErrors[simulationId] =
-      error?.message || '저장한 일정을 불러오지 못했어요.'
+    simulationTimelineErrors[simulationId] = error?.message || '저장한 일정을 불러오지 못했어요.'
   } finally {
     simulationTimelineLoading[simulationId] = false
   }
@@ -234,6 +233,17 @@ function simulationPeriodCopy(plan) {
   if (giftDate) return `${giftDate} 증여 예정`
   if (operationEndDate) return `${operationEndDate} 운용 마무리 예정`
   return '일정 미정'
+}
+
+function planProductNames(plan) {
+  if (Array.isArray(plan?.productNames) && plan.productNames.length) {
+    return plan.productNames.map((name) => String(name).trim()).filter(Boolean)
+  }
+
+  return String(plan?.productName ?? '')
+    .split(' · ')
+    .map((name) => name.trim())
+    .filter(Boolean)
 }
 
 /**
@@ -542,7 +552,7 @@ onMounted(() => loadStatus())
             -->
             <p v-if="family.renewalAmount" class="renewal-note">
               {{ hasRenewalSchedule ? family.resetDate : '증여 이력 없음' }}부터
-              {{ formatCompactWon(family.renewalAmount) }}까지 세금없이 증여할 수 있어요
+              {{ formatCompactWon(family.renewalAmount) }}까지 세금없이 더 증여할 수 있어요
             </p>
           </div>
         </section>
@@ -557,7 +567,11 @@ onMounted(() => loadStatus())
                 {{ formatCompactWon(familySimulation.amount) }}을 준비하고 있어요
               </template>
             </h2>
-            <strong>{{ familySimulation.productName }}</strong>
+            <ul class="plan-card-product-list" aria-label="선택 상품">
+              <li v-for="productName in planProductNames(familySimulation)" :key="productName">
+                {{ productName }}
+              </li>
+            </ul>
             <div class="plan-card-meta">
               <span v-if="familySimulation.rate">
                 예상 수익률 연 {{ familySimulation.rate }}%
@@ -613,7 +627,7 @@ onMounted(() => loadStatus())
             <div class="status-card-title">
               <div>
                 <span class="status-section-icon history"><AppIcon name="clock" :size="19" /></span>
-                <strong>증여 이력</strong>
+                증여 이력
               </div>
               <span>{{ history.length }}건</span>
             </div>
@@ -648,7 +662,7 @@ onMounted(() => loadStatus())
                 <span class="status-section-icon planned"
                   ><AppIcon name="calendar" :size="19"
                 /></span>
-                <strong>진행 중인 증여</strong>
+                진행 중인 증여
               </div>
               <span>{{ familyPlanGroups.length }}건</span>
             </div>
@@ -731,7 +745,10 @@ onMounted(() => loadStatus())
                             class="timeline-dot"
                             :class="isTrancheDone(tranche) ? 'is-done' : 'is-upcoming'"
                           >
-                            <AppIcon :name="isTrancheDone(tranche) ? 'check' : 'wallet'" :size="14" />
+                            <AppIcon
+                              :name="isTrancheDone(tranche) ? 'check' : 'wallet'"
+                              :size="14"
+                            />
                           </span>
                           <div class="timeline-point-copy">
                             <strong>{{ tranche.sequenceNo }}회차</strong>

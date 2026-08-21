@@ -27,7 +27,7 @@ const menuItems = [
   { label: '회원 관리', icon: 'user', to: '/admin/users', available: true },
   { label: '상품 관리', icon: 'wallet', to: '/admin/products', available: true },
   { label: '신고 관리', icon: 'document', to: '/admin/reports', available: true },
-  { label: '세법 관리', icon: 'shield' },
+  { label: '세법 관리', icon: 'shield', to: '/admin/lawtax', available: true },
   { label: 'FAQ 관리', icon: 'chat', to: '/admin/faq', available: true },
   { label: '배치 작업 관리', icon: 'refresh', to: '/admin/batch', available: true },
   { label: '권한 관리', icon: 'settings', to: '/admin/authorization', available: true },
