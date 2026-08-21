@@ -541,7 +541,7 @@ onMounted(() => loadStatus())
             -->
             <p v-if="family.renewalAmount" class="renewal-note">
               {{ hasRenewalSchedule ? family.resetDate : '증여 이력 없음' }}부터
-              {{ formatCompactWon(family.renewalAmount) }}까지 세금없이 증여할 수 있어요
+              {{ formatCompactWon(family.renewalAmount) }}까지 세금없이 더 증여할 수 있어요
             </p>
           </div>
         </section>
