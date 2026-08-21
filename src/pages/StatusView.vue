@@ -612,7 +612,7 @@ onMounted(() => loadStatus())
             <div class="status-card-title">
               <div>
                 <span class="status-section-icon history"><AppIcon name="clock" :size="19" /></span>
-                <strong>증여 이력</strong>
+                증여 이력
               </div>
               <span>{{ history.length }}건</span>
             </div>
@@ -647,7 +647,7 @@ onMounted(() => loadStatus())
                 <span class="status-section-icon planned"
                   ><AppIcon name="calendar" :size="19"
                 /></span>
-                <strong>진행 중인 증여</strong>
+                진행 중인 증여
               </div>
               <span>{{ familyPlanGroups.length }}건</span>
             </div>

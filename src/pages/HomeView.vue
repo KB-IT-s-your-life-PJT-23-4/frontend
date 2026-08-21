@@ -9,6 +9,7 @@ import { useAppStore } from '../stores/appStore'
 import { deductionProgress, RELATION_OPTIONS } from '../utils/deduction'
 import { formatCompactWon } from '../utils/finance'
 import { resolveProfileImageUrl } from '../utils/profileImage'
+import '../assets/css/home-view.css'
 
 const store = useAppStore()
 const latestNotifications = computed(() => store.notifications.value.slice(0, 2))

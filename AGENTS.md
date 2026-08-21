@@ -45,6 +45,7 @@
 - When `0`, `false`, or an empty collection can be valid form data, check explicitly for `null`, `undefined`, or an empty string instead of using truthiness to enable submission controls.
 - When one clarification answer makes dependent questions inapplicable, normalize the related values consistently in both `facts` and `answers` using the backend contract's absence sentinel (for example, `"none"` for absent consultation dates), then skip those questions instead of requiring redundant user input; never fabricate a real date.
 - Treat AI `answer` values as display-safe plain text. Do not rely on rendering raw Markdown unless an explicitly sanitized Markdown renderer and contract are introduced together.
+- When normalizing decorative separators from API text, inspect the actual Unicode characters returned by the API and cover visually similar variants with a real response sample in tests.
 - Follow the formatting rules in `.prettierrc.json`.
 - Do not modify files unrelated to the requested change.
 
@@ -65,6 +66,7 @@
 ## Verification
 
 - Check syntax and import paths in every changed file.
+- When a PostCSS visitor mutates declarations, make the transformation idempotent or explicitly mark visited nodes, and verify the compiled CSS rather than relying only on a pure value-mapping test.
 - When a source module is imported by a standalone Node ESM test, include its explicit `.js` import extensions so the test does not rely on Vite resolution.
 - Apply the repository's formatting rules when needed.
 - Run `npm run build` after code changes.

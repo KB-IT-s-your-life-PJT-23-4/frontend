@@ -15,6 +15,40 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* 수증자 전환은 이름을 읽고 누르기 쉽도록 글자와 터치 영역을 함께 키운다. */
+.status-content .family-switcher {
+  padding: 5px;
+  gap: 5px;
+  border-radius: 20px;
+}
+
+.status-content .family-switcher button {
+  min-width: 96px;
+  min-height: 48px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 16px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.status-content .family-switcher .add-family-tab {
+  width: 48px;
+  min-width: 48px;
+  padding: 0;
+}
+
+.status-content .family-switcher .add-family-tab svg {
+  width: 20px;
+  height: 20px;
+}
+
+.status-content .renewal-card h2,
+.status-content .status-section > .section-heading-row > h2,
+.status-content .status-card-title strong {
+  font-weight: 510;
+}
+
 .active-plan-card .plan-card-eyebrow {
   justify-content: flex-end;
 }
