@@ -65,7 +65,7 @@
 .tax-comparison-option {
   display: grid;
   min-width: 0;
-  padding: 18px;
+  padding: 21px 18px;
   align-content: start;
   border: 1px solid #dfe7ee;
   border-radius: 22px;
@@ -75,7 +75,7 @@
 
 .tax-comparison-option.is-recommended {
   border: 2px solid #4c789c;
-  padding: 17px;
+  padding: 20px 17px;
   background: #eef6fd;
   box-shadow: 0 8px 24px rgba(52, 92, 125, 0.1);
 }
@@ -91,7 +91,7 @@
 .tax-comparison-option header span {
   font-size: 13px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.5;
 }
 
 .tax-comparison-option header em {
@@ -107,31 +107,32 @@
 
 .tax-comparison-metrics {
   display: grid;
-  margin-top: 4px;
-  gap: 8px;
+  margin-top: 8px;
+  gap: 11px;
 }
 
 .tax-comparison-metrics > div {
   display: grid;
   min-width: 0;
-  gap: 3px;
+  gap: 5px;
 }
 
 .tax-comparison-metrics > div + div {
-  padding-top: 8px;
+  padding-top: 11px;
   border-top: 1px solid #e7edf2;
 }
 
 .tax-comparison-metrics small {
   color: #82919e;
   font-size: 10px;
+  line-height: 1.45;
 }
 
 .tax-comparison-metrics strong {
   overflow-wrap: anywhere;
   color: #2f506b;
   font-size: 14px;
-  line-height: 1.25;
+  line-height: 1.4;
 }
 
 .tax-comparison-option.is-recommended .tax-comparison-metrics strong {
@@ -141,7 +142,7 @@
 .tax-comparison-metrics span {
   color: #9aa6b0;
   font-size: 9px;
-  line-height: 1.4;
+  line-height: 1.55;
 }
 
 .small-taxable-base-note {

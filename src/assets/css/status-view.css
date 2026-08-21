@@ -49,6 +49,68 @@
   font-weight: 510;
 }
 
+.status-content .deduction-card-body > p {
+  margin-top: 18px;
+}
+
+.status-content .active-plan-card .plan-card-copy {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.status-content .active-plan-card .plan-card-copy h2 {
+  margin-bottom: 15px;
+}
+
+.status-content .active-plan-card .plan-card-product-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 7px;
+  color: #426c90;
+  font-size: 13px;
+  line-height: 1.45;
+  list-style: none;
+}
+
+.status-content .active-plan-card .plan-card-product-list li {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 7px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-content .active-plan-card .plan-card-product-list li::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5d86a7;
+  content: '';
+}
+
+.status-content .active-plan-card .plan-card-meta {
+  display: grid;
+  margin-top: 16px;
+  justify-content: stretch;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.status-content .active-plan-card .plan-card-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-content .active-plan-card .saved-plan-timeline {
+  margin-top: 17px;
+}
+
 .active-plan-card .plan-card-eyebrow {
   justify-content: flex-end;
 }

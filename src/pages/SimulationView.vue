@@ -281,6 +281,11 @@ function addAmount(value) {
   setAmount(amount.value + value)
 }
 
+function resetAmountInput() {
+  amountText.value = ''
+  errorMessage.value = ''
+}
+
 function updateGiftDate(value) {
   giftDate.value = value
   giftDateError.value = ''
@@ -727,6 +732,7 @@ onMounted(async () => {
       :donor-pays-tax="donorPaysTax"
       @amount-input="setAmount"
       @add-amount="addAmount"
+      @reset-amount="resetAmountInput"
       @update:investment-years="investmentYears = $event"
       @update:gift-date="updateGiftDate"
       @update:donor-pays-tax="donorPaysTax = $event"
@@ -756,26 +762,20 @@ onMounted(async () => {
             <AppIcon name="calendar" :size="15" />
             {{ result.evaluationDate }} 평가 기준
           </span>
-          <span v-if="isHistoryResult">
+          <span>
             <AppIcon name="wallet" :size="15" />
             {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
           </span>
           <button
-            v-else
+            v-if="!isHistoryResult"
             class="result-condition-edit"
             type="button"
             :disabled="loading"
-            :aria-label="
-              result.donorPaysTax
-                ? '받는 분이 세금을 납부하는 방식으로 변경'
-                : '주는 분이 세금까지 준비하는 방식으로 변경'
-            "
             @click="changeTaxPaymentMethod"
           >
-            <AppIcon name="wallet" :size="15" />
             <span v-if="loading" class="button-spinner" />
             <template v-else>
-              {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
+              {{ result.donorPaysTax ? '받는 분 납부로 변경' : '주는 분 준비로 변경' }}
             </template>
           </button>
         </div>

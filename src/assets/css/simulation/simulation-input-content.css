@@ -1,3 +1,50 @@
+.amount-step .input-step-heading {
+  align-items: center;
+}
+
+.amount-step .amount-heading-copy {
+  display: flex;
+  width: auto;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  flex: 1;
+  gap: 8px;
+}
+
+.amount-reset-button {
+  min-width: 60px;
+  min-height: 34px;
+  padding: 0 9px;
+  flex: none;
+  border: 1px solid #dce4ec;
+  border-radius: 10px;
+  background: #f7f9fb;
+  color: #5d7083;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.amount-reset-button:hover:not(:disabled),
+.amount-reset-button:focus-visible:not(:disabled) {
+  border-color: #a9bdce;
+  outline: 0;
+  background: #eef4f8;
+  color: #315d80;
+}
+
+.amount-reset-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .amount-step .amount-input-wrap {
   min-height: 58px;
   height: auto;
@@ -407,6 +454,22 @@
 }
 
 @media (max-width: 390px) {
+  .amount-step .amount-heading-copy {
+    width: auto;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .amount-step .amount-heading-copy h3 {
+    font-size: 16px;
+  }
+
+  .amount-reset-button {
+    min-width: 56px;
+    min-height: 32px;
+    padding-inline: 8px;
+  }
+
   .amount-step .amount-input-wrap {
     min-height: 54px;
     padding-bottom: 7px;
