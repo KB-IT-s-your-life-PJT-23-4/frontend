@@ -15,6 +15,7 @@ const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const isAdminLayout = computed(() => route.meta.layout === 'admin')
+const isLandingLayout = computed(() => route.meta.layout === 'landing')
 const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.role))
 const showBottomNav = computed(() => !route.meta.hideBottomNav)
 
@@ -31,6 +32,9 @@ async function confirmBlockedAccess() {
 <template>
   <a class="skip-link" href="#main-content">본문으로 바로가기</a>
   <main v-if="isAdminLayout" id="main-content" class="admin-app-frame">
+    <RouterView />
+  </main>
+  <main v-else-if="isLandingLayout" id="main-content" class="landing-app-frame">
     <RouterView />
   </main>
   <div v-else class="desktop-shell">

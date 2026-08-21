@@ -1,0 +1,1433 @@
+/* 미리줌 랜딩 페이지 전용 스타일
+ *
+ * 구성
+ * 1. 프레임 & 토큰
+ * 2. 공통 요소
+ * 3. 상단 내비게이션
+ * 4. 히어로
+ * 5. 스택 카드 씬
+ * 6. 자산 합산 씬
+ * 7. 오빗 씬
+ * 8. 10년 주기 씬
+ * 9. 폰 스트립 씬
+ * 10. 마지막 CTA
+ * 11. 푸터
+ * 12. 반응형
+ * 13. 모션 감소 대응
+ */
+
+/* -------------- 1. 프레임 & 토큰 ------------- */
+
+/* 이 파일은 번들에서 전역으로 합쳐지므로, 프레임/배경 오버라이드는 반드시
+ * 이 페이지가 마운트될 때만 붙는 `mz-landing-active` 루트 클래스로 한정한다.
+ * 그러지 않으면 같은 `landing` 레이아웃을 쓰는 다른 랜딩 페이지까지 영향을 받는다. */
+html.mz-landing-active .landing-app-frame {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background: #05080c;
+}
+
+html.mz-landing-active,
+html.mz-landing-active body {
+  background: #05080c;
+}
+
+/* 랜딩은 전체 화면을 사용하므로 앱 프레임의 데스크탑 여백을 해제한다. */
+html.mz-landing-active body {
+  padding: 0;
+}
+
+.mz-landing {
+  --acid: #ffcc00;
+  --ink: #05080c;
+  --ink-raised: #0d131a;
+  --paper: #f2f4f6;
+  --dim: rgb(255 255 255 / 56%);
+  --dimmer: rgb(255 255 255 / 34%);
+  --hair: rgb(255 255 255 / 12%);
+  --ink-dim: rgb(20 28 38 / 52%);
+  --ink-dimmer: rgb(20 28 38 / 38%);
+  --shell: min(1320px, calc(100% - 40px));
+  position: relative;
+  overflow-x: clip;
+  color: #fff;
+  background: var(--ink);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mz-landing *,
+.mz-landing *::before,
+.mz-landing *::after {
+  box-sizing: border-box;
+}
+
+.mz-landing a {
+  text-decoration: none;
+}
+
+/* -------------- 2. 공통 요소 ------------- */
+.mz-landing .mz-micro {
+  margin: 0;
+  color: var(--dimmer);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mz-landing [data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.mz-landing [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.mz-progress {
+  position: fixed;
+  z-index: 80;
+  inset: 0 0 auto;
+  height: 2px;
+}
+
+.mz-progress i {
+  display: block;
+  height: 100%;
+  background: var(--acid);
+  transform: scaleX(var(--page-progress, 0));
+  transform-origin: 0 50%;
+}
+
+.mz-scene {
+  --p: 0;
+  position: relative;
+}
+
+.mz-scene-sticky {
+  position: sticky;
+  top: 0;
+  display: grid;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  place-items: center;
+}
+
+.mz-rail {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  color: rgb(255 255 255 / 62%);
+  line-height: 1.7;
+  transform: translateY(-50%);
+}
+
+.mz-rail.is-left {
+  left: clamp(14px, 2.4vw, 34px);
+}
+
+.mz-rail.is-right {
+  right: clamp(14px, 2.4vw, 34px);
+  text-align: right;
+}
+
+@keyframes mz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mz-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mz-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes mz-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* -------------- 3. 상단 내비게이션 ------------- */
+.mz-nav {
+  position: fixed;
+  z-index: 70;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px clamp(14px, 2.6vw, 30px);
+  pointer-events: none;
+}
+
+.mz-nav > * {
+  pointer-events: auto;
+}
+
+.mz-brand {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 22px 7px 7px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: #fff;
+  box-shadow: 0 10px 26px rgb(0 0 0 / 16%);
+  font-size: 16px;
+  font-weight: 500;
+  gap: 10px;
+}
+
+.mz-brand-mark {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+}
+
+.mz-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mz-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mz-nav-login {
+  padding: 12px 14px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
+  transition: color 0.4s ease;
+}
+
+.mz-nav.is-light .mz-nav-login {
+  color: #3d474f;
+}
+
+/* 어두운 섹션 위에서는 흰 알약, 밝은 히어로 위에서는 검은 알약으로 뒤집는다. */
+.mz-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  color: var(--ink);
+  background: #fff;
+  box-shadow: 0 10px 26px rgb(0 0 0 / 30%);
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    transform 0.25s ease,
+    color 0.4s ease,
+    background 0.4s ease;
+}
+
+.mz-nav.is-light .mz-nav-cta {
+  color: #fff;
+  background: var(--ink);
+}
+
+.mz-nav-cta:hover {
+  transform: translateY(-2px);
+}
+
+/* -------------- 4. 히어로 ------------- */
+.mz-hero {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  min-height: 100svh;
+  align-items: center;
+  padding: clamp(132px, 17vh, 190px) 0 clamp(64px, 10vh, 110px);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.mz-hero .mz-micro {
+  color: var(--ink-dimmer);
+}
+
+.mz-hero-inner {
+  position: relative;
+  display: grid;
+  width: var(--shell);
+  margin: 0 auto;
+  align-items: center;
+  gap: clamp(28px, 4vw, 72px);
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+}
+
+.mz-hero-rail {
+  position: absolute;
+  top: clamp(-56px, -5vh, -34px);
+}
+
+.mz-hero-rail.is-left {
+  left: 0;
+}
+
+.mz-hero-rail.is-right {
+  right: 0;
+  text-align: right;
+}
+
+.mz-hero-copy h1 {
+  margin: 0;
+  font-size: clamp(46px, 8.2vw, 122px);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 0.93;
+}
+
+.mz-hero-copy h1 span {
+  display: block;
+  animation: mz-rise 0.9s both cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.mz-hero-copy h1 span:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.mz-hero-copy h1 span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.mz-hero-copy h1 span:nth-child(3) {
+  animation-delay: 0.27s;
+}
+
+.mz-hero-lead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: clamp(24px, 3.4vw, 44px);
+  gap: clamp(14px, 2vw, 26px);
+}
+
+.mz-hero-assets {
+  display: flex;
+  padding: 6px;
+  margin: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgb(23 62 97 / 10%);
+  list-style: none;
+}
+
+.mz-hero-assets li {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  margin-left: -10px;
+  color: #fff;
+  background: #173e61;
+  animation: mz-pop 0.5s both cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-delay: calc(0.5s + var(--i) * 0.07s);
+  font-size: 10px;
+  font-weight: 500;
+  place-items: center;
+}
+
+.mz-hero-assets li:first-child {
+  margin-left: 0;
+}
+
+.mz-hero-assets li:nth-child(2) {
+  background: #2c608b;
+}
+
+.mz-hero-assets li:nth-child(3) {
+  background: #4f7da5;
+}
+
+.mz-hero-assets li:nth-child(4) {
+  color: var(--ink);
+  background: var(--acid);
+}
+
+.mz-hero-assets li:nth-child(5) {
+  color: #0b2237;
+  background: #82b8e9;
+}
+
+.mz-hero-assets li:nth-child(6) {
+  background: #0b2237;
+}
+
+.mz-hero-lead p {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.7;
+}
+
+.mz-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 17px 30px;
+  border-radius: 999px;
+  margin-top: clamp(26px, 3.2vw, 40px);
+  color: #fff;
+  background: var(--ink);
+  box-shadow: 0 14px 32px rgb(5 8 12 / 22%);
+  font-size: 15px;
+  font-weight: 500;
+  gap: 10px;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.3s ease;
+}
+
+.mz-hero-cta:hover {
+  box-shadow: 0 20px 42px rgb(5 8 12 / 30%);
+  transform: translateY(-3px);
+}
+
+.mz-hero-cta svg {
+  transition: transform 0.3s ease;
+}
+
+.mz-hero-cta:hover svg {
+  transform: translateX(4px);
+}
+
+.mz-hero-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mz-hero-index {
+  display: flex;
+  align-items: center;
+  color: var(--ink-dimmer);
+  font-size: 10px;
+  gap: 14px;
+  letter-spacing: 0.16em;
+}
+
+.mz-hero-index i {
+  flex: 1;
+  height: 1px;
+  background: rgb(20 28 38 / 16%);
+}
+
+.mz-hero-card {
+  position: relative;
+  padding: clamp(20px, 2vw, 28px);
+  border-radius: 26px;
+  overflow: hidden;
+  color: #fff;
+  background: var(--ink);
+  box-shadow: 0 28px 60px rgb(5 8 12 / 22%);
+}
+
+.mz-hero-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.mz-hero-card-head small {
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--acid);
+  background: rgb(255 204 0 / 16%);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.mz-hero-card-value {
+  display: block;
+  margin: 12px 0 18px;
+  font-size: clamp(26px, 2.6vw, 38px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.mz-hero-chart {
+  position: relative;
+}
+
+.mz-hero-chart svg {
+  display: block;
+  width: 100%;
+  height: clamp(104px, 14vh, 148px);
+}
+
+.mz-hero-chart-fill {
+  fill: url('#mz-hero-area');
+  animation: mz-fade 1.2s 0.9s both;
+}
+
+.mz-hero-chart-line {
+  fill: none;
+  stroke: var(--acid);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-linecap: round;
+  stroke-width: 2.4;
+  vector-effect: non-scaling-stroke;
+  animation: mz-draw 1.5s 0.5s both cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mz-hero-chart-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  color: var(--dimmer);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.mz-hero-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-radius: 22px;
+  color: var(--ink);
+  background: var(--acid);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mz-hero-note {
+  padding-top: 14px;
+  border-top: 1px solid rgb(20 28 38 / 12%);
+  margin: 4px 0 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* -------------- 5. 스택 카드 씬 ------------- */
+.mz-stack {
+  height: 520vh;
+}
+
+.mz-stack-deck {
+  position: relative;
+  width: min(430px, 76vw);
+  height: min(560px, 66svh);
+}
+
+.mz-stack-card {
+  --enter: clamp(0, calc(var(--p) * var(--n) - var(--i)), 1);
+  --cover: clamp(0, calc(var(--p) * var(--n) - var(--i) - 1), 4);
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(22px, 2.4vw, 32px);
+  border-radius: 30px;
+  inset: 0;
+  color: var(--ink);
+  background: var(--acid);
+  box-shadow: 0 -6px 34px rgb(0 0 0 / 34%);
+  transform: translate3d(0, calc((1 - var(--enter)) * 92svh - var(--cover) * 16px), 0)
+    scale(calc(1 - var(--cover) * 0.04)) rotate(calc((1 - var(--enter)) * -5deg));
+  will-change: transform;
+}
+
+.mz-landing .mz-stack-card .mz-micro {
+  color: rgb(5 8 12 / 55%);
+}
+
+.mz-stack-card svg {
+  margin-top: 14px;
+  color: rgb(5 8 12 / 82%);
+}
+
+.mz-stack-card h3 {
+  margin: auto 0 0;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+  white-space: pre-line;
+}
+
+.mz-stack-card p {
+  max-width: 30ch;
+  margin: 16px 0 0;
+  color: rgb(5 8 12 / 72%);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* -------------- 6. 자산 합산 씬 ------------- */
+.mz-flow {
+  height: 360vh;
+}
+
+.mz-flow-stage {
+  position: relative;
+  display: grid;
+  width: min(1100px, 92vw);
+  height: 100%;
+  place-items: center;
+}
+
+.mz-flow-chip {
+  --t: clamp(0, calc(var(--p) * 1.7 - var(--d) * 0.05), 1);
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 18px;
+  border: 1px solid var(--hair);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 6%);
+  gap: 3px;
+  opacity: calc(1 - var(--t) * 0.92);
+  transform: translate(-50%, -50%)
+    translate3d(calc(var(--x) * (1 - var(--t)) * 1vmin), calc(var(--y) * (1 - var(--t)) * 1vmin), 0)
+    scale(calc(1 - var(--t) * 0.35));
+  will-change: transform;
+}
+
+.mz-flow-chip small {
+  color: var(--dimmer);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
+.mz-flow-chip strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mz-flow-card {
+  position: relative;
+  z-index: 3;
+  width: min(360px, 78vw);
+  padding: clamp(24px, 2.4vw, 34px);
+  border: 1px solid var(--hair);
+  border-radius: 30px;
+  background: linear-gradient(180deg, #10171f, #080c11);
+  box-shadow: 0 40px 90px rgb(0 0 0 / 60%);
+  transform: scale(calc(0.94 + var(--p) * 0.06));
+}
+
+.mz-flow-card strong {
+  display: block;
+  margin: 14px 0 10px;
+  font-size: clamp(32px, 3.8vw, 50px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.mz-flow-card strong em {
+  margin-left: 4px;
+  color: var(--dim);
+  font-size: 0.46em;
+  font-style: normal;
+}
+
+.mz-flow-card p {
+  margin: 0;
+  color: var(--dimmer);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.mz-flow-bars {
+  display: flex;
+  height: 56px;
+  align-items: flex-end;
+  margin-top: 22px;
+  gap: 6px;
+}
+
+.mz-flow-bars i {
+  flex: 1;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 10%);
+}
+
+.mz-flow-bars i:nth-child(1) {
+  height: 38%;
+}
+
+.mz-flow-bars i:nth-child(2) {
+  height: 56%;
+}
+
+.mz-flow-bars i:nth-child(3) {
+  height: 78%;
+}
+
+.mz-flow-bars i:nth-child(4) {
+  height: 100%;
+  background: var(--acid);
+}
+
+.mz-flow-title {
+  position: absolute;
+  z-index: 4;
+  top: 62%;
+  left: 50%;
+  width: min(760px, 88vw);
+  margin: 0;
+  font-size: clamp(36px, 6.2vw, 84px);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  opacity: clamp(0, calc(var(--p) * 2.4 - 1.1), 1);
+  pointer-events: none;
+  text-shadow: 0 6px 44px rgb(5 8 12 / 78%);
+  transform: translateX(-50%);
+}
+
+/* -------------- 7. 오빗 씬 ------------- */
+.mz-orbit {
+  height: 360vh;
+}
+
+.mz-orbit-stage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  transform: rotate(calc(var(--p) * 100deg));
+}
+
+.mz-orbit-stage > i {
+  --r: calc((1 - var(--p)) * 34vmin + 3vmin);
+  position: absolute;
+  width: clamp(52px, 7vmin, 92px);
+  border: 1px solid rgb(255 255 255 / 5%);
+  border-radius: 26%;
+  aspect-ratio: 1;
+  background: #10161d;
+  opacity: calc(1 - var(--p) * var(--p));
+  transform: rotate(var(--a)) translateY(calc(-1 * var(--r))) rotate(calc(-1 * var(--a)))
+    rotate(calc(var(--p) * -240deg));
+  will-change: transform;
+}
+
+.mz-orbit-core {
+  position: relative;
+  z-index: 3;
+  max-width: min(420px, 84vw);
+  text-align: center;
+  opacity: clamp(0, calc(var(--p) * 2.2 - 1), 1);
+  transform: rotate(calc(var(--p) * -100deg)) scale(calc(0.72 + var(--p) * 0.28));
+}
+
+.mz-orbit-core img {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+}
+
+.mz-orbit-core strong {
+  display: block;
+  margin-top: 16px;
+  font-size: clamp(30px, 4.4vw, 56px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.mz-orbit-core p {
+  margin: 14px 0 0;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* -------------- 8. 10년 주기 씬 ------------- */
+.mz-cycle {
+  height: 300vh;
+}
+
+.mz-cycle .mz-scene-sticky {
+  align-content: center;
+  padding: 0 clamp(16px, 3vw, 32px);
+  gap: clamp(26px, 4vh, 52px);
+}
+
+.mz-cycle-head {
+  max-width: min(760px, 90vw);
+  text-align: center;
+}
+
+.mz-cycle-head h2 {
+  margin: 16px 0 0;
+  font-size: clamp(32px, 5.4vw, 74px);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  opacity: calc(0.22 + var(--p) * 0.78);
+}
+
+.mz-cycle-sub {
+  max-width: 46ch;
+  margin: 18px auto 0;
+  color: var(--dimmer);
+  font-size: 13px;
+  line-height: 1.8;
+  opacity: calc(0.18 + var(--p) * 0.82);
+}
+
+.mz-cycle-stage {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+}
+
+.mz-cycle-ticks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mz-cycle-ticks i {
+  --lit: clamp(0, calc(var(--p) * 6 - var(--t)), 1);
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, var(--acid), var(--acid)) left / calc(var(--lit) * 100%) 100% no-repeat,
+    rgb(255 255 255 / 12%);
+}
+
+.mz-cycle-ticks.is-right i {
+  background:
+    linear-gradient(90deg, var(--acid), var(--acid)) right / calc(var(--lit) * 100%) 100% no-repeat,
+    rgb(255 255 255 / 12%);
+}
+
+.mz-cycle-card {
+  width: min(360px, 84vw);
+  padding: clamp(22px, 2.4vw, 30px);
+  border: 1px solid var(--hair);
+  border-radius: 26px;
+  background: var(--ink-raised);
+  box-shadow: 0 30px 70px rgb(0 0 0 / 55%);
+}
+
+.mz-cycle-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--dim);
+  font-size: 12px;
+}
+
+.mz-cycle-card-head small {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 7%);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.mz-cycle-card > strong {
+  display: block;
+  margin-top: 16px;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.mz-cycle-card > strong em {
+  font-size: 0.5em;
+  font-style: normal;
+}
+
+.mz-cycle-card > strong span {
+  color: var(--dimmer);
+  font-size: 0.42em;
+  font-weight: 300;
+}
+
+.mz-cycle-gauge {
+  height: 8px;
+  border-radius: 999px;
+  margin: 18px 0 20px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 10%);
+}
+
+.mz-cycle-gauge i {
+  display: block;
+  width: calc(clamp(0, calc(var(--p) * 1.6), 1) * 64%);
+  height: 100%;
+  border-radius: 999px;
+  background: var(--acid);
+}
+
+.mz-cycle-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: var(--dimmer);
+  font-size: 12px;
+}
+
+.mz-cycle-meta strong {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.mz-cycle-mono {
+  display: flex;
+  width: min(360px, 84vw);
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+  margin: 0;
+  color: var(--acid);
+  font-family: ui-monospace, sfmono-regular, menlo, monospace;
+  font-size: 13px;
+  gap: 14px;
+  letter-spacing: 0.14em;
+}
+
+.mz-cycle-mono span {
+  color: var(--dimmer);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+/* -------------- 9. 폰 스트립 씬 ------------- */
+.mz-strip {
+  height: 280vh;
+}
+
+.mz-strip .mz-scene-sticky::after {
+  position: absolute;
+  z-index: 2;
+  background: radial-gradient(
+    64% 44% at 50% 50%,
+    rgb(5 8 12 / 94%) 0%,
+    rgb(5 8 12 / 62%) 46%,
+    rgb(5 8 12 / 0%) 80%
+  );
+  content: '';
+  inset: 0;
+  pointer-events: none;
+}
+
+.mz-strip-stage {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 2vw, 30px);
+  inset: 0;
+}
+
+.mz-strip-column {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vw, 28px);
+  transform: translate3d(0, calc((var(--p) - 0.5) * var(--speed) * -1px), 0);
+  will-change: transform;
+}
+
+.mz-strip-phone {
+  position: relative;
+  display: flex;
+  width: clamp(120px, 15vw, 200px);
+  flex-direction: column;
+  padding: 18px 14px;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: clamp(20px, 2.2vw, 30px);
+  aspect-ratio: 9 / 17.5;
+  background: linear-gradient(180deg, #10161d, #070a0e);
+  gap: 10px;
+}
+
+.mz-strip-phone-label {
+  color: rgb(255 255 255 / 30%);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.mz-strip-phone i {
+  border-radius: 10px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.mz-strip-phone i:nth-child(2) {
+  height: 34%;
+}
+
+.mz-strip-phone i:nth-child(3) {
+  height: 20%;
+}
+
+.mz-strip-phone i:nth-child(4) {
+  flex: 1;
+}
+
+.mz-strip-title {
+  position: relative;
+  z-index: 3;
+  width: min(900px, 88vw);
+  margin: 0;
+  font-size: clamp(28px, 4.4vw, 62px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 0 6px 50px rgb(5 8 12 / 95%);
+}
+
+.mz-strip-title em {
+  color: var(--acid);
+  font-style: normal;
+}
+
+/* -------------- 10. 마지막 CTA ------------- */
+.mz-final {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  min-height: 100svh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(96px, 15vh, 156px) 0 0;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--acid);
+  text-align: center;
+}
+
+.mz-landing .mz-final .mz-micro {
+  color: rgb(5 8 12 / 55%);
+}
+
+.mz-final-inner {
+  position: relative;
+  z-index: 2;
+  padding-inline: clamp(16px, 3vw, 32px);
+}
+
+.mz-final h2 {
+  margin: 18px 0 0;
+  font-size: clamp(42px, 6.8vw, 96px);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.mz-final-sub {
+  margin: 20px 0 0;
+  color: rgb(5 8 12 / 62%);
+  font-size: clamp(14px, 1.2vw, 17px);
+}
+
+.mz-final-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: clamp(28px, 3.6vw, 44px);
+  gap: 12px;
+}
+
+.mz-final-primary,
+.mz-final-ghost {
+  display: inline-flex;
+  align-items: center;
+  padding: 17px 30px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  gap: 10px;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 0.25s ease;
+}
+
+.mz-final-primary {
+  color: #fff;
+  background: var(--ink);
+  box-shadow: 0 16px 34px rgb(5 8 12 / 24%);
+}
+
+.mz-final-ghost {
+  border: 1px solid rgb(5 8 12 / 24%);
+  color: var(--ink);
+}
+
+.mz-final-primary:hover,
+.mz-final-ghost:hover {
+  transform: translateY(-3px);
+}
+
+.mz-final-ghost:hover {
+  background: rgb(5 8 12 / 6%);
+}
+
+.mz-final-wordmark {
+  display: block;
+  width: 100%;
+  margin-top: auto;
+  color: var(--ink);
+  font-size: min(17.2vw, 300px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.78;
+  white-space: nowrap;
+  transform: translateY(18%);
+  user-select: none;
+}
+
+/* -------------- 11. 푸터 ------------- */
+.mz-footer {
+  padding: clamp(56px, 8vh, 96px) 0 clamp(40px, 6vh, 64px);
+  background: var(--ink);
+}
+
+.mz-footer-inner {
+  display: grid;
+  width: var(--shell);
+  margin: 0 auto;
+  gap: 22px;
+}
+
+.mz-footer-brand {
+  display: flex;
+  align-items: center;
+  font-size: 17px;
+  font-weight: 500;
+  gap: 10px;
+}
+
+.mz-footer-brand img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.mz-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  gap: 22px;
+}
+
+.mz-footer nav a {
+  color: var(--dim);
+  transition: color 0.25s ease;
+}
+
+.mz-footer nav a:hover {
+  color: var(--acid);
+}
+
+.mz-footer p {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--dimmer);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.mz-footer small {
+  color: rgb(255 255 255 / 28%);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+/* -------------- 12. 반응형 ------------- */
+@media (width <= 1024px) {
+  .mz-hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 52px);
+  }
+
+  .mz-hero-rail {
+    position: static;
+    margin-bottom: 8px;
+  }
+
+  .mz-hero-rail.is-right {
+    display: none;
+  }
+
+  .mz-hero-panel {
+    max-width: 460px;
+  }
+
+  /* 좁은 화면에서는 씬 가운데의 카드와 겹치지 않도록 레일을 상단으로 올린다. */
+  .mz-rail {
+    top: 84px;
+    transform: none;
+  }
+
+  .mz-flow-title {
+    top: auto;
+    bottom: 14%;
+  }
+}
+
+@media (width <= 720px) {
+  .mz-landing {
+    --shell: calc(100% - 32px);
+  }
+
+  .mz-nav {
+    padding: 12px 14px;
+  }
+
+  .mz-brand {
+    padding: 6px 16px 6px 6px;
+    font-size: 15px;
+  }
+
+  .mz-brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 11px;
+  }
+
+  .mz-brand-mark img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .mz-nav-login {
+    display: none;
+  }
+
+  .mz-nav-cta {
+    padding: 12px 18px;
+    font-size: 13px;
+  }
+
+  .mz-hero {
+    padding-top: 116px;
+  }
+
+  .mz-rail {
+    font-size: 9px;
+  }
+
+  .mz-stack {
+    height: 440vh;
+  }
+
+  .mz-stack-deck {
+    width: min(340px, 84vw);
+    height: min(470px, 62svh);
+  }
+
+  .mz-stack-card {
+    border-radius: 26px;
+  }
+
+  .mz-flow {
+    height: 300vh;
+  }
+
+  .mz-flow-chip {
+    padding: 9px 13px;
+    border-radius: 14px;
+  }
+
+  .mz-flow-chip strong {
+    font-size: 12px;
+  }
+
+  .mz-orbit {
+    height: 300vh;
+  }
+
+  .mz-cycle {
+    height: 280vh;
+  }
+
+  .mz-cycle-stage {
+    flex-direction: column;
+  }
+
+  .mz-cycle-ticks {
+    flex-direction: row;
+  }
+
+  .mz-cycle-ticks i {
+    width: 22px;
+  }
+
+  .mz-strip {
+    height: 250vh;
+  }
+
+  .mz-strip-stage {
+    gap: 12px;
+  }
+
+  .mz-strip-column:nth-child(3) {
+    display: none;
+  }
+
+  .mz-strip-phone {
+    width: clamp(110px, 34vw, 160px);
+  }
+
+  .mz-final-wordmark {
+    transform: translateY(22%);
+  }
+}
+
+/* -------------- 13. 모션 감소 대응 ------------- */
+@media (prefers-reduced-motion: reduce) {
+  .mz-landing *,
+  .mz-landing *::before,
+  .mz-landing *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .mz-scene {
+    height: auto;
+  }
+
+  .mz-scene-sticky {
+    position: static;
+    height: auto;
+    padding: clamp(64px, 10vh, 110px) clamp(16px, 3vw, 32px);
+    overflow: visible;
+    gap: 32px;
+  }
+
+  .mz-rail {
+    position: static;
+    transform: none;
+  }
+
+  .mz-rail.is-right {
+    text-align: left;
+  }
+
+  .mz-stack-deck {
+    display: grid;
+    width: min(430px, 86vw);
+    height: auto;
+    gap: 20px;
+  }
+
+  .mz-stack-card {
+    position: static;
+    min-height: 360px;
+    transform: none;
+  }
+
+  .mz-flow-stage {
+    height: auto;
+    gap: 28px;
+  }
+
+  .mz-flow-chip {
+    display: none;
+  }
+
+  .mz-flow-card {
+    transform: none;
+  }
+
+  .mz-flow-title {
+    position: static;
+    width: min(760px, 88vw);
+    opacity: 1;
+    transform: none;
+  }
+
+  .mz-orbit-stage {
+    height: auto;
+    padding: 40px 0;
+    transform: none;
+  }
+
+  .mz-orbit-stage > i {
+    display: none;
+  }
+
+  .mz-orbit-core {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mz-cycle-head h2,
+  .mz-cycle-sub {
+    opacity: 1;
+  }
+
+  .mz-cycle-gauge i {
+    width: 64%;
+  }
+
+  .mz-cycle-ticks i,
+  .mz-cycle-ticks.is-right i {
+    background: var(--acid);
+  }
+
+  .mz-strip .mz-scene-sticky::after {
+    display: none;
+  }
+
+  .mz-strip-stage {
+    position: static;
+    height: 420px;
+    overflow: hidden;
+  }
+
+  .mz-strip-column {
+    transform: none;
+  }
+
+  .mz-landing [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
