@@ -277,10 +277,7 @@ router.beforeEach(async (to) => {
 
     if (!authStore.isLogin) {
       if (hadSession) await authStore.clearSession()
-      return {
-        name: 'login',
-        query: { redirect: to.fullPath },
-      }
+      return { name: 'home' }
     }
   }
 
@@ -302,12 +299,6 @@ router.beforeEach(async (to) => {
         return false
       }
     } catch {
-      if (!authStore.isLogin) {
-        return {
-          name: 'login',
-          query: { redirect: to.fullPath },
-        }
-      }
       return { name: 'home' }
     }
   }
