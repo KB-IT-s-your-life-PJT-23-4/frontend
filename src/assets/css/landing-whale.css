@@ -1,9 +1,9 @@
 .whale-landing {
   --acid: #ffd966;
+  --acid-soft: #fbedc8;
   --paper: #eff2f4;
   --black: #07131f;
   --navy: #173e61;
-  --story-progress: 0;
   min-height: 100vh;
   overflow-x: clip;
   color: var(--black);
@@ -83,11 +83,12 @@ html.whale-intro-locked body {
   border-bottom: 1px solid currentColor;
   font-size: 11px;
 }
+
 .whale-hero {
   position: relative;
   min-height: clamp(680px, 82svh, 900px);
   overflow: hidden;
-  background: var(--paper);
+  background: linear-gradient(165deg, #f5f7f8 0%, var(--paper) 50%, #e9edf0 100%);
 }
 .whale-hero-inner {
   position: relative;
@@ -113,14 +114,13 @@ html.whale-intro-locked body {
 .whale-hero h1 {
   margin: 0;
   color: var(--black);
-  font-size: clamp(68px, 11vw, 160px);
-  line-height: 0.98;
-  letter-spacing: -0.055em;
+  font-size: clamp(52px, 9vw, 120px);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
   word-break: keep-all;
 }
 
-/* 각 줄은 자기 마스크 안에서 위로 올라온다. 한글 글자가 잘리지 않도록
- * 마스크에 여백을 주고 같은 크기의 음수 마진으로 레이아웃을 되돌린다. */
 .whale-hero h1 span,
 .whale-hero h1 em {
   display: block;
@@ -154,7 +154,6 @@ html.whale-intro-locked body {
     whale-line-shine 1.05s 1s ease-out forwards;
 }
 
-/* 인트로 커튼이 재생될 때는 커튼이 완전히 걷힌 뒤(1.04초)부터 글자가 올라온다. */
 .has-intro .whale-hero h1 span:nth-child(1) i {
   animation-delay: 1.06s;
 }
@@ -165,8 +164,6 @@ html.whale-intro-locked body {
   animation-delay: 1.3s, 2.05s;
 }
 
-/* 마지막 줄에는 브랜드 컬러가 한 번 스쳐 지나가는 광택을 얹는다.
- * 텍스트 클리핑을 지원하지 않으면 위의 네이비 단색으로 남는다. */
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .whale-hero h1 em i {
     color: transparent;
@@ -217,6 +214,8 @@ html.whale-intro-locked body {
   position: absolute;
   border: 1px solid rgb(23 62 97 / 11%);
   border-radius: 50%;
+  opacity: 0.7;
+  animation: whale-orbit-drift 15s ease-in-out infinite;
 }
 .orbit-one {
   top: -38vw;
@@ -230,6 +229,103 @@ html.whale-intro-locked body {
   width: 68vw;
   height: 68vw;
   box-shadow: inset 0 0 0 9vw rgb(255 255 255 / 20%);
+  animation-name: whale-orbit-drift-alt;
+  animation-duration: 19s;
+}
+@keyframes whale-orbit-drift {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-1.1vw, 1.3vw) scale(1.035);
+  }
+}
+@keyframes whale-orbit-drift-alt {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(1.5vw, -1vw) scale(1.05);
+  }
+}
+.whale-hero-mascot {
+  position: absolute;
+  right: clamp(16px, 4vw, 64px);
+  bottom: clamp(18px, 4vw, 56px);
+  z-index: 3;
+  width: clamp(140px, 19vw, 280px);
+  pointer-events: none;
+}
+.whale-hero-mascot-shadow {
+  position: absolute;
+  bottom: -4%;
+  left: 50%;
+  width: 92%;
+  height: 20%;
+  background: radial-gradient(closest-side, rgb(23 62 97 / 26%), transparent 75%);
+  border-radius: 50%;
+  transform: translateX(-50%) scale(1);
+  opacity: 0.55;
+  animation: whale-mascot-shadow 4.6s ease-in-out infinite;
+}
+.whale-hero-mascot img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: whale-mascot-float 4.6s ease-in-out infinite;
+}
+@keyframes whale-mascot-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes whale-mascot-shadow {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.78);
+    opacity: 0.3;
+  }
+}
+.whale-hero-cta-row {
+  display: flex;
+  margin-top: clamp(28px, 3.4vw, 44px);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.whale-hero-cta {
+  display: inline-flex;
+  min-height: 52px;
+  padding: 0 24px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--black);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.whale-hero-cta-note {
+  color: #77838c;
+  font-size: 12px;
+  font-weight: 600;
 }
 .whale-marquee {
   overflow: hidden;
@@ -253,56 +349,52 @@ html.whale-intro-locked body {
   font-style: normal;
 }
 .whale-story {
-  position: relative;
-  height: 300svh;
-  background: var(--black);
-}
-.whale-story-sticky {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  min-height: 620px;
-  overflow: hidden;
-  color: #fff;
-  background:
-    radial-gradient(circle at 50% 54%, rgb(63 102 134 / 30%), transparent 36%), var(--black);
-}
-.whale-story {
-  /* 스크롤 진행도를 단계별로 나눈다: 폰 등장 -> 그래프 진행 -> 비교 행 노출 */
-  --phone-in: clamp(0, calc(var(--story-progress) * 3), 1);
-  --chart-in: clamp(0, calc((var(--story-progress) - 0.32) * 2.3), 1);
-  --rows-in: clamp(0, calc((var(--story-progress) - 0.74) * 5), 1);
-}
-.whale-story-copy {
-  position: absolute;
-  top: clamp(54px, 8vh, 95px);
-  left: clamp(20px, 7vw, 100px);
-  z-index: 2;
-  opacity: calc(1 - var(--story-progress) * 1.35);
-  transform: translateY(calc(var(--story-progress) * -40px));
+  background: var(--paper);
 }
 .whale-story-copy p {
-  color: var(--acid);
+  color: var(--navy);
 }
 .whale-story-copy h2 {
   margin: 17px 0 0;
-  font-size: clamp(30px, 4.6vw, 70px);
-  line-height: 1.08;
-  letter-spacing: -0.055em;
+  color: var(--navy);
+  font-size: clamp(32px, 4.4vw, 58px);
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+}
+.whale-story-stats {
+  display: flex;
+  margin-top: 26px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.whale-story-stat {
+  display: flex;
+  padding: 14px 16px;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid #e4e8eb;
+  border-radius: 14px;
+  color: var(--black);
+  background: #fff;
+  box-shadow: 0 10px 24px rgb(7 19 31 / 6%);
+}
+.whale-story-stat small {
+  color: #77838c;
+  font-size: 9px;
+  font-weight: 600;
+}
+.whale-story-stat strong {
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: 800;
 }
 .whale-phone {
-  position: absolute;
-  top: 53%;
-  left: 50%;
-  width: min(500px, calc(100% - 40px));
   padding: 22px;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid #e4e8eb;
   border-radius: 28px;
   color: var(--black);
-  background: #f9fafb;
-  box-shadow: 0 40px 90px rgb(0 0 0 / 40%);
-  transform: translate(-50%, calc(-44% + (1 - var(--phone-in)) * 42vh))
-    scale(calc(0.82 + var(--phone-in) * 0.18));
+  background: #fff;
+  box-shadow: 0 30px 70px rgb(7 19 31 / 12%);
 }
 .whale-phone-top {
   display: flex;
@@ -370,17 +462,28 @@ html.whale-intro-locked body {
 }
 .whale-chart-line {
   fill: none;
-  stroke: var(--acid);
+  stroke: var(--navy);
   stroke-width: 4;
   stroke-linecap: round;
   stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--chart-in));
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1s 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.whale-phone.is-visible .whale-chart-line {
+  stroke-dashoffset: 0;
 }
 .whale-chart-fill {
   fill: url(#whale-chart-area);
-  opacity: var(--chart-in);
-  transform: scaleX(var(--chart-in));
+  opacity: 0;
+  transform: scaleX(0);
   transform-origin: left;
+  transition:
+    opacity 0.9s 0.3s ease,
+    transform 0.9s 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.whale-phone.is-visible .whale-chart-fill {
+  opacity: 1;
+  transform: scaleX(1);
 }
 .whale-chart > div {
   display: flex;
@@ -396,55 +499,23 @@ html.whale-intro-locked body {
   border: 1px solid #e4e8eb;
   border-radius: 10px;
   font-size: 9px;
-  opacity: var(--rows-in);
-  transform: translateY(calc((1 - var(--rows-in)) * 18px));
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s 0.5s ease,
+    transform 0.6s 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.whale-phone.is-visible .whale-compare-row {
+  opacity: 1;
+  transform: none;
 }
 .whale-compare-row + .whale-compare-row {
   margin-top: 7px;
+  transition-delay: 0.65s;
 }
 .whale-compare-row.is-best {
   border-color: #dfc544;
   background: #fff9d9;
-}
-.whale-story-stat {
-  position: absolute;
-  z-index: 3;
-  display: flex;
-  padding: 15px 18px;
-  flex-direction: column;
-  gap: 4px;
-  border: 1px solid rgb(255 255 255 / 20%);
-  border-radius: 15px;
-  background: rgb(255 255 255 / 10%);
-  backdrop-filter: blur(16px);
-  opacity: clamp(0, (var(--story-progress) - 0.62) * 4, 1);
-  transform: translateY(calc((1 - clamp(0, (var(--story-progress) - 0.62) * 4, 1)) * 32px));
-}
-.whale-story-stat small {
-  color: #9eb0bc;
-  font-size: 8px;
-}
-.whale-story-stat strong {
-  font-size: 12px;
-}
-.stat-one {
-  top: 24%;
-  right: 7%;
-}
-.stat-one strong {
-  color: var(--acid);
-}
-.stat-two {
-  bottom: 15%;
-  left: 7%;
-}
-.whale-story-step {
-  position: absolute;
-  right: 20px;
-  bottom: 22px;
-  color: #72808a;
-  font-size: 8px;
-  letter-spacing: 0.15em;
 }
 .whale-section {
   padding: clamp(72px, 8vw, 120px) 0;
@@ -499,8 +570,7 @@ html.whale-intro-locked body {
   font-style: normal;
 }
 .whale-features {
-  color: #fff;
-  background: var(--navy);
+  background: var(--paper);
 }
 .whale-heading.is-light h2 {
   color: #fff;
@@ -518,10 +588,10 @@ html.whale-intro-locked body {
   position: relative;
   min-height: 500px;
   padding: 25px;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid rgb(23 62 97 / 8%);
   border-radius: 26px;
   color: var(--black);
-  background: #f5f7f8;
+  background: #fff;
   box-shadow: 0 20px 50px rgb(0 0 0 / 10%);
   transition:
     opacity 0.75s ease var(--delay, 0ms),
@@ -541,6 +611,25 @@ html.whale-intro-locked body {
 .whale-feature-grid article:nth-child(3) {
   color: #fff;
   background: #285678;
+  border-color: rgb(255 255 255 / 18%);
+}
+
+.whale-feature-grid article[data-reveal] {
+  transform-origin: 50% 100%;
+  transform: translateY(64px) scale(0.9) rotate(-5deg);
+}
+.whale-feature-grid article[data-reveal]:nth-child(2) {
+  transform: translateY(64px) scale(0.88) rotate(4deg);
+}
+.whale-feature-grid article[data-reveal]:nth-child(3) {
+  transform: translateY(64px) scale(0.86) rotate(-3deg);
+}
+.whale-feature-grid article[data-reveal].is-visible {
+  transform: none;
+  transition:
+    opacity 0.6s ease var(--delay, 0ms),
+    transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms),
+    box-shadow 0.28s ease;
 }
 .whale-feature-meta {
   display: flex;
@@ -578,60 +667,315 @@ html.whale-intro-locked body {
   color: #77838c;
   font-size: 8px;
 }
-.whale-feature-compare {
-  display: grid;
-  margin-top: 18px;
-  gap: 15px;
+.whale-sim-period-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #2c608b;
+  background: #eaf2ff;
+  font-size: 7px;
+  font-weight: 700;
+  white-space: nowrap;
 }
-.whale-feature-compare > div {
+.whale-sim-verdict {
+  margin: 0;
+  padding-right: 76px;
+  color: var(--black);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.whale-sim-subtext {
+  margin: 5px 0 0;
+  color: #77838c;
+  font-size: 8px;
+}
+.whale-sim-result-grid {
   display: grid;
-  grid-template-columns: 62px minmax(0, 1fr) auto;
+  margin-top: 14px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.whale-sim-result-card {
+  position: relative;
+  padding: 10px 9px;
+  border: 1px solid #e4e8eb;
+  border-radius: 12px;
+  background: #fff;
+}
+.whale-sim-result-card.is-best {
+  border: 1.5px solid var(--navy);
+  background: #f3f7fb;
+}
+.whale-sim-result-tag {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--navy);
+  font-size: 6px;
+  font-weight: 700;
+}
+.whale-sim-result-title {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--black);
+  font-size: 9px;
+  font-weight: 700;
+}
+.whale-sim-result-label {
+  display: block;
+  color: #8f9aa2;
+  font-size: 6px;
+  font-weight: 600;
+}
+.whale-sim-result-value {
+  display: block;
+  margin: 1px 0 6px;
+  color: var(--black);
+  font-size: 12px;
+  font-weight: 800;
+}
+.whale-sim-result-tax {
+  display: block;
+  margin-top: 1px;
+  color: #56636d;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.whale-feature-preview.is-01 {
+  position: relative;
+  min-height: 256px;
+}
+.whale-sim-loop {
+  position: relative;
+  min-height: 224px;
+}
+.whale-sim-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation-duration: 9s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: forwards;
+}
+.whale-sim-scene.scene-1 {
+  animation-name: whale-sim-scene-1;
+}
+.whale-sim-scene.scene-2 {
+  animation-name: whale-sim-scene-2;
+}
+@keyframes whale-sim-scene-1 {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  44% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  48% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  96% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes whale-sim-scene-2 {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  45% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  49% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  95% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  99% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.whale-sim-recipient {
+  display: flex;
+  margin-top: 16px;
+  padding: 8px 10px;
   align-items: center;
   gap: 8px;
+  border: 1px solid #e4e8eb;
+  border-radius: 12px;
+  background: #f7f9fa;
+}
+.whale-sim-avatar {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--acid);
+  color: var(--black);
   font-size: 8px;
+  font-weight: 700;
 }
-.whale-feature-compare i {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: #e8edf0;
-}
-.whale-feature-compare b {
-  display: block;
-  width: 86%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--navy);
-  transform: scaleX(0.15);
-  transform-origin: left;
-}
-.whale-feature-grid article.is-visible .whale-feature-compare b {
-  animation: whale-feature-bar-in 0.8s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.whale-feature-compare > div:nth-child(2) b {
-  width: 68%;
-  background: #8ca1b1;
-}
-.whale-feature-grid article.is-visible .whale-feature-compare > div:nth-child(2) b {
-  animation-delay: 0.42s;
-}
-.whale-feature-compare strong {
+.whale-sim-recipient-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   font-size: 9px;
 }
-.whale-feature-delta {
-  display: flex;
-  margin-top: 18px;
-  padding: 9px 10px;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 10px;
-  color: #405568;
-  background: #eef3f6;
-  font-size: 8px;
+.whale-sim-recipient-copy small {
+  color: #77838c;
+  font-size: 7px;
 }
-.whale-feature-delta strong {
-  color: var(--navy);
+.whale-sim-change {
+  display: flex;
+  margin-left: auto;
+  align-items: center;
+  gap: 2px;
+  color: #6b7680;
+  font-size: 7px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.whale-sim-step {
+  display: flex;
+  margin-top: 14px;
+  align-items: center;
+  gap: 6px;
+}
+.whale-sim-scene .whale-sim-step:first-child {
+  margin-top: 0;
+}
+.whale-sim-step-num {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--navy);
+  font-size: 7px;
+  font-weight: 700;
+}
+.whale-sim-step strong {
+  color: var(--black);
+  font-size: 9px;
+  font-weight: 700;
+}
+.whale-sim-deduction-row {
+  display: grid;
+  margin-top: 8px;
+  grid-template-columns: 1fr 1fr;
+}
+.whale-sim-deduction-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.whale-sim-deduction-row > div:last-child {
+  padding-left: 10px;
+  border-left: 1px solid #e4e8eb;
+}
+.whale-sim-deduction-row span {
+  color: #8f9aa2;
+  font-size: 6px;
+  font-weight: 600;
+}
+.whale-sim-deduction-row strong {
+  color: var(--black);
   font-size: 10px;
+  font-weight: 800;
+}
+.whale-sim-amount-box {
+  display: flex;
+  margin-top: 12px;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.whale-sim-amount-box span {
+  color: #77838c;
+  font-size: 9px;
+  font-weight: 600;
+}
+.whale-sim-pills {
+  display: grid;
+  margin-top: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+.whale-sim-pills span {
+  padding: 4px 0;
+  border: 1px solid #d9dfe3;
+  border-radius: 999px;
+  color: #56636d;
+  font-size: 7px;
+  font-weight: 700;
+  text-align: center;
+  animation: whale-sim-pill-pulse 9s ease-in-out infinite;
+  animation-fill-mode: forwards;
+}
+.whale-sim-pills span:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.whale-sim-pills span:nth-child(3) {
+  animation-delay: 0.5s;
+}
+@keyframes whale-sim-pill-pulse {
+  0% {
+    color: #56636d;
+    background: transparent;
+    transform: scale(1);
+  }
+  53% {
+    color: #56636d;
+    background: transparent;
+    transform: scale(1);
+  }
+  57% {
+    color: var(--black);
+    background: var(--acid);
+    transform: scale(1.06);
+  }
+  63% {
+    color: #56636d;
+    background: transparent;
+    transform: scale(1);
+  }
+  100% {
+    color: #56636d;
+    background: transparent;
+    transform: scale(1);
+  }
 }
 .whale-feature-grid article:nth-child(2) .whale-feature-preview {
   background: #fffdf5;
@@ -642,6 +986,24 @@ html.whale-intro-locked body {
   grid-template-columns: repeat(3, 1fr);
   margin-top: 30px;
   gap: 5px;
+  /* 카드 01처럼 영상처럼 재생되는 느낌을 주려고, 8초 주기로 선이 자라나면서
+     증여·점검·갱신 시점이 순서대로 "도달"하듯 켜지고, 끝에서 살짝 어두워졌다가
+     다시 처음부터 재생된다. */
+  animation: whale-timeline-cycle 8s ease-in-out infinite;
+}
+@keyframes whale-timeline-cycle {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  10%,
+  88% {
+    opacity: 1;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
 }
 .whale-feature-timeline::before {
   position: absolute;
@@ -651,6 +1013,21 @@ html.whale-intro-locked body {
   height: 1px;
   background: #d1c16f;
   content: '';
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: whale-timeline-line 8s ease-in-out infinite forwards;
+}
+@keyframes whale-timeline-line {
+  0%,
+  10% {
+    transform: scaleX(0);
+  }
+  68% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(1);
+  }
 }
 .whale-feature-timeline > div {
   position: relative;
@@ -668,10 +1045,129 @@ html.whale-intro-locked body {
   background: var(--navy);
   box-shadow: 0 0 0 1px #cfbd5c;
 }
+.whale-feature-timeline > div:nth-child(1) i {
+  animation: whale-timeline-dot-1 8s ease-in-out infinite forwards;
+}
+.whale-feature-timeline > div:nth-child(2) i {
+  animation: whale-timeline-dot-2 8s ease-in-out infinite forwards;
+}
+.whale-feature-timeline > div:nth-child(3) i {
+  animation: whale-timeline-dot-3 8s ease-in-out infinite forwards;
+}
+@keyframes whale-timeline-dot-1 {
+  0%,
+  10% {
+    transform: scale(0.7);
+    background: #c9d0d6;
+    box-shadow: 0 0 0 1px #d8dde1;
+  }
+  14% {
+    transform: scale(1.2);
+    background: var(--navy);
+    box-shadow:
+      0 0 0 1px #cfbd5c,
+      0 0 10px 2px rgb(207 189 92 / 55%);
+  }
+  20%,
+  100% {
+    transform: scale(1);
+    background: var(--navy);
+    box-shadow: 0 0 0 1px #cfbd5c;
+  }
+}
+@keyframes whale-timeline-dot-2 {
+  0%,
+  38% {
+    transform: scale(0.7);
+    background: #c9d0d6;
+    box-shadow: 0 0 0 1px #d8dde1;
+  }
+  42% {
+    transform: scale(1.2);
+    background: var(--navy);
+    box-shadow:
+      0 0 0 1px #cfbd5c,
+      0 0 10px 2px rgb(207 189 92 / 55%);
+  }
+  48%,
+  100% {
+    transform: scale(1);
+    background: var(--navy);
+    box-shadow: 0 0 0 1px #cfbd5c;
+  }
+}
+@keyframes whale-timeline-dot-3 {
+  0%,
+  62% {
+    transform: scale(0.7);
+    background: #c9d0d6;
+    box-shadow: 0 0 0 1px #d8dde1;
+  }
+  66% {
+    transform: scale(1.2);
+    background: var(--navy);
+    box-shadow:
+      0 0 0 1px #cfbd5c,
+      0 0 10px 2px rgb(207 189 92 / 55%);
+  }
+  72%,
+  100% {
+    transform: scale(1);
+    background: var(--navy);
+    box-shadow: 0 0 0 1px #cfbd5c;
+  }
+}
 .whale-feature-timeline span {
   display: grid;
   margin-top: 16px;
   gap: 5px;
+  opacity: 0;
+  transform: translateY(6px);
+}
+.whale-feature-timeline > div:nth-child(1) span {
+  animation: whale-timeline-label-1 8s ease-in-out infinite forwards;
+}
+.whale-feature-timeline > div:nth-child(2) span {
+  animation: whale-timeline-label-2 8s ease-in-out infinite forwards;
+}
+.whale-feature-timeline > div:nth-child(3) span {
+  animation: whale-timeline-label-3 8s ease-in-out infinite forwards;
+}
+@keyframes whale-timeline-label-1 {
+  0%,
+  12% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  20%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes whale-timeline-label-2 {
+  0%,
+  40% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  48%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes whale-timeline-label-3 {
+  0%,
+  64% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  72%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .whale-feature-timeline small {
   color: #7d7350;
@@ -692,6 +1188,23 @@ html.whale-intro-locked body {
 .whale-feature-grid article:nth-child(3) .whale-feature-preview-head > small {
   color: #b8cad7;
 }
+.whale-consult-loop {
+  animation: whale-consult-cycle 8s ease-in-out infinite;
+}
+@keyframes whale-consult-cycle {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  10%,
+  88% {
+    opacity: 1;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
 .whale-feature-question {
   width: 82%;
   margin: 16px 0 13px !important;
@@ -701,6 +1214,77 @@ html.whale-intro-locked body {
   background: #f7fafc;
   font-size: 9px !important;
   line-height: 1.55 !important;
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transform-origin: left top;
+  animation: whale-consult-question 8s ease-in-out infinite forwards;
+}
+@keyframes whale-consult-question {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  14%,
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.whale-consult-answer-slot {
+  position: relative;
+}
+.whale-consult-typing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  padding: 10px 12px;
+  align-items: center;
+  gap: 4px;
+  border-radius: 14px 14px 14px 5px;
+  background: rgb(255 255 255 / 10%);
+  opacity: 0;
+  animation: whale-consult-typing-visibility 8s ease-in-out infinite forwards;
+}
+.whale-consult-typing i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #b8cad7;
+  animation: whale-consult-typing-bounce 0.9s ease-in-out infinite;
+}
+.whale-consult-typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.whale-consult-typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes whale-consult-typing-visibility {
+  0%,
+  16% {
+    opacity: 0;
+  }
+  20%,
+  38% {
+    opacity: 1;
+  }
+  42%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes whale-consult-typing-bounce {
+  0%,
+  80%,
+  100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
 }
 .whale-feature-source {
   display: grid;
@@ -710,6 +1294,21 @@ html.whale-intro-locked body {
   gap: 8px;
   border: 1px solid rgb(255 255 255 / 16%);
   border-radius: 11px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: whale-consult-source 8s ease-in-out infinite forwards;
+}
+@keyframes whale-consult-source {
+  0%,
+  42% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  48%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .whale-feature-source span {
   display: grid;
@@ -767,6 +1366,11 @@ html.whale-intro-locked body {
     z-index: 1;
     box-shadow: 0 28px 64px rgb(0 0 0 / 20%);
     transform: translateY(-8px);
+    /* 등장 애니메이션용 0.7s 트랜지션이 이 요소에도 걸려 있어서, 마우스를 올렸을 때도
+       버벅이지 않도록 호버는 늘 빠른 트랜지션을 쓰도록 여기서 다시 짧게 지정한다. */
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.28s ease;
   }
   .whale-feature-grid article:hover .whale-feature-preview {
     transform: translateY(-4px);
@@ -874,7 +1478,13 @@ html.whale-intro-locked body {
 }
 .whale-result {
   color: var(--black);
-  background: #dfe8ed;
+  background: linear-gradient(
+    180deg,
+    var(--paper) 0,
+    #dfe8ed 70px,
+    #dfe8ed calc(100% - 70px),
+    var(--paper) 100%
+  );
 }
 .whale-result-grid {
   display: grid;
@@ -883,7 +1493,6 @@ html.whale-intro-locked body {
   gap: clamp(48px, 7vw, 90px);
 }
 .whale-result-copy h2 {
-  /* 0.88은 한글 글자가 위아래로 겹쳐서 행간과 위아래 여백을 넓혔다. */
   margin: 0;
   color: var(--navy);
   font-size: clamp(54px, 7vw, 96px);
@@ -977,37 +1586,8 @@ html.whale-intro-locked body {
   font-size: 8px;
   line-height: 1.6;
 }
-.whale-trust-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 48px;
-  border-top: 1px solid #cbd2d6;
-  border-bottom: 1px solid #cbd2d6;
-}
-.whale-trust-row article {
-  min-height: 260px;
-  padding: 28px;
-  border-right: 1px solid #cbd2d6;
-}
-.whale-trust-row article:last-child {
-  border: 0;
-}
-.whale-trust-row svg {
-  color: var(--navy);
-}
-.whale-trust-row h3 {
-  margin: 70px 0 12px;
-  color: var(--navy);
-  font-size: 18px;
-}
-.whale-trust-row p {
-  margin: 0;
-  color: #6e7a83;
-  font-size: 10px;
-  line-height: 1.8;
-}
 .whale-faq {
-  background: #fff;
+  background: linear-gradient(180deg, var(--paper) 0, #fff 60px, #fff 100%);
 }
 .whale-faq-grid {
   display: grid;
@@ -1055,7 +1635,13 @@ html.whale-intro-locked body {
   padding: clamp(100px, 14vw, 190px) 0;
   overflow: hidden;
   text-align: center;
-  background: var(--acid);
+  background: linear-gradient(
+    180deg,
+    #fff 0,
+    var(--acid-soft) 90px,
+    var(--acid-soft) calc(100% - 90px),
+    var(--black) 100%
+  );
 }
 .whale-final-ring {
   position: absolute;
@@ -1071,11 +1657,16 @@ html.whale-intro-locked body {
 .whale-final .whale-shell {
   position: relative;
 }
+.whale-final-mark {
+  width: clamp(52px, 6vw, 68px);
+  filter: drop-shadow(0 10px 20px rgb(7 19 31 / 16%));
+}
 .whale-final h2 {
   margin: 25px 0 18px;
-  font-size: clamp(70px, 12vw, 165px);
-  line-height: 0.94;
-  letter-spacing: -0.085em;
+  font-size: clamp(44px, 8vw, 100px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 .whale-final .whale-shell > h2:first-child {
   margin-top: 0;
@@ -1120,6 +1711,10 @@ html.whale-intro-locked body {
   display: flex;
   gap: 22px;
   font-size: 9px;
+}
+.whale-footer-pending {
+  cursor: default;
+  opacity: 0.6;
 }
 .whale-footer p {
   max-width: 650px;
@@ -1172,7 +1767,6 @@ html.whale-intro-locked body {
   }
 }
 @keyframes whale-intro-lift {
-  /* from을 생략하면 clip-path: none에서 보간이 안 돼 중간에 툭 끊긴다. */
   from {
     clip-path: inset(0 0 0 0);
   }
@@ -1191,11 +1785,6 @@ html.whale-intro-locked body {
     transform: translateY(var(--hero-content-final-y));
   }
 }
-@keyframes whale-feature-bar-in {
-  to {
-    transform: scaleX(1);
-  }
-}
 @keyframes whale-line-shine {
   to {
     background-position: 0% 50%;
@@ -1210,6 +1799,7 @@ html.whale-intro-locked body {
 @media (max-width: 800px) {
   .whale-nav {
     grid-template-columns: 1fr auto;
+    gap: 18px;
     height: 66px;
   }
   .whale-nav > nav {
@@ -1229,13 +1819,11 @@ html.whale-intro-locked body {
     --hero-content-final-y: 0;
     transform: translateY(22vh);
   }
-  /* 표어에서 가장 긴 줄('미리 준비하는')이 화면 폭 안에 들어가도록 vw로 잡는다.
-   * 고정 크기로 두면 마스크(overflow:hidden)에 글자가 잘려 깨져 보인다. */
   .whale-hero h1 {
     display: flex;
-    font-size: min(14.6vw, 92px);
-    line-height: 1.08;
-    letter-spacing: -0.045em;
+    font-size: min(11.5vw, 68px);
+    line-height: 1.14;
+    letter-spacing: -0.02em;
     flex-direction: column;
     gap: 4px;
   }
@@ -1256,21 +1844,15 @@ html.whale-intro-locked body {
     flex-direction: column;
     gap: 32px;
   }
-  .whale-story {
-    height: 260svh;
-  }
-  .whale-story-copy {
-    top: 55px;
-    right: 20px;
-    left: 20px;
-    text-align: center;
+  .whale-hero-mascot {
+    right: 14px;
+    bottom: 14px;
+    width: clamp(100px, 28vw, 170px);
   }
   .whale-story-copy h2 {
     font-size: 28px;
   }
   .whale-phone {
-    top: 55%;
-    width: min(410px, calc(100% - 32px));
     padding: 16px;
     border-radius: 21px;
   }
@@ -1282,14 +1864,6 @@ html.whale-intro-locked body {
   }
   .whale-chart svg {
     height: 116px;
-  }
-  .stat-one {
-    top: 24%;
-    right: 10px;
-  }
-  .stat-two {
-    bottom: 10%;
-    left: 10px;
   }
   .whale-section {
     padding: 60px 0;
@@ -1351,21 +1925,8 @@ html.whale-intro-locked body {
   .whale-result-card h3 {
     margin: 28px 0 42px;
   }
-  .whale-trust-row {
-    grid-template-columns: 1fr;
-    margin-top: 32px;
-  }
-  .whale-trust-row article {
-    min-height: auto;
-    padding: 26px 0;
-    border-right: 0;
-    border-bottom: 1px solid #cbd2d6;
-  }
-  .whale-trust-row h3 {
-    margin: 34px 0 10px;
-  }
   .whale-final h2 {
-    font-size: 76px;
+    font-size: 52px;
   }
   .whale-footer .whale-shell {
     grid-template-columns: 1fr;
@@ -1376,9 +1937,6 @@ html.whale-intro-locked body {
 }
 
 @media (max-width: 380px) {
-  .whale-phone {
-    top: 57%;
-  }
   .whale-story-stat {
     padding: 10px 12px;
   }
@@ -1386,7 +1944,7 @@ html.whale-intro-locked body {
     min-height: 420px;
   }
   .whale-final h2 {
-    font-size: 64px;
+    font-size: 44px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1416,20 +1974,13 @@ html.whale-intro-locked body {
   .whale-hero-content {
     transform: translateY(var(--hero-content-final-y));
   }
-  .whale-phone {
-    transform: translate(-50%, -50%);
-  }
   .whale-chart-line {
     stroke-dashoffset: 0;
   }
   .whale-chart-fill,
-  .whale-compare-row,
-  .whale-story-stat {
+  .whale-compare-row {
     opacity: 1;
     transform: none;
-  }
-  .whale-feature-compare b {
-    transform: scaleX(1);
   }
   .whale-feature-preview,
   .whale-feature-timeline > div,

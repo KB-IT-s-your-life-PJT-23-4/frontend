@@ -2,16 +2,30 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AppIcon from '../components/layout/AppIcon.vue'
 import brandSymbol from '../assets/brand-symbol.png'
+import mascotDuo from '../assets/mascot-duo.png'
 import '../assets/css/landing-whale.css'
 
 const root = ref(null)
-const storyScene = ref(null)
 
-// 인트로 재생 여부는 첫 렌더 전에 정해야 표어의 등장 지연이 한 프레임도 어긋나지 않는다.
+const INTRO_SESSION_KEY = 'mirizoom-landing-intro-shown'
+function hasSeenIntroThisSession() {
+  try {
+    return window.sessionStorage.getItem(INTRO_SESSION_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+function markIntroSeen() {
+  try {
+    window.sessionStorage.setItem(INTRO_SESSION_KEY, '1')
+  } catch {}
+}
+
 const playIntro =
-  !window.matchMedia('(prefers-reduced-motion: reduce)').matches && !window.location.hash
-// showIntro는 커튼이 걷히면 꺼지지만, hasIntro는 페이지가 살아 있는 동안 유지한다.
-// 도중에 바뀌면 표어의 animation-delay가 재계산되어 글자가 툭 튀어나온다.
+  !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+  !window.location.hash &&
+  !hasSeenIntroThisSession()
+
 const hasIntro = ref(playIntro)
 const showIntro = ref(playIntro)
 let observer
@@ -19,8 +33,6 @@ let frame
 let previousScrollRestoration
 let introUnlockTimer
 
-// 인트로 커튼이 걷히면(약 1초) 스크롤 잠금을 푼다. animationend가 유실되어도
-// 페이지가 영영 스크롤되지 않는 일이 없도록 타이머로 한 번 더 풀어 준다.
 const INTRO_UNLOCK_FALLBACK_MS = 1600
 
 function unlockIntroScroll() {
@@ -44,17 +56,10 @@ function clamp(value) {
 function updateMotion() {
   frame = undefined
   const page = root.value
-  const scene = storyScene.value
   if (!page) return
 
   const pageTravel = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
   page.style.setProperty('--page-progress', String(clamp(window.scrollY / pageTravel)))
-
-  if (scene) {
-    const rect = scene.getBoundingClientRect()
-    const travel = Math.max(scene.offsetHeight - window.innerHeight, 1)
-    page.style.setProperty('--story-progress', String(clamp(-rect.top / travel)))
-  }
 }
 
 function requestMotion() {
@@ -76,6 +81,7 @@ onMounted(() => {
   }
 
   if (playIntro) {
+    markIntroSeen()
     document.documentElement.classList.add('whale-intro-locked')
     introUnlockTimer = window.setTimeout(unlockIntroScroll, INTRO_UNLOCK_FALLBACK_MS)
   }
@@ -228,6 +234,10 @@ const faqs = [
       <section class="whale-hero">
         <div class="whale-hero-orbit orbit-one" />
         <div class="whale-hero-orbit orbit-two" />
+        <div class="whale-hero-mascot" aria-hidden="true">
+          <span class="whale-hero-mascot-shadow" />
+          <img :src="mascotDuo" alt="" />
+        </div>
         <div class="whale-shell whale-hero-inner">
           <div class="whale-hero-content">
             <h1>
@@ -235,9 +245,15 @@ const faqs = [
               <span><i>다음 10년,</i></span>
               <em><i>증여.</i></em>
             </h1>
+            <div class="whale-hero-cta-row">
+              <RouterLink to="/simulation" class="whale-hero-cta">
+                무료로 시작하기 <AppIcon name="arrow" :size="16" />
+              </RouterLink>
+              <span class="whale-hero-cta-note">가입은 1분이면 충분해요</span>
+            </div>
             <div class="whale-hero-bottom">
-              <p>중요한 증여 결정을 비교하고,<br />가족의 긴 계획을 한곳에서 관리하세요.</p>
-              <!-- <a href="#story" class="whale-scroll-link">SCROLL TO EXPLORE <i>↓</i></a> -->
+              <p>증여 결정을 비교하고, 가족의 계획을 한곳에서 관리해요.</p>
+              <a href="#story" class="whale-scroll-link">SCROLL TO EXPLORE <i>↓</i></a>
             </div>
           </div>
         </div>
@@ -250,14 +266,20 @@ const faqs = [
         </div>
       </div>
 
-      <section id="story" ref="storyScene" class="whale-story">
-        <div class="whale-story-sticky">
-          <div class="whale-story-copy">
+      <section id="story" class="whale-section whale-story">
+        <div class="whale-shell whale-result-grid">
+          <div class="whale-story-copy" data-reveal>
             <p class="whale-mono">A CLEARER VIEW</p>
             <h2>시간이 만드는 차이를<br />눈으로 확인하세요.</h2>
+            <div class="whale-story-stats">
+              <div class="whale-story-stat"><small>예상 차이</small><strong>+ 860만원</strong></div>
+              <div class="whale-story-stat">
+                <small>장기 기록</small><strong>안전하게 저장</strong>
+              </div>
+            </div>
           </div>
 
-          <div class="whale-phone" aria-label="미리줌 시뮬레이션 결과 예시">
+          <div class="whale-phone" data-reveal aria-label="미리줌 시뮬레이션 결과 예시">
             <div class="whale-phone-top">
               <span><img :src="brandSymbol" alt="" /> 미리줌</span><small>계산 완료</small>
             </div>
@@ -294,14 +316,6 @@ const faqs = [
               <span>나누어 증여</span><strong>1억 3,960만원</strong>
             </div>
           </div>
-
-          <div class="whale-story-stat stat-one">
-            <small>예상 차이</small><strong>+ 860만원</strong>
-          </div>
-          <div class="whale-story-stat stat-two">
-            <small>장기 기록</small><strong>안전하게 저장</strong>
-          </div>
-          <span class="whale-story-step">01 — 03</span>
         </div>
       </section>
 
@@ -329,7 +343,7 @@ const faqs = [
 
       <section id="features" class="whale-section whale-features">
         <div class="whale-shell">
-          <div class="whale-heading is-light" data-reveal>
+          <div class="whale-heading" data-reveal>
             <!-- <p class="whale-mono">BUILT FOR CLARITY</p> -->
             <h2>계획부터 기록까지.<br />한 흐름으로.</h2>
           </div>
@@ -346,19 +360,66 @@ const faqs = [
               </div>
               <div class="whale-feature-preview" :class="`is-${feature.index}`" aria-hidden="true">
                 <template v-if="feature.index === '01'">
-                  <div class="whale-feature-preview-head">
-                    <span><AppIcon name="chart" :size="15" /> 시나리오 비교</span
-                    ><small>10년 후</small>
-                  </div>
-                  <div class="whale-feature-compare">
-                    <div>
-                      <span>지금 증여</span><i><b /></i><strong>1.48억</strong>
+                  <!-- 실제 화면을 녹화할 수 없는 환경이라, 시뮬레이션 입력→실행 흐름을
+                       코드로 재현한 2장면 루프로 대신한다. (비교 결과 → 수증자/금액 입력)
+                       prefers-reduced-motion이면 1번 장면에 고정된다. -->
+                  <div class="whale-sim-loop">
+                    <div class="whale-sim-scene scene-1">
+                      <span class="whale-sim-period-badge">기간 내 1회 증여 · 3회 재가입</span>
+                      <p class="whale-sim-verdict">지금 전액 증여가<br />더 유리해요</p>
+                      <p class="whale-sim-subtext">
+                        예상 증여세를 반영한 금액을 지금부터 운용해요.
+                      </p>
+                      <div class="whale-sim-result-grid">
+                        <div class="whale-sim-result-card is-best">
+                          <span class="whale-sim-result-tag">추천</span>
+                          <strong class="whale-sim-result-title">지금 전액 증여</strong>
+                          <span class="whale-sim-result-label">12년 후 예상 총 금액</span>
+                          <strong class="whale-sim-result-value">1억 481만원</strong>
+                          <span class="whale-sim-result-label">받는 분 납부할 세금</span>
+                          <strong class="whale-sim-result-tax">388만원</strong>
+                        </div>
+                        <div class="whale-sim-result-card">
+                          <strong class="whale-sim-result-title">공제 활용 분할 증여</strong>
+                          <span class="whale-sim-result-label">12년 후 예상 총 금액</span>
+                          <strong class="whale-sim-result-value">4,601만원</strong>
+                          <span class="whale-sim-result-label">받는 분 납부할 세금</span>
+                          <strong class="whale-sim-result-tax">0원</strong>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <span>나누어 증여</span><i><b /></i><strong>1.39억</strong>
+
+                    <div class="whale-sim-scene scene-2">
+                      <div class="whale-sim-step">
+                        <span class="whale-sim-step-num">1</span>
+                        <strong>누구에게 증여할까요?</strong>
+                      </div>
+                      <div class="whale-sim-recipient">
+                        <span class="whale-sim-avatar">서윤</span>
+                        <span class="whale-sim-recipient-copy">
+                          <strong>김서윤</strong>
+                          <small>자녀 · 공제 갱신 2036.08.21</small>
+                        </span>
+                        <span class="whale-sim-change"
+                          >변경<AppIcon name="chevron" :size="10"
+                        /></span>
+                      </div>
+                      <div class="whale-sim-deduction-row">
+                        <div><span>최근 10년 증여 이력</span><strong>2,000만원</strong></div>
+                        <div><span>남은 공제 한도</span><strong>3,000만원</strong></div>
+                      </div>
+                      <div class="whale-sim-step">
+                        <span class="whale-sim-step-num">2</span>
+                        <strong>얼마를 증여할까요?</strong>
+                      </div>
+                      <div class="whale-sim-amount-box">
+                        <strong>30,000,000</strong><span>원</span>
+                      </div>
+                      <div class="whale-sim-pills">
+                        <span>+1백만원</span><span>+5백만원</span><span>+1천만원</span>
+                      </div>
                     </div>
                   </div>
-                  <small class="whale-feature-delta">예상 차이 <strong>+860만원</strong></small>
                 </template>
 
                 <template v-else-if="feature.index === '02'">
@@ -383,11 +444,18 @@ const faqs = [
                   <div class="whale-feature-preview-head">
                     <span><AppIcon name="chat" :size="15" /> 상담 요약</span><small>근거 2건</small>
                   </div>
-                  <p class="whale-feature-question">이전 증여가 있다면<br />세금이 달라지나요?</p>
-                  <div class="whale-feature-source">
-                    <AppIcon name="document" :size="16" />
-                    <span><small>관련 법령</small><strong>상속세 및 증여세법 제53조</strong></span>
-                    <i>↗</i>
+                  <div class="whale-consult-loop">
+                    <p class="whale-feature-question">이전 증여가 있다면<br />세금이 달라지나요?</p>
+                    <div class="whale-consult-answer-slot">
+                      <div class="whale-consult-typing" aria-hidden="true"><i /><i /><i /></div>
+                      <div class="whale-feature-source">
+                        <AppIcon name="document" :size="16" />
+                        <span
+                          ><small>관련 법령</small><strong>상속세 및 증여세법 제53조</strong></span
+                        >
+                        <i>↗</i>
+                      </div>
+                    </div>
                   </div>
                 </template>
               </div>
@@ -407,9 +475,7 @@ const faqs = [
           <div class="whale-heading whale-how-heading" data-reveal>
             <!-- <p class="whale-mono">THREE STEPS</p> -->
             <h2>딱 세 단계면<br />충분해요.</h2>
-            <p class="whale-how-sub">
-              가족 정보만 알려주면 남은 계산은 미리줌이 차근차근 채워드려요.
-            </p>
+            <p class="whale-how-sub">가족 정보만 알려주면, 나머지는 미리줌이 채워요.</p>
           </div>
           <div class="whale-how-cards">
             <article
@@ -457,32 +523,6 @@ const faqs = [
         </div>
       </section>
 
-      <section class="whale-section whale-trust">
-        <div class="whale-shell">
-          <div class="whale-heading" data-reveal>
-            <!-- <p class="whale-mono">BUILT ON TRUST</p> -->
-            <h2>기준과 한계를<br />분명하게.</h2>
-          </div>
-          <div class="whale-trust-row">
-            <article data-reveal>
-              <AppIcon name="document" :size="27" />
-              <h3>근거 있는 계산</h3>
-              <p>관련 법령과 공제 기준을 바탕으로 계산 조건을 함께 안내해요.</p>
-            </article>
-            <article data-reveal>
-              <AppIcon name="shield" :size="27" />
-              <h3>개인정보 보호</h3>
-              <p>필요한 정보만 다루고 가족의 기록을 안전하게 관리하기 위해 노력해요.</p>
-            </article>
-            <article data-reveal>
-              <AppIcon name="info" :size="27" />
-              <h3>명확한 역할</h3>
-              <p>미리줌은 계획 도구이며 개별 판단은 전문가와 확인해야 합니다.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
       <section id="faq" class="whale-section whale-faq">
         <div class="whale-shell whale-faq-grid">
           <div class="whale-heading" data-reveal>
@@ -505,9 +545,9 @@ const faqs = [
       <section class="whale-final">
         <div class="whale-final-ring" />
         <div class="whale-shell" data-reveal>
-          <!-- <p class="whale-mono">START YOUR FAMILY PLAN</p> -->
+          <img :src="brandSymbol" alt="" class="whale-final-mark" aria-hidden="true" />
           <h2>미리 보면,<br />쉬워집니다.</h2>
-          <p>우리 가족의 긴 계획을 오늘부터 시작하세요.</p>
+          <p>가족의 계획, 오늘 시작해요.</p>
           <RouterLink to="/simulation"
             >무료로 시작하기 <AppIcon name="arrow" :size="18"
           /></RouterLink>
@@ -519,7 +559,8 @@ const faqs = [
       <div class="whale-shell">
         <div><img :src="brandSymbol" alt="" /><strong>미리줌</strong></div>
         <nav>
-          <a href="#">이용약관</a><a href="#">개인정보처리방침</a
+          <span class="whale-footer-pending" title="준비 중인 페이지입니다">이용약관</span
+          ><span class="whale-footer-pending" title="준비 중인 페이지입니다">개인정보처리방침</span
           ><a href="mailto:help@mirizoom.kr">문의하기</a>
         </nav>
         <p>
