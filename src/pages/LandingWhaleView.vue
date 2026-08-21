@@ -246,7 +246,7 @@ const faqs = [
               <em><i>증여.</i></em>
             </h1>
             <div class="whale-hero-cta-row">
-              <RouterLink to="/simulation" class="whale-hero-cta">
+              <RouterLink to="/login" class="whale-hero-cta">
                 무료로 시작하기 <AppIcon name="arrow" :size="16" />
               </RouterLink>
               <span class="whale-hero-cta-note">가입은 1분이면 충분해요</span>
@@ -548,7 +548,7 @@ const faqs = [
           <img :src="brandSymbol" alt="" class="whale-final-mark" aria-hidden="true" />
           <h2>미리 보면,<br />쉬워집니다.</h2>
           <p>가족의 계획, 오늘 시작해요.</p>
-          <RouterLink to="/simulation"
+          <RouterLink to="/login"
             >무료로 시작하기 <AppIcon name="arrow" :size="18"
           /></RouterLink>
         </div>
