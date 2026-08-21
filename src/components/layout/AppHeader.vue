@@ -13,12 +13,15 @@ defineProps({
 const store = useAppStore()
 const authStore = useAuthStore()
 const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.role))
+const serviceHomeRoute = computed(() =>
+  authStore.isLogin ? { name: 'home-dashboard' } : { name: 'home' },
+)
 </script>
 
 <template>
   <header class="app-header">
     <div class="brand-lockup" aria-label="미리줌 바로가기">
-      <RouterLink class="brand-home-link" to="/" aria-label="미리줌 홈">
+      <RouterLink class="brand-home-link" :to="serviceHomeRoute" aria-label="미리줌 홈">
         <img src="/src/assets/brand-symbol.png" alt="" class="brand-avatar" />
         <span>미리줌</span>
       </RouterLink>
@@ -50,9 +53,7 @@ const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.
       <RouterLink v-if="authStore.isLogin" class="header-login-link" to="/my">
         {{ authStore.user?.name ? `${authStore.user.name}님` : '마이페이지' }}
       </RouterLink>
-      <RouterLink v-else-if="showLogin" class="header-login-link" to="/login">
-        로그인
-      </RouterLink>
+      <RouterLink v-else-if="showLogin" class="header-login-link" to="/login"> 로그인 </RouterLink>
     </div>
   </header>
 </template>

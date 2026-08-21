@@ -22,7 +22,7 @@ test('현재 관리자 라우트의 로그인 redirect를 유지한다', () => {
 })
 
 test('허용하지 않은 외부 또는 임의 경로는 홈으로 보낸다', () => {
-  assert.equal(resolvePostLoginPath('https://example.com'), '/')
-  assert.equal(resolvePostLoginPath('//example.com'), '/')
-  assert.equal(resolvePostLoginPath('/unknown'), '/')
+  assert.equal(resolvePostLoginPath('https://example.com'), '/home')
+  assert.equal(resolvePostLoginPath('//example.com'), '/home')
+  assert.equal(resolvePostLoginPath('/unknown'), '/home')
 })

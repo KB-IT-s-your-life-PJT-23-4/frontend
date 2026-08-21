@@ -289,18 +289,22 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  const authStore = useAuthStore()
+  const isLandingRoute = to.meta.layout === 'landing'
+  const shouldResolveSession = Boolean(to.meta.requiresAuth || isLandingRoute)
+
+  if (shouldResolveSession && !authStore.isLogin && authStore.refreshToken) {
+    try {
+      const session = await restoreAuthSession()
+      authStore.setAuthSession(session)
+    } catch {}
+  }
+
+  if (isLandingRoute && authStore.isLogin) return { name: 'home-dashboard' }
   if (!to.meta.requiresAuth) return true
 
-  const authStore = useAuthStore()
   if (!authStore.isLogin) {
     const hadSession = Boolean(authStore.accessToken || authStore.refreshToken || authStore.user)
-
-    if (authStore.refreshToken) {
-      try {
-        const session = await restoreAuthSession()
-        authStore.setAuthSession(session)
-      } catch {}
-    }
 
     if (!authStore.isLogin) {
       if (hadSession) await authStore.clearSession()
