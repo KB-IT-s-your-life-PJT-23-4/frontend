@@ -34,6 +34,12 @@
   line-height: 1.6;
 }
 
+.timeline-tax-payment-action {
+  display: flex;
+  margin-top: 9px;
+  justify-content: flex-end;
+}
+
 .timeline-heading-meta {
   display: flex;
   min-width: 0;

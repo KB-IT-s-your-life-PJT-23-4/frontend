@@ -766,18 +766,6 @@ onMounted(async () => {
             <AppIcon name="wallet" :size="15" />
             {{ result.donorPaysTax ? '주는 분이 세금 준비' : '받는 분이 세금 납부' }}
           </span>
-          <button
-            v-if="!isHistoryResult"
-            class="result-condition-edit"
-            type="button"
-            :disabled="loading"
-            @click="changeTaxPaymentMethod"
-          >
-            <span v-if="loading" class="button-spinner" />
-            <template v-else>
-              {{ result.donorPaysTax ? '받는 분 납부로 변경' : '주는 분 준비로 변경' }}
-            </template>
-          </button>
         </div>
       </section>
 
@@ -786,6 +774,9 @@ onMounted(async () => {
         :recommended-scenario="recommendedScenario"
         :selected-products="calculationProducts"
         :portfolio-profile="selectedPortfolioType"
+        :can-change-tax-payment="!isHistoryResult"
+        :changing-tax-payment="loading"
+        @change-tax-payment="changeTaxPaymentMethod"
       />
 
       <PortfolioDonutCard

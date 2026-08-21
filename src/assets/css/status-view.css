@@ -17,30 +17,30 @@
 
 /* 수증자 전환은 이름을 읽고 누르기 쉽도록 글자와 터치 영역을 함께 키운다. */
 .status-content .family-switcher {
-  padding: 5px;
-  gap: 5px;
-  border-radius: 20px;
+  padding: 4px;
+  gap: 4px;
+  border-radius: 18px;
 }
 
 .status-content .family-switcher button {
-  min-width: 96px;
-  min-height: 48px;
-  padding: 12px 18px;
-  border-radius: 14px;
+  min-width: 90px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 13px;
   font-size: 16px;
   line-height: 1.25;
   white-space: nowrap;
 }
 
 .status-content .family-switcher .add-family-tab {
-  width: 48px;
-  min-width: 48px;
+  width: 44px;
+  min-width: 44px;
   padding: 0;
 }
 
 .status-content .family-switcher .add-family-tab svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .status-content .renewal-card h2,
