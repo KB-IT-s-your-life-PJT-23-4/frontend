@@ -18,6 +18,9 @@ const isAdminLayout = computed(() => route.meta.layout === 'admin')
 const isLandingLayout = computed(() => route.meta.layout === 'landing')
 const isAdmin = computed(() => authStore.isLogin && isAdminRole(authStore.user?.role))
 const showBottomNav = computed(() => !route.meta.hideBottomNav)
+const serviceHomeRoute = computed(() =>
+  authStore.isLogin ? { name: 'home-dashboard' } : { name: 'home' },
+)
 
 watchEffect(() => {
   document.body.classList.toggle('admin-route', isAdminLayout.value)
@@ -51,7 +54,7 @@ async function confirmBlockedAccess() {
         <p>세금부터 장기 운용까지,<br />한 번에 비교하고 미리 준비하세요.</p>
       </div>
       <nav class="desktop-nav" aria-label="데스크톱 주요 메뉴">
-        <RouterLink to="/"><AppIcon name="home" :size="20" /> 홈</RouterLink>
+        <RouterLink :to="serviceHomeRoute"><AppIcon name="home" :size="20" /> 홈</RouterLink>
         <RouterLink to="/simulation"><AppIcon name="calculator" :size="20" /> 증여 설계</RouterLink>
         <RouterLink to="/status"><AppIcon name="chart" :size="20" /> 증여 현황</RouterLink>
         <RouterLink to="/chat"><AppIcon name="chat" :size="20" /> AI 상담</RouterLink>
