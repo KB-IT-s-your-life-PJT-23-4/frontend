@@ -49,3 +49,10 @@
     white-space: nowrap;
   }
 }
+
+@media (max-width: 340px) {
+  .save-plan-preview > div:last-child {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}
