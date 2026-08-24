@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import ModalSheet from '../layout/ModalSheet.vue'
 import { formatWon } from '../../utils/finance'
+import '../../assets/css/simulation/save-plan-modal.css'
 
 const props = defineProps({
   show: {
@@ -68,7 +69,8 @@ const productRows = computed(() => {
         <span>전략</span><strong>{{ selectedScenario.scenarioName }}</strong>
       </div>
       <div>
-        <span>증여 금액</span><strong>{{ formatWon(result.requestedAmount) }}</strong>
+        <span>증여 금액</span
+        ><strong class="save-plan-amount">{{ formatWon(result.requestedAmount) }}</strong>
       </div>
       <div>
         <span>추천 상품</span>
@@ -84,8 +86,15 @@ const productRows = computed(() => {
       </div>
     </div>
     <template #actions>
-      <button class="secondary-button" type="button" @click="$emit('close')">취소</button>
-      <button class="primary-button" type="button" :disabled="saving" @click="$emit('save')">
+      <button class="secondary-button save-plan-action" type="button" @click="$emit('close')">
+        취소
+      </button>
+      <button
+        class="primary-button save-plan-action"
+        type="button"
+        :disabled="saving"
+        @click="$emit('save')"
+      >
         {{ saving ? '저장 중...' : '계획 저장' }}
       </button>
     </template>

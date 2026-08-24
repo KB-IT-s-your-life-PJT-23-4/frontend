@@ -1,0 +1,58 @@
+@media (max-width: 560px) {
+  .save-plan-preview,
+  .save-plan-preview > div,
+  .save-plan-preview > div > strong,
+  .save-plan-products,
+  .save-plan-product-row,
+  .save-plan-product-row > span {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .save-plan-preview > div,
+  .save-plan-preview > div:last-child {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .save-plan-preview > div > strong {
+    overflow-wrap: anywhere;
+  }
+
+  .save-plan-preview .save-plan-amount {
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+
+  .save-plan-preview .save-plan-products {
+    width: 100%;
+    font-size: inherit;
+    letter-spacing: inherit;
+  }
+
+  .save-plan-product-row {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  .save-plan-product-row > span {
+    overflow-wrap: anywhere;
+    white-space: normal;
+    line-height: 1.45;
+  }
+
+  .save-plan-action {
+    min-width: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 340px) {
+  .save-plan-preview > div:last-child {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}

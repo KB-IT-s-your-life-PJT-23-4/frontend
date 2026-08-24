@@ -534,8 +534,8 @@ onMounted(() => loadStatus())
               <span>한도 {{ formatWon(family.deductionLimit) }}</span>
             </div>
             <p>
-              <AppIcon name="info" :size="16" /> 추가 {{ formatCompactWon(remaining) }}까지 공제
-              한도 안에서 증여할 수 있어요.
+              <AppIcon name="info" :size="16" /> {{ formatCompactWon(remaining) }}까지 공제 한도
+              안에서 더 증여할 수 있어요.
             </p>
           </div>
         </section>

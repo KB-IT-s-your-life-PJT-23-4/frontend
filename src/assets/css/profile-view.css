@@ -144,7 +144,7 @@
 
 .profile-information-list > div {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   min-height: 45px;
   padding: 10px 0;
   align-items: center;
@@ -154,6 +154,7 @@
 .profile-information-list dt {
   color: #67717c;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .profile-information-list dd {
@@ -163,6 +164,11 @@
   font-size: 14px;
   overflow-wrap: anywhere;
   text-align: right;
+}
+
+.profile-information-list .profile-email-value {
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .profile-readonly-note,
@@ -247,8 +253,25 @@
   background: #fff0f0;
 }
 
+@media (max-width: 390px) {
+  .profile-information-card {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .profile-information-list > div {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 389px) {
+  .profile-information-list .profile-email-value {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
 @media (max-width: 359px) {
-  .profile-information-card,
   .profile-edit-card {
     padding-right: 18px;
     padding-left: 18px;
