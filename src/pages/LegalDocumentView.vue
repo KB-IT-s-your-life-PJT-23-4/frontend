@@ -148,11 +148,6 @@ function goBack() {
       </nav>
 
       <article class="legal-document-card">
-        <div class="legal-document-meta">
-          <span>서비스 안내용 초안</span>
-          <span>안내 기준일 2026.08.19</span>
-        </div>
-
         <section
           v-for="section in currentDocument.sections"
           :key="section.title"
