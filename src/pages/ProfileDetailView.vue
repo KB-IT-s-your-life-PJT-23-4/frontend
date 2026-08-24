@@ -127,7 +127,7 @@ onMounted(loadProfile)
             <dl class="profile-information-list">
               <div>
                 <dt>이메일</dt>
-                <dd>{{ displayValue(profile.email) }}</dd>
+                <dd class="profile-email-value">{{ displayValue(profile.email) }}</dd>
               </div>
             </dl>
             <p class="profile-readonly-note">이메일은 회원 식별 정보로 조회만 가능합니다.</p>

@@ -34,7 +34,12 @@
 }
 
 .my-page .my-content {
+  grid-template-columns: minmax(0, 1fr);
   padding-bottom: 48px;
+}
+
+.my-page .my-content > * {
+  min-width: 0;
 }
 
 .history-section > .section-heading-row > span {
@@ -87,8 +92,9 @@
 }
 
 .history-family-switcher .all-family-tab {
-  min-width: 64px;
-  flex-basis: 64px;
+  min-width: 72px;
+  flex-basis: 72px;
+  white-space: nowrap;
 }
 
 .history-family-switcher button::before {
