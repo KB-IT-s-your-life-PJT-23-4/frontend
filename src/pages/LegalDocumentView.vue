@@ -3,13 +3,11 @@ import { computed } from 'vue'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import AppHeader from '../components/layout/AppHeader.vue'
 import PageHeading from '../components/layout/PageHeading.vue'
-import { useAuthStore } from '../stores/authStore.js'
 import { useSignupDraftStore } from '../stores/signupDraftStore.js'
 import '../assets/css/legal-document.css'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const signupDraftStore = useSignupDraftStore()
 
 const signupLegalRouteNames = new Set(['signup', 'terms', 'privacy-policy'])
@@ -117,13 +115,7 @@ const documentKey = computed(() => (route.name === 'privacy-policy' ? 'privacy' 
 const currentDocument = computed(() => documents[documentKey.value])
 
 function goBack() {
-  const previousPath = window.history.state?.back
-  if (typeof previousPath === 'string' && previousPath.startsWith('/')) {
-    router.back()
-    return
-  }
-
-  router.push({ name: authStore.isLogin ? 'my' : 'signup' })
+  router.push({ name: 'my' })
 }
 </script>
 
