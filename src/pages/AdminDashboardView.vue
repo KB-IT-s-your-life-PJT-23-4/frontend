@@ -159,7 +159,7 @@ onMounted(() => loadDashboard())
           icon="chart"
         />
         <AdminMetricCard
-          title="AI 상담 요청"
+          title="AI 상담 요청 건수"
           :value="consultationAvailable ? formatNumber(dashboard.consultations.requests) : '-'"
           :unit="consultationAvailable ? '건' : ''"
           :description="
