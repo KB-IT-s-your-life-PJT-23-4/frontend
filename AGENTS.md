@@ -46,6 +46,7 @@
 - When one clarification answer makes dependent questions inapplicable, normalize the related values consistently in both `facts` and `answers` using the backend contract's absence sentinel (for example, `"none"` for absent consultation dates), then skip those questions instead of requiring redundant user input; never fabricate a real date.
 - Treat AI `answer` values as display-safe plain text. Do not rely on rendering raw Markdown unless an explicitly sanitized Markdown renderer and contract are introduced together.
 - When normalizing decorative separators from API text, inspect the actual Unicode characters returned by the API and cover visually similar variants with a real response sample in tests.
+- When a backend response field changes from a scalar to a collection, verify the current DTO cardinality, preserve the server-provided order, and render every collection item in detail views instead of reading only a legacy singular field.
 - Follow the formatting rules in `.prettierrc.json`.
 - Do not modify files unrelated to the requested change.
 
@@ -77,6 +78,7 @@
 - Apply the repository's formatting rules when needed.
 - Run `npm run build` after code changes.
 - When the API adapter supports mock mode, verify new API-backed routes and mutations reuse the existing Pinia demo state instead of relying on no-op API fallbacks.
+- When a backend package is provided for an existing screen, recheck its current controller methods before retaining frontend capability flags or "API integration pending" UI; connect newly available mutations and remove stale unavailable-state copy.
 - For UI changes, verify loading, empty, error, and relevant responsive states.
 - If verification cannot be run, clearly state what was not run and why.
 

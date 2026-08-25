@@ -67,6 +67,7 @@ const pageButtons = computed(() => {
 const canBlockReportedUsers = computed(
   () => adminReportCapabilities.blockUser && canManageUserBlock(authStore.user?.role),
 )
+const selectedReportQuestions = computed(() => reportQuestions(selectedReport.value))
 
 function statusLabel(status) {
   return statusOptions.find((option) => option.value === status)?.label ?? status ?? '-'
@@ -91,6 +92,23 @@ function formatDateTime(value) {
 
 function formatNumber(value) {
   return Number(value ?? 0).toLocaleString('ko-KR')
+}
+
+function questionText(value, fallback = '-') {
+  const question = typeof value === 'string' ? value.trim() : ''
+  return question || fallback
+}
+
+function reportQuestions(report) {
+  const values = Array.isArray(report?.questionExcerpts)
+    ? report.questionExcerpts
+    : [report?.questionExcerpt]
+
+  return values.map((question) => questionText(question, '')).filter(Boolean)
+}
+
+function questionPreview(report) {
+  return reportQuestions(report)[0] ?? '-'
 }
 
 function reportErrorMessage(error, fallback) {
@@ -157,7 +175,7 @@ function openProcessing(report = selectedReport.value) {
 }
 
 async function submitProcessing() {
-  if (!selectedReport.value || !adminReportCapabilities.processReport) return
+  if (!selectedReport.value) return
   if (!processingDraft.value.resolutionNote.trim()) {
     processingError.value = '처리 메모를 입력해주세요.'
     return
@@ -179,6 +197,12 @@ async function submitProcessing() {
   } finally {
     isProcessing.value = false
   }
+}
+
+function openBlockFromProcessing() {
+  if (!selectedReport.value?.userId || !canBlockReportedUsers.value) return
+  showProcessingModal.value = false
+  openBlockModal()
 }
 
 function openBlockModal() {
@@ -312,6 +336,7 @@ onMounted(() => loadReports(0))
                   <th>유형</th>
                   <th>상태</th>
                   <th>사용자</th>
+                  <th>사용자 질문</th>
                   <th>발생 횟수</th>
                   <th>접수 시각</th>
                   <th><span class="sr-only">상세</span></th>
@@ -343,6 +368,19 @@ onMounted(() => loadReports(0))
                     >
                   </td>
                   <td data-label="사용자">#{{ report.userId ?? '-' }}</td>
+                  <td class="admin-report-question-cell" data-label="사용자 질문">
+                    <div class="admin-report-question-summary">
+                      <p class="admin-report-question-preview" :title="questionPreview(report)">
+                        {{ questionPreview(report) }}
+                      </p>
+                      <small
+                        v-if="reportQuestions(report).length > 1"
+                        class="admin-report-question-more"
+                      >
+                        외 {{ reportQuestions(report).length - 1 }}건
+                      </small>
+                    </div>
+                  </td>
                   <td data-label="발생 횟수">
                     <strong class="admin-report-count"
                       >{{ formatNumber(report.occurrenceCount) }}회</strong
@@ -452,6 +490,24 @@ onMounted(() => loadReports(0))
               <dd>{{ formatDateTime(selectedReport.reviewedAt) }}</dd>
             </div>
           </dl>
+          <section class="admin-report-question" aria-label="신고를 발생시킨 사용자 질문">
+            <div class="admin-report-question__heading">
+              <span>사용자 질문</span>
+              <strong v-if="selectedReportQuestions.length">
+                {{ formatNumber(selectedReportQuestions.length) }}건
+              </strong>
+            </div>
+            <ol v-if="selectedReportQuestions.length" class="admin-report-question__list">
+              <li
+                v-for="(question, index) in selectedReportQuestions"
+                :key="`${index}-${question}`"
+              >
+                <span>{{ index + 1 }}</span>
+                <p>{{ question }}</p>
+              </li>
+            </ol>
+            <p v-else class="admin-report-question__empty">저장된 사용자 질문이 없습니다.</p>
+          </section>
           <section class="admin-report-window" aria-label="위험 감지 집계 기간">
             <span>집계 기간</span
             ><strong>{{ formatDateTime(selectedReport.countWindowStartedAt) }}</strong
@@ -510,6 +566,27 @@ onMounted(() => loadReports(0))
             }}</strong
           >
         </div>
+        <section
+          class="admin-report-question admin-report-processing-questions"
+          aria-label="사용자 질문 내역"
+        >
+          <div class="admin-report-question__heading">
+            <span>사용자 질문 내역</span>
+            <strong v-if="selectedReportQuestions.length">
+              {{ formatNumber(selectedReportQuestions.length) }}건
+            </strong>
+          </div>
+          <ol v-if="selectedReportQuestions.length" class="admin-report-question__list">
+            <li
+              v-for="(question, index) in selectedReportQuestions"
+              :key="`processing-${index}-${question}`"
+            >
+              <span>{{ index + 1 }}</span>
+              <p>{{ question }}</p>
+            </li>
+          </ol>
+          <p v-else class="admin-report-question__empty">저장된 사용자 질문이 없습니다.</p>
+        </section>
         <label
           ><span>처리 상태</span
           ><select v-model="processingDraft.status">
@@ -526,20 +603,6 @@ onMounted(() => loadReports(0))
             placeholder="판단 근거와 처리 내용을 입력하세요."
           />
         </label>
-        <div
-          v-if="!adminReportCapabilities.processReport"
-          class="admin-report-api-notice"
-          role="status"
-        >
-          <AppIcon name="info" :size="18" />
-          <p>
-            <strong>신고 처리 API 연동 대기</strong
-            ><span
-              >현재 백엔드는 목록 조회만 제공합니다. 처리 API 추가 후 이 화면에서 바로 연동할 수
-              있습니다.</span
-            >
-          </p>
-        </div>
         <p v-if="processingError" class="admin-report-form-error" role="alert">
           {{ processingError }}
         </p>
@@ -553,23 +616,19 @@ onMounted(() => loadReports(0))
         >
           취소</button
         ><button
-          type="submit"
-          form="admin-report-processing-form"
-          class="primary-button"
-          :disabled="isProcessing || !adminReportCapabilities.processReport"
+          type="button"
+          class="danger-button"
+          :disabled="isProcessing || !canBlockReportedUsers || !selectedReport?.userId"
           :title="
-            !adminReportCapabilities.processReport
-              ? '신고 처리 API 연동 후 활성화됩니다.'
-              : undefined
+            !selectedReport?.userId
+              ? '차단할 사용자 정보가 없습니다.'
+              : !canBlockReportedUsers
+                ? 'ROOT 또는 MIDDLE 관리자만 사용할 수 있습니다.'
+                : undefined
           "
+          @click="openBlockFromProcessing"
         >
-          {{
-            isProcessing
-              ? '처리 중...'
-              : adminReportCapabilities.processReport
-                ? '처리 저장'
-                : '처리 API 연동 대기'
-          }}
+          사용자 차단
         </button></template
       >
     </ModalSheet>
